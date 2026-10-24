@@ -1,3 +1,4 @@
+import { preflight, withCors } from "@/lib/cors";
 import { createOrderSchema } from "@liksha/validation";
 import {
   createOrder,
@@ -9,7 +10,7 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export async function POST(request: Request) {
+async function handlePost(request: Request) {
   const idempotencyKey = request.headers.get("idempotency-key")?.trim().slice(0, 120);
   // double click / network retry par doosra order na bane (disk-backed, restart-safe)
   if (idempotencyKey) {
@@ -72,3 +73,10 @@ export async function GET(request: Request) {
   }));
   return Response.json({ orders, total: orders.length });
 }
+
+
+export async function POST(request: Request) {
+  return withCors(await handlePost(request), request);
+}
+
+export const OPTIONS = preflight;

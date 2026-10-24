@@ -1,3 +1,4 @@
+import { preflight, withCors } from "@/lib/cors";
 import { getOrder, submitPaymentReference } from "@/lib/orders";
 import { OrderError } from "@/lib/orders";
 import { normaliseUpiReference } from "@/lib/upi";
@@ -13,7 +14,7 @@ export const dynamic = "force-dynamic";
  * Order ka aakhri 4 digit phone ya OTP token match hona zaroori hai (enumeration
  * se bachne ke liye).
  */
-export async function POST(request: Request) {
+async function handlePost(request: Request) {
   let body: { orderNumber?: string; reference?: string; phoneLast4?: string; phoneToken?: string };
   try {
     body = (await request.json()) as typeof body;
@@ -62,3 +63,10 @@ export async function POST(request: Request) {
     return Response.json({ error: "Could not save the payment reference. Please try again." }, { status: 500 });
   }
 }
+
+
+export async function POST(request: Request) {
+  return withCors(await handlePost(request), request);
+}
+
+export const OPTIONS = preflight;

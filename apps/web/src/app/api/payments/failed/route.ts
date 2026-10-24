@@ -1,3 +1,4 @@
+import { preflight, withCors } from "@/lib/cors";
 import { failPayment, getOrder } from "@/lib/orders";
 
 export const dynamic = "force-dynamic";
@@ -10,7 +11,7 @@ export const dynamic = "force-dynamic";
  * owner ki Google Sheet me `payment.failed` row turant chali jaati hai aur
  * customer dobara try kar sakta hai.
  */
-export async function POST(request: Request) {
+async function handlePost(request: Request) {
   let body: { orderNumber?: string; phoneLast4?: string; reason?: string };
   try {
     body = (await request.json()) as typeof body;
@@ -42,3 +43,10 @@ export async function POST(request: Request) {
 
   return Response.json({ ok: true, paymentStatus: failed?.paymentStatus ?? "failed" }, { status: 202 });
 }
+
+
+export async function POST(request: Request) {
+  return withCors(await handlePost(request), request);
+}
+
+export const OPTIONS = preflight;

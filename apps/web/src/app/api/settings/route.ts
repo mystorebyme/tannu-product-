@@ -1,3 +1,4 @@
+import { preflight, withCors } from "@/lib/cors";
 import { getStoreSettings } from "@/lib/store-settings";
 import { sheetsConfigured } from "@/lib/google-sheets";
 
@@ -8,7 +9,7 @@ export const dynamic = "force-dynamic";
  * Google Sheet configured hai to sheet ki value jeetti hai — owner redeploy
  * ke bina phone / email / UPI change kar sakta hai.
  */
-export async function GET() {
+async function handleGet() {
   const settings = await getStoreSettings({ fresh: true });
   return Response.json(
     {
@@ -27,3 +28,10 @@ export async function GET() {
     { headers: { "cache-control": "no-store" } },
   );
 }
+
+
+export async function GET(request: Request) {
+  return withCors(await handleGet(), request);
+}
+
+export const OPTIONS = preflight;

@@ -57,6 +57,16 @@ callback — sab isi se bante hain (`apps/web/src/config/site.ts`).
 Variable (secret nahi) rakhein — workflow `vars.STORE_API_URL` padhta hai. Set karne ya badalne par
 Pages workflow dobara chalao (Actions → Pages → Re-run) — static build me value inject hoti hai.
 
+**CORS (zaroori):** Pages static site se order/payment call **cross-origin** jaati hai, isliye
+Render API par allowlist wala CORS hai (`apps/web/src/lib/cors.ts`): apni site
+(`NEXT_PUBLIC_SITE_URL`), `https://mystorebyme.github.io`, localhost aur apne
+`*.onrender.com` hosts. Koi `*` nahi. Aur domain add karna ho to Render env me
+`CORS_ALLOWED_ORIGINS=https://a.com,https://b.com` daal dein. In routes par OPTIONS preflight
+bhi handle hota hai: `/api/orders`, `/api/payments/manual`, `/api/payments/failed`, `/api/settings`.
+
+Iske bina Pages par "Order place nahi hua" (browser CORS block) dikhta hai — `STORE_API_URL`
+set karte hi order seedha Render par banta hai, UPI payment ke baad wahi order page khulta hai.
+
 ### 3.3 Custom domain + SSL
 
 1. Render → storefront → **Settings → Custom Domains** → `designerclothes.in` + `www.designerclothes.in` add.
