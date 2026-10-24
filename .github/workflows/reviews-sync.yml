@@ -4,6 +4,11 @@ name: Reviews sync
 # Site inhe build ke waqt padhti hai — isliye reviews "vha se direct update" rehte hain.
 
 on:
+  # push trigger: workflow_dispatch ke liye workflow default branch par hona chahiye,
+  # isliye manual run ke liye trigger file touch karke push karein
+  push:
+    paths:
+      - ".reviews-sync-trigger"
   schedule:
     - cron: "0 21 * * *" # 02:30 IST
   workflow_dispatch:
