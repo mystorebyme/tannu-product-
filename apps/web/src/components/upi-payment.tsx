@@ -1,10 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { postJson } from "@/lib/http-json";
 import { API_AVAILABLE, apiUrl } from "@/lib/api-base";
 import { formatPrice } from "@/lib/format";
 import { buildUpiUri } from "@/lib/upi";
 import { UpiQr } from "@/components/upi-qr";
+import { UpiApps } from "@/components/upi-apps";
 
 /**
  * UPI payment card — seedha owner ke UPI account me paisa.
@@ -33,7 +35,6 @@ export function UpiPayment({
   reference?: string | null;
   whatsapp: string;
 }) {
-  const [copied, setCopied] = useState(false);
   const [value, setValue] = useState("");
   const [last4, setLast4] = useState("");
   const [busy, setBusy] = useState(false);
@@ -52,16 +53,6 @@ export function UpiPayment({
     [upiId, upiName, amount, orderNumber],
   );
 
-  async function copy() {
-    try {
-      await navigator.clipboard.writeText(upiId);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-    } catch {
-      setCopied(false);
-    }
-  }
-
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     const clean = value.replace(/[\s-]/g, "").toUpperCase();
@@ -75,28 +66,18 @@ export function UpiPayment({
     }
     setBusy(true);
     setError(null);
-    try {
-      const controller = new AbortController();
-      const timer = window.setTimeout(() => controller.abort(), 20_000);
-      const response = await fetch(apiUrl("/api/payments/manual"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderNumber, reference: clean, phoneLast4: last4 }),
-        signal: controller.signal,
-      });
-      window.clearTimeout(timer);
-      const payload = (await response.json()) as { ok?: boolean; error?: string };
-      if (!response.ok || !payload.ok) {
-        setError(payload.error ?? "Could not save the reference. Please try again.");
-        setBusy(false);
-        return;
-      }
-      setSubmitted(true);
+    const result = await postJson<{ ok?: boolean; error?: string }>(
+      apiUrl("/api/payments/manual"),
+      { orderNumber, reference: clean, phoneLast4: last4 },
+      { timeoutMs: 20_000 },
+    );
+    if (!result.data?.ok) {
+      setError(result.data?.error ?? result.error ?? "Could not save the reference. Please try again.");
       setBusy(false);
-    } catch {
-      setError("We could not reach the server. Please check your connection and try again.");
-      setBusy(false);
+      return;
     }
+    setSubmitted(true);
+    setBusy(false);
   }
 
   const wa = whatsapp.replace(/\D/g, "").slice(-10);
@@ -147,24 +128,14 @@ export function UpiPayment({
               <span className="break-all text-[14px] font-semibold text-[#5c1010]" data-testid="upi-id">
                 {upiId}
               </span>
-              <button
-                type="button"
-                onClick={copy}
-                className="h-7 shrink-0 border border-[#c9a95f] px-2.5 text-[9.5px] font-semibold tracking-[.1em] text-[#8a6a1f] uppercase transition hover:bg-[#f3e3bf]"
-              >
-                {copied ? "Copied" : "Copy UPI ID"}
-              </button>
             </div>
             <p className="mt-1 break-words text-[11.5px] text-[#6b6259]">
               {upiName} · Amount <strong>{formatPrice(amount)}</strong> (exact — no extra charges)
             </p>
 
-            <a
-              href={upiUri}
-              className="mt-3 inline-flex h-10 items-center justify-center bg-[#862222] px-5 text-[10.5px] font-semibold tracking-[.14em] text-white uppercase"
-            >
-              Open UPI app
-            </a>
+            <div className="mt-3">
+              <UpiApps uri={upiUri} upiId={upiId} amountPaise={amount} />
+            </div>
 
             {submitted ? (
               <div className="mt-3 border border-[#c9dcc9] bg-[#eef7ee] px-3 py-2.5" data-testid="upi-submitted">

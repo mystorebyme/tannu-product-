@@ -1,5 +1,6 @@
 "use server";
 
+import { createAdminOrder } from "@/lib/data";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
@@ -22,6 +23,7 @@ import {
   verifyOrderPayment,
 } from "@/lib/data";
 import {
+  createAdminProduct,
   publishCatalog,
   saveCollectionOverride,
   saveProductOverride,
@@ -239,6 +241,90 @@ export async function publishCatalogAction() {
   revalidatePath("/");
   revalidatePath("/products");
   revalidatePath("/collections");
+}
+
+/* ───────────────────────── naya product + 10 photos ───────────────────────── */
+
+export async function createProductAction(formData: FormData) {
+  const session = await requireSession();
+  const text = (key: string) => String(formData.get(key) ?? "").trim();
+
+  const images = formData
+    .getAll("image")
+    .map((value) => String(value).trim())
+    .filter(Boolean)
+    .slice(0, 10);
+
+  const priceRupees = Number(text("price"));
+  const result = createAdminProduct(
+    {
+      title: text("title"),
+      handle: text("handle"),
+      price: Number.isFinite(priceRupees) ? Math.round(priceRupees * 100) : 0,
+      images,
+      collections: formData.getAll("collections").map((value) => String(value)),
+      sizes: formData.getAll("sizes").map((value) => String(value)),
+      description: text("description"),
+      fabric: text("fabric"),
+      color: text("color"),
+      category: text("category") || "anarkali",
+    },
+    session.email,
+  );
+
+  if (!result.ok || !result.handle) {
+    redirect(`/products/new?error=${encodeURIComponent(result.error ?? "Product save nahi hua")}`);
+  }
+
+  const publish = await publishCatalog();
+  appendAudit({
+    actor: session.email,
+    action: "product.created",
+    target: result.handle!,
+    meta: { images: images.length, published: publish.ok },
+  });
+  revalidatePath("/products");
+  revalidatePath("/");
+  redirect(`/products/${encodeURIComponent(result.handle!)}?created=1`);
+}
+
+/* ───────────────────────── manual order (admin) ───────────────────────── */
+
+export async function createOrderAction(formData: FormData) {
+  const session = await requireSession();
+  const text = (key: string) => String(formData.get(key) ?? "").trim();
+  const items = text("handle")
+    ? [{ handle: text("handle"), size: text("size"), quantity: Math.max(1, Number(text("quantity")) || 1) }]
+    : [];
+
+  const result = await createAdminOrder({
+    customerName: text("customerName"),
+    email: text("email"),
+    phone: text("phone"),
+    address: text("address"),
+    city: text("city"),
+    state: text("state"),
+    pincode: text("pincode"),
+    notes: text("notes") || undefined,
+    items,
+    markPaid: formData.get("markPaid") === "on",
+    reference: text("reference") || undefined,
+    actor: session.email,
+  });
+
+  if (!result.order) {
+    redirect(`/orders/new?error=${encodeURIComponent(result.error ?? "Order create nahi hua")}`);
+  }
+
+  appendAudit({
+    actor: session.email,
+    action: "order.created.manual",
+    target: result.order!.orderNumber,
+    meta: { total: result.order!.total },
+  });
+  revalidatePath("/orders");
+  revalidatePath("/");
+  redirect(`/orders/${encodeURIComponent(result.order!.orderNumber)}`);
 }
 
 /* ───────────────────────── manual invoice (admin) ───────────────────────── */

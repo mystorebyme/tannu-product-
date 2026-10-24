@@ -8,10 +8,20 @@ import { FloatingHelp } from "@/components/floating-help";
 import { AnnouncementBar } from "@/components/announcement-bar";
 import { WishlistProvider } from "@/components/wishlist-provider";
 import { StoreSettingsProvider } from "@/components/store-settings-provider";
-import { siteConfig } from "@/config/site";
+import { logoMark, siteConfig } from "@/config/site";
+import { assetUrl } from "@/lib/format";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
+  applicationName: "Liksha Clothing",
+  // browser tab / home-screen icon — live store ka hi logo (same to same)
+  icons: {
+    icon: [{ url: logoMark, sizes: "192x192", type: "image/png" }],
+    shortcut: [{ url: logoMark }],
+    apple: [{ url: logoMark, sizes: "180x180" }],
+  },
+  appleWebApp: { capable: true, title: "Liksha Clothing", statusBarStyle: "default" },
+  manifest: assetUrl("/manifest.webmanifest"),
   title: {
     default: "Liksha Clothing | Designer Anarkali Suits, Lehenga Choli & Suit Sets",
     template: "%s | Liksha Clothing",

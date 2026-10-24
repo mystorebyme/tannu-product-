@@ -52,6 +52,12 @@ async function main() {
     !/100% SECURE PAYMENT/i.test(home.text) && !/7 DAYS REPLACEMENT/i.test(home.text),
   );
   check("home shows category counts from the live store", /ANARKALI SUIT/i.test(home.text) && /Products/i.test(home.text));
+  check("home hero pricing paragraph removed (Round 12)", !/No hidden charges/i.test(home.text));
+  check("tab title carries the brand name", /<title>[^<]*Liksha Clothing[^<]*<\/title>/i.test(home.text));
+  check("tab icon points at the brand logo", /rel="icon"[^>]*likshaclothing/i.test(home.text));
+
+  const manifest = await get("/manifest.webmanifest");
+  check("manifest served for installed app", manifest.status === 200 && /Liksha Clothing/.test(manifest.text), `status ${manifest.status}`);
 
   const collection = await get("/collections/lehnga-choli");
   check("collection 200", collection.status === 200, `status ${collection.status}`);
@@ -88,6 +94,7 @@ async function main() {
     // har product par reviews (live Trustoo ya sample seed)
     check("PDP has a review block", pdp.text.includes('data-testid="product-reviews"'));
     check("PDP has aggregate rating in JSON-LD", /"aggregateRating"/.test(pdp.text));
+    check("PDP has WhatsApp order beside Buy now", pdp.text.includes('data-testid="pdp-whatsapp-order"'));
   }
 
   // ── phone OTP + GST invoice + tracking ──
@@ -143,6 +150,8 @@ async function main() {
       body: JSON.stringify({ ...orderPayload, phoneToken: undefined }),
     });
     check("order without verified phone is blocked", blocked.status === 400, `status ${blocked.status}`);
+  } else {
+    check("checkout has no OTP gate (Round 12)", otpStatus.required === false);
   }
 
   const order = await fetch(`${BASE}/api/orders`, {

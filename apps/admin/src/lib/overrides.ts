@@ -31,14 +31,39 @@ export type ProductOverride = {
   updatedBy?: string;
 };
 
+/**
+ * Admin panel se banaya gaya naya product (live store snapshot me nahi hai).
+ * Publish par `scripts/build-catalog.mjs` ise catalogue me jodta hai.
+ */
+export type NewProduct = {
+  handle: string;
+  title: string;
+  /** final selling price (paise) — sale ladder: 499/549/599/649/699 */
+  price: number;
+  compareAtPrice?: number | null;
+  /** 1 se 10 photos (https URLs) */
+  images: string[];
+  collections?: string[];
+  description?: string;
+  sizes?: string[];
+  fabric?: string;
+  color?: string;
+  category?: string;
+  inStock?: boolean;
+  createdAt?: string;
+  createdBy?: string;
+};
+
 export type OverridesFile = {
   meta?: { note?: string; lastPublishedAt?: string | null };
   products: Record<string, ProductOverride>;
   collections: Record<string, { title?: string; subtitle?: string }>;
   hidden: string[];
+  /** admin se add kiye gaye naye products */
+  newProducts?: NewProduct[];
 };
 
-const EMPTY: OverridesFile = { products: {}, collections: {}, hidden: [] };
+const EMPTY: OverridesFile = { products: {}, collections: {}, hidden: [], newProducts: [] };
 
 export function overridesFile(): string {
   return path.join(repoRoot(), "database/seeds/admin/overrides.json");
@@ -46,7 +71,7 @@ export function overridesFile(): string {
 
 export function readOverrides(): OverridesFile {
   const file = overridesFile();
-  if (!fs.existsSync(file)) return { ...EMPTY, products: {}, collections: {}, hidden: [] };
+  if (!fs.existsSync(file)) return { ...EMPTY, products: {}, collections: {}, hidden: [], newProducts: [] };
   try {
     const parsed = JSON.parse(fs.readFileSync(file, "utf8")) as Partial<OverridesFile>;
     return {
@@ -54,9 +79,10 @@ export function readOverrides(): OverridesFile {
       products: parsed.products ?? {},
       collections: parsed.collections ?? {},
       hidden: parsed.hidden ?? [],
+      newProducts: Array.isArray(parsed.newProducts) ? parsed.newProducts : [],
     };
   } catch {
-    return { ...EMPTY, products: {}, collections: {}, hidden: [] };
+    return { ...EMPTY, products: {}, collections: {}, hidden: [], newProducts: [] };
   }
 }
 

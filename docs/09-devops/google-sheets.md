@@ -68,6 +68,9 @@ curl -s "$SHEET_URL?action=settings&token=$TOKEN" | head -c 400
 # health — har sheet me kitni rows hain
 curl -s "$SHEET_URL?action=health&token=$TOKEN"
 
+# last rows (admin panel ka "Google Sheet" screen yahi use karta hai)
+curl -s "$SHEET_URL?action=recent&sheet=Orders&limit=20&token=$TOKEN"
+
 # test row (Apps Script editor me `testAppend` bhi chala sakte hain)
 curl -s -X POST "$SHEET_URL" \
   -H 'Content-Type: text/plain;charset=utf-8' \
@@ -92,3 +95,24 @@ curl -s -X POST "$SHEET_URL" \
   account ke saath share karo, "Anyone with link" **nahi**.
 - Token leak ho jaye to Apps Script me `TOKEN` badal ke naya version deploy karo aur env update karo.
 - Payment yahan **verify** nahi hota — UTR sheet me aata hai, admin panel se verify hota hai.
+
+## 6. Admin panel se sheet dikhna + update hona
+
+| Screen | Kya karta hai |
+| --- | --- |
+| `/sheet` | Sheet ki **live settings** (UPI ID, phone, WhatsApp, email, announcement) + last order / payment / message rows dikhata hai. Connected na ho to setup steps batata hai. |
+| `/settings` | Save karte hi values DB me **aur** seedha sheet me (`action: settings_save`) likh di jaati hain — owner ko wahi value dikhti hai. |
+| `/orders` | Har status / tracking change sheet me nayi row append karta hai (`update` ka kaam append-only log se hota hai). |
+| `/products/new` | Naya product + 10 photos; publish par catalogue rebuild. |
+
+Storefront par admin ka data do tarah se aata hai: `STORE_API_URL` (Render) se admin
+`/api/admin/sheet` call karta hai, jo Apps Script se `action=recent` + `action=settings` leta hai.
+
+```bash
+# admin ka view (token ke saath)
+curl -s -H "Authorization: Bearer $ADMIN_API_TOKEN" "$STORE/api/admin/sheet" | head -c 500
+```
+
+Sheet me order rows **append hote hain** (overwrite nahi) — isliye ek order ka poora
+timeline mile: `order.placed` → `order.status_changed` → `order.tracking_updated` →
+`payment.reference_submitted` → `payment.paid`.

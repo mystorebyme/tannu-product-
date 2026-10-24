@@ -1,5 +1,7 @@
 "use client";
 
+import { readJson } from "@/lib/http-json";
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -10,6 +12,7 @@ import { colourSwatch } from "@/lib/colour";
 import type { ColourOption, Product } from "@/types/catalog";
 import { ProductGallery } from "@/components/product-gallery";
 import { Stars } from "@/components/product-reviews";
+import { useStoreSettings } from "@/components/store-settings-provider";
 
 /** catalogue me hai lekin type import ke liye alias */
 type Variant = ColourOption;
@@ -28,6 +31,7 @@ export function ProductDetail({
 }) {
   const { addItem } = useCart();
   const router = useRouter();
+  const { whatsapp } = useStoreSettings();
 
   // ek hi design ke saare colours yahin switch hote hain — page reload nahi
   const variants = useMemo<Variant[]>(() => {
@@ -112,10 +116,10 @@ export function ProductDetail({
       const response = await fetch(`/api/delivery/check?pincode=${encodeURIComponent(pin)}`, {
         cache: "no-store",
       });
-      const payload = (await response.json()) as {
+      const parsed = await readJson<{
         data?: { serviceable: boolean; message: string; deliveryDays: string | null; district: string | null; state: string | null };
-      };
-      const result = payload.data;
+      }>(response);
+      const result = parsed.data?.data;
       if (!result) {
         setPinOk(false);
         setPinMessage("We could not check delivery right now. Please try again.");
@@ -359,17 +363,41 @@ export function ProductDetail({
             {sizePricing && !sizePricing.available ? "Out of stock" : "Add to cart"}
           </button>
         </div>
-        <button
-          type="button"
-          onClick={() => {
-            add(1);
-            router.push("/checkout");
-          }}
-          data-testid="buy-now"
-          className="mt-2 w-full border border-[#862222] py-3 text-[11.5px] font-semibold tracking-[.16em] text-[#862222] uppercase transition hover:bg-[#faf1ef]"
-        >
-          Buy it now
-        </button>
+        <div className="mt-2 grid gap-2 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={() => {
+              add(1);
+              router.push("/checkout");
+            }}
+            data-testid="buy-now"
+            className="w-full border border-[#862222] py-3 text-[11.5px] font-semibold tracking-[.16em] text-[#862222] uppercase transition hover:bg-[#faf1ef]"
+          >
+            Buy it now
+          </button>
+          <a
+            href={`https://wa.me/91${whatsapp.replace(/\D/g, "").slice(-10)}?text=${encodeURIComponent(
+              [
+                `Hi Liksha Clothing, I want to order:`,
+                `${product.title}`,
+                `Colour: ${active.name}`,
+                `Size: ${size}`,
+                `Quantity: ${quantity}`,
+                `Price: ${formatPrice(price * quantity)}`,
+                `https://www.likshaclothing.com/products/${product.handle}`,
+              ].join("\n"),
+            )}`}
+            target="_blank"
+            rel="noreferrer"
+            data-testid="pdp-whatsapp-order"
+            className="flex w-full items-center justify-center gap-2 border border-[#25D366] py-3 text-[11.5px] font-semibold tracking-[.14em] text-[#128c4b] uppercase transition hover:bg-[#f1fbf4]"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+              <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.2 14.1c-.2.6-1.2 1.2-1.7 1.2-.5.1-1 .1-1.6-.1a11.6 11.6 0 0 1-5.9-5.2c-.4-.7-.6-1.4-.6-2 0-.6.3-1.2.6-1.6.2-.2.4-.3.6-.3h.5c.2 0 .4 0 .5.4l.7 1.7c.1.2 0 .4-.1.6l-.4.5c-.1.1-.2.3-.1.5a7.5 7.5 0 0 0 3.3 2.9c.2.1.4.1.5-.1l.6-.7c.2-.2.3-.2.5-.1l1.6.8c.2.1.4.2.4.4 0 .2 0 .9-.2 1.4Z" />
+            </svg>
+            Order on WhatsApp
+          </a>
+        </div>
 
         <p className="mt-3 text-[11px] tracking-[.06em] text-[#8a8078]">
           Free shipping across India · 7 days replacement · prepaid only
@@ -423,19 +451,7 @@ export function ProductDetail({
           ))}
         </div>
 
-        <a
-          href={`https://wa.me/919909790455?text=${encodeURIComponent(
-            `Hi Liksha Clothing, I want to order: ${product.title} (${active.name}, ${size})`,
-          )}`}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-4 flex items-center justify-center gap-2 border border-[#d9c6b4] py-2.5 text-[11px] font-semibold tracking-[.14em] text-[#3f3830] uppercase"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-            <path d="M20 12a8 8 0 0 1-11.7 7.1L4 20l1-4.2A8 8 0 1 1 20 12Z" />
-          </svg>
-          Order on WhatsApp
-        </a>
+
       </div>
     </div>
   );

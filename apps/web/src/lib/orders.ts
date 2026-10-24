@@ -96,6 +96,8 @@ export interface CreateOrderPayload {
   couponCode?: string | null;
   paymentMethod: PaymentMethod;
   items: { handle: string; size: string; quantity: number }[];
+  /** admin ke manual/phone orders par pincode serviceability check skip (admin ne khud confirm kiya) */
+  skipPincodeCheck?: boolean;
 }
 
 export class OrderError extends Error {
@@ -114,9 +116,11 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
 
   // delivery serviceability — sirf admin-approved states/pincodes par order
   // (India Post data me na ho, blocked ho ya state band ho to yahin ruk jaata hai)
-  const serviceability = await checkPincode(payload.pincode);
-  if (!serviceability.serviceable) {
-    throw new OrderError(serviceability.message, 400, "pincode_not_serviceable");
+  if (!payload.skipPincodeCheck) {
+    const serviceability = await checkPincode(payload.pincode);
+    if (!serviceability.serviceable) {
+      throw new OrderError(serviceability.message, 400, "pincode_not_serviceable");
+    }
   }
 
   const items = payload.items.map((line) => {

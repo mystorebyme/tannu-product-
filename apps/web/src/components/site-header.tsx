@@ -1,5 +1,7 @@
 "use client";
 
+import { readJson } from "@/lib/http-json";
+
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -85,7 +87,8 @@ export function SiteHeader() {
     const timer = setTimeout(
       () => {
         fetch(`/api/search?q=${encodeURIComponent(term)}`, { signal: controller.signal })
-          .then((response) => (response.ok ? response.json() : { results: [] }))
+          .then((response) => (response.ok ? readJson<{ results?: SearchHit[]; suggestions?: string[] }>(response) : null))
+          .then((parsed) => parsed?.data ?? { results: [] })
           .then(
             (payload: {
               results?: SearchHit[];

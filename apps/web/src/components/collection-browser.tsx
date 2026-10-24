@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { readJson } from "@/lib/http-json";
 import { CollectionToolbar } from "@/components/collection-toolbar";
 import { ProductCard } from "@/components/product-card";
 import type { Product } from "@/types/catalog";
@@ -49,7 +50,9 @@ export function CollectionBrowser({
       const query = buildQuery(nextSort, nextPrice);
       const response = await fetch(`/api/products?${query}&offset=${offset}`);
       if (!response.ok) throw new Error("request failed");
-      return (await response.json()) as { data: Product[]; total: number };
+      const parsed = await readJson<{ data: Product[]; total: number }>(response);
+      if (!parsed.data?.data) throw new Error("request failed");
+      return parsed.data;
     },
     [buildQuery],
   );

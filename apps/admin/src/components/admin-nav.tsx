@@ -17,6 +17,7 @@ const links = [
   { href: "/reports", label: "Reports" },
   { href: "/coupons", label: "Coupons" },
   { href: "/reviews", label: "Reviews" },
+  { href: "/sheet", label: "Google Sheet" },
   { href: "/settings", label: "Settings" },
   { href: "/audit-logs", label: "Audit logs" },
   { href: "/staff", label: "Staff & roles" },

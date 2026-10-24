@@ -82,6 +82,79 @@ export async function readSheetSettings(options: { fresh?: boolean } = {}): Prom
   }
 }
 
+/** Admin settings → Google Sheet (owner ki sheet hamesha latest rahe). */
+export async function writeSheetSettings(settings: {
+  announcement?: string;
+  supportPhone?: string;
+  supportEmail?: string;
+  whatsapp?: string;
+  upiId?: string;
+  upiName?: string;
+  gstin?: string;
+  freeShipping?: boolean;
+}): Promise<boolean> {
+  const config = googleSheetsConfig();
+  if (!config) return false;
+  try {
+    const response = await fetch(config.url, {
+      method: "POST",
+      cache: "no-store",
+      headers: { "content-type": "text/plain;charset=utf-8", accept: "application/json" },
+      body: JSON.stringify({
+        token: config.token,
+        action: "settings_save",
+        settings: {
+          announcement: settings.announcement ?? "",
+          support_phone: settings.supportPhone ?? "",
+          support_email: settings.supportEmail ?? "",
+          whatsapp: settings.whatsapp ?? "",
+          upi_id: settings.upiId ?? "",
+          upi_name: settings.upiName ?? "",
+          gstin: settings.gstin ?? "",
+          free_shipping: settings.freeShipping !== false,
+        },
+      }),
+      signal: AbortSignal.timeout(WRITE_TIMEOUT_MS),
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    invalidateSheetSettings();
+    return true;
+  } catch (error) {
+    console.warn(`[sheets] settings write failed: ${(error as Error).message}`);
+    return false;
+  }
+}
+
+export type SheetRecentRow = Record<string, string | number>;
+
+/** Sheet ki last N rows (admin panel me dikhane ke liye). */
+export async function readSheetRecent(
+  sheet: "Orders" | "Payments" | "Messages" | "Newsletter",
+  limit = 20,
+): Promise<SheetRecentRow[] | null> {
+  const config = googleSheetsConfig();
+  if (!config) return null;
+  try {
+    const endpoint = new URL(config.url);
+    endpoint.searchParams.set("action", "recent");
+    endpoint.searchParams.set("sheet", sheet);
+    endpoint.searchParams.set("limit", String(Math.min(100, Math.max(1, limit))));
+    if (config.token) endpoint.searchParams.set("token", config.token);
+    const response = await fetch(endpoint, {
+      cache: "no-store",
+      headers: { accept: "application/json" },
+      signal: AbortSignal.timeout(READ_TIMEOUT_MS),
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const payload = (await response.json()) as { ok?: boolean; rows?: SheetRecentRow[] };
+    if (!payload?.ok || !Array.isArray(payload.rows)) return null;
+    return payload.rows;
+  } catch (error) {
+    console.warn(`[sheets] recent read failed: ${(error as Error).message}`);
+    return null;
+  }
+}
+
 /** Sheet me rows append karo. Best-effort — order kabhi isliye fail nahi hota. */
 export async function appendSheetRows(appends: SheetAppend[]): Promise<boolean> {
   const config = googleSheetsConfig();

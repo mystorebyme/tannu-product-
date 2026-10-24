@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { readJson } from "@/lib/http-json";
 import { ProductCard } from "@/components/product-card";
 import { useWishlist } from "@/components/wishlist-provider";
 import type { Product } from "@/types/catalog";
@@ -24,9 +25,9 @@ export default function WishlistPage() {
     const controller = new AbortController();
     setLoading(true);
     fetch(`/api/products?handles=${encodeURIComponent(wishlist.join(","))}`, { signal: controller.signal })
-      .then((response) => (response.ok ? response.json() : { data: [] }))
-      .then((payload: { data?: Product[] }) => {
-        const byHandle = new Map((payload.data ?? []).map((product) => [product.handle, product]));
+      .then((response) => (response.ok ? readJson<{ data?: Product[] }>(response) : null))
+      .then((parsed) => {
+        const byHandle = new Map((parsed?.data?.data ?? []).map((product) => [product.handle, product]));
         setItems(wishlist.map((handle) => byHandle.get(handle)).filter((p): p is Product => Boolean(p)));
       })
       .catch(() => undefined)

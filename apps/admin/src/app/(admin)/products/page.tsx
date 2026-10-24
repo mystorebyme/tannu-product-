@@ -38,17 +38,22 @@ export default async function ProductsPage({
           <h1>Products</h1>
           <p>{all.length} products · price aur stock yahin se manage hota hai</p>
         </div>
-        <form className="actions" action="/products">
+        <div className="actions">
+          <Link className="btn btn-primary" href="/products/new" data-testid="new-product">
+            + Add product
+          </Link>
+          <form className="actions" action="/products">
           <input name="q" defaultValue={q} placeholder="Search title, SKU, fabric" style={{ width: 240 }} />
           <select name="stock" defaultValue={stock} style={{ width: 130 }}>
             <option value="all">All stock</option>
             <option value="live">In stock</option>
             <option value="out">Out of stock</option>
           </select>
-          <button className="btn" type="submit">
-            Filter
-          </button>
-        </form>
+            <button className="btn" type="submit">
+              Filter
+            </button>
+          </form>
+        </div>
       </div>
 
       <div className="panel">

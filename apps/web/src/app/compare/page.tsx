@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { readJson } from "@/lib/http-json";
 import { useWishlist } from "@/components/wishlist-provider";
 import { useCart } from "@/components/cart-provider";
 import { discountPercent, formatPrice, imageUrl } from "@/lib/format";
@@ -22,9 +23,9 @@ export default function ComparePage() {
     }
     const controller = new AbortController();
     fetch(`/api/products?handles=${encodeURIComponent(compare.join(","))}`, { signal: controller.signal })
-      .then((response) => (response.ok ? response.json() : { data: [] }))
-      .then((payload: { data?: Product[] }) => {
-        const byHandle = new Map((payload.data ?? []).map((product) => [product.handle, product]));
+      .then((response) => (response.ok ? readJson<{ data?: Product[] }>(response) : null))
+      .then((parsed) => {
+        const byHandle = new Map((parsed?.data?.data ?? []).map((product) => [product.handle, product]));
         setItems(compare.map((handle) => byHandle.get(handle)).filter((p): p is Product => Boolean(p)));
       })
       .catch(() => undefined);

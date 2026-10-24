@@ -26,6 +26,10 @@ export default async function SettingsPage() {
         </div>
         <div className="panel-body">
           <input type="hidden" name="actor" value={session?.email ?? "admin"} />
+          <p className="small muted" style={{ marginTop: 0 }}>
+            Save karte hi ye values Google Sheet ke <span className="mono">Settings</span> tab me bhi likh di
+            jaati hain — owner sheet aur admin panel dono me same data dekhta hai.
+          </p>
           <div className="field">
             <label htmlFor="announcement">Announcement bar</label>
             <input id="announcement" name="announcement" defaultValue={settings.announcement} />

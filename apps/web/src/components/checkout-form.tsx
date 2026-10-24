@@ -6,11 +6,12 @@ import { useEffect, useState } from "react";
 import { useCart } from "@/components/cart-provider";
 import { formatPrice, imageUrl } from "@/lib/format";
 import { SafeImage } from "@/components/safe-image";
-import { PhoneOtp } from "@/components/phone-otp";
 import { useStoreSettings } from "@/components/store-settings-provider";
 import { API_AVAILABLE, apiUrl } from "@/lib/api-base";
 import { buildUpiUri } from "@/lib/upi";
 import { UpiQr } from "@/components/upi-qr";
+import { UpiApps } from "@/components/upi-apps";
+import { postJson, readJson } from "@/lib/http-json";
 
 const indianStates = [
   "Andhra Pradesh", "Assam", "Bihar", "Chandigarh", "Chhattisgarh", "Delhi", "Goa", "Gujarat",
@@ -28,16 +29,7 @@ export function CheckoutForm() {
   // sirf prepaid — COD option hata diya gaya hai
   const payment = "prepaid" as const;
   const [submitting, setSubmitting] = useState(false);
-  const [phoneToken, setPhoneToken] = useState<string | null>(null);
-  const [otpRequired, setOtpRequired] = useState(false);
-
-  useEffect(() => {
-    // server batata hai OTP zaroori hai ya nahi (Firebase configured / env flag)
-    fetch("/api/otp/status")
-      .then((response) => response.json())
-      .then((payload: { required?: boolean }) => setOtpRequired(Boolean(payload.required)))
-      .catch(() => setOtpRequired(false));
-  }, []);
+  // OTP step hata diya gaya hai (owner request) — order sirf details par
   const [error, setError] = useState<string | null>(null);
   // delivery check — admin ke rules + India Post data se
   const [pinStatus, setPinStatus] = useState<
@@ -70,10 +62,10 @@ export function CheckoutForm() {
     setPinBusy(true);
     const timer = setTimeout(() => {
       fetch(`/api/delivery/check?pincode=${encodeURIComponent(pin)}`, { cache: "no-store" })
-        .then((response) => response.json())
-        .then((payload: { data?: { serviceable: boolean; message: string; state: string | null; district: string | null } }) => {
+        .then((response) => readJson<{ data?: { serviceable: boolean; message: string; state: string | null; district: string | null } }>(response))
+        .then((parsed) => {
           if (!active) return;
-          const result = payload.data;
+          const result = parsed.data?.data;
           if (!result) return;
           setPinStatus({ ok: result.serviceable, message: result.message, state: result.state, district: result.district });
           // state auto-fill: admin ne jis state ko allow kiya hai wahi select rahe
@@ -126,10 +118,6 @@ export function CheckoutForm() {
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     if (lines.length === 0) return;
-    if (otpRequired && !phoneToken) {
-      setError("Please verify your mobile number with OTP before placing the order.");
-      return;
-    }
     if (pinStatus && !pinStatus.ok) {
       setError(pinStatus.message);
       return;
@@ -150,38 +138,27 @@ export function CheckoutForm() {
         typeof crypto !== "undefined" && "randomUUID" in crypto
           ? crypto.randomUUID()
           : `${Date.now()}-${Math.random()}`;
-      const controller = new AbortController();
-      const timer = window.setTimeout(() => controller.abort(), 25_000);
-      const response = await fetch(apiUrl("/api/orders"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Idempotency-Key": idempotencyKey },
-        signal: controller.signal,
-        body: JSON.stringify({
+      const result = await postJson<{ orderNumber?: string; error?: string }>(
+        apiUrl("/api/orders"),
+        {
           ...form,
-          phoneToken: phoneToken ?? undefined,
           paymentMethod: payment,
-          items: lines.map((line) => ({
-            handle: line.handle,
-            size: line.size,
-            quantity: line.quantity,
-          })),
-        }),
-      });
-      window.clearTimeout(timer);
-      const payload = (await response.json().catch(() => ({}))) as { orderNumber?: string; error?: string };
-      if (!response.ok || !payload.orderNumber) {
-        setError(payload.error ?? "We could not place your order. Please check the details and try again.");
+          items: lines.map((line) => ({ handle: line.handle, size: line.size, quantity: line.quantity })),
+        },
+        { timeoutMs: 25_000, headers: { "Idempotency-Key": idempotencyKey } },
+      );
+
+      if (!result.data?.orderNumber) {
+        setError(result.data?.error ?? result.error ?? "Order place nahi hua. Details check karke dobara try kariye.");
+        setWhatsappHref(whatsappOrderLink());
         setSubmitting(false);
         return;
       }
       clear();
-      router.push(`/orders/${payload.orderNumber}`);
+      router.push(`/orders/${result.data.orderNumber}`);
     } catch (error) {
-      // network/timeout — customer ko gumraah na karo, WhatsApp ka rasta do
       console.warn("order submit failed", error);
-      setError(
-        "We could not reach our order server just now. Please try again, or send the order on WhatsApp — we confirm it there.",
-      );
+      setError("Order server tak nahi pahuncha. Dobara try kariye, ya WhatsApp par order bhej dijiye — wahan hum turant confirm karte hain.");
       setWhatsappHref(whatsappOrderLink());
       setSubmitting(false);
     }
@@ -208,14 +185,13 @@ export function CheckoutForm() {
           <h2 className="text-[11px] font-semibold tracking-[.16em] text-[#862222] uppercase">Contact</h2>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <Field label="Full name" required value={form.customerName} onChange={(v) => update("customerName", v)} />
-            <PhoneOtp
-              phone={form.phone}
-              onPhoneChange={(value) => {
-                update("phone", value);
-                setPhoneToken(null);
-              }}
-              verified={Boolean(phoneToken)}
-              onVerified={(payload) => setPhoneToken(payload?.phoneToken ?? null)}
+            <Field
+              label="Mobile number"
+              required
+              type="tel"
+              inputMode="numeric"
+              value={form.phone}
+              onChange={(v) => update("phone", v)}
             />
             <Field
               label="Email"
@@ -350,7 +326,7 @@ export function CheckoutForm() {
               <strong>{formatPrice(total)}</strong> to UPI <strong className="break-all">{upiId}</strong> and share
               the screenshot there.
             </p>
-            <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-start">
               <div className="w-[128px] shrink-0 rounded-sm border border-[#c9dcc9] bg-white p-1">
                 <UpiQr
                   uri={buildUpiUri({
@@ -364,14 +340,26 @@ export function CheckoutForm() {
                   size={240}
                 />
               </div>
-              <a
-                href={whatsappHref}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex h-10 items-center justify-center bg-[#25D366] px-4 text-[10.5px] font-semibold tracking-[.12em] text-white uppercase"
-              >
-                Send order on WhatsApp
-              </a>
+              <div className="min-w-0 flex-1">
+                <UpiApps
+                  uri={buildUpiUri({
+                    vpa: upiId,
+                    name: upiName,
+                    amountPaise: total,
+                    note: "Liksha website order",
+                  })}
+                  upiId={upiId}
+                  amountPaise={total}
+                />
+                <a
+                  href={whatsappHref}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-2.5 inline-flex h-10 items-center justify-center bg-[#25D366] px-4 text-[10.5px] font-semibold tracking-[.12em] text-white uppercase"
+                >
+                  Send order on WhatsApp
+                </a>
+              </div>
             </div>
           </div>
         ) : null}

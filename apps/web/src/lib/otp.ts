@@ -50,11 +50,13 @@ export async function verifyFirebaseIdToken(idToken: string): Promise<string | n
 export { issuePhoneToken, readPhoneToken } from "@/lib/phone-token";
 export { issuePhoneToken as issueToken } from "@/lib/phone-token";
 
-/** OTP order ke waqt zaroori hai ya nahi — sirf "off" mode me optional. */
+/**
+ * Round 12: owner ne order ke waqt OTP hata diya.
+ * Endpoints (start/verify) code me hain par checkout inhe call nahi karta —
+ * order hamesha normal form se place hota hai, isliye ye hamesha false hai.
+ */
 export function otpRequired(): boolean {
-  if (process.env.REQUIRE_PHONE_OTP === "0") return false;
-  if (process.env.REQUIRE_PHONE_OTP === "1") return true;
-  return otpMode() !== "off";
+  return false;
 }
 
 /* ---------- dev mode store (process memory, sirf local/test) ---------- */

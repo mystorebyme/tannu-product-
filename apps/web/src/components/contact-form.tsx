@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { postJson } from "@/lib/http-json";
 import { useStoreSettings } from "@/components/store-settings-provider";
 
 /** fallback — live value Google Sheet / admin settings se aati hai */
@@ -37,14 +38,9 @@ export function ContactForm() {
     setStatus("loading");
     setError(null);
     try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-      const payload = (await response.json()) as { error?: string };
-      if (!response.ok) {
-        setError(payload.error ?? "Could not send your message.");
+      const result = await postJson<{ error?: string; ok?: boolean }>("/api/contact", form);
+      if (result.error || !result.data) {
+        setError(result.data?.error ?? result.error ?? "Could not send your message.");
         setStatus("error");
         return;
       }

@@ -121,6 +121,11 @@ function doGet(e) {
   if (action === 'settings') {
     return json_({ ok: true, settings: readSettings_(), time: new Date().toISOString() });
   }
+  if (action === 'recent') {
+    var name = String(params.sheet || 'Orders');
+    var limit = Math.min(100, Math.max(1, Number(params.limit || 20)));
+    return json_({ ok: true, sheet: name, rows: recentRows_(name, limit) });
+  }
   if (action === 'health') {
     var names = Object.keys(HEADERS);
     return json_({
@@ -132,6 +137,46 @@ function doGet(e) {
     });
   }
   return json_({ ok: false, error: 'unknown action' });
+}
+
+/** Last N rows (sheet ke headers ke saath object bana kar) — admin panel ise dikhata hai */
+function recentRows_(name, limit) {
+  if (!HEADERS[name]) return [];
+  var sheet = sheet_(name);
+  var last = sheet.getLastRow();
+  if (last < 2) return [];
+  var width = Math.max(1, sheet.getLastColumn());
+  var headers = sheet.getRange(1, 1, 1, width).getValues()[0];
+  var start = Math.max(2, last - limit + 1);
+  var values = sheet.getRange(start, 1, last - start + 1, width).getValues();
+  return values.reverse().map(function (row) {
+    var object = {};
+    for (var i = 0; i < headers.length; i += 1) {
+      object[String(headers[i])] = row[i] === null ? '' : row[i];
+    }
+    return object;
+  });
+}
+
+/** Settings sheet me owner/admin ki values likho (key/value rows update/insert) */
+function writeSettings_(settings) {
+  var sheet = sheet_('Settings');
+  var values = sheet.getDataRange().getValues();
+  var index = {};
+  for (var i = 1; i < values.length; i += 1) {
+    index[String(values[i][0] || '').trim().toLowerCase()] = i + 1;
+  }
+  var written = 0;
+  Object.keys(settings || {}).forEach(function (key) {
+    var cleanKey = String(key).trim().toLowerCase();
+    if (!cleanKey) return;
+    var value = settings[key];
+    if (value === undefined || value === null) return;
+    if (index[cleanKey]) sheet.getRange(index[cleanKey], 2).setValue(value);
+    else sheet.appendRow([cleanKey, value]);
+    written += 1;
+  });
+  return written;
 }
 
 function appendRows_(rows) {
@@ -168,6 +213,14 @@ function doPost(e) {
   }
   if (TOKEN && String(body.token || '') !== TOKEN) {
     return json_({ ok: false, error: 'unauthorized' });
+  }
+  if (body.action === 'settings_save') {
+    try {
+      var count = writeSettings_(body.settings || {});
+      return json_({ ok: true, written: count, settings: readSettings_() });
+    } catch (error) {
+      return json_({ ok: false, error: String(error) });
+    }
   }
   if (body.action !== 'append') {
     return json_({ ok: false, error: 'unknown action' });

@@ -58,7 +58,13 @@ export function applySalePricing(products) {
   const list = Array.isArray(products) ? products : [products];
   for (const product of list) {
     if (!product || typeof product.handle !== "string") continue;
-    const { price, compareAtPrice } = salePriceFor(product.handle);
+    const computed = salePriceFor(product.handle);
+    // admin ne ladder ke andar ka price chuna hai to wo respect karo, warna handle se
+    const keepChosen = SALE_FINAL_PRICES.includes(product.price) && !product.saleAutoPrice;
+    const price = keepChosen ? product.price : computed.price;
+    const compareAtPrice = keepChosen
+      ? Math.round(price / (1 - (computed.percent === 60 ? 0.6 : 0.7)))
+      : computed.compareAtPrice;
     product.price = price;
     product.compareAtPrice = compareAtPrice;
     // har size par wahi final price — "final price 499/599/…" har size par sach ho

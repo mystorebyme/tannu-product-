@@ -29,13 +29,18 @@ export default async function OrdersPage({
           <h1>Orders</h1>
           <p>{orders.length} orders · status ke hisaab se filter kariye</p>
         </div>
-        <form className="actions" action="/orders">
-          <input name="q" defaultValue={q} placeholder="Order number / phone / name" style={{ width: 260 }} />
-          <input type="hidden" name="status" value={status} />
-          <button className="btn" type="submit">
-            Search
-          </button>
-        </form>
+        <div className="actions">
+          <Link className="btn btn-primary" href="/orders/new" data-testid="manual-order">
+            + New order
+          </Link>
+          <form className="actions" action="/orders">
+            <input name="q" defaultValue={q} placeholder="Order number / phone / name" style={{ width: 260 }} />
+            <input type="hidden" name="status" value={status} />
+            <button className="btn" type="submit">
+              Search
+            </button>
+          </form>
+        </div>
       </div>
 
       <div className="actions" style={{ marginBottom: 12 }}>

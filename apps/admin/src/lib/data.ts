@@ -281,6 +281,64 @@ const DEFAULT_SETTINGS: StoreSettings = {
   whatsapp: "9909790455",
 };
 
+export type ManualOrderInput = {
+  customerName: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  pincode: string;
+  notes?: string;
+  items: { handle: string; size: string; quantity: number }[];
+  markPaid?: boolean;
+  reference?: string;
+  actor?: string;
+};
+
+/** Admin ke manual (phone/WhatsApp) order — storefront hi order number banata hai. */
+export async function createAdminOrder(
+  input: ManualOrderInput,
+): Promise<{ order?: { orderNumber: string; total: number }; error?: string }> {
+  if (remoteMode()) {
+    const payload = await storeRequest<{ order?: { orderNumber: string; total: number }; error?: string }>(
+      "/api/admin/orders",
+      { method: "POST", body: JSON.stringify(input) },
+    );
+    if (payload) return payload;
+    return { error: "Storefront API se reply nahi aaya (STORE_API_URL / ADMIN_API_TOKEN check kariye)." };
+  }
+  return { error: "Manual order ke liye STORE_API_URL set kariye (admin ko storefront chahiye)." };
+}
+
+export type SheetOverview = {
+  configured: boolean;
+  reachable?: boolean;
+  settings?: Partial<StoreSettings>;
+  live?: Partial<StoreSettings>;
+  sheet?: string | null;
+  hint?: string;
+  recent?: {
+    orders: Record<string, string | number>[];
+    payments: Record<string, string | number>[];
+    messages: Record<string, string | number>[];
+  };
+};
+
+/** Admin ka "Google Sheet" screen — storefront API se live sheet data. */
+export async function getSheetOverview(): Promise<SheetOverview> {
+  if (remoteMode()) {
+    const payload = await storeRequest<SheetOverview>("/api/admin/sheet");
+    if (payload) return payload;
+  }
+  return {
+    configured: Boolean(process.env.GOOGLE_SHEETS_WEBAPP_URL),
+    settings: await getSettings(),
+    recent: { orders: [], payments: [], messages: [] },
+    hint: "Local/dev me sheet rows sirf storefront ke through aati hain (STORE_API_URL set kariye).",
+  };
+}
+
 export async function getSettings(): Promise<StoreSettings> {
   if (remoteMode()) {
     const payload = await storeRequest<{ data: Partial<StoreSettings> }>("/api/admin/settings");

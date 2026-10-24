@@ -3,7 +3,7 @@ import "server-only";
 import fs from "node:fs";
 import { dataFile } from "./data-dir";
 import { dbEnabled } from "./db";
-import { readSheetSettings } from "./google-sheets";
+import { readSheetSettings, writeSheetSettings } from "./google-sheets";
 
 /**
  * Store settings — source of truth storefront hai.
@@ -125,6 +125,9 @@ export async function saveStoreSettings(input: unknown, actor: string): Promise<
     fs.mkdirSync(file.replace(/\/[^/]+$/, ""), { recursive: true });
     fs.writeFileSync(file, JSON.stringify(next, null, 2));
   }
+
+  // sheet configured hai to admin ka edit seedha sheet me bhi (owner ko wahi dikhe)
+  await writeSheetSettings(next).catch(() => false);
 
   cache = { at: Date.now(), value: next };
   return next;

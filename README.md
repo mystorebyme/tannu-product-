@@ -99,11 +99,20 @@ Message Postgres me save hota hai + owner ko email jaata hai + admin panel (`/me
 Bina key ke **FormSubmit** (free, unlimited) — pehli submission par inbox me activation mail aata hai.
 Detail: [`docs/09-devops/contact-form.md`](docs/09-devops/contact-form.md).
 
-## Firebase phone OTP (asli SMS)
+## Phone OTP endpoints (checkout se hata diye)
 
-`NEXT_PUBLIC_FIREBASE_*` + `FIREBASE_API_KEY` set karte hi real SMS OTP chalu ho jaata hai;
-`OTP_DEV_MODE=off` karna mat bhooliye. Pura step-by-step:
-[`docs/09-devops/firebase-otp.md`](docs/09-devops/firebase-otp.md).
+Owner ke Round 12 instruction par checkout me **OTP nahi** lagta — customer seedha mobile
+number bharke order kar sakta hai. `/api/otp/*` endpoints code me hain (future use ke liye)
+par koi order un par block nahi hota.
+
+## Admin panel ke naye kaam
+
+| Screen | Kya hota hai |
+| --- | --- |
+| `/orders/new` | Phone/WhatsApp order manually create — order number (LK-…) system banata hai, sheet me row turant. |
+| `/products/new` | Naya product + **10 photos** (URL slots with live preview), price sale ladder se, publish par catalogue rebuild. |
+| `/sheet` | Google Sheet ka live data (settings + last order/payment/message rows) aur setup status. |
+| `/settings` | Save karte hi values sheet me bhi chali jaati hain. |
 
 ## Quickstart
 

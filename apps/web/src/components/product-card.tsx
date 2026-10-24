@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRef } from "react";
 import { useCart } from "@/components/cart-provider";
 import { useWishlist } from "@/components/wishlist-provider";
 import { discountPercent, formatPrice, imageUrl } from "@/lib/format";
@@ -12,7 +13,8 @@ import { coloursFor } from "@/lib/colour-index";
 
 /**
  * Product card — live store (likshaclothing.com) jaisa:
- *  - hover par doosri image cross-fade + slow zoom
+ *  - hover par pehli image hat jaati hai aur doosri image cursor ke saath
+ *    background me halki si move karti hai (parallax follow)
  *  - image ke **upar** icons: wishlist (heart), compare (eye), aur niche add-to-cart
  *  - price ke niche colour swatches
  */
@@ -31,6 +33,31 @@ export function ProductCard({
   const off = discountPercent(product.price, product.compareAtPrice);
   const primary = product.images[0];
   const hoverImage = product.images[1] ?? null;
+  const mediaRef = useRef<HTMLDivElement>(null);
+  const frame = useRef<number | null>(null);
+
+  /** cursor ke saath image move — CSS variable se, isliye re-render nahi hota */
+  function follow(event: React.MouseEvent<HTMLDivElement>) {
+    const node = mediaRef.current;
+    if (!node) return;
+    const rect = node.getBoundingClientRect();
+    const x = (event.clientX - rect.left) / rect.width - 0.5;
+    const y = (event.clientY - rect.top) / rect.height - 0.5;
+    if (frame.current) cancelAnimationFrame(frame.current);
+    frame.current = requestAnimationFrame(() => {
+      node.style.setProperty("--cursor-x", `${(x * 22).toFixed(1)}px`);
+      node.style.setProperty("--cursor-y", `${(y * 22).toFixed(1)}px`);
+    });
+  }
+
+  function reset() {
+    const node = mediaRef.current;
+    if (!node) return;
+    if (frame.current) cancelAnimationFrame(frame.current);
+    node.style.removeProperty("--cursor-x");
+    node.style.removeProperty("--cursor-y");
+  }
+
   const defaultSize =
     product.sizes.find((size) => product.sizePricing?.[size]?.available) ?? product.sizes[0] ?? "Free Size";
 
@@ -38,7 +65,12 @@ export function ProductCard({
     <div className="group relative flex flex-col">
       <div className="relative overflow-hidden bg-[#f6f1ec]">
         <Link href={`/products/${product.handle}`} className="block" data-testid="product-card">
-          <div className="card-media relative aspect-[3/4] w-full">
+          <div
+            ref={mediaRef}
+            className="card-media relative aspect-[3/4] w-full"
+            onMouseMove={hoverImage ? follow : undefined}
+            onMouseLeave={hoverImage ? reset : undefined}
+          >
             <SafeImage
               src={imageUrl(primary, 600)}
               alt={product.title}

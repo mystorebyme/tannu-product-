@@ -498,6 +498,67 @@ const readExtra = (name, key) => {
   }
   if (overriddenCount) console.log(`admin overrides applied: ${overriddenCount} products`);
 
+  /* ---------- admin se add kiye gaye naye products (upload) ---------- */
+  const COLLECTION_KEYS = new Set([
+    "new-arrivals", "party-wear-gown", "likshas-choice", "lehnga-choli",
+    "printed-suit-set", "trending", "weddin-collection", "sale",
+  ]);
+  const VALID_SIZES = new Set(["XS", "S", "M", "L", "XL", "XXL", "3XL", "Free Size"]);
+  let addedCount = 0;
+  for (const item of overrides.newProducts ?? []) {
+    const title = String(item?.title ?? "").trim();
+    const rawImages = (Array.isArray(item?.images) ? item.images : []).filter(
+      (src) => typeof src === "string" && /^https:\/\//.test(src),
+    );
+    if (!title || !rawImages.length) continue;
+    let handle = asciiHandle(item.handle || title) || `admin-${addedCount + 1}`;
+    if (usedHandles.has(handle)) handle = `${handle}-${addedCount + 1}`;
+    usedHandles.add(handle);
+    // "ek image sirf ek product par" — pehle se use hui photo skip
+    const images = [];
+    for (const src of rawImages) {
+      if (usedImages.has(src)) continue;
+      usedImages.add(src);
+      images.push(src);
+      if (images.length >= 10) break;
+    }
+    if (!images.length) continue;
+    const price = Number.isInteger(item.price) && item.price > 0 ? item.price : 49_900;
+    const sizes = normalizeSizes((Array.isArray(item.sizes) ? item.sizes : []).filter((size) => VALID_SIZES.has(size)));
+    const finalSizes = sizes.length ? sizes : ["S", "M", "L", "XL"];
+    const collections = (Array.isArray(item.collections) ? item.collections : []).filter((h) => COLLECTION_KEYS.has(h));
+    if (!collections.length) collections.push("new-arrivals");
+    const description = String(item.description ?? "").trim() || title;
+    products.push({
+      handle,
+      sourceHandle: handle,
+      title,
+      price,
+      compareAtPrice: null,
+      images,
+      collections,
+      category: ["anarkali", "lehnga", "printed", "gown", "sharara", "other"].includes(item.category)
+        ? item.category
+        : "anarkali",
+      productType: "Admin upload",
+      fabric: String(item.fabric ?? "").trim() || "Silk blend",
+      color: String(item.color ?? "").trim() || "As shown",
+      sizes: finalSizes,
+      sizePricing: Object.fromEntries(finalSizes.map((size) => [size, { price, compareAtPrice: null, available: true }])),
+      details: description.split(/\n+/).filter(Boolean).slice(0, 8),
+      description: description.slice(0, 400),
+      descriptionHtml: `<p>${description.replace(/</g, "&lt;")}</p>`,
+      source: "admin",
+      rating: 0,
+      reviewCount: 0,
+      inStock: item.inStock !== false,
+      featured: false,
+      publishedAt: item.createdAt ?? new Date().toISOString(),
+    });
+    addedCount += 1;
+  }
+  if (addedCount) console.log(`admin products added: ${addedCount}`);
+
   /* ---------- festive sale pricing (Flat 70% / 60%, final ₹499–₹699) ---------- */
   applySalePricing(products);
   console.log(`sale pricing: ${products.length} products -> ₹${[...new Set(products.map((p) => p.price / 100))].sort((a, b) => a - b).join(" / ₹")}`);

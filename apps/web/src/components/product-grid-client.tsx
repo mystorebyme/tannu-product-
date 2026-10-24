@@ -1,5 +1,7 @@
 "use client";
 
+import { readJson } from "@/lib/http-json";
+
 import { useState } from "react";
 import { ProductCard } from "@/components/product-card";
 import type { Product } from "@/types/catalog";
@@ -41,8 +43,9 @@ export function ProductGridWithMore({
       params.set("limit", String(pageSize));
       const response = await fetch(`/api/products?${params.toString()}`);
       if (!response.ok) throw new Error("failed");
-      const payload = (await response.json()) as { data: Product[] };
-      setProducts((current) => [...current, ...payload.data]);
+      const parsed = await readJson<{ data: Product[] }>(response);
+      if (!parsed.data?.data) throw new Error("failed");
+      setProducts((current) => [...current, ...parsed.data!.data]);
     } catch {
       setError("Aur products load nahi hue. Internet check kar ke dobara try kariye.");
     } finally {

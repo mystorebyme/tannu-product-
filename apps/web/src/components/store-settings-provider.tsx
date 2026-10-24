@@ -1,5 +1,7 @@
 "use client";
 
+import { readJson } from "@/lib/http-json";
+
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { API_AVAILABLE, apiUrl } from "@/lib/api-base";
 
@@ -59,8 +61,8 @@ export function StoreSettingsProvider({ children }: { children: ReactNode }) {
     try {
       const response = await fetch(apiUrl("/api/settings"), { cache: "no-store" });
       if (!response.ok) return;
-      const payload = (await response.json()) as { data?: Partial<PublicSettings> };
-      const data = payload.data;
+      const parsed = await readJson<{ data?: Partial<PublicSettings> }>(response);
+      const data = parsed.data?.data;
       if (!data) return;
       setSettings((current) => ({
         ...current,

@@ -114,14 +114,6 @@ export default async function HomePage() {
             <h1 className="font-display text-[34px] leading-[1.05] font-medium text-[#5c1010] sm:text-[44px] lg:text-[54px]">
               Flat <span className="text-[#862222]">70%</span> Off
             </h1>
-            <p className="max-w-[420px] text-[13px] leading-relaxed text-[#5c534b] sm:text-[14px]">
-              Every anarkali, lehenga and suit set — final price just{" "}
-              <strong className="font-semibold text-[#862222]">₹499</strong>,{" "}
-              <strong className="font-semibold text-[#862222]">₹549</strong>,{" "}
-              <strong className="font-semibold text-[#862222]">₹599</strong>,{" "}
-              <strong className="font-semibold text-[#862222]">₹649</strong> or{" "}
-              <strong className="font-semibold text-[#862222]">₹699</strong>. No hidden charges.
-            </p>
             <div className="mt-1 flex w-full max-w-[420px] flex-col gap-2.5 sm:flex-row sm:justify-center lg:justify-start">
               <Link
                 href="/collections/sale"

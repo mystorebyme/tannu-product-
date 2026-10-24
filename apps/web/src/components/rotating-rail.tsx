@@ -1,5 +1,7 @@
 "use client";
 
+import { readJson } from "@/lib/http-json";
+
 import { useEffect, useMemo, useState } from "react";
 import { ProductCarousel } from "@/components/product-carousel";
 import type { Product } from "@/types/catalog";
@@ -37,8 +39,9 @@ export function RotatingRail({
       try {
         const response = await fetch(`/api/rotation?rail=${rail}&bucket=${nextBucket}`, { cache: "no-store" });
         if (!response.ok) throw new Error(String(response.status));
-        const payload = (await response.json()) as { products?: Product[] };
-        if (!cancelled && payload.products?.length) {
+        const parsed = await readJson<{ products?: Product[] }>(response);
+        const payload = parsed.data;
+        if (!cancelled && payload?.products?.length) {
           setProducts(payload.products);
           return;
         }
