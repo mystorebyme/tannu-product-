@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { latestReviews, shopRating } from "@/lib/reviews";
-import { Stars } from "@/components/product-reviews";
+import { Stars } from "@/components/stars";
 
 /**
  * Home par customer reviews strip — live store ke Trustoo carousel jaisa.

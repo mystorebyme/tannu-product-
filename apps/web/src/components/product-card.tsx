@@ -6,6 +6,7 @@ import { useWishlist } from "@/components/wishlist-provider";
 import { discountPercent, formatPrice, imageUrl } from "@/lib/format";
 import type { Product } from "@/types/catalog";
 import { SafeImage } from "@/components/safe-image";
+import { Stars } from "@/components/stars";
 import { colourSwatch } from "@/lib/colour";
 import { coloursFor } from "@/lib/colour-index";
 
@@ -127,6 +128,14 @@ export function ProductCard({
         >
           {product.title}
         </Link>
+        {product.reviewCount > 0 ? (
+          <p className="mt-1 flex items-center justify-center gap-1 text-[10px] text-[#8a8078]">
+            <Stars value={product.rating} size={10} />
+            <span>
+              {product.rating.toFixed(1)} ({product.reviewCount})
+            </span>
+          </p>
+        ) : null}
         <div className="mt-1.5 flex items-center justify-center gap-1.5 text-[12px]">
           {product.compareAtPrice && product.compareAtPrice > product.price ? (
             <span className="text-[#a49a90] line-through">{formatPrice(product.compareAtPrice)}</span>

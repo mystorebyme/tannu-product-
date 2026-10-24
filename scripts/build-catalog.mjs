@@ -237,6 +237,26 @@ function splitColour(title) {
 /** group key: colour ke bina title ka slug */
 const groupKeyOf = (base) => base.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
+/** Live Trustoo sync ka rating/count — cards aur PDP wahi dikhate hain. */
+function reviewRatings() {
+  const ratings = new Map();
+  for (const file of ["database/seeds/reviews/aggregates.json", "database/seeds/reviews/reviews.json"]) {
+    const full = path.join(ROOT, file);
+    if (!fs.existsSync(full)) continue;
+    try {
+      const parsed = JSON.parse(fs.readFileSync(full, "utf8"));
+      for (const [handle, block] of Object.entries(parsed.products ?? {})) {
+        const count = Number(block.count ?? 0);
+        const rating = Number(block.rating ?? 0);
+        if (count > 0 && rating > 0 && !ratings.has(handle)) ratings.set(handle, { rating, count });
+      }
+    } catch {
+      /* seed missing/broken — rating 0 hi rahegi */
+    }
+  }
+  return ratings;
+}
+
 (function main() {
   const liveProducts = readJson(path.join(LIVE, "products.json")).products;
   const liveCollections = readJson(path.join(LIVE, "collections.json")).collections;
@@ -251,6 +271,7 @@ const groupKeyOf = (base) => base.toLowerCase().replace(/[^a-z0-9]+/g, "-").repl
     }
   }
 
+  const ratings = reviewRatings();
   const usedHandles = new Set();
   const products = [];
   const stats = { images: 0, sizes: new Set(), noImage: [], duplicateImages: [] };
@@ -340,8 +361,8 @@ const groupKeyOf = (base) => base.toLowerCase().replace(/[^a-z0-9]+/g, "-").repl
       details,
       description: stripEmoji(details.join(" ").trim() || cleanTitle).slice(0, 400),
       descriptionHtml,
-      rating: 0,
-      reviewCount: 0,
+      rating: ratings.get(handle)?.rating ?? 0,
+      reviewCount: ratings.get(handle)?.count ?? 0,
       inStock: variants.some((variant) => variant.available) || variants.length === 0,
       featured: collections.includes("frontpage") || collections.includes("trending"),
       publishedAt: source.published_at ?? null,

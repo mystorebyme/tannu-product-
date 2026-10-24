@@ -47,12 +47,39 @@ async function fetchJson(url) {
   }
 }
 
-/** product_id → handle (live snapshot se) */
+/** Shopify handles me emoji bhi hote hain — catalogue ASCII slug use karta hai */
+function asciiHandle(handle) {
+  return String(handle)
+    .normalize("NFKD")
+    .replace(/[^a-zA-Z0-9-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .toLowerCase();
+}
+
+/** product_id → hamare catalogue ka handle (catalogue `sourceHandle` se slug banata hai) */
 function handleMap() {
-  if (!fs.existsSync(LIVE)) return new Map();
-  const live = JSON.parse(fs.readFileSync(LIVE, "utf8"));
+  const catalogueHandles = new Map();
+  for (const file of ["apps/web/src/data/catalog.json", "database/seeds/catalog.json"]) {
+    const full = path.join(ROOT, file);
+    if (!fs.existsSync(full)) continue;
+    try {
+      const catalog = JSON.parse(fs.readFileSync(full, "utf8"));
+      for (const product of catalog.products ?? []) {
+        if (product.sourceHandle && product.handle) catalogueHandles.set(product.sourceHandle, product.handle);
+      }
+    } catch {
+      /* ignore */
+    }
+    if (catalogueHandles.size) break;
+  }
   const map = new Map();
-  for (const product of live.products ?? []) map.set(String(product.id), product.handle);
+  if (!fs.existsSync(LIVE)) return map;
+  const live = JSON.parse(fs.readFileSync(LIVE, "utf8"));
+  for (const product of live.products ?? []) {
+    const handle = catalogueHandles.get(product.handle) ?? asciiHandle(product.handle);
+    map.set(String(product.id), handle);
+  }
   return map;
 }
 
