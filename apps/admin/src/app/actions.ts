@@ -14,6 +14,7 @@ import {
   createManualInvoice,
   getDelivery,
   saveDelivery,
+  markMessageHandled,
   saveSettings,
   setOrderNote,
   setOrderTracking,
@@ -53,6 +54,17 @@ export async function logoutAction() {
   const store = await cookies();
   store.delete(SESSION_COOKIE);
   redirect("/login");
+}
+
+/** Website message ko "handled" mark karna (Messages page) */
+export async function markMessageHandledAction(formData: FormData) {
+  const session = await requireSession();
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+  const ok = await markMessageHandled(id, session.email);
+  if (ok) appendAudit({ actor: session.email, action: "message.handled", target: id });
+  revalidatePath("/messages");
+  revalidatePath("/");
 }
 
 export async function updateStockAction(formData: FormData) {

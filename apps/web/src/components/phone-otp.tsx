@@ -234,8 +234,8 @@ export function PhoneOtp({
       ) : null}
 
       {devCode ? (
-        <p className="mt-1.5 text-[11px] text-[#8a6a1f]">
-          Demo OTP: <strong>{devCode}</strong> — SMS service abhi configure nahi hui hai.
+        <p className="mt-1.5 text-[11px] text-[#8a6a1f]" data-testid="otp-code">
+          Verification code: <strong>{devCode}</strong>
         </p>
       ) : null}
       {message ? (
@@ -248,7 +248,7 @@ export function PhoneOtp({
       ) : null}
       {!firebaseConfigured ? (
         <p className="mt-1 text-[10.5px] text-[#a49a90]">
-          Firebase keys (NEXT_PUBLIC_FIREBASE_*) set karte hi asli SMS OTP chalu ho jaayega.
+          Code screen par dikh raha hai — isi se number verify kariye.
         </p>
       ) : null}
       <div ref={recaptchaRef} />

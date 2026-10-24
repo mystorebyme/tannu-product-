@@ -1,14 +1,19 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ProductCarousel } from "@/components/product-carousel";
+import { RotatingRail } from "@/components/rotating-rail";
 import { CategoryCircles } from "@/components/category-circles";
 import { ReviewsStrip } from "@/components/reviews-strip";
 import { EditorialBand, OccasionStrip } from "@/components/occasion-strip";
 import { Reveal } from "@/components/reveal";
 import { getProducts, getCollection } from "@/lib/store";
+import { RAILS, type RailKey, railPool } from "@/lib/rails";
+import { compactProduct, rotatePick, rotationBucket } from "@/lib/rotation";
 import { imageUrl } from "@/lib/format";
 import { siteConfig } from "@/config/site";
 import { SafeImage } from "@/components/safe-image";
+
+/** Home ke rails har 10 minute me badalte hain — page bhi utni hi der me refresh hota hai */
+export const revalidate = 600;
 
 export const metadata: Metadata = {
   title: "Liksha Clothing | Designer Anarkali Suits, Lehenga Choli & Suit Sets",
@@ -26,13 +31,25 @@ export default async function HomePage() {
   const products = await getProducts();
   const byCollection = (handle: string) => products.filter((product) => product.collections.includes(handle));
 
-  const trending = byCollection("trending");
-  const newArrivals = [...byCollection("new-arrivals")].sort((a, b) =>
-    String(b.publishedAt ?? "").localeCompare(String(a.publishedAt ?? "")),
-  );
-
-  // "Trendy Anarkali Sets" rail — live home jaisa 6 products (trending pehle, phir Liksha's choice)
-  const trendyRail = [...trending, ...byCollection("likshas-choice").filter((p) => !trending.includes(p))].slice(0, 6);
+  /**
+   * Har rail ka set 10-minute window se banta hai (server par bhi wahi algorithm
+   * jo client par hai) — refresh par naye products, aur client bhi 10 min me
+   * khud badal jaata hai.
+   */
+  const bucket = rotationBucket();
+  const rail = (key: RailKey) => {
+    const pool = railPool(key, products);
+    const picks = rotatePick(pool, `${key}:${bucket}`, RAILS[key].count);
+    return {
+      initial: picks.map(compactProduct),
+      // fallback pool (static preview ke liye) — chhota rakha hai
+      pool: rotatePick(pool, `pool:${bucket}`, 24).map(compactProduct),
+    };
+  };
+  const trendy = rail("trendy");
+  const newArrivalsRail = rail("newArrivals");
+  const lehnga = rail("lehnga");
+  const explore = rail("explore");
 
   const anarkaliCollection = await getCollection("party-wear-gown");
   const lehngaCollection = await getCollection("lehnga-choli");
@@ -41,8 +58,6 @@ export default async function HomePage() {
   const saleCollection = await getCollection("sale");
   const choiceCollection = await getCollection("likshas-choice");
 
-  // live home ka "LEHNGA CHOLI" rail
-  const lehngaRail = byCollection("lehnga-choli").slice(0, 8);
   // "Shop by edit" circles — ek line me, live store ka style
   const circleItems = [
     { href: "/collections/party-wear-gown", title: "Anarkali Suit", image: anarkaliCollection?.image, count: byCollection("party-wear-gown").length },
@@ -92,30 +107,15 @@ export default async function HomePage() {
 
       <CategoryCircles items={circleItems} />
 
-      <ProductRail
-        title="Trendy Anarkali Sets"
-        subtitle="Top view in this week"
-        href="/collections/trending"
-        products={trendyRail}
-      />
+      <ProductRail rail="trendy" products={trendy.initial} pool={trendy.pool} />
 
-      <ProductRail
-        title="New Arrivals"
-        subtitle="Freshly dropped, straight from the studio"
-        href="/collections/new-arrivals"
-        products={newArrivals.slice(0, 8)}
-      />
+      <ProductRail rail="newArrivals" products={newArrivalsRail.initial} pool={newArrivalsRail.pool} />
 
-      {lehngaRail.length ? (
-        <ProductRail
-          title="Lehnga Choli"
-          subtitle="Our range of designer lehnga choli"
-          href="/collections/lehnga-choli"
-          products={lehngaRail}
-        />
-      ) : null}
+      <ProductRail rail="lehnga" products={lehnga.initial} pool={lehnga.pool} />
 
       <ReviewsStrip />
+
+      <ProductRail rail="explore" products={explore.initial} pool={explore.pool} />
       <OccasionStrip />
       <EditorialBand />
 
@@ -124,16 +124,15 @@ export default async function HomePage() {
 }
 
 function ProductRail({
-  title,
-  subtitle,
-  href,
+  rail,
   products,
+  pool,
 }: {
-  title: string;
-  subtitle: string;
-  href: string;
+  rail: RailKey;
   products: Awaited<ReturnType<typeof getProducts>>;
+  pool: Awaited<ReturnType<typeof getProducts>>;
 }) {
+  const { title, subtitle, href } = RAILS[rail];
   if (!products.length) return null;
   return (
     <section className="container-liksha py-10 lg:py-14">
@@ -144,7 +143,7 @@ function ProductRail({
         <p className="mt-1 text-[11.5px] tracking-[.14em] text-[#9c8f82] uppercase">{subtitle}</p>
       </Reveal>
       <Reveal className="mt-7" delay={80}>
-        <ProductCarousel products={products} perView={3} />
+        <RotatingRail rail={rail} initial={products} pool={pool} perView={3} />
       </Reveal>
       <div className="mt-8 flex justify-center">
         <Link

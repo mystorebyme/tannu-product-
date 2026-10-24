@@ -338,10 +338,46 @@ export async function getAudit(limit = 100): Promise<AuditRow[]> {
   return [...orderAudit, ...rows].sort((a, b) => (a.at < b.at ? 1 : -1)).slice(0, limit);
 }
 
-export function getMessages() {
-  return readRows<{ id: string; createdAt: string; name: string; email: string; message: string; handled: boolean }>(
-    "messages.json",
-  );
+export type ContactMessage = {
+  id: string;
+  createdAt: string;
+  name: string;
+  email: string;
+  phone?: string | null;
+  subject?: string | null;
+  message: string;
+  handled: boolean;
+  handledAt?: string | null;
+  handledBy?: string | null;
+};
+
+/**
+ * Website ke contact-form messages.
+ * Remote mode me storefront API (Postgres) se — pehle admin apni local file
+ * padhta tha jahan kabhi kuch aata hi nahi tha.
+ */
+export async function getMessages(limit = 100): Promise<ContactMessage[]> {
+  if (remoteMode()) {
+    const payload = await storeRequest<{ messages: ContactMessage[] }>(`/api/admin/messages?limit=${limit}`);
+    if (payload?.messages) return payload.messages;
+  }
+  return readRows<ContactMessage>("messages.json").slice(0, limit);
+}
+
+export async function markMessageHandled(id: string, actor: string): Promise<boolean> {
+  if (remoteMode()) {
+    const payload = await storeRequest<{ message: ContactMessage }>("/api/admin/messages", {
+      method: "PATCH",
+      body: JSON.stringify({ id, action: "handled", actor }),
+    });
+    if (payload?.message) return true;
+  }
+  const rows = readRows<ContactMessage>("messages.json");
+  const index = rows.findIndex((row) => row.id === id);
+  if (index === -1) return false;
+  rows[index] = { ...rows[index]!, handled: true, handledAt: new Date().toISOString(), handledBy: actor };
+  writeRows("messages.json", rows);
+  return true;
 }
 
 /* ───────────────────────── manual invoice (admin) ─────────────────────────

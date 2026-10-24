@@ -6,7 +6,8 @@ import raw from "../../../../database/seeds/delivery/pincodes.json";
  * `database/seeds/delivery/pincodes.json` = { state: { district: [pincode…] } }.
  *
  * Isi wajah se "kuch bhi number daal do" wala bug band hota hai: jo pincode
- * India Post ke data me nahi hai, wo deliverable nahi mana jaata.
+ * is data me nahi hai, wo deliverable nahi mana jaata. Customer ko ye kabhi
+ * nahi dikhta ki data kahan se aaya — message sirf "valid Indian pincode".
  */
 
 type Grouped = Record<string, Record<string, string[]>>;
@@ -62,15 +63,26 @@ type Rules = {
   deliveryDays: string;
 };
 
+/**
+ * Customer ko dikhne wale messages.
+ *
+ * Zaroori: yahan kabhi "record me nahi mila", "database", "admin ne block kiya",
+ * "automated" jaisa kuch nahi jaata — customer ko sirf saaf jawab milta hai:
+ *  • galat/fake pincode -> "valid Indian pincode daaliye"
+ *  • delivery possible nahi (admin rule ya area) -> "not available yet"
+ * Internal reason (`unknown` / `blocked` / `state_blocked`) sirf admin ke liye hai.
+ */
+const UNAVAILABLE = "Sorry, delivery is not available at this pincode right now.";
+const ASK_WHATSAPP = "Please WhatsApp us and we will check for you.";
+const VALID_ONLY = "Please enter a valid Indian pincode.";
+
 const MESSAGES: Record<ServiceabilityReason, (pin: string, state?: string | null) => string> = {
   ok: (pin, state) => `Delivering to ${pin}${state ? ` (${state})` : ""} — free shipping.`,
-  invalid: () => "Pincode 6 digit ka hona chahiye (jaise 302001).",
-  unknown: (pin) => `Pincode ${pin} India Post ke record me nahi mila. Kripya sahi pincode daaliye.`,
-  blocked: (pin) => `Sorry, ${pin} par delivery abhi band hai. WhatsApp par humse baat kar lijiye.`,
-  state_blocked: (pin, state) =>
-    `Abhi ${state ?? "is state"} me delivery available nahi hai. ${pin} ke liye WhatsApp par poochhiye.`,
-  state_not_allowed: (pin, state) =>
-    `Abhi ${state ?? "is state"} me delivery available nahi hai. ${pin} ke liye WhatsApp par poochhiye.`,
+  invalid: () => "Please enter a valid 6-digit Indian pincode.",
+  unknown: () => VALID_ONLY,
+  blocked: () => `${UNAVAILABLE} ${ASK_WHATSAPP}`,
+  state_blocked: () => `${UNAVAILABLE} ${ASK_WHATSAPP}`,
+  state_not_allowed: () => `${UNAVAILABLE} ${ASK_WHATSAPP}`,
 };
 
 /**

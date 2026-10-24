@@ -83,6 +83,9 @@ export function SiteHeader() {
   const [results, setResults] = useState<SearchHit[]>([]);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [recommended, setRecommended] = useState<SearchHit[]>([]);
+  // keyboard navigation (↑ ↓ Enter) + scroll-into-view — mobile par list ke end tak pahunchne ke liye
+  const searchPanelRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(-1);
 
   // search server par hoti hai -> client bundle me 400KB ka catalog nahi jaata
   useEffect(() => {
@@ -113,6 +116,42 @@ export function SiteHeader() {
       clearTimeout(timer);
     };
   }, [query, searchOpen]);
+
+  useEffect(() => {
+    setActiveIndex(-1);
+  }, [query, searchOpen]);
+
+  // active item ko panel ke andar scroll karo (page scroll nahi hota)
+  useEffect(() => {
+    const panel = searchPanelRef.current;
+    if (!panel || activeIndex < 0) return;
+    const items = panel.querySelectorAll<HTMLElement>("[data-search-item]");
+    const item = items[activeIndex];
+    if (!item) return;
+    item.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [activeIndex]);
+
+  const onSearchKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      const panel = searchPanelRef.current;
+      if (!panel) return;
+      const items = panel.querySelectorAll<HTMLElement>("[data-search-item]");
+      if (!items.length) return;
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        setActiveIndex((current) => (current + 1 >= items.length ? 0 : current + 1));
+      } else if (event.key === "ArrowUp") {
+        event.preventDefault();
+        setActiveIndex((current) => (current <= 0 ? items.length - 1 : current - 1));
+      } else if (event.key === "Enter" && activeIndex >= 0) {
+        event.preventDefault();
+        items[activeIndex]?.click();
+      } else if (event.key === "Escape") {
+        setSearchOpen(false);
+      }
+    },
+    [activeIndex],
+  );
 
   const submitSearch = useCallback(
     (event: React.FormEvent) => {
@@ -255,7 +294,13 @@ export function SiteHeader() {
         </div>
 
         {searchOpen ? (
-          <div className="border-t border-[#eee6de] bg-white px-4 py-4 shadow-sm">
+          <div
+            ref={searchPanelRef}
+            data-testid="search-panel"
+            onKeyDown={onSearchKeyDown}
+            /* panel apne andar scroll hota hai — bahut results hone par bhi user niche tak pahunch sakta hai */
+            className="max-h-[calc(100svh-72px)] overflow-y-auto overscroll-contain border-t border-[#eee6de] bg-white px-4 py-4 shadow-sm"
+          >
             <form onSubmit={submitSearch} className="mx-auto max-w-[760px]">
               <div className="flex items-center gap-2 border border-[#d9cec3] px-3">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
@@ -293,11 +338,13 @@ export function SiteHeader() {
 
               {results.length > 0 ? (
                 <ul className="mt-2.5 divide-y divide-[#f0eae3] border border-[#f0eae3]" data-testid="search-suggestions">
-                  {results.map((product) => (
+                  {results.map((product, index) => (
                     <li key={product.handle}>
                       <Link
                         href={`/products/${product.handle}`}
-                        className="flex items-center gap-3 p-2 hover:bg-[#faf7f3]"
+                        data-search-item
+                        aria-current={index === activeIndex ? "true" : undefined}
+                        className="flex items-center gap-3 p-2 hover:bg-[#faf7f3] aria-[current=true]:bg-[#f6f1ec]"
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <SafeImage src={imageUrl(product.images[0], 160)} alt={product.title} className="h-14 w-12 object-cover" />
@@ -331,12 +378,14 @@ export function SiteHeader() {
                     {query.trim().length < 2 ? "Recommended for you" : "You may also like"}
                   </p>
                   <ul className="mt-1.5 divide-y divide-[#f0eae3] border border-[#f0eae3]">
-                    {recommended.map((product) => (
+                    {recommended.map((product, index) => (
                       <li key={product.handle}>
                         <Link
                           href={`/products/${product.handle}`}
                           onClick={() => setSearchOpen(false)}
-                          className="flex items-center gap-3 p-2 hover:bg-[#faf7f3]"
+                          data-search-item
+                          aria-current={results.length + index === activeIndex ? "true" : undefined}
+                          className="flex items-center gap-3 p-2 hover:bg-[#faf7f3] aria-[current=true]:bg-[#f6f1ec]"
                         >
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <SafeImage src={imageUrl(product.images[0], 160)} alt={product.title} className="h-14 w-12 object-cover" />

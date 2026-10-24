@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export default async function DashboardPage() {
   const orders = await getOrders();
   const products = getProducts();
-  const messages = getMessages();
+  const messages = await getMessages(100);
   const invoices = await getManualInvoices();
   const catalogState = overrideStats();
   const pendingPayments = orders.filter((order) => order.paymentStatus === "pending" || order.paymentStatus === "processing");

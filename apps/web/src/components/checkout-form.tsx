@@ -234,7 +234,7 @@ export function CheckoutForm() {
                 value={form.pincode}
                 onChange={(v) => update("pincode", v.replace(/\D/g, "").slice(0, 6))}
               />
-              {pinBusy ? <p className="mt-1 text-[11px] text-[#8a8078]">Delivery check ho raha hai…</p> : null}
+              {pinBusy ? <p className="mt-1 text-[11px] text-[#8a8078]">Checking delivery…</p> : null}
               {pinStatus ? (
                 <p
                   className={`mt-1 text-[11px] leading-relaxed ${pinStatus.ok ? "text-[#2f7a3f]" : "text-[#a11d1d]"}`}

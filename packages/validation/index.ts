@@ -59,6 +59,7 @@ export const contactSchema = z.object({
   name: z.string().trim().min(2).max(80),
   email: emailSchema,
   phone: phoneSchema.optional(),
+  subject: z.string().trim().max(80).optional(),
   message: z.string().trim().min(10).max(1500),
 });
 

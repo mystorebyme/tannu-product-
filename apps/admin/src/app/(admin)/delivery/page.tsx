@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
  * - State-wise allow: jo states tick hain, sirf unke pincodes deliver hote hain.
  * - Block list: kisi bhi state ka specific pincode band.
  * - Allow list: state band hone par bhi specific pincode chalu.
- * Website par har check asli India Post data + yahi rules se hota hai.
+ * Website par har pincode check yahi rules se hota hai (customer ko neutral message dikhta hai).
  */
 export default async function DeliveryPage() {
   const { settings, states, totals } = await getDelivery();

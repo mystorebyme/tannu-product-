@@ -60,7 +60,9 @@ test("admin sirf Rajasthan allow kare to Gujarat ka pincode band", () => {
   const gujarat = evaluatePincode("380001", rules);
   assert.equal(gujarat.serviceable, false);
   assert.equal(gujarat.reason, "state_blocked");
-  assert.match(gujarat.message, /Gujarat/);
+  // customer ko neutral message — state ka naam ya internal wajah nahi dikhti
+  assert.match(gujarat.message, /delivery is not available/i);
+  assert.equal(gujarat.state, "Gujarat"); // admin ke liye data phir bhi maujood hai
 });
 
 test("admin ka blocked pincode state allowed hone par bhi band rehta hai", () => {
@@ -92,4 +94,34 @@ test("block list allowed override se jeetti hai", () => {
   const result = evaluatePincode("400001", rules);
   assert.equal(result.serviceable, false);
   assert.equal(result.reason, "blocked");
+});
+
+test("customer ko kabhi internal wording nahi dikhti (no data-source / automation leak)", async () => {
+  const { evaluatePincode } = await import("../../apps/web/src/lib/pincodes.ts");
+  const rules = {
+    allowAllStates: true,
+    states: {} as Record<string, boolean>,
+    blockedPincodes: [{ pincode: "302003" }],
+    allowedPincodes: [],
+    deliveryDays: "4-7 business days",
+  };
+
+  const unknown = evaluatePincode("595454", rules);
+  assert.equal(unknown.serviceable, false);
+  assert.match(unknown.message, /valid indian pincode/i);
+  assert.doesNotMatch(unknown.message, /india post|record|database|admin|automated|server/i);
+
+  const blocked = evaluatePincode("302003", rules);
+  assert.equal(blocked.serviceable, false);
+  assert.equal(blocked.reason, "blocked");
+  assert.match(blocked.message, /delivery is not available/i);
+  assert.doesNotMatch(blocked.message, /india post|record|blocked|admin|automated/i);
+
+  const stateOff = evaluatePincode("302001", { ...rules, allowAllStates: false, states: { Rajasthan: false } });
+  assert.equal(stateOff.serviceable, false);
+  assert.doesNotMatch(stateOff.message, /india post|record|admin|automated/i);
+
+  const invalid = evaluatePincode("012345", rules);
+  assert.equal(invalid.serviceable, false);
+  assert.match(invalid.message, /valid 6-digit indian pincode/i);
 });

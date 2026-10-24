@@ -118,7 +118,7 @@ export function ProductDetail({
       const result = payload.data;
       if (!result) {
         setPinOk(false);
-        setPinMessage("Delivery check abhi available nahi hai. Please try again.");
+        setPinMessage("We could not check delivery right now. Please try again.");
         return;
       }
       setPinOk(result.serviceable);
@@ -129,7 +129,7 @@ export function ProductDetail({
       );
     } catch {
       setPinOk(false);
-      setPinMessage("Delivery check fail ho gaya. Please try again.");
+      setPinMessage("Could not check delivery. Please try again.");
     } finally {
       setPinBusy(false);
     }

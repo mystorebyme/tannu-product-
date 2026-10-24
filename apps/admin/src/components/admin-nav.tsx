@@ -13,6 +13,7 @@ const links = [
   { href: "/payments", label: "Payments" },
   { href: "/delivery", label: "Delivery" },
   { href: "/customers", label: "Customers" },
+  { href: "/messages", label: "Messages" },
   { href: "/reports", label: "Reports" },
   { href: "/coupons", label: "Coupons" },
   { href: "/reviews", label: "Reviews" },

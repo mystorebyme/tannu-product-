@@ -178,6 +178,35 @@ test("manual invoice Postgres me save hota hai (redeploy par nahi khota)", async
   assert.equal(fetched?.items[0]?.quantity, 2);
 });
 
+test("contact form ka message Postgres me save hota hai aur admin mark-handled kar sakta hai", async () => {
+  const messages = await import("../../apps/web/src/lib/messages.ts");
+  const saved = await messages.saveMessage({
+    name: "Contact Tester",
+    email: "contact@example.com",
+    phone: "9876500011",
+    subject: "Sizing help",
+    message: "Mujhe size guide chahiye is lehenga ke liye.",
+  });
+  assert.match(saved.id, /^[0-9a-f-]{36}$/);
+
+  const list = await messages.listMessages(10);
+  const found = list.find((row) => row.id === saved.id);
+  assert.ok(found, "message list me mila");
+  assert.equal(found?.subject, "Sizing help");
+  assert.equal(found?.handled, false);
+
+  const handled = await messages.markMessageHandled(saved.id, "admin@likshaclothing.com");
+  assert.equal(handled?.handled, true);
+  assert.equal(handled?.handledBy, "admin@likshaclothing.com");
+  assert.ok(handled?.handledAt);
+
+  const rows = await db.query<{ subject: string }>(
+    "select subject from contact_messages where id = $1",
+    [saved.id],
+  );
+  assert.equal(rows.rows[0]?.subject, "Sizing help");
+});
+
 test("blocked pincode par order place nahi hota", async () => {
   const delivery = await import("../../apps/web/src/lib/delivery.ts");
   await delivery.saveDeliverySettings(

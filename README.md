@@ -60,6 +60,21 @@ Ya behtar: **New → Blueprint** se `render.yaml` apply karein — wahan `liksha
 - Production me `ADMIN_PASSWORD` set nahi hai to login **fail-closed** (default password kabhi nahi chalta).
 - Login form par "Keep me signed in (30 days)" checkbox hai.
 
+## Home page rotation (har 10 minute)
+
+Home ke product rails 10-minute "bucket" se bante hain:
+
+- window badalte hi naya random set (server + client dono par same algorithm — `lib/rotation.ts`),
+- `More from Liksha` rail **poore catalogue** se chalta hai, isliye har product home par aata hai,
+- `/api/rotation?rail=trendy&bucket=N` sirf card ke liye zaroori fields deta hai (chhota payload),
+- API na chale (static preview) to client usi pool se locally shuffle kar leta hai.
+
+## Contact form ("Send us a message")
+
+Message Postgres me save hota hai + owner ko email jaata hai + admin panel (`/messages`) me dikhta hai.
+Bina key ke **FormSubmit** (free, unlimited) — pehli submission par inbox me activation mail aata hai.
+Detail: [`docs/09-devops/contact-form.md`](docs/09-devops/contact-form.md).
+
 ## Firebase phone OTP (asli SMS)
 
 `NEXT_PUBLIC_FIREBASE_*` + `FIREBASE_API_KEY` set karte hi real SMS OTP chalu ho jaata hai;

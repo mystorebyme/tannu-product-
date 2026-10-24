@@ -12,8 +12,8 @@ export async function POST(request: Request) {
   }
   const parsed = newsletterSchema.safeParse(body);
   if (!parsed.success) {
-    return Response.json({ error: "Valid email daaliye." }, { status: 400 });
+    return Response.json({ error: "Please enter a valid email address." }, { status: 400 });
   }
-  const result = saveSubscriber(parsed.data.email);
+  const result = await saveSubscriber(parsed.data.email);
   return Response.json({ ok: true, duplicate: result.duplicate }, { status: 201 });
 }

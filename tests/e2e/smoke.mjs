@@ -239,6 +239,73 @@ async function main() {
     check("invoices API needs a token", noToken.status === 401, `status ${noToken.status}`);
   }
 
+  // ── contact form (message save + admin inbox) ──
+  const contact = await fetch(`${BASE}/api/contact`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      name: "Smoke Visitor",
+      email: "smoke-visitor@example.com",
+      phone: "9876543210",
+      subject: "Sizing help",
+      message: "Smoke test message — size guide chahiye is product ke liye.",
+    }),
+  });
+  const contactBody = await contact.json().catch(() => ({}));
+  check("contact form accepts a message", contact.status === 201 && contactBody.ok === true, `status ${contact.status}`);
+  check("contact response gives a direct email fallback", Boolean(contactBody.channels?.mailto), JSON.stringify(contactBody).slice(0, 120));
+
+  const badContact = await fetch(`${BASE}/api/contact`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ name: "x", email: "not-an-email", message: "short" }),
+  });
+  check("contact form rejects invalid input", badContact.status === 400, `status ${badContact.status}`);
+
+  if (adminToken) {
+    const inbox = await fetch(`${BASE}/api/admin/messages`, {
+      headers: { authorization: `Bearer ${adminToken}` },
+    });
+    const inboxBody = await inbox.json().catch(() => ({}));
+    const saved = (inboxBody.messages ?? []).find((row) => row.email === "smoke-visitor@example.com");
+    check("message reaches the admin inbox", Boolean(saved), `status ${inbox.status}`);
+    if (saved) {
+      const handled = await fetch(`${BASE}/api/admin/messages`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json", authorization: `Bearer ${adminToken}` },
+        body: JSON.stringify({ id: saved.id, action: "handled", actor: "smoke@admin" }),
+      });
+      const handledBody = await handled.json().catch(() => ({}));
+      check("admin can mark a message handled", handledBody.message?.handled === true, `status ${handled.status}`);
+    }
+    const privateInbox = await fetch(`${BASE}/api/admin/messages`);
+    check("messages API needs a token", privateInbox.status === 401, `status ${privateInbox.status}`);
+  }
+
+  // ── pincode message: koi internal data-source wording nahi ──
+  const unknownPin = await get("/api/delivery/check?pincode=595454");
+  const unknownBody = JSON.parse(unknownPin.text);
+  check(
+    "unknown pincode gets a neutral message",
+    /valid indian pincode/i.test(unknownBody.data?.message ?? "") &&
+      !/india post|record|admin|automated/i.test(unknownBody.data?.message ?? ""),
+    unknownBody.data?.message,
+  );
+
+  // ── home rails har 10 minute me rotate hote hain ──
+  const railA = await get("/api/rotation?rail=trendy&bucket=1000");
+  const railB = await get("/api/rotation?rail=trendy&bucket=1001");
+  const railABody = JSON.parse(railA.text);
+  const railBBody = JSON.parse(railB.text);
+  const handlesA = (railABody.products ?? []).map((product) => product.handle);
+  const handlesB = (railBBody.products ?? []).map((product) => product.handle);
+  check("rotation api returns products", handlesA.length > 0, String(handlesA.length));
+  check("rotation changes with the 10-minute bucket", handlesA.join(",") !== handlesB.join(","));
+  check("rotation payload is compact (max 2 images)", (railABody.products ?? []).every((product) => (product.images ?? []).length <= 2));
+
+  const homeRails = await get("/");
+  check("home renders rotating rails", homeRails.text.includes('data-testid="product-carousel"'));
+
   const missing = await get("/orders/LK-NOTREAL1");
   check("unknown order gives 404 page", missing.status === 404, `status ${missing.status}`);
 
