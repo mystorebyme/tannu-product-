@@ -129,6 +129,36 @@
      "handle": "premium-quality-bandhej-green-anarkali-suit-set-copy"
     }
    ]
+  },
+  "peacock-design-heavy-traditional-crop-top-with-shrug": {
+   "handle": "peacock-design-heavy-traditional-crop-top-with-shrug-purple",
+   "colours": [
+    {
+     "name": "Purple",
+     "handle": "peacock-design-heavy-traditional-crop-top-with-shrug-purple"
+    },
+    {
+     "name": "Cream",
+     "handle": "peacock-design-heavy-traditional-crop-top-with-shrug-cream"
+    },
+    {
+     "name": "Sky Blue",
+     "handle": "peacock-design-heavy-traditional-crop-top-with-shrug-sky-blue"
+    }
+   ]
+  },
+  "embroidery-kurta-set": {
+   "handle": "purple-embroidery-kurta-set",
+   "colours": [
+    {
+     "name": "Black",
+     "handle": "black-embroidery-kurta-set"
+    },
+    {
+     "name": "Purple",
+     "handle": "purple-embroidery-kurta-set"
+    }
+   ]
   }
  },
  "byHandle": {
@@ -151,6 +181,11 @@
   "premium-quality-lukhnowi-green-suit-set-copy": "premium-quality-5-layers-anarkali-suit-set",
   "premium-quality-5-layers-blue-anarkali-suit-set-copy": "premium-quality-5-layers-anarkali-suit-set",
   "premium-quality-anarkali-suit-set-copy-3": "premium-quality-bandhej-anarkali-suit-set",
-  "premium-quality-bandhej-green-anarkali-suit-set-copy": "premium-quality-bandhej-anarkali-suit-set"
+  "premium-quality-bandhej-green-anarkali-suit-set-copy": "premium-quality-bandhej-anarkali-suit-set",
+  "peacock-design-heavy-traditional-crop-top-with-shrug-purple": "peacock-design-heavy-traditional-crop-top-with-shrug",
+  "peacock-design-heavy-traditional-crop-top-with-shrug-cream": "peacock-design-heavy-traditional-crop-top-with-shrug",
+  "peacock-design-heavy-traditional-crop-top-with-shrug-sky-blue": "peacock-design-heavy-traditional-crop-top-with-shrug",
+  "black-embroidery-kurta-set": "embroidery-kurta-set",
+  "purple-embroidery-kurta-set": "embroidery-kurta-set"
  }
 }
