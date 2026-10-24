@@ -25,12 +25,17 @@ const files = [
   path.join(ROOT, "database/seeds/reviews/seed-reviews.json"),
 ];
 
+/** FNV-1a + avalanche — djb2 base 33 mod N me sab ids ek hi photo par aa jaate the */
 function hash(value) {
-  let h = 5381;
+  let h = 2166136261;
   for (let index = 0; index < value.length; index += 1) {
-    h = ((h << 5) + h + value.charCodeAt(index)) >>> 0;
+    h ^= value.charCodeAt(index);
+    h = Math.imul(h, 16777619);
   }
-  return h;
+  h ^= h >>> 13;
+  h = Math.imul(h, 0x5bd1e995);
+  h ^= h >>> 15;
+  return h >>> 0;
 }
 
 const catalog = JSON.parse(fs.readFileSync(CATALOG, "utf8"));
@@ -42,7 +47,7 @@ const imagesByHandle = new Map(
 function photosFor(handle, reviewId, salt) {
   const images = imagesByHandle.get(handle) ?? [];
   if (!images.length) return [];
-  const seed = hash(`${handle}:${reviewId}:${salt}`);
+  const seed = hash(`${salt}:${reviewId}:${handle}`);
   const first = images[seed % images.length];
   if (images.length < 2) return [first];
   // har teesre review me do photo (natural lagta hai), baaki me ek
