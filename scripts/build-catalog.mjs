@@ -78,7 +78,9 @@ const EMOJI =
  */
 const TITLE_FIXES = [
   [/\bslik\b/gi, "Silk"],
-  [/\bplazz?o\b/gi, "Palazzo"],
+  [/\bplaz{1,2}o{1,2}\b/gi, "Palazzo"],
+  [/\bwaite\b/gi, "White"],
+  [/\bfux\b/gi, "Fox"],
   [/\bhavy\b/gi, "Heavy"],
   [/\bdesiner\b/gi, "Designer"],
   [/\bbeutifull\b/gi, "Beautiful"],

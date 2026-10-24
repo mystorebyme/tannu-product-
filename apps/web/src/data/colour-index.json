@@ -143,6 +143,19 @@
     }
    ]
   },
+  "faux-blooming-anarkali-style-sarara-suit-set": {
+   "handle": "black-faux-blooming-anarkali-style-sarara-suit-set-copy",
+   "colours": [
+    {
+     "name": "White",
+     "handle": "black-faux-blooming-anarkali-style-sarara-suit-set-copy"
+    },
+    {
+     "name": "Black",
+     "handle": "black-faux-blooming-anarkali-style-sarara-suit-set"
+    }
+   ]
+  },
   "peacock-design-heavy-traditional-crop-top-with-shrug": {
    "handle": "peacock-design-heavy-traditional-crop-top-with-shrug-purple",
    "colours": [
@@ -634,6 +647,8 @@
   "premium-quality-anarkali-suit-set-copy-3": "premium-quality-bandhej-anarkali-suit-set",
   "pink-colour-readymade-alia-cut-gown-with-dupatta-set-kka-1070": "colour-readymade-alia-cut-gown-with-dupatta-set-kka-1070",
   "waine-colour-readymade-alia-cut-gown-with-dupatta-set-kka-1071": "colour-readymade-alia-cut-gown-with-dupatta-set-kka-1070",
+  "black-faux-blooming-anarkali-style-sarara-suit-set-copy": "faux-blooming-anarkali-style-sarara-suit-set",
+  "black-faux-blooming-anarkali-style-sarara-suit-set": "faux-blooming-anarkali-style-sarara-suit-set",
   "peacock-design-heavy-traditional-crop-top-with-shrug-cream": "peacock-design-heavy-traditional-crop-top-with-shrug",
   "peacock-design-heavy-traditional-crop-top-with-shrug-sky-blue": "peacock-design-heavy-traditional-crop-top-with-shrug",
   "peacock-design-heavy-traditional-crop-top-with-shrug-purple": "peacock-design-heavy-traditional-crop-top-with-shrug",

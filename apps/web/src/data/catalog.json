@@ -5,13 +5,13 @@
   "cdn": "https://cdn.shopify.com/s/files/1/0738/8345/1696/",
   "currency": "INR",
   "moneyUnit": "paise",
-  "builtAt": "2026-10-24T19:32:06.927Z",
+  "builtAt": "2026-10-24T19:36:01.839Z",
   "snapshotAt": "2026-10-24T06:51:35.543Z",
   "productCount": 446,
   "liveProductCount": 287,
   "extraProductCount": 159,
-  "listedProductCount": 388,
-  "colourGroupCount": 42,
+  "listedProductCount": 387,
+  "colourGroupCount": 43,
   "imageCount": 2898
  },
  "collections": [
@@ -21,7 +21,7 @@
    "subtitle": "Freshly dropped festive favourites",
    "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08096_JPG.jpg",
    "sortOrder": 1,
-   "productCount": 362
+   "productCount": 361
   },
   {
    "handle": "party-wear-gown",
@@ -101,7 +101,7 @@
    "subtitle": "",
    "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/IMG_2191.jpg",
    "sortOrder": 101,
-   "productCount": 103
+   "productCount": 102
   }
  ],
  "colourGroups": {
@@ -1377,6 +1377,144 @@
      },
      "inStock": true,
      "colourCode": "As Shown"
+    }
+   ]
+  },
+  "faux-blooming-anarkali-style-sarara-suit-set": {
+   "key": "faux-blooming-anarkali-style-sarara-suit-set",
+   "title": "White Faux Blooming Anarkali Style Sarara Suit Set",
+   "handle": "black-faux-blooming-anarkali-style-sarara-suit-set-copy",
+   "colours": [
+    {
+     "name": "White",
+     "handle": "black-faux-blooming-anarkali-style-sarara-suit-set-copy",
+     "title": "White Faux Blooming Anarkali Style Sarara Suit Set",
+     "price": 49900,
+     "compareAtPrice": 124750,
+     "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/Picsart_25-01-28_13-03-20-570.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/Picsart_25-01-28_13-03-20-570.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/Picsart_25-01-28_13-02-41-840.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/Picsart_25-01-28_13-03-58-022.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/IMG_5230.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/IMG_5226.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/IMG_5227.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/IMG_5231.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/IMG_5232.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/IMG_5229.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "S [36]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "M [38]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "L [40]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Black",
+     "handle": "black-faux-blooming-anarkali-style-sarara-suit-set",
+     "title": "Black Faux Blooming Anarkali Style Sarara Suit Set",
+     "price": 59900,
+     "compareAtPrice": 199667,
+     "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/IMG_5216.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/IMG_5216.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/IMG_5209.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/IMG_20250127_213242_262.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/IMG_5217.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/IMG_5214.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/IMG_20250127_213252_082.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "S [36]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "M [38]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "L [40]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "Black"
     }
    ]
   },
@@ -6597,7 +6735,7 @@
   {
    "handle": "lakhnavi-work-anarkali-suit-set",
    "sourceHandle": "lakhnavi-work-anarkali-suit-set",
-   "title": "Off Waite Lakhnavi Work Designer Anarkali Suit",
+   "title": "Off White Lakhnavi Work Designer Anarkali Suit",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -21854,7 +21992,7 @@
   {
    "handle": "adeena-black-faux-blooming-anarkali-style-sarara-suit-set-copy",
    "sourceHandle": "adeena-black-faux-blooming-anarkali-style-sarara-suit-set-copy",
-   "title": "Aafia Waite Faux Blooming Anarkali Style Sarara Suit Set",
+   "title": "Aafia White Faux Blooming Anarkali Style Sarara Suit Set",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -25885,7 +26023,7 @@
   {
    "handle": "sunheri-fux-georgette-suit-set-6013",
    "sourceHandle": "sunheri-fux-georgette-suit-set-6013",
-   "title": "Sunheri Fux Georgette Suit Set - 6013",
+   "title": "Sunheri Fox Georgette Suit Set - 6013",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -34111,7 +34249,7 @@
   {
    "handle": "black-faux-blooming-anarkali-style-sarara-suit-set-copy",
    "sourceHandle": "black-faux-blooming-anarkali-style-sarara-suit-set-copy",
-   "title": "Waite Faux Blooming Anarkali Style Sarara Suit Set",
+   "title": "White Faux Blooming Anarkali Style Sarara Suit Set",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -34199,7 +34337,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-01-28T14:51:31+05:30"
+   "publishedAt": "2025-01-28T14:51:31+05:30",
+   "colourGroup": "faux-blooming-anarkali-style-sarara-suit-set",
+   "colourName": "White"
   },
   {
    "handle": "premium-readymade-anarkali-suit-set-1",
@@ -40809,7 +40949,7 @@
   {
    "handle": "avni-designer-readymade-kurti-plazoo-dupatta-set",
    "sourceHandle": "avni-designer-readymade-kurti-plazoo-dupatta-set",
-   "title": "Avni Designer Readymade Kurti Plazoo Dupatta Set",
+   "title": "Avni Designer Readymade Kurti Palazzo Dupatta Set",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -42415,7 +42555,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-01-28T14:46:16+05:30"
+   "publishedAt": "2025-01-28T14:46:16+05:30",
+   "colourGroup": "faux-blooming-anarkali-style-sarara-suit-set",
+   "colourName": "Black"
   },
   {
    "handle": "premium-readymade-anarkali-suit-set-2",
@@ -42779,7 +42921,7 @@
   {
    "handle": "sunheri-fux-georgette-suit-set-6013-7287419895940",
    "sourceHandle": "sunheri-fux-georgette-suit-set-6013",
-   "title": "Sunheri Fux Georgette Suit Set",
+   "title": "Sunheri Fox Georgette Suit Set",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [

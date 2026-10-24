@@ -106,3 +106,14 @@ Rules (`scripts/build-catalog.mjs`):
   (same title, alag fabric/price/photos; unhe merge karna galat hota).
 - Duplicate title pass ka suffix: colour → style code → **fabric** → product type → `Edition N`
   (last resort). Group meta titles representative ke final title se sync.
+
+### 7.1 Spelling fixes (source store ke typos)
+
+| Pehle | Ab | Kitne |
+| --- | --- | --- |
+| `Waite` | `White` | 3 |
+| `Fux` | `Fox` (`Fox Georgette` fabric) | 2 |
+| `Plazoo` / `Plazo` | `Palazzo` | 1 + 3 |
+
+Isi se do listing aur merge hui (`Waite…` / `White…` ek hi design the): ab
+**446 products / 387 cards / 43 groups**. Koi URL nahi toota, duplicate title 0.
