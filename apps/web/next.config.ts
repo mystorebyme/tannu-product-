@@ -12,7 +12,11 @@ const nextConfig: NextConfig = {
   images: {
     // product images Shopify CDN se aate hain. <img> use karte hain kyunki
     // direct CDN hit browser se hota hai -> Next server ka bandwidth zero.
-    remotePatterns: [{ protocol: "https", hostname: "cdn.shopify.com" }],
+    remotePatterns: [
+      { protocol: "https", hostname: "cdn.shopify.com" },
+      // Trustoo reviews ke customer photos
+      { protocol: "https", hostname: "img.trustoo.io" },
+    ],
   },
   poweredByHeader: false,
   compress: true,

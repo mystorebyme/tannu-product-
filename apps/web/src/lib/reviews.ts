@@ -53,14 +53,30 @@ export function hasFullReviews(handle: string): boolean {
   return Boolean(data.products[handle]?.reviews?.length);
 }
 
-/** Home / PDP cross-sell ke liye — sabse achhe reviews pehle. */
+/**
+ * Home strip ke liye — naye reviews pehle, par ek hi product ke kai reviews
+ * lagatar na aayein (real store ke carousel jaisa mix).
+ */
 export function latestReviews(limit = 8): Review[] {
   const all = Object.entries(data.products).flatMap(([handle, block]) =>
     block.reviews.map((review) => ({ ...review, productHandle: handle })),
   );
-  return all
-    .sort((a, b) => (b.date ?? "").localeCompare(a.date ?? "") || b.rating - a.rating)
-    .slice(0, limit);
+  const sorted = all.sort((a, b) => (b.date ?? "").localeCompare(a.date ?? "") || b.rating - a.rating);
+  const picked: Review[] = [];
+  const usedProducts = new Set<string>();
+  for (const review of sorted) {
+    if (picked.length >= limit) break;
+    const handle = review.productHandle ?? "";
+    if (usedProducts.has(handle)) continue;
+    usedProducts.add(handle);
+    picked.push(review);
+  }
+  // itne saare products na hon to baaki reviews se bhar do
+  for (const review of sorted) {
+    if (picked.length >= limit) break;
+    if (!picked.includes(review)) picked.push(review);
+  }
+  return picked;
 }
 
 export function hasReviews(): boolean {
