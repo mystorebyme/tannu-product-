@@ -11,6 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const staticRoutes = [
     { path: "", priority: 1 },
+    { path: "/collections", priority: 0.9 },
     { path: "/collections/new-arrivals", priority: 0.9 },
     { path: "/search", priority: 0.4 },
     { path: "/pages/about-us", priority: 0.5 },

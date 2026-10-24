@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { BrandLockup } from "@/components/brand-lockup";
 import { useStoreSettings } from "@/components/store-settings-provider";
+import { siteConfig } from "@/config/site";
 
 /**
  * Footer — live store (likshaclothing.com) ka same structure:
@@ -28,49 +29,18 @@ const menuLinks = [
   { label: "ANARKALI SUIT", href: "/collections/party-wear-gown" },
   { label: "LEHENGA CHOLI", href: "/collections/lehnga-choli" },
   { label: "PRINTED SUIT SET", href: "/collections/printed-suit-set" },
+  { label: "CONTACT US", href: "/pages/contact" },
   { label: "SALE", href: "/collections/sale" },
-  { label: "SAREES", href: "/collections/saree" },
+  { label: "SHOP ALL", href: "/collections" },
   { label: "WEDDING COLLECTION", href: "/collections/weddin-collection" },
 ];
 
-const socials = [
-  {
-    label: "Instagram",
-    href: "https://www.instagram.com/likshaclothing/",
-    icon: (
-      <>
-        <rect x="3" y="3" width="18" height="18" rx="5" />
-        <circle cx="12" cy="12" r="4" />
-        <path d="M17.5 6.5h.01" />
-      </>
-    ),
-  },
-  {
-    label: "Facebook",
-    href: "https://www.facebook.com/",
-    icon: <path d="M14 9h3V6h-3c-2.2 0-4 1.8-4 4v2H8v3h2v6h3v-6h3l1-3h-4v-2c0-.6.4-1 1-1Z" />,
-  },
-  {
-    label: "WhatsApp",
-    href: "https://wa.me/918005900581",
-    icon: (
-      <>
-        <path d="M20 12a8 8 0 0 1-11.7 7.1L4 20l1-4.2A8 8 0 1 1 20 12Z" />
-        <path d="M9 9c.5 3 2.5 5 5.5 5.5" />
-      </>
-    ),
-  },
-  {
-    label: "Pinterest",
-    href: "https://www.pinterest.com/",
-    icon: (
-      <>
-        <circle cx="12" cy="12" r="9" />
-        <path d="M10 20l2-7M9 10c0-2 1.6-3.5 3.6-3.5 2.2 0 3.4 1.3 3.4 3.2 0 2.4-1.4 4.3-3.1 4.3-.9 0-1.6-.6-1.4-1.5" />
-      </>
-    ),
-  },
-];
+/**
+ * Social — abhi ke liye **sirf Instagram ka URL text** dikhta hai (clickable link
+ * nahi, owner ne bola "abhi ke liye koi link nahi"), aur WhatsApp ka working link.
+ * Facebook/Pinterest ke dummy links hata diye gaye hain (accounts hi nahi hain).
+ */
+const INSTAGRAM_URL = siteConfig.socials.instagram;
 
 export function SiteFooter() {
   const { whatsapp, supportEmail, supportPhone } = useStoreSettings();
@@ -104,7 +74,7 @@ export function SiteFooter() {
             className="inline-block"
           >
             {/* same brand lockup jo header me hai — maroon band par gold wordmark */}
-            <BrandLockup tone="light" />
+            <BrandLockup tone="light" size="large" variant="stacked" />
           </Link>
         </div>
 
@@ -145,21 +115,30 @@ export function SiteFooter() {
             </ul>
 
             <p className="mt-5 text-[15px] font-medium text-white">Follow Us :</p>
-            <div className="mt-3 flex items-center gap-2.5">
-              {socials.map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={social.label}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-white/35 text-white transition hover:border-[#e1d256] hover:text-[#e1d256]"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    {social.icon}
-                  </svg>
-                </a>
-              ))}
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              {/* Instagram — sirf URL text, koi clickable link nahi (abhi ke liye) */}
+              <span className="flex items-center gap-2 text-[12.5px] break-all text-[#f1dede]" data-testid="instagram-url">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+                  <rect x="3" y="3" width="18" height="18" rx="5" />
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M17.5 6.5h.01" />
+                </svg>
+                {INSTAGRAM_URL}
+              </span>
+              {/* WhatsApp — customer isi par order/query bhejta hai */}
+              <a
+                href={`https://wa.me/91${whatsapp.replace(/\D/g, "").slice(-10)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Chat on WhatsApp"
+                className="flex h-8 items-center gap-2 rounded-full border border-white/35 px-3 text-[12px] text-white transition hover:border-[#e1d256] hover:text-[#e1d256]"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+                  <path d="M20 12a8 8 0 0 1-11.7 7.1L4 20l1-4.2A8 8 0 1 1 20 12Z" />
+                  <path d="M9 9c.5 3 2.5 5 5.5 5.5" />
+                </svg>
+                WhatsApp
+              </a>
             </div>
           </div>
 

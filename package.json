@@ -34,6 +34,9 @@
     "test:e2e": "playwright test",
     "test:integration": "tsx --test tests/integration/*.test.ts",
     "test:smoke": "node tests/e2e/smoke.mjs",
+    "test:responsive": "node tests/e2e/responsive.mjs && node tests/e2e/breakpoints.mjs",
+    "assets:brand": "node scripts/brand/build-responsive-assets.mjs",
+    "assets:proof": "node scripts/brand/render-proof.mjs",
     "test:unit": "tsx --test tests/unit/*.test.ts",
     "typecheck": "npm run typecheck --workspaces --if-present"
   },

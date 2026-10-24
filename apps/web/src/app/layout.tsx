@@ -8,7 +8,7 @@ import { FloatingHelp } from "@/components/floating-help";
 import { AnnouncementBar } from "@/components/announcement-bar";
 import { WishlistProvider } from "@/components/wishlist-provider";
 import { StoreSettingsProvider } from "@/components/store-settings-provider";
-import { logoMark, siteConfig } from "@/config/site";
+import { brandAssets, logoMark, siteConfig } from "@/config/site";
 import { assetUrl } from "@/lib/format";
 
 export const metadata: Metadata = {
@@ -16,9 +16,13 @@ export const metadata: Metadata = {
   applicationName: "Designer Clothing",
   // browser tab / home-screen icon — owner ka brand mark (local asset)
   icons: {
-    icon: [{ url: logoMark, sizes: "192x192", type: "image/png" }],
+    icon: [
+      { url: brandAssets.mark128, sizes: "128x128", type: "image/png" },
+      { url: brandAssets.mark192, sizes: "192x192", type: "image/png" },
+      { url: logoMark, sizes: "512x512", type: "image/png" },
+    ],
     shortcut: [{ url: logoMark }],
-    apple: [{ url: logoMark, sizes: "180x180" }],
+    apple: [{ url: brandAssets.mark192, sizes: "180x180" }],
   },
   appleWebApp: { capable: true, title: "Designer Clothing", statusBarStyle: "default" },
   manifest: assetUrl("/manifest.webmanifest"),

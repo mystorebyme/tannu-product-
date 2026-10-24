@@ -17,18 +17,21 @@
 ## 2. Brand
 
 - Naam: `Designer Clothing` (`apps/web/src/config/site.ts` → `siteConfig.name`).
-- Logo (owner ka final): gold crown + gown mark with `DESIGNER / CLOTHING` wordmark.
-  - `apps/web/public/images/logo-mark-512.png` — square mark (favicon, Apple touch icon,
-    PWA 512, invoice PDF masthead, admin sidebar/login)
-  - `apps/web/public/images/logo-mark-192.png` — footer + PWA 192
-  - `apps/web/public/images/logo-mark-128.png` — header badge / mobile menu (light DOM size)
-  - `apps/web/public/images/logo.png` / `.webp` — poora lockup (share/invoice ke liye)
-  - `apps/web/public/images/og-image.jpg` — social share card (1200×630)
+- Logo (owner ka final, koi redraw nahi) — device ke hisaab se alag file:
+  - `apps/web/public/images/brand/logo-mobile.png` — header, <768px
+  - `apps/web/public/images/brand/logo-tablet.png` — header, 768–1023px
+  - `apps/web/public/images/brand/logo-desktop.png` — header + invoice masthead, ≥1024px
+  - `apps/web/public/images/brand/logo-fluid.png` — stacked, footer / invoice / any size
+  - `apps/web/public/images/brand/logo-mark-{128,192,512}.png` — favicon, Apple touch icon, PWA, invoice PDF, admin
+  - `apps/web/public/images/og-image.jpg` — social share card (1200×630, wide hero se)
   - Ek hi component: `apps/web/src/components/brand-lockup.tsx` (header, mobile menu, footer)
-  - Admin: `apps/admin/public/invoice-logo.png` (wahi mark) + sidebar/login brand
+  - Admin: `apps/admin/public/invoice-logo.png` (horizontal lockup) + `/brand-mark.png` (sidebar/login)
+  - Pipeline + breakpoints: `scripts/brand/build-responsive-assets.mjs`, `docs/05-design/responsive-assets.md`
 - Phone / WhatsApp: `8005900581` (Settings sheet se override ho sakta hai:
   `support_phone`, `whatsapp`).
 - UPI: `dhakadgourav@fam` (`upi_id`, `upi_name` sheet se).
+- Instagram (abhi sirf URL text, link nahi): `https://www.instagram.com/designer_clothing_9`
+  (`siteConfig.socials.instagram`). WhatsApp hi working social link hai.
 
 ## 3. Domain se pehle: poora env checklist (ek jagah)
 

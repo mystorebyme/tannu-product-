@@ -129,3 +129,31 @@ Runtime smoke (dev):
 - **Env checklist:** `docs/09-devops/domain-and-brand.md` §3 (Render vars, GitHub `STORE_API_URL`,
   DNS/SSL, domain ke baad verification curl).
 - Verified: `npm run test:unit` → 84 pass, smoke → 82/0, Pages preview + CI green.
+
+## Round 15 — responsive logo, hero aur header (2026-10-24)
+
+Owner ka master prompt: har screen par professional logo/header/hero, device-specific assets.
+
+- **Asset pipeline:** `scripts/brand/build-responsive-assets.mjs` — owner ke original files
+  (`assets/source/`) se sirf crop/trim/resize/WebP. Header logo unki hi wide banner ke header
+  se crop hota hai (flat version jo mockup me hai), favicon/invoice official 3D mark se.
+- **Logo:** `brand/logo-mobile.png` (<768), `logo-tablet.png` (768–1023), `logo-desktop.png`
+  (≥1024), `logo-fluid.png` (stacked, footer/invoice), `logo-mark-{128,192,512}` — ek hi
+  `<picture>`, browser sirf ek file download karta hai. Header me logo mobile par centre
+  (`grid-cols-[auto_1fr_auto]`), desktop par left — kabhi overlap nahi.
+- **Hero:** `banners/banner-mobile.webp` (860×1290 portrait), `banner-tablet.webp`
+  (1200×900, poster + blurred backdrop — kuch crop nahi), `banner-desktop.webp`
+  (1779×594, baked carousel arrows side-trim se hataye), `banner-fluid.webp`.
+  Har box ka `aspect-ratio` file ke ratio ke barabar → stretch/crop/CLS zero.
+- **Header:** announcement bar 3-part (phone / shipping / tagline), nav labels chhote
+  (SHOP · ANARKALI · LEHENGA CHOLI · PRINTED SET · NEW IN · SALE · CONTACT), naya
+  `/collections` landing (SHOP link pehle dead tha), SAREES dead link hata diya.
+- **Checkout UPI:** GPay/PhonePe/Paytm/BHIM/Amazon Pay ke alag buttons hata diye — sirf
+  QR + UPI ID + Open UPI app + Copy.
+- **Socials:** Instagram sirf URL text (`designer_clothing_9`), WhatsApp hi working link;
+  Facebook/Pinterest dummy links removed.
+- **Tests:** `tests/e2e/responsive.mjs` (39 checks) + `tests/e2e/breakpoints.mjs`
+  (18 viewports, 48 checks) — CI me add; smoke 86/0, unit 89/0.
+- **Proof sheet:** `docs/assets/responsive-proof.png` (`npm run assets:proof`) — asli assets
+  + asli CSS heights se 320 se 1920 tak ka header+hero.
+- Docs: `docs/05-design/responsive-assets.md`.

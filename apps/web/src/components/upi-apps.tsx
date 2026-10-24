@@ -50,11 +50,18 @@ export function UpiApps({
   uri,
   upiId,
   amountPaise,
+  showAppButtons = true,
 }: {
   /** `buildUpiUri()` ka output */
   uri: string;
   upiId: string;
   amountPaise: number;
+  /**
+   * `false` = sirf "Open UPI app" + "Copy UPI ID" (checkout par yahi chalta hai).
+   * Owner ne bola: checkout par GPay/PhonePe/Paytm/BHIM/Amazon Pay ke alag buttons
+   * nahi chahiye — `upi://pay` kholne par phone khud saare installed apps dikhata hai.
+   */
+  showAppButtons?: boolean;
 }) {
   const [platform, setPlatform] = useState<Platform>("desktop");
   const [copied, setCopied] = useState(false);
@@ -116,6 +123,7 @@ export function UpiApps({
           : `Phone par ${formatPrice(amountPaise)} ka UPI app khulega — amount pehle se bhara hoga.`}
       </p>
 
+      {showAppButtons ? (
       <div className="mt-2.5 flex flex-wrap gap-1.5">
         {links.map((app) => (
           <a
@@ -136,6 +144,7 @@ export function UpiApps({
           </a>
         ))}
       </div>
+      ) : null}
 
       {tried ? (
         <p className="mt-2 text-[10.5px] leading-relaxed text-[#8a8078]">

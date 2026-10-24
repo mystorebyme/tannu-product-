@@ -8,8 +8,8 @@ import { Reveal } from "@/components/reveal";
 import { getProducts, getCollection } from "@/lib/store";
 import { RAILS, type RailKey, railPool } from "@/lib/rails";
 import { compactProduct, rotatePick, rotationBucket } from "@/lib/rotation";
-import { assetUrl, imageUrl } from "@/lib/format";
-import { siteConfig } from "@/config/site";
+import { imageUrl } from "@/lib/format";
+import { heroBanners, siteConfig } from "@/config/site";
 import { SafeImage } from "@/components/safe-image";
 
 /** Home ke rails har 10 minute me badalte hain — page bhi utni hi der me refresh hota hai */
@@ -23,10 +23,15 @@ export const metadata: Metadata = {
 };
 
 /**
- * Festive home banner — owner ka diya hua Diwali Sale poster (Flat 70% OFF).
- * Local asset hai (public/images), isliye GitHub Pages ke base path ke saath aata hai.
+ * Festive home banner — owner ke diye hue Diwali Sale posters (Flat 70% OFF).
+ *
+ * Device ke hisaab se alag file (ek hi download hoti hai):
+ *   - <768px   → portrait poster  (mobile, poora composition)
+ *   - 768–1023 → 4:3 crop         (tablet, text + dono models)
+ *   - ≥1024px  → wide banner      (desktop/laptop)
+ * Wrapper ka `aspect-ratio` har asset ke exact ratio ke barabar hai, isliye
+ * kuch bhi crop/stretch nahi hota aur layout shift (CLS) zero rehta hai.
  */
-const HERO_IMAGE = assetUrl("/images/diwali-sale-70-2026.webp");
 const HERO_HREF = "/collections/sale";
 
 export default async function HomePage() {
@@ -88,33 +93,42 @@ export default async function HomePage() {
     <div>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      {/* ── hero banner: owner ka festive poster (mobile par poora, desktop par side-by-side) ── */}
-      <section className="relative overflow-hidden bg-[#f7ecdd]" data-testid="hero-banner">
-        <div className="mx-auto grid max-w-[1500px] items-stretch lg:grid-cols-[0.92fr_1.08fr]">
+      {/* ── hero banner: device-specific festive poster (mobile / tablet / desktop) ── */}
+      <section className="relative bg-[#fbf1e2]" data-testid="hero-banner" aria-label="Diwali Sale">
+        <div className="mx-auto max-w-[1920px]">
           <Link
             href={HERO_HREF}
-            className="group relative order-1 block lg:order-2"
             aria-label="Shop the Diwali sale — flat 70% off"
+            className="hero-media group relative block aspect-[860/1290] w-full overflow-hidden bg-[#fbf1e2] md:aspect-[4/3] lg:aspect-[1779/594]"
           >
-            <div className="relative flex h-full items-center justify-center overflow-hidden">
-              <SafeImage
-                src={HERO_IMAGE}
-                alt="Designer Clothing Diwali Sale — flat 70% off ethnic wear"
+            <picture>
+              <source media="(min-width:1024px)" srcSet={heroBanners.desktop} width={1779} height={594} />
+              <source media="(min-width:768px)" srcSet={heroBanners.tablet} width={1200} height={900} />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={heroBanners.mobile}
+                alt="Happy Diwali Sale — flat 70% off ethnic wear by Designer Clothing"
+                width={860}
+                height={1290}
                 loading="eager"
                 fetchPriority="high"
-                className="mx-auto h-auto w-full max-w-[560px] object-contain transition duration-700 group-hover:scale-[1.01] lg:h-full lg:max-h-[78vh] lg:max-w-none"
+                decoding="async"
+                className="transition duration-700 group-hover:scale-[1.01]"
               />
-            </div>
+            </picture>
           </Link>
 
-          <div className="order-2 flex flex-col items-center justify-center gap-4 px-6 py-8 text-center lg:order-1 lg:items-start lg:px-12 lg:py-14 lg:text-left xl:px-16">
-            <p className="text-[10px] font-semibold tracking-[.34em] text-[#9a5b3c] uppercase sm:text-[11px]">
-              Diwali Sale
-            </p>
-            <h1 className="font-display text-[34px] leading-[1.05] font-medium text-[#5c1010] sm:text-[44px] lg:text-[54px]">
-              Flat <span className="text-[#862222]">70%</span> Off
-            </h1>
-            <div className="mt-1 flex w-full max-w-[420px] flex-col gap-2.5 sm:flex-row sm:justify-center lg:justify-start">
+          {/* SEO h1 + quick actions — poster par text pehle se hai, isliye chhota strip */}
+          <div className="container-liksha flex flex-col items-center gap-3 border-b border-[#efe2cf] py-5 text-center sm:flex-row sm:justify-between sm:text-left">
+            <div>
+              <h1 className="font-display text-[20px] leading-tight font-medium text-[#5c1010] sm:text-[24px]">
+                Diwali Sale — Flat <span className="text-[#862222]">70%</span> Off
+              </h1>
+              <p className="mt-1 text-[11px] text-[#7b6f64]">
+                Free shipping pan-India · Prepaid only · 4–7 day delivery
+              </p>
+            </div>
+            <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
               <Link
                 href="/collections/sale"
                 className="inline-flex h-11 items-center justify-center bg-[#862222] px-7 text-[11px] font-semibold tracking-[.16em] text-white uppercase transition hover:bg-[#6d1b1b]"
@@ -128,13 +142,6 @@ export default async function HomePage() {
                 New arrivals
               </Link>
             </div>
-            <ul className="mt-1 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[11px] text-[#7b6f64] lg:justify-start">
-              <li>Free shipping pan-India</li>
-              <li aria-hidden>·</li>
-              <li>Prepaid only</li>
-              <li aria-hidden>·</li>
-              <li>4–7 day delivery</li>
-            </ul>
           </div>
         </div>
       </section>

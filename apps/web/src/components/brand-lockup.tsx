@@ -1,52 +1,69 @@
-import { logoSmall } from "@/config/site";
+import { brandAssets } from "@/config/site";
 
 /**
- * Brand lockup — owner ka final logo (gold crown + gown) + "DESIGNER CLOTHING" wordmark.
+ * Brand lockup — owner ka **original** logo (gold crown + gown + DESIGNER CLOTHING
+ * wordmark), bilkul jaisa diya gaya hai (koi redraw/typography change nahi).
  *
- * Mark image (`/images/logo-mark-128.png`) ka background black hai, isliye usko
- * chhote black plate me dikhate hain — gold mark ka contrast bana rehta hai aur
- * header/footer dono par same dikhta hai. Wordmark HTML text hai (crisp on retina,
- * mobile par bhi padha jaata hai). Sab jagah ek hi component use hota hai.
+ * Device ke hisaab se **alag asset** aata hai, `<picture>` se — browser sirf ek hi
+ * file download karta hai:
+ *   - <768px   → `logo-mobile.png`  compact horizontal (mark chhota, naam bada)
+ *   - 768–1023 → `logo-tablet.png`  horizontal, mark bada
+ *   - ≥1024px  → `logo-desktop.png` full horizontal lockup (highest resolution)
+ *
+ * `variant="stacked"` → `logo-fluid.png` (mark upar, wordmark neeche) — footer jaisi
+ * jagah jahan height available hai par width kam.
+ *
+ * `tone="light"` (maroon footer) par logo ko cream plate par rakhte hain — original
+ * logo ka wordmark black hai aur maroon par invisible ho jaata. Logo khud kabhi
+ * recolor nahi hota.
  */
 export function BrandLockup({
   tone = "dark",
-  compact = false,
+  size = "header",
+  variant = "header",
   className = "",
 }: {
   /** `dark` = light background (header), `light` = maroon/dark footer */
   tone?: "dark" | "light";
-  compact?: boolean;
+  /** `header` = nav, `compact` = mobile drawer, `large` = footer */
+  size?: "header" | "compact" | "large";
+  /** `header` = horizontal lockup per device, `stacked` = fluid stacked file */
+  variant?: "header" | "stacked";
   className?: string;
 }) {
-  const gold = tone === "light" ? "#f0c862" : "#b8860b";
   return (
-    <span className={`flex items-center gap-2 sm:gap-2.5 ${className}`}>
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-black ring-1 ring-[#b8860b]/60 sm:h-11 sm:w-11">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
+    <span
+      data-size={size}
+      data-variant={variant}
+      className={`brand-lockup inline-flex items-center ${
+        tone === "light" ? "rounded-sm bg-[#fdfaf4] px-2.5 py-2" : ""
+      } ${className}`}
+    >
+      {variant === "stacked" ? (
+        // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={logoSmall}
-          alt="Designer Clothing logo"
-          width={44}
-          height={44}
-          className="h-full w-full scale-[1.35] object-contain"
+          src={brandAssets.fluid}
+          alt="Designer Clothing"
+          width={660}
+          height={397}
+          decoding="async"
+          className="block w-auto max-w-full object-contain"
         />
-      </span>
-      <span className="flex flex-col leading-none">
-        <span
-          className="font-display text-[17px] font-medium tracking-[.14em] sm:text-[19px] lg:text-[21px]"
-          style={{ color: gold }}
-        >
-          DESIGNER
-        </span>
-        <span
-          className={`mt-[3px] text-[8.5px] tracking-[.42em] sm:text-[9.5px] ${
-            compact ? "" : "sm:tracking-[.46em]"
-          }`}
-          style={{ color: tone === "light" ? "#f7e7c6" : "#6b6259" }}
-        >
-          CLOTHING
-        </span>
-      </span>
+      ) : (
+        <picture>
+          <source media="(min-width:1024px)" srcSet={brandAssets.desktop} />
+          <source media="(min-width:768px)" srcSet={brandAssets.tablet} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={brandAssets.mobile}
+            alt="Designer Clothing"
+            width={403}
+            height={112}
+            decoding="async"
+            className="block w-auto max-w-full object-contain"
+          />
+        </picture>
+      )}
     </span>
   );
 }

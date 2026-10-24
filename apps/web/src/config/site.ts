@@ -1,24 +1,64 @@
 /**
- * Brand logo — owner ka final "Designer Clothing" mark (gold crown + gown).
+ * Brand assets — owner ke original logo/poster se banaye gaye responsive files.
  *
- * Local assets hain (`public/images/`), isliye GitHub Pages ke base path par bhi
- * chalte hain aur kisi doosri site par depend nahi karte:
- *   - `logo-mark-128/192/512.png` → square mark (header badge, favicon, invoice, manifest)
- *   - `logo.png/.webp` → poora lockup (crown + gown + DESIGNER CLOTHING wordmark)
- *   - `og-image.jpg`   → social share card
+ * Sab local hain (`public/images/brand`, `public/images/banners`), isliye GitHub
+ * Pages ke base path par bhi chalte hain aur kisi doosri site par depend nahi karte.
+ * Banane ka script: `node scripts/brand/build-responsive-assets.mjs` (koi redraw nahi,
+ * sirf trim/crop/resize + WebP).
+ *
+ * Logo (owner ke apne logo se crop — koi redraw nahi):
+ *   - `brand/logo-mobile.png`   <768px    compact horizontal (mark chhota, naam bada)
+ *   - `brand/logo-tablet.png`   768–1023  horizontal, mark bada
+ *   - `brand/logo-desktop.png`  ≥1024px   full horizontal lockup (highest resolution)
+ *   - `brand/logo-fluid.png`    stacked (mark upar, wordmark neeche) — footer / invoice
+ *   - `brand/logo-mark-{128,192,512}.png` square official mark (favicon, PWA, admin)
+ *
+ * Hero banner:
+ *   - `banners/banner-desktop.webp` wide  (≥1024px)
+ *   - `banners/banner-tablet.webp`  4:3   (768–1023px)
+ *   - `banners/banner-mobile.webp`  portrait (<768px)
+ *   - `banners/banner-fluid.webp`   fluid fallback
  */
-const LOGO_BASE = process.env.NEXT_PUBLIC_PAGES_BASE_PATH ?? "";
+const ASSET_BASE = process.env.NEXT_PUBLIC_PAGES_BASE_PATH ?? "";
 
-export const logoUrl = `${LOGO_BASE}/images/logo.png`;
-/** full lockup (wordmark ke saath) — invoice / share card / admin */
-export const logoLockupUrl = `${LOGO_BASE}/images/logo.png`;
-/** chhota mark (header badge / footer) */
-export const logoSmall = `${LOGO_BASE}/images/logo-mark-128.png`;
-/** footer bhi wahi mark */
-export const logoWhiteUrl = `${LOGO_BASE}/images/logo-mark-192.png`;
-export const logoFallback = `${LOGO_BASE}/images/logo-mark-192.png`;
+export const brandAssets = {
+  /** horizontal lockup — desktop nav */
+  desktop: `${ASSET_BASE}/images/brand/logo-desktop.png`,
+  /** horizontal, mark bada — tablet */
+  tablet: `${ASSET_BASE}/images/brand/logo-tablet.png`,
+  /** compact horizontal — mobile */
+  mobile: `${ASSET_BASE}/images/brand/logo-mobile.png`,
+  /** stacked — footer / invoice / any fluid container */
+  fluid: `${ASSET_BASE}/images/brand/logo-fluid.png`,
+  /** square mark — favicon / PWA / admin / WhatsApp thumb */
+  mark: `${ASSET_BASE}/images/brand/logo-mark-512.png`,
+  mark192: `${ASSET_BASE}/images/brand/logo-mark-192.png`,
+  mark128: `${ASSET_BASE}/images/brand/logo-mark-128.png`,
+} as const;
+
+export const heroBanners = {
+  desktop: `${ASSET_BASE}/images/banners/banner-desktop.webp`,
+  tablet: `${ASSET_BASE}/images/banners/banner-tablet.webp`,
+  mobile: `${ASSET_BASE}/images/banners/banner-mobile.webp`,
+  fluid: `${ASSET_BASE}/images/banners/banner-fluid.webp`,
+} as const;
+
+/** aspect ratios (CSS `aspect-ratio` ke liye) — layout shift zero */
+export const HERO_RATIO = {
+  desktop: 1779 / 594,
+  tablet: 4 / 3,
+  mobile: 860 / 1290,
+} as const;
+
+/** invoice / print ke liye poora logo */
+export const logoUrl = brandAssets.fluid;
+export const logoLockupUrl = brandAssets.desktop;
+/** chhota square mark */
+export const logoSmall = brandAssets.mark128;
+export const logoWhiteUrl = brandAssets.mark192;
+export const logoFallback = brandAssets.fluid;
 /** favicon / PWA icon */
-export const logoMark = `${LOGO_BASE}/images/logo-mark-512.png`;
+export const logoMark = brandAssets.mark;
 
 /**
  * Site ka apna URL — WhatsApp / invoice / canonical links isi se banate hain.
@@ -33,16 +73,20 @@ export const siteUrl =
 export const siteConfig = {
   name: "Designer Clothing",
   url: siteUrl,
-  ogImage: `${LOGO_BASE}/images/og-image.jpg`,
+  ogImage: `${ASSET_BASE}/images/og-image.jpg`,
   description:
     "Designer Anarkali suits, lehenga choli and printed suit sets by Designer Clothing — hand-finished for weddings and festivals.",
   phone: "+91 8005900581",
   whatsapp: "8005900581",
   email: "Info.likshaclothing@gmail.com",
   address: "Jaipur, Rajasthan, India",
+  /**
+   * Sirf asli accounts — koi dummy link nahi. Abhi ke liye Instagram sirf
+   * **URL text** ke roop me dikhta hai (clickable nahi), WhatsApp hi working link hai.
+   */
   socials: {
-    instagram: "https://www.instagram.com/likshaclothing",
-    facebook: "https://www.facebook.com/likshaclothing",
+    instagram: "https://www.instagram.com/designer_clothing_9",
+    instagramHandle: "designer_clothing_9",
   },
   currency: "INR",
 } as const;

@@ -17,7 +17,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         <div className="brand">
           {/* wahi mark jo storefront header me hai */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/invoice-logo.png" alt="Designer Clothing" className="brand-mark" width={34} height={34} />
+          <img src="/brand-mark.png" alt="Designer Clothing" className="brand-mark" width={34} height={34} />
           DESIGNER
           <small>CLOTHING · ADMIN</small>
         </div>

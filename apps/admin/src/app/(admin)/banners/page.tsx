@@ -8,8 +8,12 @@ export const dynamic = "force-dynamic";
  * Announcement yahin se badla ja sakta hai (turant site par — store settings API).
  * Hero image abhi catalogue/brand asset hai, isliye uski current state yahan dikhti hai.
  */
-/** Storefront ka current Diwali/Dewali poster (owner-supplied creative) */
-const HERO_IMAGE = "/images/diwali-sale-70-2026.webp";
+/** Storefront ke home hero ke teen device-specific posters (owner-supplied creative) */
+const HERO_IMAGES = [
+  { label: "Desktop / laptop (≥1024px)", path: "/images/banners/banner-desktop.webp" },
+  { label: "Tablet (768–1023px)", path: "/images/banners/banner-tablet.webp" },
+  { label: "Mobile (<768px)", path: "/images/banners/banner-mobile.webp" },
+];
 const HERO_HREF = "/collections/sale";
 
 export default async function BannersPage() {
@@ -53,19 +57,30 @@ export default async function BannersPage() {
           <h2>Home hero</h2>
         </div>
         <div className="panel-body">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={`${storeUrl}${HERO_IMAGE}`}
-            alt="Current home hero"
-            style={{ width: "100%", maxWidth: 560, border: "1px solid #e5dbd0" }}
-          />
+          <div style={{ display: "grid", gap: 14, gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
+            {HERO_IMAGES.map((image) => (
+              <figure key={image.path} style={{ margin: 0 }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`${storeUrl}${image.path}`}
+                  alt={`Home hero — ${image.label}`}
+                  style={{ width: "100%", border: "1px solid #e5dbd0", display: "block" }}
+                />
+                <figcaption className="small muted" style={{ marginTop: 6 }}>
+                  {image.label}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
           <p className="small" style={{ marginTop: 10 }}>
             Hero link: <span className="mono">{HERO_HREF}</span>
           </p>
           <p className="small muted">
-            Ye owner ka diya hua festive poster hai (<span className="mono">apps/web/public{HERO_IMAGE}</span>) —
-            flat 70% OFF, final price ₹499–₹699. Nayi creative chahiye to image isi path par replace karke
-            deploy karo; announcement text Settings (ya Google Sheet) se turant badalta hai.
+            Teen device-specific files yahin se aati hain (<span className="mono">apps/web/public/images/banners/</span>)
+            — phone par portrait, tablet par 4:3, desktop par wide. Sab me flat 70% OFF, final price ₹499–₹699.
+            Nayi creative chahiye to wahi files replace karke deploy karo
+            (<span className="mono">node scripts/brand/build-responsive-assets.mjs</span>);
+            announcement text Settings (ya Google Sheet) se turant badalta hai.
           </p>
         </div>
       </div>

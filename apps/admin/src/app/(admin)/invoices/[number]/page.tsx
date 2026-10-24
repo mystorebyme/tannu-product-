@@ -59,7 +59,7 @@ export default async function ManualInvoicePage({ params }: { params: Promise<{ 
         <header className="invoice-head">
           <div>
             {/* same to same logo jo PDF/HTML invoice par hai */}
-            <img src="/invoice-logo.png" alt="Designer Clothing" width={176} height={51} />
+            <img src="/invoice-logo.png" alt="Designer Clothing" width={196} height={51} />
             <p className="invoice-muted" style={{ marginTop: 8 }}>
               Designer Clothing · Jaipur, Rajasthan
               <br />

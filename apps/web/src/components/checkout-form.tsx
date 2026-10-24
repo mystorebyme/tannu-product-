@@ -290,6 +290,7 @@ export function CheckoutForm() {
                     })}
                     upiId={upiId}
                     amountPaise={total}
+                    showAppButtons={false}
                   />
                 </div>
               </div>
@@ -374,6 +375,7 @@ export function CheckoutForm() {
                   })}
                   upiId={upiId}
                   amountPaise={total}
+                  showAppButtons={false}
                 />
                 <a
                   href={whatsappHref}

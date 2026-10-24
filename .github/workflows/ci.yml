@@ -78,6 +78,11 @@ jobs:
         run: npm run test:smoke
         env:
           BASE_URL: http://localhost:3000
+
+      - name: Responsive + breakpoint checks
+        run: npm run test:responsive
+        env:
+          BASE_URL: http://localhost:3000
           ADMIN_API_TOKEN: dev-admin-token
 
   e2e:

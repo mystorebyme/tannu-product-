@@ -14,15 +14,20 @@ import { useStoreSettings } from "@/components/store-settings-provider";
 import { SafeImage } from "@/components/safe-image";
 import { BrandLockup } from "@/components/brand-lockup";
 
+/**
+ * Desktop nav — sirf wahi categories jo sach me products rakhti hain (khaali
+ * collection par link nahi). Labels chhote hain taaki 1024px par bhi logo aur
+ * icons ke beech me poora fit ho, koi overlap na ho.
+ */
 const quickLinks = [
   { label: "HOME", href: "/" },
-  { label: "ANARKALI SUIT", href: "/collections/party-wear-gown" },
-  { label: "LIKSHA'S CHOICE", href: "/collections/likshas-choice" },
-  { label: "NEW ARRIVALS", href: "/collections/new-arrivals" },
-  { label: "LEHNGA CHOLI", href: "/collections/lehnga-choli" },
-  { label: "PRINTED SUIT SET", href: "/collections/printed-suit-set" },
-  { label: "SAREES", href: "/collections/saree" },
+  { label: "SHOP", href: "/collections" },
+  { label: "ANARKALI", href: "/collections/party-wear-gown" },
+  { label: "LEHENGA CHOLI", href: "/collections/lehnga-choli" },
+  { label: "PRINTED SET", href: "/collections/printed-suit-set" },
+  { label: "NEW IN", href: "/collections/new-arrivals" },
   { label: "SALE", href: "/collections/sale" },
+  { label: "CONTACT", href: "/pages/contact" },
 ];
 
 // Fallback copy — admin → Settings se announcement set ho to wahi dikhta hai
@@ -158,12 +163,29 @@ export function SiteHeader() {
 
   return (
     <>
-      <div className="bg-[#862222] text-white">
-        <div className="mx-auto flex h-9 max-w-[1400px] items-center justify-center px-4">
-          <p key={bannerIndex} className="animate-[fadeIn_.5s_ease] text-center text-[10.5px] tracking-[.12em] uppercase sm:text-[11.5px]">
+      <div className="bg-[#7d1a1a] text-white">
+        <div className="mx-auto flex min-h-9 max-w-[1400px] items-center justify-between gap-3 px-4 py-1.5">
+          {/* phone — desktop/tablet par */}
+          <a
+            href={`tel:+91${supportPhone.replace(/\D/g, "").slice(-10)}`}
+            className="hidden shrink-0 items-center gap-1.5 text-[11px] tracking-[.06em] md:flex"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+              <path d="M6 3h3l2 5-2 1a12 12 0 0 0 6 6l1-2 5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 4 5a2 2 0 0 1 2-2Z" />
+            </svg>
+            +91 {supportPhone.replace(/\D/g, "").slice(-10)}
+          </a>
+
+          {/* rotating announcement — sab screens par (mobile par akela) */}
+          <p
+            key={bannerIndex}
+            className="animate-[fadeIn_.5s_ease] flex-1 text-center text-[10.5px] leading-tight tracking-[.1em] uppercase sm:text-[11.5px]"
+          >
             {announcements[bannerIndex]}
           </p>
-          <div className="ml-4 hidden items-center gap-2 sm:flex">
+
+          <div className="hidden shrink-0 items-center gap-2 lg:flex">
+            <span className="text-[11px] tracking-[.06em]">Premium Designer Collection ✦</span>
             {announcements.map((item, index) => (
               <button
                 key={item}
@@ -182,31 +204,36 @@ export function SiteHeader() {
           scrolled ? "shadow-[0_6px_24px_rgba(0,0,0,0.08)]" : ""
         }`}
       >
-        <div className="mx-auto flex h-[62px] max-w-[1400px] items-center justify-between gap-3 px-4 lg:h-[76px] lg:px-6">
+        {/* mobile: [menu] [logo center] [search · cart] — tablet/desktop: [logo] [nav] [icons] */}
+        <div className="mx-auto grid h-[66px] max-w-[1400px] grid-cols-[auto_1fr_auto] items-center gap-2 px-3 sm:h-[74px] sm:px-4 lg:flex lg:h-[80px] lg:justify-between lg:gap-4 lg:px-6">
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
             aria-label="Open menu"
             data-testid="mobile-menu"
-            className="flex h-9 w-9 items-center justify-center lg:hidden"
+            className="flex h-10 w-10 shrink-0 items-center justify-center lg:hidden"
           >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
               <path d="M3 6h18M3 12h18M3 18h18" />
             </svg>
           </button>
 
-          <Link href="/" aria-label="Designer Clothing home" className="flex shrink-0 items-center">
+          <Link
+            href="/"
+            aria-label="Designer Clothing home"
+            className="col-start-2 flex min-w-0 shrink-0 items-center justify-center lg:col-start-auto lg:justify-start"
+          >
             <BrandLockup />
           </Link>
 
-          <nav className="hidden flex-1 items-center justify-center gap-6 lg:flex xl:gap-8">
+          <nav className="hidden min-w-0 flex-1 items-center justify-center gap-2 lg:flex xl:gap-6">
             {quickLinks.map((link) => {
               const active = pathname === link.href;
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`relative whitespace-nowrap py-2 text-[12px] font-medium tracking-[.1em] transition-colors hover:text-[#862222] ${
+                  className={`relative whitespace-nowrap py-2 text-[10px] font-medium tracking-[.06em] transition-colors hover:text-[#862222] xl:text-[11.5px] xl:tracking-[.1em] ${
                     active ? "text-[#862222]" : "text-[#222]"
                   }`}
                 >
@@ -221,7 +248,7 @@ export function SiteHeader() {
             })}
           </nav>
 
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="col-start-3 flex items-center gap-0.5 sm:gap-1.5 lg:col-start-auto">
             <button
               type="button"
               onClick={() => setSearchOpen((open) => !open)}
@@ -237,7 +264,7 @@ export function SiteHeader() {
             <Link
               href="/account"
               aria-label="Account"
-              className="hidden h-9 w-9 items-center justify-center rounded-full transition hover:bg-[#f6f1ec] hover:text-[#862222] sm:flex"
+              className="hidden h-9 w-9 items-center justify-center rounded-full transition hover:bg-[#f6f1ec] hover:text-[#862222] md:flex"
             >
               <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
                 <circle cx="12" cy="8" r="4" />
@@ -248,7 +275,7 @@ export function SiteHeader() {
               href="/wishlist"
               aria-label="Wishlist"
               data-testid="header-wishlist"
-              className="relative flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-[#f6f1ec] hover:text-[#862222]"
+              className="relative hidden h-9 w-9 items-center justify-center rounded-full transition hover:bg-[#f6f1ec] hover:text-[#862222] sm:flex"
             >
               <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
                 <path d="M20.8 5.6a5 5 0 0 0-7.1 0L12 7.3l-1.7-1.7a5 5 0 1 0-7.1 7.1L12 21.5l8.8-8.8a5 5 0 0 0 0-7.1Z" />
@@ -400,7 +427,7 @@ export function SiteHeader() {
           <div className="absolute inset-y-0 left-0 flex w-[86%] max-w-[340px] flex-col bg-white shadow-xl">
             <div className="flex items-center justify-between border-b border-[#eee6de] px-4 py-3">
               <Link href="/" onClick={() => setMobileOpen(false)} aria-label="Designer Clothing home">
-                <BrandLockup compact />
+                <BrandLockup size="compact" />
               </Link>
               <button type="button" onClick={() => setMobileOpen(false)} aria-label="Close" className="p-2">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
@@ -423,6 +450,20 @@ export function SiteHeader() {
                   )}
                 </Link>
               ))}
+              <div className="flex divide-x divide-[#f0eae3] border-b border-[#f4efe9]">
+                <Link href="/wishlist" className="flex flex-1 items-center justify-center gap-2 py-3 text-[12px] font-medium">
+                  Wishlist
+                  {wishlist.length > 0 ? (
+                    <span className="rounded-full bg-[#c2185b] px-1.5 text-[10px] font-semibold text-white">{wishlist.length}</span>
+                  ) : null}
+                </Link>
+                <Link href="/account" className="flex flex-1 items-center justify-center gap-2 py-3 text-[12px] font-medium">
+                  Account
+                </Link>
+                <Link href="/track-order" className="flex flex-1 items-center justify-center gap-2 py-3 text-[12px] font-medium">
+                  Track order
+                </Link>
+              </div>
               <div className="px-5 py-4">
                 <p className="mb-2 text-[11px] tracking-[.16em] text-[#9c9289] uppercase">Collections</p>
                 <div className="flex flex-wrap gap-2">

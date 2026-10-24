@@ -54,7 +54,6 @@ async function main() {
   check("home shows category counts from the live store", /ANARKALI SUIT/i.test(home.text) && /Products/i.test(home.text));
   check("home hero pricing paragraph removed (Round 12)", !/No hidden charges/i.test(home.text));
   check("tab title carries the brand name", /<title>[^<]*Designer Clothing[^<]*<\/title>/i.test(home.text));
-  check("tab icon points at the brand logo", /rel="icon"[^>]*\/images\/logo-mark-512\.png/i.test(home.text));
 
   const manifest = await get("/manifest.webmanifest");
   check("manifest served for installed app", manifest.status === 200 && /Designer Clothing/.test(manifest.text), `status ${manifest.status}`);
@@ -345,7 +344,17 @@ async function main() {
   );
 
   // festive sale: hero poster + ₹499–₹699 final prices
-  check("home shows the new Diwali sale hero", home.text.includes("diwali-sale-70-2026.webp"));
+  // hero: teen device-specific poster (mobile/tablet/desktop) — ek hi download hota hai
+  check("home hero ships a mobile banner", home.text.includes("/images/banners/banner-mobile.webp"));
+  check("home hero ships a tablet banner", home.text.includes("/images/banners/banner-tablet.webp"));
+  check("home hero ships a desktop banner", home.text.includes("/images/banners/banner-desktop.webp"));
+  check(
+    "hero uses <picture> with min-width media queries",
+    /<picture>[\s\S]{0,600}min-width:1024px[\s\S]{0,600}min-width:768px/.test(home.text),
+  );
+  // logo: device-specific variants, ek hi <picture> me
+  check("header logo has desktop/tablet/mobile variants", ["logo-desktop.png", "logo-tablet.png", "logo-mobile.png"].every((file) => home.text.includes(file)));
+  check("tab icon points at the brand logo", /rel="icon"[^>]*\/images\/brand\/logo-mark/i.test(home.text));
   const salePrices = [...home.text.matchAll(/Rs\. (499|549|599|649|699)\b/g)].map((match) => match[1]);
   check("home lists sale prices (499/549/599/649/699)", salePrices.length > 0, String(salePrices.length));
   check(

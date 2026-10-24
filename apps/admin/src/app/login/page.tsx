@@ -14,7 +14,7 @@ export default async function LoginPage({
       <div className="login-card">
         <div className="brand">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/invoice-logo.png" alt="Designer Clothing" width={64} height={64} style={{ display: "block", margin: "0 auto 6px", borderRadius: 999 }} />
+          <img src="/brand-mark.png" alt="Designer Clothing" width={64} height={64} style={{ display: "block", margin: "0 auto 6px", borderRadius: 999 }} />
           DESIGNER CLOTHING
         </div>
         <div className="sub">CLOTHING · ADMIN</div>

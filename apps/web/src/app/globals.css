@@ -278,3 +278,56 @@ table {
   text-align: left;
   vertical-align: top;
 }
+
+/* ---------- brand lockup (responsive logo) ----------
+   Ek hi `<picture>`, teen assets — browser sirf ek download karta hai.
+   Height breakpoints yahin hain: mobile 40 → tablet 50 → desktop 46 (horizontal
+   lockup lamba hai, isliye height kam par width zyada — header me overlap nahi). */
+.brand-lockup img {
+  height: 40px;
+  width: auto;
+}
+
+@media (min-width: 768px) {
+  .brand-lockup img {
+    height: 50px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .brand-lockup img {
+    height: 46px;
+  }
+}
+
+.brand-lockup[data-size="compact"] img {
+  height: 34px;
+}
+
+/* footer / drawer — stacked fluid logo */
+.brand-lockup[data-variant="stacked"] img {
+  height: 92px;
+}
+
+@media (min-width: 768px) {
+  .brand-lockup[data-variant="stacked"] img {
+    height: 108px;
+  }
+}
+
+/* ---------- home hero (device-specific banner) ---------- */
+.hero-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* 320px par bhi hero ke edges par kuch kat na jaye */
+@media (max-width: 767px) {
+  .hero-media img {
+    object-fit: contain;
+    background: #fbf1e2;
+  }
+}
