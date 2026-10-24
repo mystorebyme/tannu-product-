@@ -12,12 +12,24 @@ import {
   generateOrderNumber,
   invoiceNumber,
 } from "@liksha/validation";
-import { dataFile } from "@/lib/data-dir";
-import { products } from "@/lib/store";
+import { dataFile } from "./data-dir";
+import { dbEnabled } from "./db";
+import { products } from "./store";
 
 type StoredOrder = Order;
 
-function readAll(): StoredOrder[] {
+/**
+ * Data backend.
+ *
+ * `DATABASE_URL` set hai to Postgres (production/Render), warna local JSON file
+ * (dev + tests). Dono ka behaviour same hai — baaki code ko farq nahi padta.
+ */
+let lastLoaded: StoredOrder[] = [];
+/** read ke waqt ka snapshot — in-memory array mutate hone se diff kharab na ho */
+let lastSnapshot = new Map<string, string>();
+let hydrated = false;
+
+function readJson(): StoredOrder[] {
   const file = dataFile("orders.json");
   if (!fs.existsSync(file)) return [];
   try {
@@ -27,11 +39,47 @@ function readAll(): StoredOrder[] {
   }
 }
 
-function writeAll(orders: StoredOrder[]) {
+function writeJson(orders: StoredOrder[]) {
   const file = dataFile("orders.json");
   const tmp = `${file}.${process.pid}.tmp`;
   fs.writeFileSync(tmp, JSON.stringify(orders, null, 2));
   fs.renameSync(tmp, file); // atomic write -> partial file kabhi nahi
+}
+
+/** Pehli baar: purana JSON ledger (agar hai) Postgres me import kar do. */
+async function hydrateOnce() {
+  if (hydrated) return;
+  hydrated = true;
+  const { importOrders, loadOrders } = await import("./orders-pg");
+  const existing = await loadOrders();
+  if (existing.length) return;
+  const legacy = readJson();
+  if (legacy.length) {
+    const imported = await importOrders(legacy);
+    console.info(`[orders] ${imported} purane orders Postgres me import hue`);
+  }
+}
+
+async function readAll(): Promise<StoredOrder[]> {
+  if (dbEnabled()) {
+    await hydrateOnce();
+    const { loadOrders } = await import("./orders-pg");
+    lastLoaded = await loadOrders();
+    lastSnapshot = new Map(lastLoaded.map((order) => [order.orderNumber, JSON.stringify(order)]));
+    return lastLoaded;
+  }
+  return readJson();
+}
+
+async function writeAll(orders: StoredOrder[]) {
+  if (dbEnabled()) {
+    const { saveOrders } = await import("./orders-pg");
+    await saveOrders(lastSnapshot, orders);
+    lastLoaded = orders;
+    lastSnapshot = new Map(orders.map((order) => [order.orderNumber, JSON.stringify(order)]));
+    return;
+  }
+  writeJson(orders);
 }
 
 export interface CreateOrderPayload {
@@ -59,7 +107,7 @@ export class OrderError extends Error {
 }
 
 /** price server par recompute hota hai — client ke bheje hue amount par bharosa nahi */
-export function createOrder(payload: CreateOrderPayload): Order {
+export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
   if (!payload.items.length) throw new OrderError("Cart khaali hai.", 400, "empty_cart");
 
   const items = payload.items.map((line) => {
@@ -147,27 +195,28 @@ export function createOrder(payload: CreateOrderPayload): Order {
     ],
   };
 
-  const all = readAll();
+  const all = await readAll();
   all.unshift(order);
-  writeAll(all);
+  await writeAll(all);
   return order;
 }
 
-export function listOrders(): Order[] {
-  return readAll();
+export async function listOrders(): Promise<Order[]> {
+  return await readAll();
 }
 
-export function getOrder(orderNumberValue: string): Order | undefined {
-  return readAll().find((order) => order.orderNumber === orderNumberValue);
+export async function getOrder(orderNumberValue: string): Promise<Order | undefined> {
+  const orders = await readAll();
+  return orders.find((order) => order.orderNumber === orderNumberValue);
 }
 
-export function updateOrderStatus(
+export async function updateOrderStatus(
   orderNumberValue: string,
   status: OrderStatus,
   actor = "admin",
   note?: string,
-): Order {
-  const all = readAll();
+): Promise<Order> {
+  const all = await readAll();
   const index = all.findIndex((order) => order.orderNumber === orderNumberValue);
   if (index === -1) throw new OrderError("Order nahi mila", 404, "order_not_found");
   const order = all[index]!;
@@ -192,7 +241,7 @@ export function updateOrderStatus(
     audit: [entry, ...order.audit],
   };
   all[index] = updated;
-  writeAll(all);
+  await writeAll(all);
   return updated;
 }
 
@@ -200,12 +249,12 @@ export function updateOrderStatus(
  * Tracking — admin courier/AWB daalta hai, customer track page dikhata hai.
  * ------------------------------------------------------------------ */
 
-export function setTracking(
+export async function setTracking(
   orderNumberValue: string,
   input: { courier?: string | null; awb?: string | null; url?: string | null },
   actor = "admin",
-): Order {
-  const all = readAll();
+): Promise<Order> {
+  const all = await readAll();
   const index = all.findIndex((order) => order.orderNumber === orderNumberValue);
   if (index === -1) throw new OrderError("Order nahi mila", 404, "order_not_found");
   const order = all[index]!;
@@ -238,7 +287,7 @@ export function setTracking(
     ],
   };
   all[index] = updated;
-  writeAll(all);
+  await writeAll(all);
   return updated;
 }
 
@@ -248,7 +297,15 @@ export function setTracking(
 
 type InvoiceSequence = { next: number };
 
-function nextInvoiceSerial(): number {
+async function nextInvoiceSerial(): Promise<number> {
+  // DB mode: serials invoices table se aate hain, isliye deploy/restart par number repeat nahi hota
+  if (dbEnabled()) {
+    const { query } = await import("./db");
+    const rows = await query<{ next: number }>(
+      "select coalesce(max(nullif(regexp_replace(number, '^.*/', ''), '')::int), 0) + 1 as next from invoices",
+    );
+    return Number(rows[0]?.next ?? 1) || 1;
+  }
   const file = dataFile("invoice-seq.json");
   let state: InvoiceSequence = { next: 1 };
   if (fs.existsSync(file)) {
@@ -265,15 +322,15 @@ function nextInvoiceSerial(): number {
 }
 
 /** Invoice meta assign karta hai (idempotent — dobara call par wahi number). */
-export function ensureInvoice(orderNumberValue: string): { order: Order; invoice: InvoiceMeta } {
-  const all = readAll();
+export async function ensureInvoice(orderNumberValue: string): Promise<{ order: Order; invoice: InvoiceMeta }> {
+  const all = await readAll();
   const index = all.findIndex((order) => order.orderNumber === orderNumberValue);
   if (index === -1) throw new OrderError("Order nahi mila", 404, "order_not_found");
   const order = all[index]!;
   if (order.invoice) return { order, invoice: order.invoice };
 
   const issuedAt = new Date().toISOString();
-  const serial = nextInvoiceSerial();
+  const serial = await nextInvoiceSerial();
   const invoice: InvoiceMeta = {
     number: invoiceNumber(serial, new Date(issuedAt)),
     issuedAt,
@@ -291,12 +348,12 @@ export function ensureInvoice(orderNumberValue: string): { order: Order; invoice
     audit: [{ at: issuedAt, actor: "system", action: "invoice.issued", meta: { number: invoice.number } }, ...order.audit],
   };
   all[index] = updated;
-  writeAll(all);
+  await writeAll(all);
   return { order: updated, invoice };
 }
 
-export function markPaymentPaid(orderNumberValue: string, reference: string): Order | undefined {
-  const all = readAll();
+export async function markPaymentPaid(orderNumberValue: string, reference: string): Promise<Order | undefined> {
+  const all = await readAll();
   const index = all.findIndex((order) => order.orderNumber === orderNumberValue);
   if (index === -1) return undefined;
   const order = all[index]!;
@@ -314,7 +371,7 @@ export function markPaymentPaid(orderNumberValue: string, reference: string): Or
       ...order.audit,
     ],
   };
-  writeAll(all);
+  await writeAll(all);
   return all[index];
 }
 
@@ -345,12 +402,25 @@ function writeIdempotency(rows: IdempotencyRecord[]) {
   fs.renameSync(tmp, file);
 }
 
-export function findIdempotentOrder(key: string): Order | undefined {
+export async function findIdempotentOrder(key: string): Promise<Order | undefined> {
+  if (dbEnabled()) {
+    const { query } = await import("./db");
+    const rows = await query<{ order_number: string }>(
+      "select order_number from orders where idempotency_key = $1 limit 1",
+      [key],
+    );
+    return rows[0] ? getOrder(rows[0].order_number) : undefined;
+  }
   const record = readIdempotency().find((row) => row.key === key);
-  return record ? getOrder(record.orderNumber) : undefined;
+  return record ? await getOrder(record.orderNumber) : undefined;
 }
 
-export function rememberIdempotency(key: string, orderNumberValue: string): void {
+export async function rememberIdempotency(key: string, orderNumberValue: string): Promise<void> {
+  if (dbEnabled()) {
+    const { query } = await import("./db");
+    await query("update orders set idempotency_key = $1 where order_number = $2", [key, orderNumberValue]);
+    return;
+  }
   const rows = readIdempotency().filter((row) => row.key !== key);
   rows.push({ key, orderNumber: orderNumberValue, at: new Date().toISOString() });
   writeIdempotency(rows);
@@ -360,11 +430,11 @@ export function rememberIdempotency(key: string, orderNumberValue: string): void
  * Client kabhi "paid" nahi bol sakta: yahan sirf backend likhta hai — webhook +
  * gateway API verify ke baad. Tabhi order "placed" se "confirmed" jaata hai. */
 
-export function applyPaymentIntent(
+export async function applyPaymentIntent(
   orderNumber: string,
   intent: { gateway: string; reference: string | null; upiUri: string | null; amount: number },
-): Order | null {
-  const orders = readAll();
+): Promise<Order | null> {
+  const orders = await readAll();
   const index = orders.findIndex((order) => order.orderNumber === orderNumber);
   if (index === -1) return null;
   const order = orders[index]!;
@@ -383,16 +453,16 @@ export function applyPaymentIntent(
       failureReason: null,
     },
   };
-  writeAll(orders);
+  await writeAll(orders);
   return orders[index]!;
 }
 
 /** Backend verify ke baad hi called hota hai. Idempotent: dobara aane par kuch nahi badalta. */
-export function confirmPayment(
+export async function confirmPayment(
   orderNumber: string,
   input: { gateway: string; reference: string | null; amount: number; actor: string },
-): { order: Order; alreadyPaid: boolean } | null {
-  const orders = readAll();
+): Promise<{ order: Order; alreadyPaid: boolean } | null> {
+  const orders = await readAll();
   const index = orders.findIndex((order) => order.orderNumber === orderNumber);
   if (index === -1) return null;
   const order = orders[index]!;
@@ -429,15 +499,15 @@ export function confirmPayment(
     ],
   };
   orders[index] = paidOrder;
-  writeAll(orders);
+  await writeAll(orders);
   return { order: paidOrder, alreadyPaid: false };
 }
 
-export function failPayment(
+export async function failPayment(
   orderNumber: string,
   input: { gateway: string; reference: string | null; reason: string },
-): Order | null {
-  const orders = readAll();
+): Promise<Order | null> {
+  const orders = await readAll();
   const index = orders.findIndex((order) => order.orderNumber === orderNumber);
   if (index === -1) return null;
   const order = orders[index]!;
@@ -462,13 +532,13 @@ export function failPayment(
       ...order.audit,
     ],
   };
-  writeAll(orders);
+  await writeAll(orders);
   return orders[index]!;
 }
 
 /** Customer-facing status — payment ka internal detail nahi jaata */
-export function paymentStatusFor(orderNumber: string) {
-  const order = readAll().find((candidate) => candidate.orderNumber === orderNumber);
+export async function paymentStatusFor(orderNumber: string) {
+  const order = (await readAll()).find((candidate) => candidate.orderNumber === orderNumber);
   if (!order) return null;
   return {
     orderNumber: order.orderNumber,

@@ -52,14 +52,14 @@ export async function POST(request: Request, context: { params: Promise<{ gatewa
   if (verified.status === "captured" || verified.status === "authorized") {
     // amount mismatch = tampering; order confirm nahi hoga
     if (verified.amount !== order.total) {
-      failPayment(order.orderNumber, {
+      await failPayment(order.orderNumber, {
         gateway: account.id,
         reference: paymentId,
         reason: `amount mismatch (gateway ${verified.amount} vs order ${order.total})`,
       });
       return Response.json({ received: true, ignored: "amount mismatch" }, { status: 409 });
     }
-    const result = confirmPayment(order.orderNumber, {
+    const result = await confirmPayment(order.orderNumber, {
       gateway: account.id,
       reference: paymentId,
       amount: verified.amount,
@@ -69,7 +69,7 @@ export async function POST(request: Request, context: { params: Promise<{ gatewa
   }
 
   if (verified.status === "failed") {
-    failPayment(order.orderNumber, { gateway: account.id, reference: paymentId, reason: "gateway reported failed" });
+    await failPayment(order.orderNumber, { gateway: account.id, reference: paymentId, reason: "gateway reported failed" });
   }
   return Response.json({ received: true, paid: false });
 }

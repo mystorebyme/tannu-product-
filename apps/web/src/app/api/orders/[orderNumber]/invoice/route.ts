@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(request: NextRequest, context: { params: Promise<{ orderNumber: string }> }) {
   const { orderNumber } = await context.params;
-  const order = getOrder(orderNumber);
+  const order = await getOrder(orderNumber);
   if (!order) {
     return Response.json({ error: "Order not found" }, { status: 404 });
   }
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ ord
     );
   }
 
-  const { order: withInvoice, invoice } = ensureInvoice(orderNumber);
+  const { order: withInvoice, invoice } = await ensureInvoice(orderNumber);
   const view = buildInvoice(withInvoice, invoice.number, invoice.issuedAt);
   const pdf = await renderInvoicePdf(view);
 

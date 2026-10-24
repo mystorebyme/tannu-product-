@@ -16,7 +16,7 @@ export async function POST(request: Request) {
   }
   if (!body.orderNumber) return Response.json({ error: "orderNumber required" }, { status: 400 });
 
-  const order = getOrder(body.orderNumber);
+  const order = await getOrder(body.orderNumber);
   if (!order) return Response.json({ error: "Order not found" }, { status: 404 });
   if (order.paymentStatus === "paid") return Response.json({ paid: true });
 

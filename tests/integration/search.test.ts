@@ -25,9 +25,9 @@ test("search with no match returns empty, not an error", () => {
 });
 
 test("collection filter narrows results", () => {
-  const lehnga = listProducts({ collection: "lehnga-choli", perPage: 60 });
-  // live store ke lehnga-choli collection me 22 products hain (snapshot se)
-  assert.equal(lehnga.total, 22);
+  const lehnga = listProducts({ collection: "lehnga-choli", perPage: 200 });
+  // live store ke lehnga-choli (22) + extra-store merge ke baad kam se kam 22
+  assert.ok(lehnga.total >= 22, `only ${lehnga.total} lehnga products`);
   for (const item of lehnga.items) assert.ok(item.collections.includes("lehnga-choli"));
 });
 
@@ -42,7 +42,7 @@ test("price sorting works both ways", () => {
 test("pagination slices without dropping the total", () => {
   const page1 = listProducts({ page: 1, perPage: 24 });
   const page2 = listProducts({ page: 2, perPage: 24 });
-  assert.equal(page1.total, 287);
+  assert.ok(page1.total >= 287, `only ${page1.total} products`);
   assert.equal(page1.items.length, 24);
   assert.notEqual(page1.items[0]!.handle, page2.items[0]!.handle);
 });
@@ -53,7 +53,8 @@ test("unknown handle returns undefined", () => {
 
 test("catalogue meta reports the live store", () => {
   const meta = catalogMeta();
-  assert.equal(meta.productCount, 287);
+  assert.ok(meta.productCount >= 287);
+  assert.equal(meta.liveProductCount, 287);
   assert.equal(meta.source, "https://www.likshaclothing.com");
   assert.equal(meta.moneyUnit, "paise");
 });

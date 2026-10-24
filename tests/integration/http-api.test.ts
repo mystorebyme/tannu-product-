@@ -33,7 +33,7 @@ test("GET /health reports the catalogue", async () => {
   const { status, body } = await json("/health");
   assert.equal(status, 200);
   assert.equal(body.data.status, "ok");
-  assert.equal(body.data.products, 287);
+  assert.ok(body.data.products >= 287, `only ${body.data.products} products`);
   assert.equal(body.data.service, "liksha-api");
 });
 
@@ -41,7 +41,7 @@ test("GET /products is paginated with an envelope", async () => {
   const { status, body } = await json("/products?perPage=3&sort=price-low");
   assert.equal(status, 200);
   assert.equal(body.data.length, 3);
-  assert.equal(body.total, 287);
+  assert.ok(body.total >= 287, `only ${body.total} products`);
   assert.equal(body.page, 1);
   assert.equal(body.perPage, 3);
 });

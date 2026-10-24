@@ -3,8 +3,8 @@ import { dateTime } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
-export default function AuditLogsPage() {
-  const rows = getAudit(120);
+export default async function AuditLogsPage() {
+  const rows = await getAudit(120);
 
   return (
     <>

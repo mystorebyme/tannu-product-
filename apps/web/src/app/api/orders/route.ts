@@ -14,7 +14,7 @@ export async function POST(request: Request) {
   const idempotencyKey = request.headers.get("idempotency-key")?.trim().slice(0, 120);
   // double click / network retry par doosra order na bane (disk-backed, restart-safe)
   if (idempotencyKey) {
-    const existing = findIdempotentOrder(idempotencyKey);
+    const existing = await findIdempotentOrder(idempotencyKey);
     if (existing) {
       return Response.json(
         { orderNumber: existing.orderNumber, total: existing.total, status: existing.status, idempotent: true },
@@ -62,8 +62,8 @@ export async function POST(request: Request) {
   }
 
   try {
-    const order = createOrder(parsed.data);
-    if (idempotencyKey) rememberIdempotency(idempotencyKey, order.orderNumber);
+    const order = await createOrder(parsed.data);
+    if (idempotencyKey) await rememberIdempotency(idempotencyKey, order.orderNumber);
     return Response.json(
       { orderNumber: order.orderNumber, total: order.total, status: order.status },
       { status: 201 },
@@ -83,7 +83,7 @@ export async function GET(request: Request) {
   if (!process.env.ADMIN_API_TOKEN || token !== process.env.ADMIN_API_TOKEN) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const orders = listOrders().map(({ email, phone, address, ...rest }) => ({
+  const orders = (await listOrders()).map(({ email, phone, address, ...rest }) => ({
     ...rest,
     email: email.replace(/(.{2}).+(@.+)/, "$1***$2"),
     phone: `******${phone.slice(-4)}`,

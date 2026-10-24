@@ -12,6 +12,6 @@ export async function GET(request: Request) {
   if (!expected || token !== expected) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const orders = listOrders();
+  const orders = await listOrders();
   return Response.json({ orders, total: orders.length }, { headers: { "cache-control": "no-store" } });
 }

@@ -128,9 +128,28 @@ catalogue integrity (count, prices, sizes, collection membership), session tampe
 
 | App | Host | Doc |
 | --- | --- | --- |
-| web | Vercel (`apps/web`) | `docs/10-deployment/vercel.md` |
-| admin | Vercel subdomain (`apps/admin`) | `docs/10-deployment/vercel.md` |
-| api | Render + persistent disk | `docs/10-deployment/render.md` |
+| storefront + admin + Postgres | Render blueprint (`render.yaml`) → `https://likshaclothing.onrender.com` | `docs/10-deployment/render.md` |
+| static browse preview | GitHub Pages (`.github/workflows/pages.yml`) | this file |
+
+### Render (production, same-to-same)
+
+1. Render dashboard → **New → Blueprint** → repo select (`render.yaml` mil jayega).
+2. Blueprint 3 cheezein banata hai: `liksha-storefront`, `liksha-admin` aur `liksha-db` (Postgres).
+3. `ADMIN_PASSWORD` dashboard me set kariye (blueprint me `sync: false` hai).
+4. Pehla boot par `npm run db:migrate` chalta hai — `database/schema.sql` + `database/migrations/*`
+   apply hote hain, phir server start hota hai.
+
+Orders/tracking/payments Postgres me rehte hain (`DATABASE_URL` set hone par). Set nahi hai to local
+JSON store chalta hai — dev aur tests bina DB ke chalte hain.
+
+Migrations manually: `DATABASE_URL=postgres://… npm run db:migrate`
+(Postgres path ka test: `npm run test:db` — WASM Postgres par asli SQL chalta hai.)
+
+### GitHub Pages (sirf browse preview)
+
+`pages.yml` static export banata hai (home, collections, product pages, cart/wishlist UI).
+Pages par Node server nahi chalta, isliye checkout/payment/order-tracking Render deployment par
+chalte hain; preview par ek banner yeh batata hai.
 
 One-command release: `bash infra/scripts/deploy.sh` (verify → build → backup → deploy hooks → health).
 Post-deploy health: `bash infra/monitoring/health.sh`.
@@ -162,8 +181,9 @@ Human walkthroughs: `agent-guides/`.
 
 ## Known limitations (Phase 1, tracked in `TASKS.md`)
 
-- Orders/settings persist in `.data/*.json` — single instance only; Postgres path is documented
-  (`database/prisma/schema.prisma`, `docs/04-data/migrations.md`).
+- Orders/invoices/payments Postgres me jaate hain jab `DATABASE_URL` set ho (`npm run db:migrate`).
+  `DATABASE_URL` ke bina `.data/*.json` use hota hai (dev/test). Admin settings aur manual invoices
+  abhi admin ke local data dir me hain — Postgres me shift baaki hai.
 - Catalogue is built from `database/seeds/live/` (real Shopify snapshot: 1,971 images, store's own
   descriptions). Refresh with `npm run catalog:sync`; in sandboxes without outbound network run the
   *Catalog sync* GitHub Action instead. `catalog:sync-live` is an alias of `catalog:sync`.

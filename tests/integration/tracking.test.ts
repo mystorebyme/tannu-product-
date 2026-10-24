@@ -39,18 +39,18 @@ function seedOrder() {
   return orderNumber;
 }
 
-test("admin can move an order along the status machine", () => {
+test("admin can move an order along the status machine", async () => {
   const orderNumber = seedOrder();
-  assert.equal(data.updateOrderStatus(orderNumber, "confirmed", "admin@likshaclothing.com")?.status, "confirmed");
-  assert.equal(data.updateOrderStatus(orderNumber, "packed", "admin@likshaclothing.com")?.status, "packed");
-  assert.equal(data.updateOrderStatus(orderNumber, "shipped", "admin@likshaclothing.com")?.status, "shipped");
+  assert.equal((await data.updateOrderStatus(orderNumber, "confirmed", "admin@likshaclothing.com"))?.status, "confirmed");
+  assert.equal((await data.updateOrderStatus(orderNumber, "packed", "admin@likshaclothing.com"))?.status, "packed");
+  assert.equal((await data.updateOrderStatus(orderNumber, "shipped", "admin@likshaclothing.com"))?.status, "shipped");
   // invalid jump (shipped -> packed) reject hota hai
-  assert.equal(data.updateOrderStatus(orderNumber, "packed", "admin@likshaclothing.com"), null);
+  assert.equal(await data.updateOrderStatus(orderNumber, "packed", "admin@likshaclothing.com"), null);
 });
 
-test("courier + AWB are stored and audited", () => {
+test("courier + AWB are stored and audited", async () => {
   const orderNumber = seedOrder();
-  const updated = data.setOrderTracking(
+  const updated = await data.setOrderTracking(
     orderNumber,
     { courier: "Delhivery", awb: "AWB-12345", url: "https://www.delhivery.com/track/package/AWB-12345" },
     "admin@likshaclothing.com",
@@ -61,6 +61,6 @@ test("courier + AWB are stored and audited", () => {
   assert.ok(updated!.tracking?.shippedAt, "shippedAt set hona chahiye");
   assert.equal(updated!.audit[0]?.action, "order.tracking_updated");
 
-  const reread = data.getOrder(orderNumber);
+  const reread = await data.getOrder(orderNumber);
   assert.equal(reread?.tracking?.awb, "AWB-12345", "tracking disk par persist hona chahiye");
 });

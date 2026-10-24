@@ -22,7 +22,7 @@ export default async function InvoicePage({
 }) {
   const { orderNumber } = await params;
   const { phone = "" } = await searchParams;
-  const order = getOrder(orderNumber);
+  const order = await getOrder(orderNumber);
   if (!order) notFound();
 
   const digits = phone.replace(/\D/g, "");
@@ -63,7 +63,7 @@ export default async function InvoicePage({
     );
   }
 
-  const { order: withInvoice, invoice } = ensureInvoice(order.orderNumber);
+  const { order: withInvoice, invoice } = await ensureInvoice(order.orderNumber);
   const view = buildInvoice(withInvoice, invoice.number, invoice.issuedAt);
   const rows = [...view.lines, ...(view.shippingLine ? [view.shippingLine] : [])];
 

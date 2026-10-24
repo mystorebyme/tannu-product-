@@ -13,7 +13,7 @@ export const metadata: Metadata = { title: "Order confirmed", robots: { index: f
 
 export default async function OrderPage({ params }: { params: Promise<{ orderNumber: string }> }) {
   const { orderNumber } = await params;
-  const order = getOrder(orderNumber);
+  const order = await getOrder(orderNumber);
   const headerList = await headers();
   const host = headerList.get("x-forwarded-host") ?? headerList.get("host") ?? "www.likshaclothing.com";
   const proto = headerList.get("x-forwarded-proto") ?? "https";

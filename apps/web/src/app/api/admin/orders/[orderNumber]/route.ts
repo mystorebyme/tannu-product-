@@ -14,7 +14,7 @@ function authorize(request: Request): boolean {
 export async function GET(request: Request, context: { params: Promise<{ orderNumber: string }> }) {
   if (!authorize(request)) return Response.json({ error: "Unauthorized" }, { status: 401 });
   const { orderNumber } = await context.params;
-  const order = getOrder(decodeURIComponent(orderNumber));
+  const order = await getOrder(decodeURIComponent(orderNumber));
   if (!order) return Response.json({ error: "Order nahi mila" }, { status: 404 });
   return Response.json({ order }, { headers: { "cache-control": "no-store" } });
 }
@@ -64,7 +64,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ order
     }
 
     if (action === "payment") {
-      const result = confirmPayment(orderNumber, {
+      const result = await confirmPayment(orderNumber, {
         gateway: String(body.gateway ?? "manual-upi"),
         reference: body.reference ? String(body.reference) : null,
         amount: Number(body.amount ?? 0),
@@ -75,7 +75,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ order
     }
 
     if (action === "payment_failed") {
-      const order = failPayment(orderNumber, {
+      const order = await failPayment(orderNumber, {
         gateway: String(body.gateway ?? "manual-upi"),
         reference: body.reference ? String(body.reference) : null,
         reason: String(body.reason ?? "admin marked failed"),

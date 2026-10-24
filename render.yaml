@@ -1,11 +1,23 @@
-# Render blueprint — likshaclothing.onrender.com
+# Render blueprint — https://likshaclothing.onrender.com
 #
-# Do services: storefront (public) aur admin (private URL).
+# Do web services: storefront (public) + admin (private URL) aur ek Postgres.
 # Render dashboard → New → Blueprint → repo select → ye file khud padh lega.
 #
-# Note: Render ke free plan par disk nahi milta, isliye `.data/` (JSON orders) har
-# deploy par reset ho sakta hai. Production me DATABASE_URL (Postgres) lagane par
-# orders DB me jaate hain — database/schema.sql + npm run db:migrate.
+# Important:
+#  • Free Postgres Render par 30 din baad expire hota hai — dashboard se renew
+#    kar lena, warna orders naye DB me jaane lagenge.
+#  • ADMIN_API_TOKEN dono services me same hona chahiye, isliye storefront
+#    generate karta hai aur admin `fromService` se padhta hai.
+#  • Admin panel orders/tracking sirf storefront API se likhta hai
+#    (STORE_API_URL), taaki customer ka tracking page turant update ho.
+
+databases:
+  - name: liksha-db
+    databaseName: liksha
+    user: liksha
+    plan: free
+    region: singapore
+    postgresMajorVersion: "16"
 
 services:
   - type: web
@@ -15,7 +27,8 @@ services:
     region: singapore
     branch: arena/f713eef1-tannu-product
     buildCommand: npm ci && npm run catalog:build && npm run build --workspace @liksha/web
-    startCommand: npm run start --workspace @liksha/web
+    # Har boot par migrate (idempotent, advisory lock) — phir server start.
+    startCommand: npm run db:migrate; npm run start --workspace @liksha/web
     healthCheckPath: /api/health
     autoDeploy: true
     envVars:
@@ -31,6 +44,10 @@ services:
         generateValue: true
       - key: ADMIN_API_TOKEN
         generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: liksha-db
+          property: connectionString
 
   - type: web
     name: liksha-admin
@@ -52,5 +69,12 @@ services:
         value: admin@likshaclothing.com
       - key: ADMIN_PASSWORD
         sync: false # Render dashboard me set kariye
+      - key: ADMIN_API_TOKEN
+        fromService:
+          name: liksha-storefront
+          type: web
+          envVarKey: ADMIN_API_TOKEN
+      - key: STORE_API_URL
+        value: https://likshaclothing.onrender.com
       - key: NEXT_PUBLIC_STORE_URL
         value: https://likshaclothing.onrender.com

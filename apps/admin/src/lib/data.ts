@@ -235,14 +235,16 @@ export function appendAudit(row: Omit<AuditRow, "at">) {
   writeRows("admin-audit.json", rows.slice(0, 500));
 }
 
-/** audit page ke liye sync snapshot — remote mode me orders page alag se dikhta hai */
+/** local snapshot — sirf tab kaam ka jab admin storefront ke saath hi chal raha ho */
 export function getOrdersSync(): Order[] {
   return readRows<Order>("orders.json");
 }
 
-export function getAudit(limit = 100): AuditRow[] {
+/** audit feed — remote mode me orders storefront API se aate hain */
+export async function getAudit(limit = 100): Promise<AuditRow[]> {
   const rows = readRows<AuditRow>("admin-audit.json");
-  const orderAudit = getOrdersSync().flatMap((order) =>
+  const orders = STORE_API ? await getOrders() : getOrdersSync();
+  const orderAudit = orders.flatMap((order) =>
     order.audit.map((entry) => ({
       at: entry.at,
       actor: entry.actor,
