@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { useCart } from "@/components/cart-provider";
 import { discountPercent, formatPrice, imageUrl } from "@/lib/format";
 import type { Product } from "@/types/catalog";
+import { SafeImage } from "@/components/safe-image";
 
 export function ProductDetail({ product }: { product: Product }) {
   const { addItem } = useCart();
@@ -111,17 +112,17 @@ export function ProductDetail({ product }: { product: Product }) {
               aria-label={`View image ${index + 1}`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={imageUrl(image, 200)} alt="" loading="lazy" className="h-full w-full object-cover" />
+              <SafeImage src={imageUrl(image, 200)} alt="" className="h-full w-full object-cover" />
             </button>
           ))}
           </div>
         ) : null}
         <div className="relative flex-1 overflow-hidden bg-[#f6f1ec]">
           <div className="relative aspect-[3/4] w-full">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <SafeImage
               src={imageUrl(product.images[activeImage], 1200)}
               alt={product.title}
+              loading="eager"
               fetchPriority="high"
               className="absolute inset-0 h-full w-full object-cover"
             />

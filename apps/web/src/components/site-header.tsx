@@ -7,6 +7,7 @@ import { navigationCollections } from "@/lib/collections";
 import { formatPrice, imageUrl } from "@/lib/format";
 import { useCart } from "@/components/cart-provider";
 import type { SearchHit } from "@/types/catalog";
+import { SafeImage } from "@/components/safe-image";
 
 const quickLinks = [
   { label: "HOME", href: "/" },
@@ -237,7 +238,7 @@ export function SiteHeader() {
                         className="flex items-center gap-3 p-2 hover:bg-[#faf7f3]"
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={imageUrl(product.images[0], 160)} alt={product.title} loading="lazy" className="h-14 w-12 object-cover" />
+                        <SafeImage src={imageUrl(product.images[0], 160)} alt={product.title} className="h-14 w-12 object-cover" />
                         <span className="flex-1 text-xs font-medium">{product.title}</span>
                         <span className="text-xs text-[#862222]">{formatPrice(product.price)}</span>
                       </Link>
@@ -363,7 +364,7 @@ function CartDrawer({
                 <div key={line.key} className="flex gap-3 border-b border-[#f1ebe5] py-4">
                   <Link href={`/products/${line.handle}`} onClick={closeCart} className="shrink-0">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={line.image} alt={line.title} className="h-24 w-20 object-cover" />
+                    <SafeImage src={line.image} alt={line.title} className="h-24 w-20 object-cover" />
                   </Link>
                   <div className="flex flex-1 flex-col">
                     <Link

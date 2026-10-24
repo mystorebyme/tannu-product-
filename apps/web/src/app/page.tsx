@@ -6,6 +6,7 @@ import { EditorialBand, OccasionStrip } from "@/components/occasion-strip";
 import { getProducts, getCollection, products as allProducts } from "@/lib/store";
 import { imageUrl } from "@/lib/format";
 import { siteConfig } from "@/config/site";
+import { SafeImage } from "@/components/safe-image";
 
 export const metadata: Metadata = {
   title: "Liksha Clothing | Designer Anarkali Suits, Lehenga Choli & Suit Sets",
@@ -84,12 +85,12 @@ export default async function HomePage() {
               </p>
             </div>
             <div className="relative min-h-[520px] overflow-hidden">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <SafeImage
                 src={imageUrl(HERO_IMAGE, 1200)}
                 alt="Liksha Clothing designer anarkali suit"
-                className="absolute inset-0 h-full w-full object-cover object-[center_25%]"
+                loading="eager"
                 fetchPriority="high"
+                className="absolute inset-0 h-full w-full object-cover object-[center_25%]"
               />
             </div>
           </div>
@@ -97,12 +98,12 @@ export default async function HomePage() {
 
         <Link href="/collections/new-arrivals" className="block lg:hidden">
           <div className="relative mx-auto aspect-[3/4] w-full max-w-[768px] overflow-hidden bg-[#f3ece4]">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <SafeImage
               src={imageUrl(HERO_IMAGE, 900)}
               alt="Liksha Clothing designer anarkali suit"
-              className="h-full w-full object-cover object-top"
+              loading="eager"
               fetchPriority="high"
+              className="h-full w-full object-cover object-top"
             />
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-5 text-center">
               <p className="text-[10px] tracking-[.28em] text-[#f3d9b8] uppercase">Diwali 2026 · 8 Nov</p>

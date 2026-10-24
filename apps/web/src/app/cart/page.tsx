@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useCart } from "@/components/cart-provider";
 import { formatPrice, imageUrl } from "@/lib/format";
 import { COUPONS as COUPON_RULES } from "@liksha/validation";
+import { SafeImage } from "@/components/safe-image";
 
 // shared package se hi rules aate hain (frontend + backend same)
 const COUPONS: Record<string, { percent: number; label: string }> = Object.fromEntries(
@@ -73,7 +74,7 @@ export default function CartPage() {
                   <div className="col-span-2 flex gap-3 sm:col-span-1">
                     <Link href={`/products/${line.handle}`} className="shrink-0">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={line.image} alt={line.title} className="h-28 w-[84px] object-cover" />
+                      <SafeImage src={line.image} alt={line.title} className="h-28 w-[84px] object-cover" />
                     </Link>
                     <div className="flex flex-col">
                       <Link

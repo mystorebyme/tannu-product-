@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCart } from "@/components/cart-provider";
 import { discountPercent, formatPrice, imageUrl } from "@/lib/format";
 import type { Product } from "@/types/catalog";
+import { SafeImage } from "@/components/safe-image";
 
 export function ProductCard({ product }: { product: Product }) {
   const { addItem } = useCart();
@@ -14,12 +15,9 @@ export function ProductCard({ product }: { product: Product }) {
       <div className="relative overflow-hidden bg-[#f6f1ec]">
         <Link href={`/products/${product.handle}`} className="block" data-testid="product-card">
           <div className="relative aspect-[3/4] w-full">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <SafeImage
               src={imageUrl(product.images[0], 600)}
               alt={product.title}
-              loading="lazy"
-              decoding="async"
               className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
             />
           </div>

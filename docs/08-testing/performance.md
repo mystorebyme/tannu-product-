@@ -35,7 +35,9 @@ npx lighthouse https://likshaclothing.com --preset=desktop --only-categories=per
 
 - Shopify CDN images bade hain (`width=1000` master). Solution: `?width=600` param CDN par supported hai —
   Phase 2 me har product ke liye 3 sizes generate karke `srcset` dena.
-- Sandbox/preview me CDN images load nahi hoti (SSL) — placeholder SVG fallback.
+- Sandbox/restricted networks me CDN images load nahi hoti (SSL). Isliye har customer-facing image
+  `SafeImage` component se render hoti hai: ek `onError` par brand placeholder SVG dikhta hai, layout
+  nahi tootta (9 `<img>` jahan fallback matter nahi karta, wahan plain `<img>` hai).
 
 ## Regressions
 

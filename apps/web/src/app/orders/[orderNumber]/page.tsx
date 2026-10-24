@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getOrder } from "@/lib/orders";
 import { formatDate, formatPrice, imageUrl } from "@/lib/format";
 import { ORDER_STATUS_COPY } from "@/config/site";
+import { SafeImage } from "@/components/safe-image";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Order confirmed", robots: { index: false } };
@@ -128,11 +129,9 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
           <ul className="divide-y divide-[#f1ebe5]">
             {order.items.map((item) => (
               <li key={`${item.handle}-${item.size}`} className="flex gap-3 p-4">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <SafeImage
                   src={imageUrl(item.image, 200)}
                   alt={item.title}
-                  loading="lazy"
                   className="h-24 w-20 shrink-0 object-cover"
                 />
                 <div className="flex-1">

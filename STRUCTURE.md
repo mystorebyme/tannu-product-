@@ -9,7 +9,8 @@ liksha-ecommerce/
 │   │   ├── src/app/          routes: /, collections/[handle], products/[handle], cart,
 │   │   │                     checkout, search, orders/[orderNumber], policies/[slug],
 │   │   │                     pages/[slug], account + api/* route handlers
-│   │   ├── src/components/   header, footer, cards, detail, cart, checkout, forms
+│   │   ├── src/components/   header, footer, cards, detail, cart, checkout, forms,
+│   │   │                     safe-image (CDN failure → branded placeholder)
 │   │   ├── src/lib/          server data layer: store, orders, payments, messages, markdown, format
 │   │   ├── src/config/       site config (nav, support numbers, status copy)
 │   │   ├── src/content/      policy markdown

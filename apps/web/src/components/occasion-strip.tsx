@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getCollections } from "@/lib/store";
 import { imageUrl } from "@/lib/format";
+import { SafeImage } from "@/components/safe-image";
 
 export async function OccasionStrip() {
   const collections = await getCollections();
@@ -18,11 +19,9 @@ export async function OccasionStrip() {
         {collections.slice(0, 8).map((collection) => (
           <Link key={collection.handle} href={`/collections/${collection.handle}`} className="group block">
             <div className="relative aspect-[4/5] overflow-hidden bg-[#f3ece4]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <SafeImage
                 src={imageUrl(collection.image, 600)}
                 alt={collection.title}
-                loading="lazy"
                 className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.05]"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
@@ -44,11 +43,9 @@ export function EditorialBand() {
     <section className="bg-[#faf6f1] py-12">
       <div className="container-liksha grid items-center gap-8 lg:grid-cols-2">
         <div className="relative aspect-[4/3] overflow-hidden bg-[#f0e7dd]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <SafeImage
             src={imageUrl("https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_9512.webp", 900)}
             alt="Liksha Clothing signature craftsmanship"
-            loading="lazy"
             className="h-full w-full object-cover"
           />
         </div>

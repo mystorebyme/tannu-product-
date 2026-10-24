@@ -61,6 +61,11 @@ Runtime smoke (dev):
 - `data-testid` hooks added (product card, size options, add-to-cart, cart drawer, search, checkout, order number).
 - Health endpoints share the `{ data: … }` envelope; docs aligned with the real API (`quantity`, flat customer
   fields, `price-low/price-high/discount` sort keys, 400 vs 409 codes).
+- Customer-facing images render through `SafeImage` — a blocked/slow CDN now degrades to the brand
+  placeholder instead of a broken icon (preview sandboxes fail Shopify CDN TLS).
+- Security headers completed: HSTS on web + admin, CSP in report-only mode, `/api/health` and
+  `/api/v1/health` share the same envelope.
+- `allowedDevOrigins` added to both Next configs so sandbox/preview hosts can load HMR assets.
 - New: 73 tests, smoke suite, Playwright spec, CI + deploy workflows, infra scripts,
   15 skills, 6 agent guides, root README/STRUCTURE/AGENTS/CLAUDE, docs 04–11.
 
