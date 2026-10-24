@@ -37,6 +37,8 @@ async function discoverShop() {
     html.match(/shopId\\?":\s*\\?"(\d{5,})/)?.[1] ??
     "73883451696";
   const apiDomain = html.match(/api\.trustoo\.io|api2?\.trustoo\.io/)?.[0] ?? "api.trustoo.io";
+  const appProxy = [...new Set([...html.matchAll(/\/apps\/[a-z0-9/_-]+/gi)].map((m) => m[0]))].slice(0, 25);
+  diagnostics.appProxy = appProxy;
   // widget script se endpoint patterns nikalo
   const scriptUrls = [...new Set([...html.matchAll(/https:\/\/cdn\.shopify\.com\/extensions\/[^"'\s]*trustoo[^"'\s]*\.js/g)].map((m) => m[0]))];
   diagnostics.scriptUrls = scriptUrls.slice(0, 6);
@@ -45,9 +47,27 @@ async function discoverShop() {
   if (scriptUrl) {
     try {
       const js = await fetchText(scriptUrl);
-      endpoints = [...js.matchAll(/["'`](\/(?:api\/)?v?\d?\/?[a-z0-9/_-]*review[a-z0-9/_-]*)["'`]/gi)]
-        .map((match) => match[1])
-        .slice(0, 25);
+      const collected = new Set();
+      for (const url of scriptUrls) {
+        let body = url === scriptUrl ? js : "";
+        if (!body) {
+          try {
+            body = await fetchText(url);
+          } catch {
+            continue;
+          }
+        }
+        const patterns = [
+          /["'`](\/apps\/[a-z0-9/_.?=&-]+)["'`]/gi,
+          /["'`](\/(?:api\/)?v?\d?\/?[a-z0-9/_-]*review[a-z0-9/_-]*)["'`]/gi,
+          /https?:\/\/(?:api2?\.)?trustoo\.io[^"'\s`]*/gi,
+        ];
+        for (const pattern of patterns) {
+          for (const match of body.matchAll(pattern)) collected.add(match[0].replace(/^["'`]|["'`]$/g, ""));
+        }
+        diagnostics.urlsFound = [...collected].slice(0, 60);
+      }
+      endpoints = [...collected].filter((value) => value.startsWith("/")).slice(0, 25);
       diagnostics.endpoints = endpoints.slice(0, 40);
       diagnostics.scriptBytes = js.length;
       note("widget", `${scriptUrl.slice(-40)} → ${endpoints.length} endpoint hints`);
@@ -79,7 +99,11 @@ async function main() {
   const { shopId, apiDomain, endpoints } = await discoverShop();
   console.log({ shopId, apiDomain, endpoints: endpoints.slice(0, 8) });
 
+  const proxyCandidates = (diagnostics.appProxy ?? []).map(
+    (proxy) => `${STORE}${proxy}?shop=${shopId}&shop_id=${shopId}&page=1&limit=100`,
+  );
   const candidates = [
+    ...proxyCandidates,
     `https://${apiDomain}/api/v1/reviews?shop_id=${shopId}&page=1&limit=100`,
     `https://${apiDomain}/api/reviews?shop_id=${shopId}&page=1&limit=100`,
     `https://${apiDomain}/v1/reviews?shop_id=${shopId}&limit=100`,
