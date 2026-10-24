@@ -9,6 +9,8 @@ import { SafeImage } from "@/components/safe-image";
 import { PhoneOtp } from "@/components/phone-otp";
 import { useStoreSettings } from "@/components/store-settings-provider";
 import { API_AVAILABLE, apiUrl } from "@/lib/api-base";
+import { buildUpiUri } from "@/lib/upi";
+import { UpiQr } from "@/components/upi-qr";
 
 const indianStates = [
   "Andhra Pradesh", "Assam", "Bihar", "Chandigarh", "Chhattisgarh", "Delhi", "Goa", "Gujarat",
@@ -21,7 +23,7 @@ export function CheckoutForm() {
   const { lines, subtotal, count, clear, isOpen, closeCart, removeLine } = useCart();
   const router = useRouter();
   // festive sale me final price already 499–699 hai — koi extra coupon nahi
-  const { upiId, whatsapp } = useStoreSettings();
+  const { upiId, upiName, whatsapp } = useStoreSettings();
   const [whatsappHref, setWhatsappHref] = useState<string | null>(null);
   // sirf prepaid — COD option hata diya gaya hai
   const payment = "prepaid" as const;
@@ -348,14 +350,29 @@ export function CheckoutForm() {
               <strong>{formatPrice(total)}</strong> to UPI <strong className="break-all">{upiId}</strong> and share
               the screenshot there.
             </p>
-            <a
-              href={whatsappHref}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-2 inline-flex h-10 items-center bg-[#25D366] px-4 text-[10.5px] font-semibold tracking-[.12em] text-white uppercase"
-            >
-              Send order on WhatsApp
-            </a>
+            <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="w-[128px] shrink-0 rounded-sm border border-[#c9dcc9] bg-white p-1">
+                <UpiQr
+                  uri={buildUpiUri({
+                    vpa: upiId,
+                    name: upiName,
+                    amountPaise: total,
+                    note: "Liksha website order",
+                  })}
+                  alt={`UPI QR to pay ${formatPrice(total)}`}
+                  className="h-auto w-full"
+                  size={240}
+                />
+              </div>
+              <a
+                href={whatsappHref}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-10 items-center justify-center bg-[#25D366] px-4 text-[10.5px] font-semibold tracking-[.12em] text-white uppercase"
+              >
+                Send order on WhatsApp
+              </a>
+            </div>
           </div>
         ) : null}
 

@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { API_AVAILABLE, apiUrl } from "@/lib/api-base";
 import { formatPrice } from "@/lib/format";
 import { buildUpiUri } from "@/lib/upi";
+import { UpiQr } from "@/components/upi-qr";
 
 /**
  * UPI payment card — seedha owner ke UPI account me paisa.
@@ -32,7 +33,6 @@ export function UpiPayment({
   reference?: string | null;
   whatsapp: string;
 }) {
-  const [qr, setQr] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [value, setValue] = useState("");
   const [last4, setLast4] = useState("");
@@ -51,27 +51,6 @@ export function UpiPayment({
       }),
     [upiId, upiName, amount, orderNumber],
   );
-
-  useEffect(() => {
-    let active = true;
-    // qrcode sirf payment screen par load hota hai (bundle chhota rehta hai)
-    import("qrcode")
-      .then((mod) =>
-        (mod.default ?? mod).toDataURL(upiUri, {
-          margin: 1,
-          width: 320,
-          errorCorrectionLevel: "M",
-          color: { dark: "#862222", light: "#ffffff" },
-        }),
-      )
-      .then((url: string) => {
-        if (active) setQr(url);
-      })
-      .catch(() => undefined);
-    return () => {
-      active = false;
-    };
-  }, [upiUri]);
 
   async function copy() {
     try {
@@ -151,14 +130,11 @@ export function UpiPayment({
         <div className="grid gap-4 px-4 py-4 sm:grid-cols-[auto_1fr] sm:px-5">
           <div className="mx-auto w-full max-w-[190px] sm:mx-0">
             <div className="relative aspect-square w-full overflow-hidden rounded-sm border border-[#e6d3a8] bg-white p-1.5">
-              {qr ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={qr} alt={`UPI QR code to pay ${formatPrice(amount)} for order ${orderNumber}`} className="h-full w-full object-contain" />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-[10px] text-[#a49a90]">
-                  Loading QR…
-                </div>
-              )}
+              <UpiQr
+                uri={upiUri}
+                alt={`UPI QR code to pay ${formatPrice(amount)} for order ${orderNumber}`}
+                className="h-full w-full object-contain"
+              />
             </div>
             <p className="mt-1.5 text-center text-[10px] tracking-[.08em] text-[#8a7a5f] uppercase">
               Scan with any UPI app
