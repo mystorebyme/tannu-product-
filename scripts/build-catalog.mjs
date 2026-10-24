@@ -104,6 +104,56 @@ function smartTitleCase(value) {
     .join(" ");
 }
 
+/**
+ * Kuch source products ka "title" asal me supplier ki description hai
+ * ("Presenting New Crunchy Silk Fabric with Embroidery Sequence Dori and Zari
+ * Work Top with Dupatta Set Bell Bottom Pant Ready to Wear..."). Aise 8-10
+ * products par card/Google par bhadda lagta hai. Handle ke hisaab se ek saaf
+ * title — matlab wahi (fabric + kaam + product type), sirf padhne layak.
+ */
+const TITLE_OVERRIDES = new Map([
+  ["new-design-premium-anarkali-suit-set", "Premium Cotton Anarkali Suit Set"],
+  ["diyas-new-design-premium-anarkali-suit-set", "White Banarasi Silk Anarkali Suit Set"],
+  [
+    "presenting-new-crunchy-silk-fabric-with-embroidery-sequence-dori-and-jari-work-top-with-dupatta-set-bell-bottom-pent-ready-to-wear",
+    "Crunchy Silk Embroidered Anarkali Suit Set",
+  ],
+  [
+    "presenting-new-premium-quality-pure-romansilk-fabric-fully-flare-anarkali-with-fancy-dupapta-set-pent-ready-to-wear",
+    "Pure Romansilk Flare Anarkali Suit Set",
+  ],
+  [
+    "presenting-new-premium-quality-pure-romansilk-chanderi-fabric-fully-flare-anarkali-with-dupapta-set-pent-ready-to-wear",
+    "Romansilk Chanderi Flare Anarkali Suit Set",
+  ],
+  ["new-arrival-premium-designer-collection-fall-in-love-with-elegance", "Premium Designer Silk Suit Set"],
+  [
+    "presenting-new-frendy-silk-fabric-with-embroidery-sequence-dori-and-jari-work-top-with-duppta-set-bell-bottom-pent-ready-to-wear-1",
+    "Trendy Silk Embroidered Suit Set with Dupatta",
+  ],
+  [
+    "presenting-new-crunchy-silk-fabric-with-embroidery-sequence-and-jari-work-top-with-duppta-set-bell-bottom-pent-ready-to-wear-kb-300-tealblue-offwhite-wine",
+    "Wine Crunchy Silk Embroidered Gown Set",
+  ],
+  [
+    "presenting-new-frendy-silk-fabric-with-embroidery-sequence-dori-and-jari-work-top-with-duppta-set-bell-bottom-pent-ready-to-wear",
+    "Trendy Silk Zari Embroidered Suit Set",
+  ],
+  [
+    "presenting-new-high-premium-quality-pure-fox-georgette-fabric-fully-flare-anarkali-with-koti-dupatta-set-pent-ready-to-wear-k299",
+    "Fox Georgette Flare Anarkali with Koti Dupatta",
+  ],
+]);
+
+/** "Presenting New ..." jaisi supplier-title ko generic taur par bhi saaf karo */
+function stripSupplierTitle(title) {
+  return title
+    .replace(/^presenting\s+(new\s+)?/i, "")
+    .replace(/^new arrival\s*\|\s*/i, "")
+    .replace(/\s*[|]\s*premium designer collection.*$/i, "")
+    .trim();
+}
+
 function polishTitle(value) {
   const raw = stripEmoji(value).trim();
   // ALL CAPS detect **replacements se pehle** (apostrophe fix ke baad case badal jaata hai)
@@ -507,7 +557,8 @@ const readExtra = (name, key) => {
     if (usedHandles.has(handle)) handle = `${handle}-${source.id}`;
     usedHandles.add(handle);
 
-    const cleanTitle = polishTitle(source.title);
+    const overrideTitle = TITLE_OVERRIDES.get(source.handle);
+    const cleanTitle = overrideTitle ?? stripSupplierTitle(polishTitle(source.title));
     const descriptionHtml = sanitizeHtml(source.body_html) || `<p>${cleanTitle}</p>`;
     const details = htmlToLines(descriptionHtml).slice(0, 14);
     // `frontpage` live store ka home-page grouping hai (nav collection nahi) — featured flag me jaata hai
