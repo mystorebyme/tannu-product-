@@ -26,15 +26,21 @@ const fetchText = async (url, init = {}) => {
 
 const fetchJson = async (url) => JSON.parse(await fetchText(url));
 
+const diagnostics = { steps: [], endpoints: [], scriptUrls: [] };
+const note = (step, detail) => diagnostics.steps.push(`${step}: ${detail}`);
+
 async function discoverShop() {
   const html = await fetchText(`${STORE}/collections/new-arrivals`);
+  note("page", `${html.length} bytes`);
   const shopId =
     html.match(/shop_id\s*=\s*"?(\d{5,})"?/)?.[1] ??
     html.match(/shopId\\?":\s*\\?"(\d{5,})/)?.[1] ??
     "73883451696";
   const apiDomain = html.match(/api\.trustoo\.io|api2?\.trustoo\.io/)?.[0] ?? "api.trustoo.io";
   // widget script se endpoint patterns nikalo
-  const scriptUrl = html.match(/https:\/\/cdn\.shopify\.com\/extensions\/[^"']*trustoo[^"']*\.js/)?.[0];
+  const scriptUrls = [...new Set([...html.matchAll(/https:\/\/cdn\.shopify\.com\/extensions\/[^"'\s]*trustoo[^"'\s]*\.js/g)].map((m) => m[0]))];
+  diagnostics.scriptUrls = scriptUrls.slice(0, 6);
+  const scriptUrl = scriptUrls[0];
   let endpoints = [];
   if (scriptUrl) {
     try {
@@ -42,8 +48,12 @@ async function discoverShop() {
       endpoints = [...js.matchAll(/["'`](\/(?:api\/)?v?\d?\/?[a-z0-9/_-]*review[a-z0-9/_-]*)["'`]/gi)]
         .map((match) => match[1])
         .slice(0, 25);
+      diagnostics.endpoints = endpoints.slice(0, 40);
+      diagnostics.scriptBytes = js.length;
+      note("widget", `${scriptUrl.slice(-40)} → ${endpoints.length} endpoint hints`);
     } catch (error) {
       console.warn("widget script fetch failed:", error.message);
+      note("widget-error", error.message.slice(0, 120));
     }
   }
   return { shopId, apiDomain, endpoints };
@@ -88,7 +98,7 @@ async function main() {
         break;
       }
     } catch (error) {
-      console.log("miss:", url, error.message.slice(0, 60));
+      console.log("miss:", url, error.message.slice(0, 80));
     }
   }
 
@@ -119,6 +129,11 @@ async function main() {
     },
     products,
   };
+
+  fs.writeFileSync(
+    path.join(ROOT, "database/seeds/reviews/last-sync.json"),
+    `${JSON.stringify({ ...diagnostics, found: found.length, saved: total, at: new Date().toISOString() }, null, 1)}\n`,
+  );
 
   if (!total) {
     console.warn("reviews nahi mile — purani file waisi hi rahegi");
