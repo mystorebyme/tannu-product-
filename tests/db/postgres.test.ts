@@ -76,7 +76,13 @@ test("order Postgres me likha jaata hai, JSON file nahi banti", async () => {
 
 test("admin status + tracking Postgres me persist hote hain", async () => {
   const { orderNumber } = await orders.createOrder(payload);
-  await orders.updateOrderStatus(orderNumber, "confirmed", "admin@likshaclothing.com");
+  // payment se pehle dispatch status nahi badal sakta (owner rule)
+  await assert.rejects(
+    () => orders.updateOrderStatus(orderNumber, "confirmed", "admin@likshaclothing.com"),
+    /payment/i,
+  );
+  await orders.markPaymentPaid(orderNumber, "UTR-PG-1");
+  await orders.updateOrderStatus(orderNumber, "packed", "admin@likshaclothing.com");
   await orders.setTracking(
     orderNumber,
     { courier: "Delhivery", awb: "AWB-PG-1", url: "https://www.delhivery.com/track/AWB-PG-1" },
@@ -84,7 +90,8 @@ test("admin status + tracking Postgres me persist hote hain", async () => {
   );
 
   const reread = await orders.getOrder(orderNumber);
-  assert.equal(reread?.status, "confirmed");
+  assert.equal(reread?.status, "packed");
+  assert.equal(reread?.paymentStatus, "paid");
   assert.equal(reread?.tracking?.awb, "AWB-PG-1");
   assert.equal(reread?.tracking?.courier, "Delhivery");
 

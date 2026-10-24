@@ -13,8 +13,15 @@ on:
         required: false
         default: "https://liksha-clothing.vercel.app"
 
+  # default branch ke bahar se dispatch GitHub API me nahi milta — isliye commit
+  # message me [live-test] likhne par bhi chalta hai (manual, gated).
+  push:
+    branches:
+      - arena/f713eef1-tannu-product
+
 jobs:
   payments:
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[live-test]')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
