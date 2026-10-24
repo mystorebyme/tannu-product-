@@ -36,8 +36,7 @@ jobs:
 
       - name: Health (DB reachable?)
         run: |
-          URL="${{ inputs.base_url }}"
-          URL="${URL:-https://liksha-clothing.vercel.app}"
+          URL="${{ inputs.base_url || 'https://liksha-clothing.vercel.app' }}"
           echo "── $URL/api/health"
           code=$(curl -sS -o health.json -w "%{http_code}" --retry 3 --retry-all-errors --max-time 60 "$URL/api/health")
           echo "http: $code"
@@ -50,7 +49,7 @@ jobs:
       # order place → payment page → pending → UTR → processing → tracking page.
       - name: Payment + tracking flow (public APIs)
         env:
-          BASE_URL: ${{ inputs.base_url }}
+          BASE_URL: ${{ inputs.base_url || 'https://liksha-clothing.vercel.app' }}
           # khaali = admin steps skip (token public repo me nahi jaata)
           ADMIN_API_TOKEN: ""
         run: |

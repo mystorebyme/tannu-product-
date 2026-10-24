@@ -9,7 +9,7 @@
  * Server chahiye:  PORT=3100 ADMIN_API_TOKEN=dev-admin-token npm run start --workspace @liksha/web
  * Chalao:          BASE_URL=http://127.0.0.1:3100 ADMIN_API_TOKEN=dev-admin-token node tests/e2e/payments.mjs
  */
-const BASE = process.env.BASE_URL ?? "http://127.0.0.1:3000";
+const BASE = (process.env.BASE_URL || "http://127.0.0.1:3000").replace(/\/+$/, "");
 const TOKEN = process.env.ADMIN_API_TOKEN ?? "dev-admin-token";
 /** admin token na ho (public/live run) to admin wale steps skip — baaki flow test hota hai */
 const CAN_ADMIN = TOKEN.length > 0;
