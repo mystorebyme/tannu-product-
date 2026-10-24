@@ -183,6 +183,13 @@ const pages: Record<string, PageContent> = {
   },
 };
 
+/** content pages build ke waqt prerender hote hain (fast + static export safe) */
+export function generateStaticParams() {
+  return Object.keys(pages).map((slug) => ({ slug }));
+}
+
+export const dynamicParams = false;
+
 export async function generateMetadata({
   params,
 }: {

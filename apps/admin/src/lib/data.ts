@@ -74,15 +74,68 @@ export function getCollections() {
   return (catalogJson as unknown as Catalog).collections;
 }
 
-export function getOrders(): Order[] {
+/**
+ * Orders ka source of truth.
+ *
+ * - `STORE_API_URL` set hai (Render par storefront + admin alag services hain):
+ *   orders storefront se aate hain aur status/tracking wahi PATCH se update hoti hai —
+ *   admin kuch bhi apne paas duplicate nahi rakhta, isliye do panel kabhi out of sync nahi.
+ * - Local dev me `.data/orders.json` (storefront aur admin same repo me).
+ */
+const STORE_API = (process.env.STORE_API_URL ?? "").replace(/\/$/, "");
+const API_TOKEN = process.env.ADMIN_API_TOKEN ?? "";
+const remoteMode = () => Boolean(STORE_API && API_TOKEN);
+
+async function storeRequest<T>(pathName: string, init?: RequestInit): Promise<T | null> {
+  try {
+    const response = await fetch(`${STORE_API}${pathName}`, {
+      ...init,
+      headers: {
+        authorization: `Bearer ${API_TOKEN}`,
+        "content-type": "application/json",
+        ...(init?.headers ?? {}),
+      },
+      cache: "no-store",
+      signal: AbortSignal.timeout(12_000),
+    });
+    if (!response.ok) return null;
+    return (await response.json()) as T;
+  } catch {
+    return null;
+  }
+}
+
+export async function getOrders(): Promise<Order[]> {
+  if (remoteMode()) {
+    const payload = await storeRequest<{ orders: Order[] }>("/api/admin/orders");
+    return payload?.orders ?? [];
+  }
   return readRows<Order>("orders.json");
 }
 
-export function getOrder(orderNumber: string): Order | undefined {
-  return getOrders().find((order) => order.orderNumber === orderNumber);
+export async function getOrder(orderNumber: string): Promise<Order | undefined> {
+  if (remoteMode()) {
+    const payload = await storeRequest<{ order: Order }>(`/api/admin/orders/${encodeURIComponent(orderNumber)}`);
+    return payload?.order;
+  }
+  const rows = readRows<Order>("orders.json");
+  return rows.find((order) => order.orderNumber === orderNumber);
 }
 
-export function updateOrderStatus(orderNumber: string, status: Order["status"], actor: string, note?: string) {
+export async function updateOrderStatus(
+  orderNumber: string,
+  status: Order["status"],
+  actor: string,
+  note?: string,
+): Promise<Order | null> {
+  if (remoteMode()) {
+    const payload = await storeRequest<{ order: Order }>(`/api/admin/orders/${encodeURIComponent(orderNumber)}`, {
+      method: "PATCH",
+      body: JSON.stringify({ action: "status", status, actor, note }),
+    });
+    return payload?.order ?? null;
+  }
+
   const rows = readRows<Order>("orders.json");
   const index = rows.findIndex((order) => order.orderNumber === orderNumber);
   if (index === -1) return null;
@@ -102,11 +155,19 @@ export function updateOrderStatus(orderNumber: string, status: Order["status"], 
 }
 
 /** courier + AWB admin panel se set hote hain; customer track page yahi dikhata hai */
-export function setOrderTracking(
+export async function setOrderTracking(
   orderNumber: string,
   input: { courier?: string; awb?: string; url?: string },
   actor: string,
-) {
+): Promise<Order | null> {
+  if (remoteMode()) {
+    const payload = await storeRequest<{ order: Order }>(`/api/admin/orders/${encodeURIComponent(orderNumber)}`, {
+      method: "PATCH",
+      body: JSON.stringify({ action: "tracking", ...input, actor }),
+    });
+    return payload?.order ?? null;
+  }
+
   const rows = readRows<Order>("orders.json");
   const index = rows.findIndex((order) => order.orderNumber === orderNumber);
   if (index === -1) return null;
@@ -174,9 +235,14 @@ export function appendAudit(row: Omit<AuditRow, "at">) {
   writeRows("admin-audit.json", rows.slice(0, 500));
 }
 
+/** audit page ke liye sync snapshot — remote mode me orders page alag se dikhta hai */
+export function getOrdersSync(): Order[] {
+  return readRows<Order>("orders.json");
+}
+
 export function getAudit(limit = 100): AuditRow[] {
   const rows = readRows<AuditRow>("admin-audit.json");
-  const orderAudit = getOrders().flatMap((order) =>
+  const orderAudit = getOrdersSync().flatMap((order) =>
     order.audit.map((entry) => ({
       at: entry.at,
       actor: entry.actor,
@@ -249,10 +315,18 @@ export function createManualInvoice(
 /* ───────────────────────── payment verification (admin) ───────────────────────── */
 
 /** Manual UPI / bank transfer admin verify karta hai — tab order confirm hota hai. */
-export function verifyOrderPayment(
+export async function verifyOrderPayment(
   orderNumber: string,
   input: { reference: string; amount: number; actor: string; note?: string },
-): Order | null {
+): Promise<Order | null> {
+  if (remoteMode()) {
+    const payload = await storeRequest<{ order: Order }>(`/api/admin/orders/${encodeURIComponent(orderNumber)}`, {
+      method: "PATCH",
+      body: JSON.stringify({ action: "payment", ...input }),
+    });
+    return payload?.order ?? null;
+  }
+
   const rows = readRows<Order>("orders.json");
   const index = rows.findIndex((order) => order.orderNumber === orderNumber);
   if (index === -1) return null;
@@ -292,6 +366,7 @@ export function verifyOrderPayment(
   return rows[index]!;
 }
 
-export function pendingPayments() {
-  return getOrders().filter((order) => order.paymentStatus !== "paid" && order.paymentStatus !== "cod");
+export async function pendingPayments() {
+  const orders = await getOrders();
+  return orders.filter((order) => order.paymentStatus !== "paid" && order.paymentStatus !== "cod");
 }

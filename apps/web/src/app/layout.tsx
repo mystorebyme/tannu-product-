@@ -57,6 +57,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         />
       </head>
       <body className="text-[#2f2a25]">
+        {process.env.NEXT_PUBLIC_PREVIEW === "1" ? (
+          <div className="bg-[#862222] px-4 py-2 text-center text-[11px] tracking-[.06em] text-white">
+            GitHub Pages static preview — cart, checkout, payment aur order tracking Render
+            deployment par chalte hain.
+          </div>
+        ) : null}
         {/* JS band ho to scroll-reveal content chhupna nahi chahiye */}
         <noscript>
           <style>{".reveal-init{opacity:1!important;transform:none!important}"}</style>

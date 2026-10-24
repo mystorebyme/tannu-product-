@@ -19,7 +19,7 @@ const NEXT_STATUS: Record<string, string[]> = {
 
 export default async function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const order = getOrder(id);
+  const order = await getOrder(id);
   if (!order) notFound();
   const session = await getSession();
   const actions = NEXT_STATUS[order.status] ?? [];

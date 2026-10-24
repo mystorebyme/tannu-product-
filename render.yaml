@@ -1,0 +1,56 @@
+# Render blueprint — likshaclothing.onrender.com
+#
+# Do services: storefront (public) aur admin (private URL).
+# Render dashboard → New → Blueprint → repo select → ye file khud padh lega.
+#
+# Note: Render ke free plan par disk nahi milta, isliye `.data/` (JSON orders) har
+# deploy par reset ho sakta hai. Production me DATABASE_URL (Postgres) lagane par
+# orders DB me jaate hain — database/schema.sql + npm run db:migrate.
+
+services:
+  - type: web
+    name: liksha-storefront
+    runtime: node
+    plan: free
+    region: singapore
+    branch: arena/f713eef1-tannu-product
+    buildCommand: npm ci && npm run catalog:build && npm run build --workspace @liksha/web
+    startCommand: npm run start --workspace @liksha/web
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      - key: NEXT_PUBLIC_SITE_URL
+        value: https://likshaclothing.onrender.com
+      - key: OTP_DEV_MODE
+        value: "on"
+      - key: OTP_TOKEN_SECRET
+        generateValue: true
+      - key: ADMIN_API_TOKEN
+        generateValue: true
+
+  - type: web
+    name: liksha-admin
+    runtime: node
+    plan: free
+    region: singapore
+    branch: arena/f713eef1-tannu-product
+    buildCommand: npm ci && npm run catalog:build && npm run build --workspace @liksha/admin
+    startCommand: npm run start --workspace @liksha/admin
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      - key: ADMIN_SESSION_SECRET
+        generateValue: true
+      - key: ADMIN_EMAIL
+        value: admin@likshaclothing.com
+      - key: ADMIN_PASSWORD
+        sync: false # Render dashboard me set kariye
+      - key: NEXT_PUBLIC_STORE_URL
+        value: https://likshaclothing.onrender.com

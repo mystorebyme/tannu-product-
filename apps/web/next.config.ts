@@ -3,7 +3,19 @@ import type { NextConfig } from "next";
 /** Next dev sirf allowlisted hosts se HMR allow karta hai — sandbox preview isi list se aata hai. */
 const devOrigins = ["localhost:3000", "127.0.0.1:3000", "*.e2b.app", "3000-iu4hlpxjms5r4hq5t841e.e2b.app"];
 
+/** GitHub Pages par sirf static preview (browse). Poora site Render par chalta hai. */
+const preview = process.env.PAGES_PREVIEW === "1";
+const basePath = process.env.PAGES_BASE_PATH ?? "";
+
 const nextConfig: NextConfig = {
+  ...(preview
+    ? {
+        output: "export" as const,
+        trailingSlash: true,
+        basePath: basePath || undefined,
+        assetPrefix: basePath || undefined,
+      }
+    : {}),
   // shared packages ko TS source se compile karna hai (no separate build step)
   transpilePackages: ["@liksha/types", "@liksha/validation", "@liksha/api-client", "@liksha/ui"],
   allowedDevOrigins: devOrigins,
@@ -17,10 +29,12 @@ const nextConfig: NextConfig = {
       // Trustoo reviews ke customer photos
       { protocol: "https", hostname: "img.trustoo.io" },
     ],
+    ...(preview ? { unoptimized: true } : {}),
   },
   poweredByHeader: false,
   compress: true,
   async headers() {
+    if (preview) return [];
     return [
       {
         source: "/(.*)",

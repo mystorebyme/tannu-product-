@@ -86,7 +86,7 @@ export async function updateTrackingAction(formData: FormData) {
   const awb = String(formData.get("awb") ?? "");
   const url = String(formData.get("url") ?? "");
   const actor = session.email;
-  const updated = setOrderTracking(orderNumber, { courier, awb, url }, actor);
+  const updated = await setOrderTracking(orderNumber, { courier, awb, url }, actor);
   if (updated) {
     appendAudit({ actor, action: "order.tracking_updated", target: orderNumber, meta: { courier, awb } });
   }
@@ -100,7 +100,7 @@ export async function updateOrderStatusAction(formData: FormData) {
   const status = String(formData.get("status") ?? "") as OrderStatus;
   const note = String(formData.get("note") ?? "") || undefined;
   const actor = session.email;
-  const updated = updateOrderStatus(orderNumber, status, actor, note);
+  const updated = await updateOrderStatus(orderNumber, status, actor, note);
   // invalid transition par kuch nahi likha jaata — UI refresh par purana status hi dikhega
   if (updated) {
     appendAudit({ actor, action: `order.status.${status}`, target: orderNumber, meta: note ? { note } : undefined });
@@ -263,7 +263,7 @@ export async function verifyPaymentAction(formData: FormData) {
   const amountRupees = Number(formData.get("amount") ?? 0);
   const note = String(formData.get("note") ?? "").trim();
   if (!orderNumber || !reference) return;
-  const updated = verifyOrderPayment(orderNumber, {
+  const updated = await verifyOrderPayment(orderNumber, {
     reference,
     amount: Math.round((Number.isFinite(amountRupees) ? amountRupees : 0) * 100),
     actor: session.email,

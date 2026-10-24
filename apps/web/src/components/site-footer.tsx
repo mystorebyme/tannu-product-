@@ -96,12 +96,17 @@ export function SiteFooter() {
     <footer className="mt-16 bg-[#8a000e] text-white">
       <div className="mx-auto max-w-[1400px] px-4 pt-11 pb-8 lg:px-6">
         <div className="flex flex-col items-center">
-          <Link href="/" aria-label="Liksha Clothing home">
+          <Link
+            href="/"
+            aria-label="Liksha Clothing home"
+            className="inline-block rounded-sm bg-white px-4 py-2.5"
+          >
+            {/* live store ka hi logo — maroon band par white plate me, same to same */}
             <SafeImage
               src={logoWhiteUrl}
               fallbackSrc={logoFallback}
               alt="Liksha Clothing"
-              className="h-20 w-auto object-contain sm:h-24"
+              className="h-14 w-auto object-contain sm:h-16"
             />
           </Link>
         </div>

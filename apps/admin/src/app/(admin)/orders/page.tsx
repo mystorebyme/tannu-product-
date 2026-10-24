@@ -13,7 +13,8 @@ export default async function OrdersPage({
 }) {
   const { status = "all", q = "" } = await searchParams;
   const term = q.trim().toLowerCase();
-  const orders = getOrders()
+  const allOrders = await getOrders();
+  const orders = allOrders
     .filter((order) => (status === "all" ? true : order.status === status))
     .filter((order) =>
       term

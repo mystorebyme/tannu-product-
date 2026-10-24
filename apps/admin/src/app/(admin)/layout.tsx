@@ -7,7 +7,7 @@ import { getOrders } from "@/lib/data";
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const session = await requireSession();
-  const orders = getOrders();
+  const orders = await getOrders();
   const pending = orders.filter((order) => order.status === "placed").length;
 
   return (

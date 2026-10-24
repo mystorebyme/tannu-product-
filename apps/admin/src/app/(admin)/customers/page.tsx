@@ -3,8 +3,8 @@ import { dateOnly, inr } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
-export default function CustomersPage() {
-  const orders = getOrders();
+export default async function CustomersPage() {
+  const orders = await getOrders();
   const map = new Map<
     string,
     { name: string; phone: string; email: string; city: string; orders: number; spend: number; last: string }

@@ -3,8 +3,8 @@ import { inr } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
-export default function ReportsPage() {
-  const orders = getOrders();
+export default async function ReportsPage() {
+  const orders = await getOrders();
   const products = getProducts();
 
   const byMonth = new Map<string, { orders: number; revenue: number }>();

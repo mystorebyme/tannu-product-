@@ -6,8 +6,8 @@ import { dateTime, inr } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
-export default function DashboardPage() {
-  const orders = getOrders();
+export default async function DashboardPage() {
+  const orders = await getOrders();
   const products = getProducts();
   const messages = getMessages();
   const invoices = getManualInvoices();

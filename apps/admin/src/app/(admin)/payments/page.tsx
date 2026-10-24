@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
  * aur gateway accounts ki health dikhti hai (ek block ho to agla automatic use hota hai).
  */
 export default async function PaymentsPage() {
-  const orders = getOrders();
+  const orders = await getOrders();
   const session = await getSession();
   const pending = orders.filter((order) => order.paymentStatus === "pending" || order.paymentStatus === "processing");
   const paid = orders.filter((order) => order.paymentStatus === "paid");

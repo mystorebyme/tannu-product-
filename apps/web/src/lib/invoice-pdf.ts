@@ -2,7 +2,7 @@ import "server-only";
 
 import PDFDocument from "pdfkit";
 import { amountInWords } from "@/lib/amount-in-words";
-import { invoiceLogoBuffer } from "@/lib/invoice-logo";
+import { invoiceLogoImage } from "@/lib/invoice-logo";
 import type { InvoiceLine, InvoiceView } from "@/lib/invoice";
 
 const rupee = (paise: number) =>
@@ -20,7 +20,9 @@ const MUTED = "#6b6259";
 const LINE = "#dcd2c7";
 const SOFT = "#f7f2ec";
 
-export function renderInvoicePdf(view: InvoiceView): Promise<Buffer> {
+export async function renderInvoicePdf(view: InvoiceView): Promise<Buffer> {
+  // masthead logo pehle load (live store ka asli logo, fallback embedded)
+  const logo = await invoiceLogoImage();
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ size: "A4", margin: 36, bufferPages: true });
     const chunks: Buffer[] = [];
@@ -34,7 +36,7 @@ export function renderInvoicePdf(view: InvoiceView): Promise<Buffer> {
 
     /* ── masthead: brand logo (exact wordmark) + tax invoice label ── */
     try {
-      doc.image(invoiceLogoBuffer(), left, 34, { height: 46 });
+      doc.image(logo, left, 34, { fit: [150, 46], valign: "center" });
     } catch {
       // logo render fail ho jaye to bhi invoice rukna nahi chahiye
       doc.fillColor(MAROON).font("Helvetica-Bold").fontSize(19).text(view.seller.name.toUpperCase(), left, 44);

@@ -1,13 +1,15 @@
 /**
- * Brand wordmark — repo ke andar hi rakha hai (public/images/site).
- * CDN par depend nahi karta, isliye header, footer, invoice aur admin sab par
- * bilkul same logo dikhta hai (kabhi broken/adha nahi).
+ * Brand logo — live store (likshaclothing.com) ka hi asli asset, same to same.
+ * Local mirror (public/images/site/logo.png) sirf fallback hai agar CDN na mile.
  */
-export const logoUrl = "/images/site/logo.png";
-/** dark (maroon) footer ke liye white wordmark */
-export const logoWhiteUrl = "/images/site/logo-white.png";
-export const logoFallback = "/images/site/logo.svg";
-export const logoMark = "/images/site/mark.png";
+const LIVE_LOGO =
+  "https://www.likshaclothing.com/cdn/shop/files/Pink_Abstract_Watercolor_Creative_Logo_3_copy_2.png?v=1734092749";
+
+export const logoUrl = `${LIVE_LOGO}&width=400`;
+/** footer bhi wahi logo (maroon band par white plate ke saath) */
+export const logoWhiteUrl = `${LIVE_LOGO}&width=400`;
+export const logoFallback = "/images/site/logo.png";
+export const logoMark = `${LIVE_LOGO}&width=120`;
 
 export const siteConfig = {
   name: "Liksha Clothing",

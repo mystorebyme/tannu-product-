@@ -2,6 +2,9 @@ import type { MetadataRoute } from "next";
 import { collections, products } from "@/lib/store";
 import { siteConfig } from "@/config/site";
 
+// GitHub Pages preview (output: export) me static rehna chahiye
+export const dynamic = "force-static";
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = siteConfig.url.replace(/\/$/, "");
   const now = new Date();

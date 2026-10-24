@@ -5,6 +5,7 @@ import { ensureInvoice, getOrder } from "@/lib/orders";
 import { buildInvoice } from "@/lib/invoice";
 import { amountInWords } from "@/lib/amount-in-words";
 import { formatDate } from "@/lib/format";
+import { logoUrl } from "@/config/site";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "GST invoice", robots: { index: false, follow: false } };
@@ -96,7 +97,7 @@ export default async function InvoicePage({
               {/* brand logo — PDF par bhi yahi exact asset lagta hai */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/images/site/invoice-logo.png"
+                src={logoUrl}
                 alt={view.seller.name}
                 width={196}
                 height={57}
