@@ -106,3 +106,26 @@ Runtime smoke (dev):
 3. Final price spot-check (10 random products) with the owner.
 4. ~~Homepage hero copy for Diwali/November 2026~~ — done (Diwali 2026 copy + dispatch cutoff).
 5. Go-live checklist (`docs/10-deployment/go-live-checklist.md`).
+
+## Round 14 — brand + pre-domain pass (2026-10-24)
+
+- **Brand:** site naam `Designer Clothing`; owner ka final logo local assets me —
+  `logo-mark-128/192/512.png` (header badge, footer, favicon/Apple icon, PWA 512, invoice),
+  `logo.png` + `logo.webp` (lockup), `og-image.jpg` (1200×630). Ek hi component:
+  `apps/web/src/components/brand-lockup.tsx`.
+- **Hero:** `diwali-sale-70-2026.webp` (Diwali poster, mobile full + desktop panel, base-path safe).
+- **One env:** domain badalne par sirf `NEXT_PUBLIC_SITE_URL` — canonical/OG/`metadataBase`,
+  sitemap, robots, product JSON-LD offer URL, UPI callback aur WhatsApp order link sab isi se.
+  Product JSON-LD aur UPI callback se cloned-site URL (`likshaclothing.com`) hata diya.
+- **CORS:** Pages static preview se `POST /api/orders`, `/api/payments/manual`,
+  `/api/payments/failed` aur `GET /api/settings` Render par cross-origin jaate hain
+  (`apps/web/src/lib/cors.ts`, allowlist + preflight, koi `*` nahi). `STORE_API_URL` set hone
+  par Pages par order sach me banta hai (pehle browser block karta tha).
+- **Sheet ready:** `Designer Clothing — Store (Orders · Payments · Settings)` — 5 tabs,
+  headers + settings values bhare hue, owner email par Editor access. Link + setup:
+  `docs/09-devops/google-sheets.md`.
+- **Reviews:** sirf customer photos (product gallery ki image review me nahi) —
+  151 products / 1690 reviews / 147 photo reviews / 252 unique photos.
+- **Env checklist:** `docs/09-devops/domain-and-brand.md` §3 (Render vars, GitHub `STORE_API_URL`,
+  DNS/SSL, domain ke baad verification curl).
+- Verified: `npm run test:unit` → 84 pass, smoke → 82/0, Pages preview + CI green.
