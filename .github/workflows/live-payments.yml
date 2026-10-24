@@ -58,3 +58,11 @@ jobs:
             echo "::error title=live-flow::${line}"
           done
           exit $code
+
+      - name: Upload flow log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-flow-log
+          path: flow.log
+          if-no-files-found: warn
