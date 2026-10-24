@@ -10,16 +10,10 @@ import type {
 } from "@liksha/types";
 import { canTransition } from "@liksha/validation";
 import catalogJson from "../data/catalog.json";
-import { mergedProducts } from "@/lib/catalog-admin";
+import { mergedProducts } from "./catalog-admin";
+import { repoRoot as repoRootFromOverrides } from "./overrides";
 
-export function repoRoot(): string {
-  let dir = process.cwd();
-  for (let depth = 0; depth < 6; depth += 1) {
-    if (fs.existsSync(path.join(dir, "turbo.json")) || fs.existsSync(path.join(dir, ".git"))) return dir;
-    dir = path.dirname(dir);
-  }
-  return process.cwd();
-}
+export const repoRoot = repoRootFromOverrides;
 
 export function dataFile(name: string): string {
   const dir = process.env.DATA_DIR ?? path.join(repoRoot(), ".data");
@@ -330,7 +324,8 @@ export function getOrdersSync(): Order[] {
 /** audit feed — remote mode me orders storefront API se aate hain */
 export async function getAudit(limit = 100): Promise<AuditRow[]> {
   const rows = readRows<AuditRow>("admin-audit.json");
-  const orders = STORE_API ? await getOrders() : getOrdersSync();
+  // remote mode me orders ka lifecycle audit storefront se aata hai (admin ke paas copy nahi)
+  const orders = remoteMode() ? await getOrders() : getOrdersSync();
   const orderAudit = orders.flatMap((order) =>
     order.audit.map((entry) => ({
       at: entry.at,

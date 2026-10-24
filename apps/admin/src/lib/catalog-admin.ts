@@ -4,80 +4,20 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import type { Catalog, Product } from "@liksha/types";
 import catalogJson from "../data/catalog.json";
-import { repoRoot } from "@/lib/data";
+import {
+  catalogWritable,
+  readOverrides,
+  repoRoot,
+  overridesFile,
+  writeOverrides,
+  type OverridesFile,
+  type ProductOverride,
+} from "./overrides";
 
 const run = promisify(execFile);
 
-export type ProductOverride = {
-  title?: string;
-  price?: number;
-  compareAtPrice?: number | null;
-  inStock?: boolean;
-  featured?: boolean;
-  description?: string;
-  collections?: string[];
-  sizePricing?: Record<string, { price?: number; available?: boolean }>;
-  images?: string[];
-  updatedAt?: string;
-  updatedBy?: string;
-};
-
-export type OverridesFile = {
-  meta?: { note?: string; lastPublishedAt?: string | null };
-  products: Record<string, ProductOverride>;
-  collections: Record<string, { title?: string; subtitle?: string }>;
-  hidden: string[];
-};
-
-const EMPTY: OverridesFile = { products: {}, collections: {}, hidden: [] };
-
-export function overridesFile(): string {
-  return path.join(repoRoot(), "database/seeds/admin/overrides.json");
-}
-
-export function readOverrides(): OverridesFile {
-  const file = overridesFile();
-  if (!fs.existsSync(file)) return { ...EMPTY, products: {}, collections: {}, hidden: [] };
-  try {
-    const parsed = JSON.parse(fs.readFileSync(file, "utf8")) as Partial<OverridesFile>;
-    return {
-      meta: parsed.meta ?? EMPTY.meta,
-      products: parsed.products ?? {},
-      collections: parsed.collections ?? {},
-      hidden: parsed.hidden ?? [],
-    };
-  } catch {
-    return { ...EMPTY, products: {}, collections: {}, hidden: [] };
-  }
-}
-
-/**
- * Catalogue edits repo ke andar jaate hain (source of truth GitHub) aur publish
- * par catalogue rebuild hota hai. Deployed container me filesystem read-only hota
- * hai — wahan crash karne ke bajaye saaf message dikhate hain.
- */
-export function catalogWritable(): boolean {
-  try {
-    const root = repoRoot();
-    fs.accessSync(root, fs.constants.W_OK);
-    return fs.existsSync(path.join(root, "scripts/build-catalog.mjs"));
-  } catch {
-    return false;
-  }
-}
-
-function writeOverrides(next: OverridesFile): boolean {
-  if (!catalogWritable()) return false;
-  try {
-    const file = overridesFile();
-    fs.mkdirSync(path.dirname(file), { recursive: true });
-    fs.writeFileSync(`${file}.tmp`, `${JSON.stringify(next, null, 2)}\n`);
-    fs.renameSync(`${file}.tmp`, file);
-    return true;
-  } catch {
-    return false;
-  }
-}
+export { catalogWritable, overridesFile, readOverrides };
+export type { OverridesFile, ProductOverride };
 
 /** admin list/edit ke liye catalogue + overrides merged */
 export function mergedProducts(): Product[] {
