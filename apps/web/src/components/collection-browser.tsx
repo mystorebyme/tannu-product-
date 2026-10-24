@@ -33,6 +33,8 @@ export function CollectionBrowser({
   const [appending, setAppending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const firstRender = useRef(true);
+  /** neeche tak scroll karte hi agle products khud load ho jaate hain */
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   const buildQuery = useCallback(
     (nextSort: string, nextPrice: string) => {
@@ -119,6 +121,26 @@ export function CollectionBrowser({
     }
   }
 
+  const hasMore = items.length < total;
+
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node || !hasMore) return;
+    if (typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        if (appending || loading) return;
+        void loadMore();
+      },
+      { rootMargin: "500px 0px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+    // loadMore/items badalne par naya sentinel observe karna zaroori hai
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasMore, appending, loading, items.length, sort, price]);
+
   return (
     <div className="container-liksha">
       <CollectionToolbar
@@ -154,18 +176,23 @@ export function CollectionBrowser({
 
             {error ? <p className="mt-5 text-center text-[12px] text-[#a02020]">{error}</p> : null}
 
-            {items.length < total ? (
-              <div className="mt-10 text-center">
+            {hasMore ? (
+              <div ref={sentinelRef} className="mt-10 text-center" data-testid="auto-load-sentinel">
                 <button
                   type="button"
-                  onClick={loadMore}
+                  onClick={() => void loadMore()}
                   disabled={appending || loading}
                   className="border border-[#862222] px-8 py-3 text-[11px] font-semibold tracking-[.16em] text-[#862222] uppercase transition hover:bg-[#862222] hover:text-white disabled:opacity-50"
                 >
                   {appending ? "Loading…" : `Load more (${total - items.length} left)`}
                 </button>
+                <p className="mt-2 text-[10.5px] text-[#a49a90]">Scroll karte hi agle styles khud load ho jaate hain</p>
               </div>
-            ) : null}
+            ) : (
+              <p className="mt-10 text-center text-[11px] tracking-[.14em] text-[#a49a90] uppercase">
+                All {total} styles loaded
+              </p>
+            )}
           </>
         )}
       </div>

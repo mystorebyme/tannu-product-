@@ -237,6 +237,26 @@ function splitColour(title) {
 /** group key: colour ke bina title ka slug */
 const groupKeyOf = (base) => base.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
+/**
+ * Admin panel se kiye gaye edits. Admin `database/seeds/admin/overrides.json`
+ * likhta hai aur publish par build dobara chalta hai — website turant wahi dikhata hai.
+ */
+const OVERRIDES_FILE = path.join(ROOT, "database/seeds/admin/overrides.json");
+
+function adminOverrides() {
+  if (!fs.existsSync(OVERRIDES_FILE)) return { products: {}, collections: {}, hidden: [] };
+  try {
+    const parsed = JSON.parse(fs.readFileSync(OVERRIDES_FILE, "utf8"));
+    return {
+      products: parsed.products ?? {},
+      collections: parsed.collections ?? {},
+      hidden: parsed.hidden ?? [],
+    };
+  } catch {
+    return { products: {}, collections: {}, hidden: [] };
+  }
+}
+
 /** Live Trustoo sync ka rating/count — cards aur PDP wahi dikhate hain. */
 function reviewRatings() {
   const ratings = new Map();
@@ -370,6 +390,43 @@ function reviewRatings() {
     stats.images += images.length;
   }
 
+  /* ---------- admin overrides (admin panel se edit) ---------- */
+  const overrides = adminOverrides();
+  const hiddenHandles = new Set(overrides.hidden ?? []);
+  let overriddenCount = 0;
+  for (const product of products) {
+    const patch = overrides.products?.[product.handle];
+    if (!patch) continue;
+    overriddenCount += 1;
+    if (typeof patch.title === "string" && patch.title.trim()) product.title = patch.title.trim();
+    if (Number.isInteger(patch.price) && patch.price > 0) product.price = patch.price;
+    if (patch.compareAtPrice === null) product.compareAtPrice = null;
+    else if (Number.isInteger(patch.compareAtPrice) && patch.compareAtPrice > 0) product.compareAtPrice = patch.compareAtPrice;
+    if (typeof patch.inStock === "boolean") product.inStock = patch.inStock;
+    if (typeof patch.featured === "boolean") product.featured = patch.featured;
+    if (typeof patch.description === "string" && patch.description.trim()) {
+      product.description = patch.description.trim();
+    }
+    if (patch.collections && Array.isArray(patch.collections)) {
+      product.collections = [...new Set(patch.collections.filter((handle) => typeof handle === "string"))].sort();
+    }
+    if (patch.sizePricing && typeof patch.sizePricing === "object") {
+      for (const [size, pricing] of Object.entries(patch.sizePricing)) {
+        if (!product.sizePricing[size]) continue;
+        if (Number.isInteger(pricing?.price) && pricing.price > 0) product.sizePricing[size].price = pricing.price;
+        if (typeof pricing?.available === "boolean") {
+          product.sizePricing[size].available = pricing.available;
+          const variant = product.variants?.find((candidate) => candidate.size === size);
+          if (variant) variant.available = pricing.available;
+        }
+      }
+    }
+    if (patch.images && Array.isArray(patch.images) && patch.images.length) {
+      product.images = patch.images.filter((image) => typeof image === "string" && image.startsWith("https://"));
+    }
+  }
+  if (overriddenCount) console.log(`admin overrides applied: ${overriddenCount} products`);
+
   /* ---------- colour grouping: same design, different colours -> one product ---------- */
   const groupMap = new Map();
   for (const product of products) {
@@ -432,7 +489,9 @@ function reviewRatings() {
 
   /** listed products: ek group ka sirf representative (cards duplicate na dikhein) */
   const listedProducts = products.filter(
-    (product) => !product.colourGroup || colourGroups[product.colourGroup]?.handle === product.handle,
+    (product) =>
+      !hiddenHandles.has(product.handle) &&
+      (!product.colourGroup || colourGroups[product.colourGroup]?.handle === product.handle),
   );
   const listedSet = new Set(listedProducts);
 
@@ -450,17 +509,25 @@ function reviewRatings() {
   };
 
   const collections = [];
+  // "Shop by edit" circles: har circle ki photo alag honi chahiye — ek hi image
+  // New Arrivals / Anarkali / Liksha's Choice me repeat nahi hogi.
+  const usedCircleImages = new Set();
   for (const live of liveCollections) {
     const copy = COLLECTION_COPY[live.handle];
     if (!copy) continue; // frontpage = home ka internal collection, nav me nahi
-    const firstProduct = products.find(
+    const candidates = products.filter(
       (product) => product.collections.includes(live.handle) && product.images.length && listedSet.has(product),
     );
+    // pehla aisa product jiski photo kisi doosre circle me use nahi hui
+    const uniquePick = candidates.find((product) => !usedCircleImages.has(product.images[0]));
+    const picked = uniquePick ?? candidates[0];
+    if (picked) usedCircleImages.add(picked.images[0]);
+    const collectionOverride = overrides.collections?.[live.handle] ?? {};
     collections.push({
       handle: live.handle,
-      title: copy.title,
-      subtitle: copy.subtitle,
-      image: firstProduct?.images[0] ?? products[0]?.images[0] ?? "",
+      title: collectionOverride.title || copy.title,
+      subtitle: collectionOverride.subtitle || copy.subtitle,
+      image: picked?.images[0] ?? "",
       sortOrder: copy.sortOrder,
       productCount: listedProducts.filter((product) => product.collections.includes(live.handle)).length,
     });

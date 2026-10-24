@@ -135,8 +135,6 @@ export function setOrderTracking(
 
 export type StoreSettings = {
   announcement: string;
-  codLimit: number;
-  codFee: number;
   freeShipping: boolean;
   upiId: string;
   gstin: string;
@@ -145,9 +143,7 @@ export type StoreSettings = {
 };
 
 const DEFAULT_SETTINGS: StoreSettings = {
-  announcement: "Diwali dispatch · Free shipping across India · COD under Rs. 3,500",
-  codLimit: 350000,
-  codFee: 5000,
+  announcement: "Festive dispatch · Free shipping across India · Express delivery on prepaid orders",
   freeShipping: true,
   upiId: "likshaclothing@upi",
   gstin: "27AAAAA0000A1Z5",
@@ -196,4 +192,106 @@ export function getMessages() {
   return readRows<{ id: string; createdAt: string; name: string; email: string; message: string; handled: boolean }>(
     "messages.json",
   );
+}
+
+/* ───────────────────────── manual invoice (admin) ─────────────────────────
+ * Owner apne hi store ke naam par invoice bana ke WhatsApp par bhej sakta hai
+ * (kisi aur ke naam/address par bhi). Ye invoice series alag rehti hai taaki
+ * real orders ki GST numbering se clash na ho. */
+
+export type ManualInvoiceItem = { title: string; size?: string; quantity: number; price: number };
+
+export type ManualInvoice = {
+  number: string;
+  createdAt: string;
+  createdBy: string;
+  customerName: string;
+  phone: string;
+  email?: string;
+  address: string;
+  city: string;
+  state: string;
+  pincode: string;
+  items: ManualInvoiceItem[];
+  subtotal: number;
+  total: number;
+  notes?: string;
+  orderRef?: string;
+};
+
+export function getManualInvoices(): ManualInvoice[] {
+  return readRows<ManualInvoice>("manual-invoices.json");
+}
+
+export function getManualInvoice(number: string): ManualInvoice | undefined {
+  return getManualInvoices().find((invoice) => invoice.number === number);
+}
+
+export function createManualInvoice(
+  input: Omit<ManualInvoice, "number" | "createdAt" | "subtotal" | "total">,
+): ManualInvoice {
+  const rows = getManualInvoices();
+  const sequence = rows.length + 1;
+  const createdAt = new Date().toISOString();
+  const subtotal = input.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const invoice: ManualInvoice = {
+    ...input,
+    number: `LK/MANUAL/${String(sequence).padStart(4, "0")}`,
+    createdAt,
+    subtotal,
+    total: subtotal,
+  };
+  rows.unshift(invoice);
+  writeRows("manual-invoices.json", rows);
+  return invoice;
+}
+
+/* ───────────────────────── payment verification (admin) ───────────────────────── */
+
+/** Manual UPI / bank transfer admin verify karta hai — tab order confirm hota hai. */
+export function verifyOrderPayment(
+  orderNumber: string,
+  input: { reference: string; amount: number; actor: string; note?: string },
+): Order | null {
+  const rows = readRows<Order>("orders.json");
+  const index = rows.findIndex((order) => order.orderNumber === orderNumber);
+  if (index === -1) return null;
+  const current = rows[index]!;
+  if (current.paymentStatus === "paid") return current;
+  const now = new Date().toISOString();
+  const nextStatus = current.status === "placed" && canTransition("placed", "confirmed") ? "confirmed" : current.status;
+  rows[index] = {
+    ...current,
+    paymentStatus: "paid",
+    status: nextStatus,
+    payment: {
+      gateway: current.payment?.gateway ?? "manual-upi",
+      reference: input.reference,
+      upiUri: current.payment?.upiUri ?? null,
+      amount: input.amount,
+      status: "paid",
+      createdAt: current.payment?.createdAt ?? now,
+      verifiedAt: now,
+      verifiedBy: input.actor,
+      failureReason: null,
+    },
+    audit: [
+      {
+        at: now,
+        actor: input.actor,
+        action: "payment.verified.manual",
+        meta: { reference: input.reference, amount: input.amount, note: input.note },
+      },
+      ...(nextStatus !== current.status
+        ? [{ at: now, actor: input.actor, action: "order.status.confirmed", meta: { reason: "payment verified" } }]
+        : []),
+      ...current.audit,
+    ],
+  };
+  writeRows("orders.json", rows);
+  return rows[index]!;
+}
+
+export function pendingPayments() {
+  return getOrders().filter((order) => order.paymentStatus !== "paid" && order.paymentStatus !== "cod");
 }

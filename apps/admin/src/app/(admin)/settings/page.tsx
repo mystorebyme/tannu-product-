@@ -13,7 +13,7 @@ export default async function SettingsPage() {
       <div className="topbar">
         <div>
           <h1>Settings</h1>
-          <p>Shipping, COD, payment aur support details</p>
+          <p>Shipping, payment aur support details (prepaid only — COD nahi)</p>
         </div>
       </div>
 
@@ -31,14 +31,6 @@ export default async function SettingsPage() {
             <input id="announcement" name="announcement" defaultValue={settings.announcement} />
           </div>
           <div className="row">
-            <div className="field">
-              <label htmlFor="codLimit">COD limit (₹)</label>
-              <input id="codLimit" name="codLimit" type="number" defaultValue={settings.codLimit / 100} />
-            </div>
-            <div className="field">
-              <label htmlFor="codFee">COD fee (₹)</label>
-              <input id="codFee" name="codFee" type="number" defaultValue={settings.codFee / 100} />
-            </div>
             <div className="field">
               <label htmlFor="freeShipping">Free shipping</label>
               <label className="small" style={{ textTransform: "none", letterSpacing: 0 }}>

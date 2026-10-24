@@ -78,13 +78,18 @@ export function createOrder(payload: CreateOrderPayload): Order {
       );
     }
     const size = line.size;
+    // size ke hisaab se price (XL +100 … 5XL +500) — cart me jo dikhta hai wahi charge hota hai
+    const sizePricing = product.sizePricing?.[size];
+    if (sizePricing && sizePricing.available === false) {
+      throw new OrderError(`${product.title} ka size ${size} abhi sold out hai.`, 400, "size_unavailable");
+    }
     return {
       handle: product.handle,
       title: product.title,
       image: product.images[0] ?? "",
       size,
       quantity,
-      price: product.price,
+      price: sizePricing?.price ?? product.price,
     };
   });
 
@@ -118,6 +123,19 @@ export function createOrder(payload: CreateOrderPayload): Order {
     couponCode: payload.couponCode ?? null,
     paymentMethod: payload.paymentMethod,
     paymentStatus: payload.paymentMethod === "cod" ? "cod" : "pending",
+    payment:
+      payload.paymentMethod === "cod"
+        ? null
+        : {
+            gateway: "pending",
+            reference: null,
+            amount: total,
+            status: "pending",
+            createdAt: now,
+            verifiedAt: null,
+            verifiedBy: null,
+            failureReason: null,
+          },
     status: "placed",
     audit: [
       {
@@ -336,4 +354,129 @@ export function rememberIdempotency(key: string, orderNumberValue: string): void
   const rows = readIdempotency().filter((row) => row.key !== key);
   rows.push({ key, orderNumber: orderNumberValue, at: new Date().toISOString() });
   writeIdempotency(rows);
+}
+
+/* ─────────────────────── payment verification (server-only) ───────────────────────
+ * Client kabhi "paid" nahi bol sakta: yahan sirf backend likhta hai — webhook +
+ * gateway API verify ke baad. Tabhi order "placed" se "confirmed" jaata hai. */
+
+export function applyPaymentIntent(
+  orderNumber: string,
+  intent: { gateway: string; reference: string | null; upiUri: string | null; amount: number },
+): Order | null {
+  const orders = readAll();
+  const index = orders.findIndex((order) => order.orderNumber === orderNumber);
+  if (index === -1) return null;
+  const order = orders[index]!;
+  if (order.paymentStatus === "paid") return order; // dobara intent banane ki zaroorat nahi
+  orders[index] = {
+    ...order,
+    payment: {
+      gateway: intent.gateway,
+      reference: intent.reference,
+      upiUri: intent.upiUri,
+      amount: intent.amount,
+      status: "processing",
+      createdAt: order.payment?.createdAt ?? new Date().toISOString(),
+      verifiedAt: null,
+      verifiedBy: null,
+      failureReason: null,
+    },
+  };
+  writeAll(orders);
+  return orders[index]!;
+}
+
+/** Backend verify ke baad hi called hota hai. Idempotent: dobara aane par kuch nahi badalta. */
+export function confirmPayment(
+  orderNumber: string,
+  input: { gateway: string; reference: string | null; amount: number; actor: string },
+): { order: Order; alreadyPaid: boolean } | null {
+  const orders = readAll();
+  const index = orders.findIndex((order) => order.orderNumber === orderNumber);
+  if (index === -1) return null;
+  const order = orders[index]!;
+  if (order.paymentStatus === "paid") return { order, alreadyPaid: true };
+
+  const now = new Date().toISOString();
+  const paidOrder: Order = {
+    ...order,
+    paymentStatus: "paid",
+    // payment mil gaya -> order confirm (agar already aage nahi badh chuka)
+    status: order.status === "placed" && canTransition("placed", "confirmed") ? "confirmed" : order.status,
+    payment: {
+      gateway: input.gateway,
+      reference: input.reference,
+      upiUri: order.payment?.upiUri ?? null,
+      amount: input.amount,
+      status: "paid",
+      createdAt: order.payment?.createdAt ?? now,
+      verifiedAt: now,
+      verifiedBy: input.actor,
+      failureReason: null,
+    },
+    audit: [
+      {
+        at: now,
+        actor: input.actor,
+        action: "payment.verified",
+        meta: { gateway: input.gateway, reference: input.reference, amount: input.amount },
+      },
+      ...(order.status === "placed"
+        ? [{ at: now, actor: input.actor, action: "order.status.confirmed", meta: { reason: "payment received" } }]
+        : []),
+      ...order.audit,
+    ],
+  };
+  orders[index] = paidOrder;
+  writeAll(orders);
+  return { order: paidOrder, alreadyPaid: false };
+}
+
+export function failPayment(
+  orderNumber: string,
+  input: { gateway: string; reference: string | null; reason: string },
+): Order | null {
+  const orders = readAll();
+  const index = orders.findIndex((order) => order.orderNumber === orderNumber);
+  if (index === -1) return null;
+  const order = orders[index]!;
+  if (order.paymentStatus === "paid") return order;
+  const now = new Date().toISOString();
+  orders[index] = {
+    ...order,
+    paymentStatus: "failed",
+    payment: {
+      gateway: input.gateway,
+      reference: input.reference,
+      amount: order.payment?.amount ?? order.total,
+      status: "failed",
+      createdAt: order.payment?.createdAt ?? now,
+      verifiedAt: null,
+      verifiedBy: null,
+      upiUri: order.payment?.upiUri ?? null,
+      failureReason: input.reason.slice(0, 200),
+    },
+    audit: [
+      { at: now, actor: "gateway", action: "payment.failed", meta: { gateway: input.gateway, reason: input.reason } },
+      ...order.audit,
+    ],
+  };
+  writeAll(orders);
+  return orders[index]!;
+}
+
+/** Customer-facing status — payment ka internal detail nahi jaata */
+export function paymentStatusFor(orderNumber: string) {
+  const order = readAll().find((candidate) => candidate.orderNumber === orderNumber);
+  if (!order) return null;
+  return {
+    orderNumber: order.orderNumber,
+    status: order.status,
+    paymentStatus: order.paymentStatus,
+    amount: order.payment?.amount ?? order.total,
+    gateway: order.payment?.gateway ?? null,
+    upiUri: order.paymentStatus === "paid" ? null : (order.payment?.upiUri ?? null),
+    verifiedAt: order.payment?.verifiedAt ?? null,
+  };
 }

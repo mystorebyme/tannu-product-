@@ -1,17 +1,28 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getProducts } from "@/lib/data";
+import { getCollections, getProducts } from "@/lib/data";
 import { inr } from "@/lib/format";
-import { updatePriceAction, updateStockAction } from "@/app/actions";
+import { publishCatalogAction, saveProductEditAction, toggleProductVisibilityAction } from "@/app/actions";
+import { mergedProduct, overrideStats } from "@/lib/catalog-admin";
 import { getSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * Product edit — yahan se website ka product poora manage hota hai:
+ * title, price, MRP, stock, featured, description, collections, size-wise price
+ * aur photos. Save "publish" ke baad live storefront par chala jaata hai.
+ */
 export default async function ProductEditPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const product = getProducts().find((item) => item.handle === decodeURIComponent(id));
+  const handle = decodeURIComponent(id);
+  const product = mergedProduct(handle);
   if (!product) notFound();
   const session = await getSession();
+  const allCollections = getCollections();
+  const listed = new Set(product.collections);
+  const stats = overrideStats();
+  const storeUrl = process.env.NEXT_PUBLIC_STORE_URL ?? "http://localhost:3000";
 
   return (
     <>
@@ -23,114 +34,173 @@ export default async function ProductEditPage({ params }: { params: Promise<{ id
           <h1>{product.title}</h1>
           <p className="mono small">{product.handle}</p>
         </div>
-        <a className="btn" href={`${process.env.NEXT_PUBLIC_STORE_URL ?? "http://localhost:3000"}/products/${product.handle}`} target="_blank" rel="noreferrer">
-          View on store
-        </a>
+        <div className="actions">
+          <form action={publishCatalogAction}>
+            <button className="btn btn-primary btn-sm" type="submit">
+              Publish to website
+            </button>
+          </form>
+          <a className="btn" href={`${storeUrl}/products/${product.handle}`} target="_blank" rel="noreferrer">
+            View on store
+          </a>
+        </div>
       </div>
 
-      <div className="row">
-        <div className="panel" style={{ marginTop: 0 }}>
-          <div className="panel-head">
-            <h2>Catalogue details</h2>
-          </div>
-          <div className="panel-body">
-            <div className="row">
-              <div className="field">
-                <label>Price (₹)</label>
-                <form action={updatePriceAction} className="actions">
-                  <input type="hidden" name="handle" value={product.handle} />
-                  <input type="hidden" name="actor" value={session?.email ?? "admin"} />
-                  <input
-                    name="price"
-                    type="number"
-                    min="1"
-                    step="1"
-                    defaultValue={Math.round(product.price / 100)}
-                    style={{ width: 140 }}
-                  />
-                  <button className="btn btn-sm btn-primary" type="submit">
-                    Save price
-                  </button>
-                </form>
-                <p className="small muted" style={{ marginTop: 6 }}>
-                  Current: {inr(product.price)} · MRP {product.compareAtPrice ? inr(product.compareAtPrice) : "—"}
-                </p>
-              </div>
-              <div className="field">
-                <label>Stock</label>
-                <form action={updateStockAction} className="actions">
-                  <input type="hidden" name="handle" value={product.handle} />
-                  <input type="hidden" name="inStock" value={product.inStock ? "false" : "true"} />
-                  <input type="hidden" name="actor" value={session?.email ?? "admin"} />
-                  <button className="btn btn-sm" type="submit">
-                    {product.inStock ? "Mark out of stock" : "Restock"}
-                  </button>
-                </form>
-                <p className="small muted" style={{ marginTop: 6 }}>
-                  Status: {product.inStock ? "In stock" : "Out of stock"}
-                </p>
-              </div>
-            </div>
+      {stats.lastPublishedAt ? (
+        <p className="small muted">
+          Last published: {new Date(stats.lastPublishedAt).toLocaleString("en-IN")} · edits pending publish:{" "}
+          {stats.edited}
+        </p>
+      ) : null}
 
-            <table style={{ marginTop: 8 }}>
+      <form action={saveProductEditAction} className="panel">
+        <div className="panel-head">
+          <h2>Catalogue details</h2>
+          <button className="btn btn-primary btn-sm" type="submit">
+            Save product
+          </button>
+        </div>
+        <div className="panel-body">
+          <input type="hidden" name="handle" value={product.handle} />
+          <input type="hidden" name="actor" value={session?.email ?? "admin"} />
+
+          <div className="field">
+            <label htmlFor="title">Title</label>
+            <input id="title" name="title" defaultValue={product.title} required />
+          </div>
+
+          <div className="row">
+            <div className="field">
+              <label htmlFor="price">Selling price (₹)</label>
+              <input id="price" name="price" type="number" min="1" step="1" defaultValue={Math.round(product.price / 100)} />
+              <p className="small muted" style={{ marginTop: 4 }}>
+                Current: {inr(product.price)}
+              </p>
+            </div>
+            <div className="field">
+              <label htmlFor="compareAtPrice">MRP (₹)</label>
+              <input
+                id="compareAtPrice"
+                name="compareAtPrice"
+                type="number"
+                min="0"
+                step="1"
+                defaultValue={product.compareAtPrice ? Math.round(product.compareAtPrice / 100) : ""}
+              />
+            </div>
+            <div className="field">
+              <label>Status</label>
+              <label className="small" style={{ textTransform: "none", letterSpacing: 0 }}>
+                <input type="checkbox" name="inStock" defaultChecked={product.inStock} style={{ width: "auto", marginRight: 8 }} />
+                In stock
+              </label>
+              <label className="small" style={{ textTransform: "none", letterSpacing: 0 }}>
+                <input type="checkbox" name="featured" defaultChecked={product.featured} style={{ width: "auto", marginRight: 8 }} />
+                Featured on home
+              </label>
+            </div>
+          </div>
+
+          <div className="field">
+            <label htmlFor="description">Short description</label>
+            <textarea id="description" name="description" rows={3} defaultValue={product.description} />
+          </div>
+
+          <div className="field">
+            <label>Collections</label>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
+              {allCollections.map((collection) => (
+                <label key={collection.handle} className="small" style={{ textTransform: "none", letterSpacing: 0 }}>
+                  <input
+                    type="checkbox"
+                    name="collections"
+                    value={collection.handle}
+                    defaultChecked={listed.has(collection.handle)}
+                    style={{ width: "auto", marginRight: 6 }}
+                  />
+                  {collection.title}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="field">
+            <label>Size-wise price aur availability</label>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>Size</th>
+                  <th>Price (₹)</th>
+                  <th>Available</th>
+                </tr>
+              </thead>
               <tbody>
-                <tr>
-                  <td className="muted">Category</td>
-                  <td>{product.category}</td>
-                </tr>
-                <tr>
-                  <td className="muted">Fabric</td>
-                  <td>{product.fabric}</td>
-                </tr>
-                <tr>
-                  <td className="muted">Colour</td>
-                  <td>{product.color}</td>
-                </tr>
-                <tr>
-                  <td className="muted">Sizes</td>
-                  <td>{product.sizes.join(", ")}</td>
-                </tr>
-                <tr>
-                  <td className="muted">Collections</td>
-                  <td>{product.collections.join(", ")}</td>
-                </tr>
-                <tr>
-                  <td className="muted">Rating</td>
-                  <td>
-                    {product.rating} ({product.reviewCount} reviews)
-                  </td>
-                </tr>
+                {product.sizes.map((size) => {
+                  const pricing = product.sizePricing?.[size];
+                  const key = size.replace(/ /g, "_");
+                  return (
+                    <tr key={size}>
+                      <td>{size}</td>
+                      <td>
+                        <input
+                          type="number"
+                          name={`size_${key}`}
+                          min="0"
+                          step="1"
+                          defaultValue={pricing ? Math.round(pricing.price / 100) : Math.round(product.price / 100)}
+                          style={{ width: 110 }}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="checkbox"
+                          name={`avail_${key}`}
+                          defaultChecked={pricing?.available ?? true}
+                          style={{ width: "auto" }}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
-        </div>
 
-        <div className="panel" style={{ marginTop: 0 }}>
-          <div className="panel-head">
-            <h2>Images</h2>
-          </div>
-          <div className="panel-body">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={`${product.images[0]}?width=600`} alt={product.title} style={{ width: "100%", borderRadius: 8 }} />
-            <p className="small muted">
-              Images Shopify CDN se aate hain. Naya image upload karne ke liye presigned URL flow use karein
-              (uploads module).
-            </p>
+          <div className="field">
+            <label>Photos (live store gallery — ek image sirf ek product par)</label>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {product.images.slice(0, 8).map((image) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={image}
+                  src={image}
+                  alt=""
+                  width={72}
+                  height={96}
+                  style={{ objectFit: "cover", border: "1px solid #e5e5e5" }}
+                />
+              ))}
+            </div>
+            <p className="small muted">{product.images.length} photos · gallery build se aati hai</p>
           </div>
         </div>
-      </div>
+      </form>
 
       <div className="panel">
         <div className="panel-head">
-          <h2>Description & detail points</h2>
+          <h2>Website visibility</h2>
         </div>
-        <div className="panel-body small">
-          <p>{product.description}</p>
-          <ul>
-            {product.details.map((detail) => (
-              <li key={detail}>{detail}</li>
-            ))}
-          </ul>
+        <div className="panel-body">
+          <p className="small muted">
+            Hide karne par product storefront listings se hat jaata hai (URL 404). Publish ke baad effect.
+          </p>
+          <form action={toggleProductVisibilityAction} className="actions">
+            <input type="hidden" name="handle" value={product.handle} />
+            <input type="hidden" name="hidden" value={product.hidden ? "false" : "true"} />
+            <button className="btn btn-sm" type="submit">
+              {product.hidden ? "Show on website" : "Hide from website"}
+            </button>
+          </form>
         </div>
       </div>
     </>

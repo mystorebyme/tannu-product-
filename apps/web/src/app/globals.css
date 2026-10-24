@@ -230,3 +230,43 @@ body {
     padding-inline: 1.25rem;
   }
 }
+
+/* ---------- mobile safety: page kabhi viewport se chaudi na ho ----------
+   Live store ki descriptions me size-chart tables hain; bina wrapper table
+   mobile par page ko desktop width tak kheench deti thi. */
+html,
+body {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+img,
+video,
+svg,
+table {
+  max-width: 100%;
+}
+
+.product-rich {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+/* rich text ke andar ki tables apne box me scroll karein, page ko na chauda karein */
+.product-rich table,
+.prose-liksha table {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+}
+
+.product-rich td,
+.product-rich th,
+.prose-liksha td,
+.prose-liksha th {
+  padding: 4px 8px 4px 0;
+  text-align: left;
+  vertical-align: top;
+}

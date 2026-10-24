@@ -1,0 +1,8 @@
+{
+  "meta": {
+    "note": "Admin panel isi file ko likhta hai. scripts/build-catalog.mjs publish par isse catalogue me merge karta hai."
+  },
+  "products": {},
+  "collections": {},
+  "hidden": []
+}

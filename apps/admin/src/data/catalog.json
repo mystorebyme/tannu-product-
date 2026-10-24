@@ -5,7 +5,7 @@
   "cdn": "https://cdn.shopify.com/s/files/1/0738/8345/1696/",
   "currency": "INR",
   "moneyUnit": "paise",
-  "builtAt": "2026-10-24T08:42:27.658Z",
+  "builtAt": "2026-10-24T08:49:07.957Z",
   "snapshotAt": "2026-10-24T06:51:35.543Z",
   "productCount": 287,
   "listedProductCount": 277,
@@ -17,7 +17,7 @@
    "handle": "new-arrivals",
    "title": "New Arrivals",
    "subtitle": "Freshly dropped festive favourites",
-   "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_9512.webp",
+   "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08096_JPG.jpg",
    "sortOrder": 1,
    "productCount": 272
   },
@@ -33,7 +33,7 @@
    "handle": "likshas-choice",
    "title": "Liksha's Choice",
    "subtitle": "Handpicked by our stylists",
-   "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_9512.webp",
+   "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08059_JPG.jpg",
    "sortOrder": 3,
    "productCount": 118
   },
@@ -73,7 +73,7 @@
    "handle": "sale",
    "title": "Sale",
    "subtitle": "Limited-time festive prices",
-   "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08096_JPG.jpg",
+   "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08106_JPG.jpg",
    "sortOrder": 8,
    "productCount": 26
   },
@@ -81,7 +81,7 @@
    "handle": "saree",
    "title": "Saree",
    "subtitle": "Timeless six yards",
-   "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_9512.webp",
+   "image": "",
    "sortOrder": 9,
    "productCount": 0
   }

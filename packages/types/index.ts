@@ -123,7 +123,24 @@ export type OrderStatus =
   | "cancelled"
   | "returned";
 
-export type PaymentStatus = "pending" | "paid" | "failed" | "cod" | "refunded";
+export type PaymentStatus = "pending" | "processing" | "paid" | "failed" | "cod" | "refunded";
+
+/** Order ke saath juda payment attempt — gateway/manual UPI, backend verify hone tak pending */
+export interface PaymentRecord {
+  /** kis gateway se aaya (razorpay/cashfree/manual-upi) */
+  gateway: string;
+  /** gateway ka apna reference (order id / payment id) */
+  reference: string | null;
+  /** customer ko dikhaya gaya UPI intent / QR */
+  upiUri?: string | null;
+  amount: number;
+  status: PaymentStatus;
+  createdAt: string;
+  /** backend ne gateway se verify karke confirm kiya */
+  verifiedAt?: string | null;
+  verifiedBy?: string | null;
+  failureReason?: string | null;
+}
 
 export interface OrderItem {
   handle: string;
@@ -165,6 +182,8 @@ export interface Order {
   couponCode: string | null;
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
+  /** payment attempt ki poori detail — verified hone tak order confirm nahi hota */
+  payment?: PaymentRecord | null;
   status: OrderStatus;
   /** courier + AWB — admin panel se bhara jaata hai, customer track page par dikhta hai */
   tracking?: Tracking | null;

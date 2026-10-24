@@ -5,11 +5,14 @@ import { imageUrl } from "@/lib/format";
 import { SafeImage } from "@/components/safe-image";
 
 /**
- * PDP gallery — live store jaisa: thumbnail rail (desktop), cross-fade main image,
- * hover zoom, swipe (mobile), keyboard arrows aur image counter.
+ * PDP gallery — live store jaisa: thumbnail rail, cross-fade main image, hover zoom
+ * (sirf mouse wale devices par), swipe (mobile), keyboard arrows, image counter.
  *
- * Sab images product ki apni gallery (`images[]`, live Shopify se) hain — koi duplicate
- * ya doosre product ki image kabhi nahi.
+ * Size window ke hisaab se: mobile par mobile, tablet par tablet, desktop par desktop —
+ * frame kabhi viewport se bada nahi hota (`max-h` + `w-full`), aur poora page
+ * horizontal scroll me nahi jaata.
+ *
+ * Image par click / "Full screen" button se full-screen viewer khulta hai (zoom + arrows).
  */
 export function ProductGallery({
   images,
@@ -24,6 +27,7 @@ export function ProductGallery({
   const [index, setIndex] = useState(0);
   const [zoom, setZoom] = useState(false);
   const [origin, setOrigin] = useState("50% 50%");
+  const [lightbox, setLightbox] = useState(false);
   const touchX = useRef<number | null>(null);
   const frameRef = useRef<HTMLDivElement | null>(null);
 
@@ -44,15 +48,25 @@ export function ProductGallery({
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
-      // input/modal me type karte waqt arrow se gallery na badle
       const tag = (event.target as HTMLElement | null)?.tagName?.toLowerCase();
       if (tag === "input" || tag === "textarea" || tag === "select") return;
       if (event.key === "ArrowRight") go(index + 1);
       if (event.key === "ArrowLeft") go(index - 1);
+      if (event.key === "Escape") setLightbox(false);
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [go, index]);
+
+  // full-screen viewer khula ho to peeche ka page scroll na ho
+  useEffect(() => {
+    if (!lightbox) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [lightbox]);
 
   function onMove(event: React.MouseEvent<HTMLDivElement>) {
     const node = frameRef.current;
@@ -64,9 +78,9 @@ export function ProductGallery({
   }
 
   return (
-    <div className="flex flex-col-reverse gap-3 sm:flex-row">
+    <div className="flex w-full min-w-0 flex-col-reverse gap-3 sm:flex-row">
       {gallery.length > 1 ? (
-        <div className="no-scrollbar flex gap-2 overflow-x-auto sm:max-h-[560px] sm:w-[78px] sm:shrink-0 sm:flex-col sm:overflow-y-auto">
+        <div className="no-scrollbar flex w-full gap-2 overflow-x-auto sm:max-h-[560px] sm:w-[78px] sm:shrink-0 sm:flex-col sm:overflow-y-auto">
           {gallery.map((image, imageIndex) => (
             <button
               key={`${image}-${imageIndex}`}
@@ -86,16 +100,17 @@ export function ProductGallery({
         </div>
       ) : null}
 
-      <div className="relative flex-1">
+      <div className="relative w-full min-w-0 flex-1">
         <div
           ref={frameRef}
-          className="relative aspect-[3/4] w-full touch-pan-y overflow-hidden bg-[#f6f1ec]"
+          className="relative mx-auto aspect-[4/5] max-h-[calc(100svh-150px)] w-full touch-pan-y overflow-hidden bg-[#f6f1ec] sm:aspect-[3/4] lg:max-h-[calc(100svh-140px)]"
           onMouseEnter={() => setZoom(true)}
           onMouseLeave={() => {
             setZoom(false);
             setOrigin("50% 50%");
           }}
           onMouseMove={onMove}
+          onDoubleClick={() => setLightbox(true)}
           onTouchStart={(event) => {
             touchX.current = event.touches[0]?.clientX ?? null;
           }}
@@ -144,6 +159,20 @@ export function ProductGallery({
             </span>
           ) : null}
 
+          {/* full-screen viewer */}
+          <button
+            type="button"
+            onClick={() => setLightbox(true)}
+            aria-label="Open image full screen"
+            title="Full screen"
+            data-testid="gallery-expand"
+            className="absolute right-3 top-3 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-[#3f3830] shadow-sm transition hover:bg-white"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <path d="M4 9V4h5M20 15v5h-5M20 9V4h-5M4 15v5h5" />
+            </svg>
+          </button>
+
           {gallery.length > 1 ? (
             <>
               <button
@@ -189,6 +218,91 @@ export function ProductGallery({
           </div>
         ) : null}
       </div>
+
+      {lightbox ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${title} — full screen image`}
+          data-testid="gallery-lightbox"
+          className="fixed inset-0 z-[120] flex flex-col bg-black/95"
+          onClick={() => setLightbox(false)}
+        >
+          <div className="flex items-center justify-between px-4 py-3 text-white/85">
+            <span className="text-[11.5px] tracking-[.14em] uppercase">
+              {index + 1} / {gallery.length}
+            </span>
+            <button
+              type="button"
+              onClick={() => setLightbox(false)}
+              aria-label="Close full screen image"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 transition hover:bg-white/20"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M6 6l12 12M18 6L6 18" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="relative flex flex-1 items-center justify-center overflow-hidden px-3 pb-3">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={imageUrl(gallery[index], 1800)}
+              alt={`${title} — image ${index + 1}`}
+              className="max-h-full max-w-full object-contain"
+              onClick={(event) => event.stopPropagation()}
+            />
+            {gallery.length > 1 ? (
+              <>
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    go(index - 1);
+                  }}
+                  aria-label="Previous image"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/15 p-3 text-white transition hover:bg-white/25"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                    <path d="M15 5l-7 7 7 7" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    go(index + 1);
+                  }}
+                  aria-label="Next image"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/15 p-3 text-white transition hover:bg-white/25"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                    <path d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </>
+            ) : null}
+          </div>
+
+          {gallery.length > 1 ? (
+            <div className="no-scrollbar flex justify-center gap-2 overflow-x-auto px-4 pb-4" onClick={(event) => event.stopPropagation()}>
+              {gallery.map((image, imageIndex) => (
+                <button
+                  key={`${image}-lb`}
+                  type="button"
+                  onClick={() => setIndex(imageIndex)}
+                  aria-label={`Go to image ${imageIndex + 1}`}
+                  className={`h-14 w-11 shrink-0 overflow-hidden border-2 transition ${
+                    index === imageIndex ? "border-white" : "border-transparent opacity-60 hover:opacity-100"
+                  }`}
+                >
+                  <img src={imageUrl(image, 160)} alt="" className="h-full w-full object-cover" />
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 }

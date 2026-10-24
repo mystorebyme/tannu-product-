@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { getOrders, getProducts, getMessages } from "@/lib/data";
+import { getManualInvoices, getOrders, getProducts, getMessages } from "@/lib/data";
+import { overrideStats } from "@/lib/catalog-admin";
+import { publishCatalogAction } from "@/app/actions";
 import { dateTime, inr } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -8,6 +10,9 @@ export default function DashboardPage() {
   const orders = getOrders();
   const products = getProducts();
   const messages = getMessages();
+  const invoices = getManualInvoices();
+  const catalogState = overrideStats();
+  const pendingPayments = orders.filter((order) => order.paymentStatus === "pending" || order.paymentStatus === "processing");
 
   const paid = orders.filter((o) => o.paymentStatus === "paid" || o.paymentStatus === "cod");
   const revenue = paid.reduce((sum, order) => sum + order.total, 0);
@@ -39,14 +44,36 @@ export default function DashboardPage() {
           <p>Aaj ka overview · {products.length} live products</p>
         </div>
         <div className="actions">
-          <Link className="btn" href="/products">
-            Manage catalogue
+          <form action={publishCatalogAction}>
+            <button className="btn" type="submit" title="Admin edits ko website par bhejo">
+              Publish website
+            </button>
+          </form>
+          <Link className="btn" href="/invoices">
+            New invoice
           </Link>
           <Link className="btn btn-primary" href="/orders">
             View orders
           </Link>
         </div>
       </div>
+
+      {pendingPayments.length > 0 ? (
+        <div className="panel">
+          <div className="panel-head">
+            <h2>Payments to verify</h2>
+            <Link className="btn btn-sm" href="/payments">
+              Open payments
+            </Link>
+          </div>
+          <div className="panel-body">
+            <p className="small">
+              <strong>{pendingPayments.length}</strong> order payment verify hone ka intezaar kar rahe hain. Backend
+              verify hone tak order confirm nahi hota.
+            </p>
+          </div>
+        </div>
+      ) : null}
 
       <div className="cards">
         <div className="card">
