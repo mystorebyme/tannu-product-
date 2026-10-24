@@ -6,8 +6,8 @@ export const dynamic = "force-dynamic";
  * POST /api/otp/start { phone }
  *
  * - Firebase mode: client khud SMS bhejta hai (SDK), is route se sirf mode pata chalta hai.
- * - Dev mode: server 6-digit code banata hai. Code response me sirf non-production me
- *   jaata hai — production me kabhi nahi (warna OTP ka matlab hi nahi raha).
+ * - Dev mode (Firebase keys nahi): server 6-digit code banata hai aur wapas deta hai,
+ *   kyunki bina Firebase ke SMS bhejne ka koi channel nahi hai.
  */
 export async function POST(request: Request) {
   let body: { phone?: string };
@@ -31,9 +31,10 @@ export async function POST(request: Request) {
   }
 
   const code = createDevCode(phone);
-  // Code response me sirf tab jaata hai jab build production ka na ho aur OTP_DEV_MODE ne
-  // explicitly block na kiya ho. Deployed site par OTP kabhi screen par nahi aata.
-  const expose = process.env.NODE_ENV !== "production" && process.env.OTP_DEV_MODE !== "off";
+  // Dev mode ka matlab hi hai "Firebase keys nahi hain" — SMS nahi jaa sakta, isliye code
+  // screen par dikhta hai (banner ke saath) warna checkout kabhi complete hi na hota.
+  // Firebase keys set hote hi mode "firebase" ho jaata hai aur code kahin nahi dikhta.
+  const expose = process.env.OTP_DEV_MODE !== "off";
   console.info(`[otp:dev] ${phone.slice(0, 2)}****${phone.slice(-2)} code ${expose ? code : "hidden"}`);
   return Response.json({ mode, phone, ...(expose ? { devCode: code } : {}) });
 }

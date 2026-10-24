@@ -235,7 +235,7 @@ export function PhoneOtp({
 
       {devCode ? (
         <p className="mt-1.5 text-[11px] text-[#8a6a1f]">
-          Dev mode (Firebase keys nahi hain): OTP <strong>{devCode}</strong>
+          Demo OTP: <strong>{devCode}</strong> — SMS service abhi configure nahi hui hai.
         </p>
       ) : null}
       {message ? (
@@ -246,9 +246,9 @@ export function PhoneOtp({
           {message}
         </p>
       ) : null}
-      {!firebaseConfigured && process.env.NODE_ENV !== "production" ? (
+      {!firebaseConfigured ? (
         <p className="mt-1 text-[10.5px] text-[#a49a90]">
-          Firebase keys set karte hi asli SMS OTP chalu ho jaayega — docs/07-security/phone-otp.md
+          Firebase keys (NEXT_PUBLIC_FIREBASE_*) set karte hi asli SMS OTP chalu ho jaayega.
         </p>
       ) : null}
       <div ref={recaptchaRef} />

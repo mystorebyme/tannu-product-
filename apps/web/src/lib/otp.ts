@@ -11,7 +11,7 @@ import crypto from "node:crypto";
  *  - "firebase": NEXT_PUBLIC_FIREBASE_* set hai -> client Firebase se SMS bhejta hai,
  *    server ID token ko Identity Toolkit se verify karta hai.
  *  - "dev": Firebase config nahi hai aur OTP_DEV_MODE != "off" -> code server banata hai
- *    aur (sirf non-production me) response me wapas deta hai. Sandbox/tests ke liye.
+ *    aur response me wapas deta hai, kyunki SMS bhejne ka koi raasta hi nahi hai.
  *  - "off": dono nahi -> OTP optional (order phone bina verify chala jaayega).
  */
 
@@ -50,11 +50,11 @@ export async function verifyFirebaseIdToken(idToken: string): Promise<string | n
 export { issuePhoneToken, readPhoneToken } from "@/lib/phone-token";
 export { issuePhoneToken as issueToken } from "@/lib/phone-token";
 
-/** OTP order ke waqt zaroori hai ya nahi */
+/** OTP order ke waqt zaroori hai ya nahi — sirf "off" mode me optional. */
 export function otpRequired(): boolean {
   if (process.env.REQUIRE_PHONE_OTP === "0") return false;
   if (process.env.REQUIRE_PHONE_OTP === "1") return true;
-  return otpMode() === "firebase";
+  return otpMode() !== "off";
 }
 
 /* ---------- dev mode store (process memory, sirf local/test) ---------- */
