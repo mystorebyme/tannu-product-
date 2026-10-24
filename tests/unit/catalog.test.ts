@@ -8,6 +8,8 @@ const root = process.cwd(); // npm test root se chalta hai
 const file = path.join(root, "database/seeds/catalog.json");
 const catalog = JSON.parse(fs.readFileSync(file, "utf8")) as Catalog;
 const products: Product[] = catalog.products;
+/** extra store (guest) products — live-store parity sirf liksha products par hoti hai */
+const likshaProducts = products.filter((product) => (product as Product & { source?: string }).source !== "extra");
 const liveDir = path.join(root, "database/seeds/live");
 const liveProducts: any[] = JSON.parse(fs.readFileSync(path.join(liveDir, "products.json"), "utf8")).products;
 const liveMembership: Record<string, string[]> = JSON.parse(
@@ -15,8 +17,9 @@ const liveMembership: Record<string, string[]> = JSON.parse(
 ).collections;
 
 test("catalogue has the full live product set", () => {
-  assert.equal(products.length, 287);
-  assert.equal(catalog.meta.productCount, 287);
+  assert.equal(likshaProducts.length, 287);
+  assert.equal(catalog.meta.liveProductCount, 287);
+  assert.equal(catalog.meta.productCount, products.length);
   assert.equal(catalog.meta.moneyUnit, "paise");
   assert.equal(catalog.meta.source, "https://www.likshaclothing.com");
 });
@@ -81,7 +84,8 @@ test("sizes use the store's display format", () => {
 
 test("nine live collections exist and membership is from the real set", () => {
   const handles = catalog.collections.map((collection) => collection.handle).sort();
-  assert.deepEqual(handles, [
+  // 9 live collections + extra store ki alag collections (guest edits)
+  for (const handle of [
     "lehnga-choli",
     "likshas-choice",
     "new-arrivals",
@@ -91,7 +95,9 @@ test("nine live collections exist and membership is from the real set", () => {
     "saree",
     "trending",
     "weddin-collection",
-  ]);
+  ]) {
+    assert.ok(handles.includes(handle), `${handle} missing`);
+  }
   const known = new Set(handles);
   for (const product of products) {
     for (const collection of product.collections) {
@@ -102,7 +108,7 @@ test("nine live collections exist and membership is from the real set", () => {
 
 test("collection counts match the live store snapshot", () => {
   const counts: Record<string, number> = {};
-  for (const product of products) {
+  for (const product of likshaProducts) {
     for (const collection of product.collections) {
       counts[collection] = (counts[collection] ?? 0) + 1;
     }
@@ -116,13 +122,14 @@ test("collection counts match the live store snapshot", () => {
 
 test("every product carries the full live gallery", () => {
   const liveByHandle = new Map(liveProducts.map((product) => [product.handle, product]));
+  const liveHandles = new Set(liveByHandle.keys());
   // ek image sirf ek product par dikhni chahiye — isliye jo photo kisi dusre product par
   // pehle use ho chuki hai wo is product se hata di jaati hai.
   const owner = new Map<string, string>();
   for (const product of products) {
     for (const image of product.images) owner.set(image, product.handle);
   }
-  for (const product of products) {
+  for (const product of likshaProducts) {
     const source: any = liveByHandle.get(product.sourceHandle);
     assert.ok(source, `${product.handle} missing from the live snapshot`);
     // catalogue me image URL se `?v=` query hata di jaati hai — compare usi form me karo

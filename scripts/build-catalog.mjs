@@ -299,6 +299,40 @@ const readExtra = (name, key) => {
   const extraCollections = readExtra("collections.json", "collections");
   const extraMembership = readExtra("membership.json", "collections");
   const extraHandles = new Set(extraProducts.map((product) => product.handle));
+  const liveHandles = new Set(liveProducts.map((product) => product.handle));
+
+  /** collection title ko compare karne ke liye normalize (NEW ARRIVAL == New Arrivals) */
+  const titleKey = (value) =>
+    String(value ?? "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "")
+      .replace(/s$/, "");
+
+  /**
+   * Extra store ki collection titles agar liksha ki kisi collection se milti hain
+   * (LEHENGA CHOLI, NEW ARRIVAL, PRINTED SUIT SET…) to unhe usi collection me merge
+   * karte hain — warna site par same naam ke do collections ban jaate hain.
+   */
+  const LIVE_TITLES = {
+    "new-arrivals": "new arrivals",
+    "party-wear-gown": "anarkali suit",
+    "likshas-choice": "likshas choice",
+    "lehnga-choli": "lehenga choli",
+    "printed-suit-set": "printed suit set",
+    "trending": "trending",
+    "weddin-collection": "wedding collection",
+    sale: "sale",
+    saree: "saree",
+  };
+  const extraCollectionMap = new Map();
+  for (const extra of extraCollections) {
+    if (extra.handle === "frontpage") continue;
+    const key = titleKey(extra.title);
+    const match = Object.entries(LIVE_TITLES).find(
+      ([, title]) => titleKey(title) === key || titleKey(title).startsWith(key) || key.startsWith(titleKey(title)),
+    );
+    if (match) extraCollectionMap.set(extra.handle, match[0]);
+  }
 
   // handle -> collections (live membership hi source of truth)
   const collectionOf = new Map();
@@ -309,10 +343,12 @@ const readExtra = (name, key) => {
     }
   }
   for (const [collectionHandle, handles] of Object.entries(extraMembership)) {
+    const mapped = extraCollectionMap.get(collectionHandle) ?? collectionHandle;
     for (const handle of handles) {
-      if (!extraHandles.has(handle)) continue; // extra store ka product hi
+      // sirf extra store ke apne products (live store me same handle ho to liksha hi)
+      if (!extraHandles.has(handle) || liveHandles.has(handle)) continue;
       if (!collectionOf.has(handle)) collectionOf.set(handle, new Set());
-      collectionOf.get(handle).add(collectionHandle);
+      collectionOf.get(handle).add(mapped);
     }
   }
   if (extraProducts.length) {
@@ -326,7 +362,12 @@ const readExtra = (name, key) => {
   /** poore catalogue me ek image sirf ek product par */
   const usedImages = new Set();
 
-  for (const source of [...liveProducts, ...extraProducts]) {
+  // live products pehle — same handle extra store me bhi ho to liksha ka hi chalta hai
+  const allSources = [
+    ...liveProducts.map((product) => ({ product, fromExtraStore: false })),
+    ...extraProducts.map((product) => ({ product, fromExtraStore: true })),
+  ];
+  for (const { product: source, fromExtraStore } of allSources) {
     if (!source.handle || !source.title) continue;
     const rawImages = (source.images ?? []).map((image) => image.src.split("?")[0]).filter(Boolean);
     // ek hi photo do products par nahi — pehla product photo ka owner, baad wale skip karte hain
@@ -409,6 +450,7 @@ const readExtra = (name, key) => {
       details,
       description: stripEmoji(details.join(" ").trim() || cleanTitle).slice(0, 400),
       descriptionHtml,
+      source: fromExtraStore ? "extra" : "liksha",
       rating: ratings.get(handle)?.rating ?? 0,
       reviewCount: ratings.get(handle)?.count ?? 0,
       inStock: variants.some((variant) => variant.available) || variants.length === 0,
@@ -564,6 +606,7 @@ const readExtra = (name, key) => {
   const takenCollectionHandles = new Set(collections.map((collection) => collection.handle));
   let extraOrder = 100;
   for (const live of extraCollections) {
+    if (extraCollectionMap.has(live.handle)) continue; // already merged in a liksha collection
     if (takenCollectionHandles.has(live.handle)) continue;
     const candidates = products.filter(
       (product) => product.collections.includes(live.handle) && product.images.length && listedSet.has(product),
@@ -594,6 +637,8 @@ const readExtra = (name, key) => {
       builtAt: new Date().toISOString(),
       snapshotAt: readJson(path.join(LIVE, "products.json")).fetchedAt ?? null,
       productCount: products.length,
+      liveProductCount: products.filter((product) => product.source !== "extra").length,
+      extraProductCount: products.filter((product) => product.source === "extra").length,
       listedProductCount: listedProducts.length,
       colourGroupCount: Object.keys(colourGroups).length,
       imageCount: stats.images,

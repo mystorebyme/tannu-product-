@@ -40,8 +40,11 @@ if (!fs.existsSync(FILE)) {
 
 const catalog = JSON.parse(fs.readFileSync(FILE, "utf8"));
 const products = catalog.products ?? [];
+/** extra store (guest) products — live-store parity check inhe chhod ke hota hai */
+const likshaProducts = products.filter((product) => product.source !== "extra");
+const catalogCollectionHandles = new Set((catalog.collections ?? []).map((collection) => collection.handle));
 
-if (products.length !== 287) fail(`expected 287 products, found ${products.length}`);
+if (likshaProducts.length !== 287) fail(`expected 287 liksha products, found ${likshaProducts.length}`);
 if (catalog.meta?.moneyUnit !== "paise") fail("meta.moneyUnit must be 'paise'");
 if (catalog.meta?.source !== "https://www.likshaclothing.com") fail("meta.source must be the live store");
 
@@ -67,7 +70,8 @@ for (const product of products) {
     if (!sizePattern.test(size)) fail(`${product.handle}: bad size "${size}"`);
   }
   for (const collection of product.collections ?? []) {
-    if (!LIVE_COLLECTIONS.includes(collection)) fail(`${product.handle}: unknown collection "${collection}"`);
+    const known = LIVE_COLLECTIONS.includes(collection) || catalogCollectionHandles.has(collection);
+    if (!known) fail(`${product.handle}: unknown collection "${collection}"`);
   }
   if (!product.description || product.description.length < 10) {
     fail(`${product.handle}: description is missing (live body_html se aana chahiye)`);
@@ -85,6 +89,8 @@ const handlesInCatalog = (catalog.collections ?? []).map((collection) => collect
 for (const handle of LIVE_COLLECTIONS) {
   if (!handlesInCatalog.includes(handle)) fail(`missing collection "${handle}"`);
 }
+
+const catalogCollections = (catalog.collections ?? []).map((collection) => collection.handle);
 
 const counts = {};
 for (const product of products) {
@@ -104,7 +110,7 @@ if (fs.existsSync(path.join(LIVE_DIR, "products.json"))) {
   const live = JSON.parse(fs.readFileSync(path.join(LIVE_DIR, "products.json"), "utf8")).products;
   const liveByHandle = new Map(live.map((item) => [item.handle, item]));
   let missingGallery = 0;
-  for (const product of products) {
+  for (const product of likshaProducts) {
     const source = liveByHandle.get(product.sourceHandle);
     if (!source) {
       fail(`${product.handle}: snapshot me source product nahi mila (${product.sourceHandle})`);
@@ -135,14 +141,15 @@ if (fs.existsSync(path.join(LIVE_DIR, "products.json"))) {
   console.log(`images unique across products: ${imageOwner.size}`);
 
   const membership = JSON.parse(fs.readFileSync(path.join(LIVE_DIR, "membership.json"), "utf8")).collections;
-  const counts = {};
-  for (const product of products) {
-    for (const collection of product.collections ?? []) counts[collection] = (counts[collection] ?? 0) + 1;
+  // sirf liksha ke products se count — extra store ke items alag collections me hain
+  const likshaCounts = {};
+  for (const product of likshaProducts) {
+    for (const collection of product.collections ?? []) likshaCounts[collection] = (likshaCounts[collection] ?? 0) + 1;
   }
   for (const [handle, handles] of Object.entries(membership)) {
     if (handle === "frontpage") continue; // home-page grouping, nav collection nahi
     const expected = handles.length;
-    const actual = counts[handle] ?? 0;
+    const actual = likshaCounts[handle] ?? 0;
     if (expected !== actual) fail(`collection ${handle}: ${actual}/${expected} products match the live store`);
   }
 } else {

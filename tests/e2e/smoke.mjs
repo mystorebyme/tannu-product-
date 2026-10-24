@@ -34,7 +34,12 @@ async function main() {
   const health = await get("/api/health");
   const healthBody = JSON.parse(health.text);
   check("health 200", health.status === 200, `status ${health.status}`);
-  check("health reports 287 products", healthBody.data?.products === 287, String(healthBody.data?.products));
+  // 287 liksha products + extra store (guest) products daily sync se
+  check(
+    "health reports the live catalogue size",
+    healthBody.data?.products >= 287,
+    String(healthBody.data?.products),
+  );
 
   const home = await get("/");
   check("home 200", home.status === 200, `status ${home.status}`);
