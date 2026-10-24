@@ -47,6 +47,14 @@ jobs:
       # Admin-only steps (payment confirm + "packed" block) secret token maangte hain;
       # wo local/admin panel par verify hote hain. Yahan public flow chalta hai:
       # order place → payment page → pending → UTR → processing → tracking page.
+      - name: Probe order create (debug)
+        run: |
+          URL="${{ inputs.base_url || 'https://liksha-clothing.vercel.app' }}"
+          echo "── POST $URL/api/orders"
+          curl -sS -X POST "$URL/api/orders" -H 'content-type: application/json' \
+            -d '{"customerName":"Live Probe","email":"probe@example.com","phone":"9876543210","address":"1 Test Street","city":"Jaipur","state":"Rajasthan","pincode":"302001","items":[{"handle":"rang-e-royale-blooming-lehenga-suit-set-10511720087684","size":"M","quantity":1}],"paymentMethod":"prepaid"}' \
+            -w '\nhttp: %{http_code}\n' | head -c 1500
+
       - name: Payment + tracking flow (public APIs)
         env:
           BASE_URL: ${{ inputs.base_url || 'https://liksha-clothing.vercel.app' }}
