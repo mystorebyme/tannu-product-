@@ -114,7 +114,7 @@ async function main() {
     if (page >= totalPages) break;
   }
   note("products-with-reviews", productEntries.length);
-  if (productEntries[0]) diagnostics.probes.push(`sample product ${JSON.stringify(productEntries[0]).slice(0, 300)}`);
+  if (productEntries[0]) diagnostics.probes.push(`sample product ${JSON.stringify(productEntries[0]).slice(0, 700)}`);
 
   // 1b) bundle se saare review endpoints nikaal ke probe karo (shape samajhne ke liye)
   const endpointNames = new Set();
@@ -132,6 +132,22 @@ async function main() {
       /* ignore */
     }
   }
+  // bundles me sirf 4 endpoints milte hain — baaki naam guess karke probe karte hain
+  const PROBE_NAMES = [
+    "get_product_reviews",
+    "get_reviews",
+    "product_reviews",
+    "review_list",
+    "get_review_list",
+    "get_product_detail",
+    "get_product",
+    "get_all_reviews",
+    "get_shop_reviews",
+    "get_store_reviews",
+    "reviews",
+    "get_review",
+  ];
+  for (const name of PROBE_NAMES) endpointNames.add(name);
   diagnostics.endpointNames = [...endpointNames];
   const sampleProductId = String(productEntries[0]?.id ?? "");
   diagnostics.probes = [];
