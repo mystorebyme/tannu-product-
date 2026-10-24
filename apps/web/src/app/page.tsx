@@ -13,6 +13,7 @@ import { BestSellersRail } from "@/components/best-sellers-rail";
 import { imageUrl } from "@/lib/format";
 import { heroBanners, siteConfig } from "@/config/site";
 import { SafeImage } from "@/components/safe-image";
+import { ShippingNote } from "@/components/shipping-note";
 
 /** Home ke rails har 10 minute me badalte hain — page bhi utni hi der me refresh hota hai */
 export const revalidate = 600;
@@ -92,7 +93,8 @@ export default async function HomePage() {
     description: siteConfig.description,
     telephone: siteConfig.phone,
     email: siteConfig.email,
-    address: { "@type": "PostalAddress", addressLocality: "Jaipur", addressRegion: "Rajasthan", addressCountry: "IN" },
+    // owner request: public page par local address nahi (sirf country)
+    address: { "@type": "PostalAddress", addressCountry: "IN" },
     priceRange: "₹499 - ₹699",
   };
 
@@ -132,7 +134,7 @@ export default async function HomePage() {
                 Diwali Sale — Up to <span className="text-[#862222]">70%</span> Off
               </h1>
               <p className="mt-1 text-[11px] text-[#7b6f64]">
-                Free shipping pan-India · Prepaid only · 4–7 day delivery
+                <ShippingNote />
               </p>
             </div>
             <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">

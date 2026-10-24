@@ -68,6 +68,85 @@ const titleCase = (value) => value.replace(/\b\w/g, (c) => c.toUpperCase());
 /** Emoji/dingbats hata do — owner ne kaha copy me emoji nahi chahiye. */
 const EMOJI =
   /[\p{Extended_Pictographic}\u{1F3FB}-\u{1F3FF}\u{1F1E6}-\u{1F1FF}\u2700-\u27BF\u2B00-\u2BFF\uFE0E\uFE0F\u200D\u20E3]/gu;
+/**
+ * Product titles ka polish (owner request, Round 17).
+ *
+ * Source store ke titles me spelling/formatting issues hain — "Slik", "Havy",
+ * "Beutifull", "Plazo", duplicate words, ALL CAPS, backtick apostrophes.
+ * Yahan sirf **safe** fixes hote hain (naam ka matlab nahi badalta, handle/URL
+ * same rehta hai). Har sync par yahi lagta hai, isliye dobara ganda nahi hota.
+ */
+const TITLE_FIXES = [
+  [/\bslik\b/gi, "Silk"],
+  [/\bplazz?o\b/gi, "Palazzo"],
+  [/\bhavy\b/gi, "Heavy"],
+  [/\bdesiner\b/gi, "Designer"],
+  [/\bbeutifull\b/gi, "Beautiful"],
+  [/\bfrendy\b/gi, "Trendy"],
+  [/\bduppta\b/gi, "Dupatta"],
+  [/\bduppata\b/gi, "Dupatta"],
+  [/\bpents?\b/gi, "Pant"],
+  [/\bjari\b/gi, "Zari"],
+  [/\bwaine\b/gi, "Wine"],
+];
+
+const SMALL_WORDS = new Set(["and", "with", "for", "of", "the", "in", "to", "a", "an", "on", "by"]);
+
+function smartTitleCase(value) {
+  return value
+    .toLowerCase()
+    .split(/\s+/)
+    .map((word, index) => {
+      if (!word) return word;
+      if (index > 0 && SMALL_WORDS.has(word)) return word;
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(" ");
+}
+
+function polishTitle(value) {
+  const raw = stripEmoji(value).trim();
+  // ALL CAPS detect **replacements se pehle** (apostrophe fix ke baad case badal jaata hai)
+  const wasAllCaps = /[A-Z]{3,}/.test(raw) && !/[a-z]/.test(raw);
+  let title = raw
+    // backtick/curly apostrophes → seedha quote ("Saakshi`s" → "Saakshi's")
+    .replace(/[`\u2018\u2019]/g, "'")
+    .replace(/\*/g, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+
+  for (const [pattern, replacement] of TITLE_FIXES) title = title.replace(pattern, replacement);
+
+  // apostrophe ke baad capital S ("Keshavi'S" → "Keshavi's"), stray quotes hatao
+  title = title.replace(/'S\b/g, "'s").replace(/'{2,}/g, "'").replace(/\s+'/g, "'");
+
+  // ek hi word lagatar do baar ("Anarkali Anarkali")
+  const words = title.split(" ");
+  const deduped = words.filter((word, index) => index === 0 || word.toLowerCase() !== words[index - 1].toLowerCase());
+  title = deduped.join(" ");
+
+  // poora CAPS title → Title Case, hyphen ke baad bhi capital ("Rang-F-Royale")
+  if (wasAllCaps) {
+    title = smartTitleCase(title).replace(/(^|[-\/])([a-z])/g, (_, sep, letter) => `${sep}${letter.toUpperCase()}`);
+  }
+
+  // punctuation ke aage space nahi, comma ke baad space
+  title = title.replace(/\s+([,.;:!?])/g, "$1").replace(/,([^\s])/g, ", $1");
+  title = title.replace(/\s{2,}/g, " ").trim();
+
+  /**
+   * Kuch source "titles" asal me poora description hain (~200 chars). Card/SEO
+   * me wo bhadda lagta hai — pehla natural break (" is ", ". ") tak chhota kar
+   * dete hain, baaki description me pehle se maujood hai.
+   */
+  if (title.length > 85) {
+    const cut = title.match(/^(.{12,80}?)(?: is |\. |, | - | \| )/i);
+    if (cut) title = cut[1].trim();
+    else title = title.slice(0, 80).replace(/[\s,;:-]+\S*$/, "").trim();
+  }
+  return title;
+}
+
 function stripEmoji(value) {
   return String(value ?? "")
     .replace(EMOJI, " ")
@@ -428,7 +507,7 @@ const readExtra = (name, key) => {
     if (usedHandles.has(handle)) handle = `${handle}-${source.id}`;
     usedHandles.add(handle);
 
-    const cleanTitle = stripEmoji(source.title.trim()).replace(/\s{2,}/g, " ");
+    const cleanTitle = polishTitle(source.title);
     const descriptionHtml = sanitizeHtml(source.body_html) || `<p>${cleanTitle}</p>`;
     const details = htmlToLines(descriptionHtml).slice(0, 14);
     // `frontpage` live store ka home-page grouping hai (nav collection nahi) — featured flag me jaata hai
@@ -437,7 +516,7 @@ const readExtra = (name, key) => {
     products.push({
       handle,
       sourceHandle: source.handle,
-      title: stripEmoji(source.title.trim()).replace(/\s{2,}/g, " "),
+      title: cleanTitle,
       price,
       compareAtPrice,
       images,
@@ -622,6 +701,42 @@ const readExtra = (name, key) => {
   if (groupedCount) {
     console.log(`colour groups: ${Object.keys(colourGroups).length} designs / ${groupedCount} colourways`);
   }
+
+  /* ---------- duplicate titles: colour/style code se unique ---------- */
+  const styleCodeOf = (product) => {
+    const match = String(product.handle).match(/(?:([a-z]{2,4})-)?(\d{3,})$/);
+    // Shopify ke lambe internal IDs title me bhddhe lagte hain — unhe chhod dete hain
+    if (!match || match[2].length > 8) return "";
+    return match[1] ? `${match[1].toUpperCase()}-${match[2]}` : `Style ${match[2]}`;
+  };
+  const titleSeen = new Set();
+  let retitled = 0;
+  for (const product of products) {
+    let title = product.title;
+    let attempt = title;
+    const candidates = [
+      String(product.colourName || product.color || "").trim(),
+      styleCodeOf(product),
+    ].filter((value) => value && !/^(as shown|multi|multicolour|multi colour)$/i.test(value));
+    for (const candidate of candidates) {
+      if (!titleSeen.has(attempt.toLowerCase())) break;
+      if (attempt.toLowerCase().includes(candidate.toLowerCase())) continue;
+      attempt = `${title} — ${candidate}`;
+      break;
+    }
+    if (titleSeen.has(attempt.toLowerCase()) && attempt === title) {
+      // koi colour/code available nahi — index se unique karo (kabhi kabhi hi hota hai)
+      let index = 2;
+      while (titleSeen.has(`${title} — Edition ${index}`.toLowerCase())) index += 1;
+      attempt = `${title} — Edition ${index}`;
+    }
+    if (attempt !== title) {
+      product.title = attempt;
+      retitled += 1;
+    }
+    titleSeen.add(product.title.toLowerCase());
+  }
+  if (retitled) console.log(`duplicate titles resolved: ${retitled}`);
 
   /** listed products: ek group ka sirf representative (cards duplicate na dikhein) */
   const listedProducts = products.filter(

@@ -79,7 +79,7 @@ export const siteConfig = {
   phone: "+91 8005900581",
   whatsapp: "8005900581",
   email: "Info.likshaclothing@gmail.com",
-  address: "Jaipur, Rajasthan, India",
+  address: "India",
   /**
    * Sirf asli accounts — koi dummy link nahi. Abhi ke liye Instagram sirf
    * **URL text** ke roop me dikhta hai (clickable nahi), WhatsApp hi working link hai.

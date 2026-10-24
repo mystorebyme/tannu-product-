@@ -248,7 +248,7 @@ export async function renderInvoicePdf(view: InvoiceView): Promise<Buffer> {
     doc.fillColor(MAROON).font("Helvetica-Bold").fontSize(7.5).text("DECLARATION", left, y);
     doc.fillColor(MUTED).font("Helvetica").fontSize(7.6).text(
       "We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct. " +
-        "Goods are dispatched from Jaipur, Rajasthan. Prices are inclusive of GST. The goods once sold are eligible for 7 days replacement " +
+        "Goods are dispatched from our India warehouse. Prices are inclusive of GST. The goods once sold are eligible for 7 days replacement " +
         "only if unused and tags are intact. This is a computer-generated invoice and does not require a physical signature.",
       left,
       y + 11,

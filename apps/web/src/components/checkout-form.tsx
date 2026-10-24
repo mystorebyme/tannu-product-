@@ -10,7 +10,6 @@ import { useStoreSettings } from "@/components/store-settings-provider";
 import { API_AVAILABLE, apiUrl } from "@/lib/api-base";
 import { buildUpiUri } from "@/lib/upi";
 import { UpiQr } from "@/components/upi-qr";
-import { UpiApps } from "@/components/upi-apps";
 import { postJson, readJson } from "@/lib/http-json";
 import { checkPincodeOffline } from "@/lib/pincode-offline";
 
@@ -167,7 +166,8 @@ export function CheckoutForm() {
         return;
       }
       clear();
-      router.push(`/orders/${result.data.orderNumber}`);
+      // payment page turant — order page khud UPI app kholta hai (mobile) / QR dikhata hai
+      router.push(`/orders/${result.data.orderNumber}?pay=1`);
     } catch (error) {
       console.warn("order submit failed", error);
       setError("Order server tak nahi pahuncha. Dobara try kariye, ya WhatsApp par order bhej dijiye — wahan hum turant confirm karte hain.");
@@ -267,34 +267,17 @@ export function CheckoutForm() {
 
         <section>
           <h2 className="text-[11px] font-semibold tracking-[.16em] text-[#862222] uppercase">Payment</h2>
-          <div className="mt-3 border border-[#e5dbd0] bg-[#fdf8f7] p-3.5">
-            <div className="flex items-start gap-3">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#862222" strokeWidth="1.7" className="mt-0.5 shrink-0" aria-hidden>
-                <path d="M12 3l7 3v6c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6l7-3z" />
-                <path d="M9 12l2 2 4-4" />
-              </svg>
-              <div className="min-w-0">
-                <p className="text-[12.5px] font-medium">Prepaid order — UPI (GPay, PhonePe, Paytm)</p>
-                <p className="mt-0.5 text-[11.5px] leading-relaxed text-[#8a8078]">
-                  You will get the payment page right after placing the order — scan the QR or pay to the UPI ID.
-                  Payment goes straight to the store account, with no gateway charges.
-                </p>
-                <p className="mt-1.5 break-all text-[11.5px] font-medium text-[#862222]">UPI: {upiId}</p>
-                <div className="mt-2.5">
-                  <UpiApps
-                    uri={buildUpiUri({
-                      vpa: upiId,
-                      name: upiName,
-                      amountPaise: total,
-                      note: "Designer Clothing order",
-                    })}
-                    upiId={upiId}
-                    amountPaise={total}
-                    showAppButtons={false}
-                  />
-                </div>
-              </div>
-            </div>
+          {/* Payment ki poori detail order page par — order place hote hi wahi khulta hai.
+              Yahan sirf itna ki prepaid hai, taaki checkout lamba na ho. */}
+          <div className="mt-3 flex items-start gap-3 border border-[#e5dbd0] bg-[#fdf8f7] p-3.5">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#862222" strokeWidth="1.7" className="mt-0.5 shrink-0" aria-hidden>
+              <path d="M12 3l7 3v6c0 4.2-2.9 7.6-7 7.6S5 16.2 5 12V6l7-3z" />
+              <path d="M9 12l2 2 4-4" />
+            </svg>
+            <p className="text-[12.5px] leading-relaxed text-[#4a423b]" data-testid="prepaid-note">
+              Prepaid order. Order place karte hi payment page khulega — QR se ya UPI ID par pay karein.
+              Payment seedha store account me jaata hai, koi gateway charge nahi.
+            </p>
           </div>
         </section>
       </div>
@@ -366,17 +349,8 @@ export function CheckoutForm() {
                 />
               </div>
               <div className="min-w-0 flex-1">
-                <UpiApps
-                  uri={buildUpiUri({
-                    vpa: upiId,
-                    name: upiName,
-                    amountPaise: total,
-                    note: "Designer Clothing order",
-                  })}
-                  upiId={upiId}
-                  amountPaise={total}
-                  showAppButtons={false}
-                />
+                <p className="text-[11px] tracking-[.12em] text-[#2f6b3f] uppercase">UPI ID</p>
+                <p className="mt-0.5 break-all text-[13px] font-semibold text-[#1f5c32]">{upiId}</p>
                 <a
                   href={whatsappHref}
                   target="_blank"

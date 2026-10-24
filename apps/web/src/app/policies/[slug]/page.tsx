@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { renderMarkdown } from "@/lib/markdown";
+import { SupportChannels } from "@/components/contact-details";
 
 const POLICY_DIR = path.join(process.cwd(), "src/content/policies");
 
@@ -67,13 +68,11 @@ export default async function PolicyPage({ params }: { params: Promise<{ slug: s
           ))}
         </nav>
         <article className="border border-[#eee6de] p-6 sm:p-9">{renderMarkdown(content)}</article>
-        <p className="mt-6 text-center text-[11.5px] text-[#8a8078]">
-          Questions? WhatsApp{" "}
-          <a className="text-[#862222]" href="https://wa.me/918005900581">
-            8005900581
-          </a>{" "}
-          or email Info.likshaclothing@gmail.com
-        </p>
+        {/* number/email sheet se live — yahan hardcode nahi */}
+        <div className="mt-6 flex flex-col items-center gap-2">
+          <p className="text-[11.5px] text-[#8a8078]">Questions? WhatsApp ya email kariye —</p>
+          <SupportChannels />
+        </div>
       </div>
     </div>
   );

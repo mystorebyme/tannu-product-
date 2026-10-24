@@ -5,9 +5,13 @@ import { useCart } from "@/components/cart-provider";
 import { formatPrice, imageUrl } from "@/lib/format";
 import { SafeImage } from "@/components/safe-image";
 import { cartWhatsAppMessage, whatsappLink } from "@/lib/whatsapp";
+import { ShippingNote } from "@/components/shipping-note";
+import { useStoreSettings } from "@/components/store-settings-provider";
 
 export default function CartPage() {
   const { lines, subtotal, setQuantity, removeLine } = useCart();
+  // WhatsApp number sheet se live (owner sheet me badle → cart link bhi badal jaaye)
+  const { whatsapp } = useStoreSettings();
   // festive sale: final price already ₹499–₹699 — koi coupon stack nahi hota
   const total = Math.max(0, subtotal);
   const freeShippingMet = true;
@@ -119,7 +123,7 @@ export default function CartPage() {
             </div>
 
             <p className="mt-4 border border-[#eadfce] bg-[#fdf8f0] px-3 py-2.5 text-[11px] leading-relaxed text-[#8a7a5f]">
-              Festive sale price already applied — <strong>no coupon needed</strong>. Free shipping on every prepaid order.
+              Festive sale price already applied — <strong>no coupon needed</strong>. <ShippingNote withDelivery={false} /> on every prepaid order.
             </p>
 
             <Link
@@ -129,7 +133,7 @@ export default function CartPage() {
               Proceed to checkout
             </Link>
             <a
-              href={whatsappLink(cartWhatsAppMessage(lines))}
+              href={whatsappLink(cartWhatsAppMessage(lines), whatsapp)}
               target="_blank"
               rel="noopener noreferrer"
               data-testid="cart-whatsapp"

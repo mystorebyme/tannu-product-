@@ -5,13 +5,13 @@
   "cdn": "https://cdn.shopify.com/s/files/1/0738/8345/1696/",
   "currency": "INR",
   "moneyUnit": "paise",
-  "builtAt": "2026-10-24T16:20:52.051Z",
+  "builtAt": "2026-10-24T18:20:02.726Z",
   "snapshotAt": "2026-10-24T06:51:35.543Z",
   "productCount": 446,
   "liveProductCount": 287,
   "extraProductCount": 159,
-  "listedProductCount": 433,
-  "colourGroupCount": 12,
+  "listedProductCount": 432,
+  "colourGroupCount": 13,
   "imageCount": 2898
  },
  "collections": [
@@ -21,7 +21,7 @@
    "subtitle": "Freshly dropped festive favourites",
    "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08096_JPG.jpg",
    "sortOrder": 1,
-   "productCount": 399
+   "productCount": 398
   },
   {
    "handle": "party-wear-gown",
@@ -29,7 +29,7 @@
    "subtitle": "Designer Anarkali Suits",
    "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_9512.webp",
    "sortOrder": 2,
-   "productCount": 276
+   "productCount": 275
   },
   {
    "handle": "likshas-choice",
@@ -37,7 +37,7 @@
    "subtitle": "Handpicked by our stylists",
    "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08059_JPG.jpg",
    "sortOrder": 3,
-   "productCount": 129
+   "productCount": 128
   },
   {
    "handle": "lehnga-choli",
@@ -1243,6 +1243,140 @@
      },
      "inStock": true,
      "colourCode": "Red"
+    }
+   ]
+  },
+  "colour-readymade-alia-cut-gown-with-dupatta-set-kka-1070": {
+   "key": "colour-readymade-alia-cut-gown-with-dupatta-set-kka-1070",
+   "title": "Colour Readymade Alia Cut Gown with Dupatta Set-Kka-1070",
+   "handle": "waine-colour-readymade-alia-cut-gown-with-dupatta-set-kka-1071",
+   "colours": [
+    {
+     "name": "Pink",
+     "handle": "pink-colour-readymade-alia-cut-gown-with-dupatta-set-kka-1070",
+     "title": "Pink Colour Readymade Alia Cut Gown with Dupatta Set-Kka-1070",
+     "price": 54900,
+     "compareAtPrice": 183000,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_2024-03-29_14-31-09.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_2024-03-29_14-31-09.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_2024-03-29_14-31-07.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_2024-03-29_14-31-04.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_2024-03-29_14-31-01.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_2024-03-29_14-30-59.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_2024-03-29_14-30-56.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_2024-03-29_14-30-54.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "S [36]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "Pink"
+    },
+    {
+     "name": "Wine",
+     "handle": "waine-colour-readymade-alia-cut-gown-with-dupatta-set-kka-1071",
+     "title": "Wine Colour Readymade Alia Cut Gown with Dupatta Set-Kka-1070",
+     "price": 59900,
+     "compareAtPrice": 199667,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_2024-03-29_14-28-55.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_2024-03-29_14-28-55.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_2024-03-29_14-28-52.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_2024-03-29_14-28-50.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_2024-03-29_14-28-47.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_2024-03-29_14-28-45.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_2024-03-29_14-28-42.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_2024-03-29_14-28-40.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_2024-03-29_14-28-37.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_2024-03-29_14-28-34.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_2024-03-29_14-28-30.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": false
+      },
+      "S [36]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "M [38]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "L [40]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": false
+      },
+      "XL [42]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": false
+      },
+      "2XL [44]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": false
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
     }
    ]
   },
@@ -2666,7 +2800,7 @@
   {
    "handle": "rang-f-royale-blooming-lehenga-suit-set",
    "sourceHandle": "rang-f-royale-blooming-lehenga-suit-set",
-   "title": "RANG-F-ROYALE BLOOMING LEHENGA SUIT SET",
+   "title": "Rang-F-Royale Blooming Lehenga Suit Set",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -2760,7 +2894,7 @@
   {
    "handle": "rang-e-royale-blooming-lehenga-suit-set",
    "sourceHandle": "rang-e-royale-blooming-lehenga-suit-set",
-   "title": "RANG-F-ROYALE BLOOMING LEHENGA SUIT SET",
+   "title": "Rang-F-Royale Blooming Lehenga Suit Set — Edition 2",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -2945,7 +3079,7 @@
   {
    "handle": "vibhutis-wine-coloured-anarkali-suit-set-td06",
    "sourceHandle": "vibhutis-wine-coloured-anarkali-suit-set-td06",
-   "title": "VIBHUTI'S WINE COLOURED ANARKALI SUIT SET - 06",
+   "title": "Vibhuti's Wine Coloured Anarkali Suit Set - 06",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -3372,7 +3506,7 @@
   {
    "handle": "maroon-trendy-anarkali-suit-set",
    "sourceHandle": "maroon-trendy-anarkali-suit-set",
-   "title": "Maroon Trendy Anarkali Suit Set",
+   "title": "Maroon Trendy Anarkali Suit Set — Edition 2",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -3980,7 +4114,7 @@
   {
    "handle": "mustard-foil-work-gown-set-royal-anarkali",
    "sourceHandle": "mustard-foil-work-gown-set-royal-anarkali",
-   "title": "MUSTARD FOIL WORK GOWN SET ROYAL ANARKALI",
+   "title": "Mustard Foil Work Gown Set Royal Anarkali",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -4469,7 +4603,7 @@
   {
    "handle": "nirus-noir-black-elegance-anarkali-suit-set",
    "sourceHandle": "nirus-noir-black-elegance-anarkali-suit-set",
-   "title": "Niru'S Noir Black Elegance Anarkali Suit Set",
+   "title": "Niru's Noir Black Elegance Anarkali Suit Set",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -4933,7 +5067,7 @@
   {
    "handle": "saakshi-s-grey-cosmo-slit-anarkali-with-skirt-suit-set",
    "sourceHandle": "saakshi-s-grey-cosmo-slit-anarkali-with-skirt-suit-set",
-   "title": "Saakshi`s Grey Cosmo Slik Anarkali Suit With Skirt",
+   "title": "Saakshi's Grey Cosmo Silk Anarkali Suit With Skirt",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -5301,7 +5435,7 @@
   {
    "handle": "aaysha-white-floral-farshi-suit-set",
    "sourceHandle": "aaysha-white-floral-farshi-suit-set",
-   "title": "AAYSHA WHITE FLORAL FARSHI SUIT SET",
+   "title": "Aaysha White Floral Farshi Suit Set",
    "price": 64900,
    "compareAtPrice": 216333,
    "images": [
@@ -6501,7 +6635,7 @@
   {
    "handle": "prachi-green-havy-vichitra-royal-elegant-suit-set",
    "sourceHandle": "prachi-green-havy-vichitra-royal-elegant-suit-set",
-   "title": "Prachi Green Havy Vichitra Royal Elegant Suit Set",
+   "title": "Prachi Green Heavy Vichitra Royal Elegant Suit Set",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -7703,7 +7837,7 @@
   {
    "handle": "rayon-gown-kurta-and-pent-set-ac-7005",
    "sourceHandle": "rayon-gown-kurta-and-pent-set-ac-7005",
-   "title": "RAYON GOWN KURTA AND PENT SET AC-7005",
+   "title": "Rayon Gown Kurta and Pant Set Ac-7005",
    "price": 64900,
    "compareAtPrice": 216333,
    "images": [
@@ -7768,7 +7902,7 @@
   {
    "handle": "beige-shades-crunchy-silk-anarkali-plazo-suit-set",
    "sourceHandle": "beige-shades-crunchy-silk-anarkali-plazo-suit-set",
-   "title": "Beige Shades Crunchy Silk Anarkali Plazo Suit Set",
+   "title": "Beige Shades Crunchy Silk Anarkali Palazzo Suit Set",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -8663,7 +8797,7 @@
   {
    "handle": "pinakis-new-anarkali-suit-set",
    "sourceHandle": "pinakis-new-anarkali-suit-set",
-   "title": "PINAKI'S NEW ANARKALI SUIT SET - 147",
+   "title": "Pinaki's New Anarkali Suit Set - 147",
    "price": 64900,
    "compareAtPrice": 216333,
    "images": [
@@ -8738,7 +8872,7 @@
   {
    "handle": "naishvika-floral-anarkali-anarkali-suit-set",
    "sourceHandle": "naishvika-floral-anarkali-anarkali-suit-set",
-   "title": "Naishvika Floral Anarkali Anarkali Suit Set",
+   "title": "Naishvika Floral Anarkali Suit Set",
    "price": 64900,
    "compareAtPrice": 216333,
    "images": [
@@ -8924,7 +9058,7 @@
   {
    "handle": "star-georgette-slik-anarkali-suit-with-skirt",
    "sourceHandle": "star-georgette-slik-anarkali-suit-with-skirt",
-   "title": "Star Georgette Slik Anarkali Suit With Skirt",
+   "title": "Star Georgette Silk Anarkali Suit With Skirt",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -9187,7 +9321,7 @@
   {
    "handle": "emani-floral-anarkali-anarkali-suit-set",
    "sourceHandle": "emani-floral-anarkali-anarkali-suit-set",
-   "title": "Emani Floral Anarkali Anarkali Suit Set",
+   "title": "Emani Floral Anarkali Suit Set",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -9432,7 +9566,7 @@
   {
    "handle": "dastani-anarkali-anarkali-suit-set",
    "sourceHandle": "dastani-anarkali-anarkali-suit-set",
-   "title": "Dastani Anarkali Anarkali Suit Set",
+   "title": "Dastani Anarkali Suit Set",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -9531,7 +9665,7 @@
   {
    "handle": "millow-floral-anarkali-anarkali-suit-set",
    "sourceHandle": "millow-floral-anarkali-anarkali-suit-set",
-   "title": "Millow Floral Anarkali Anarkali Suit Set",
+   "title": "Millow Floral Anarkali Suit Set",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -9624,7 +9758,7 @@
   {
    "handle": "ravisha-floral-anarkali-anarkali-suit-set",
    "sourceHandle": "ravisha-floral-anarkali-anarkali-suit-set",
-   "title": "Ravisha Floral Anarkali Anarkali Suit Set",
+   "title": "Ravisha Floral Anarkali Suit Set",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -9719,7 +9853,7 @@
   {
    "handle": "mastani-floral-anarkali-anarkali-suit-set",
    "sourceHandle": "mastani-floral-anarkali-anarkali-suit-set",
-   "title": "Mastani Floral Anarkali Anarkali Suit Set",
+   "title": "Mastani Floral Anarkali Suit Set",
    "price": 64900,
    "compareAtPrice": 216333,
    "images": [
@@ -9813,7 +9947,7 @@
   {
    "handle": "amani-floral-anarkali-anarkali-suit-set",
    "sourceHandle": "amani-floral-anarkali-anarkali-suit-set",
-   "title": "Aamani Floral Anarkali Anarkali Suit Set",
+   "title": "Aamani Floral Anarkali Suit Set",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -10184,7 +10318,7 @@
   {
    "handle": "dusty-rose-shades-crunchy-silk-anarkali-plazo-suit-set",
    "sourceHandle": "dusty-rose-shades-crunchy-silk-anarkali-plazo-suit-set",
-   "title": "Dusty Rose Shades Crunchy Silk Anarkali Plazo Suit Set",
+   "title": "Dusty Rose Shades Crunchy Silk Anarkali Palazzo Suit Set",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -10277,7 +10411,7 @@
   {
    "handle": "rama-shades-crunchy-silk-anarkali-plazo-suit-set",
    "sourceHandle": "rama-shades-crunchy-silk-anarkali-plazo-suit-set",
-   "title": "Rama Shades Crunchy Silk Anarkali Plazo Suit Set",
+   "title": "Rama Shades Crunchy Silk Anarkali Palazzo Suit Set",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -11086,7 +11220,7 @@
   {
    "handle": "premium-quality-heavy-traditional-crop-top-with-shrug-3",
    "sourceHandle": "premium-quality-heavy-traditional-crop-top-with-shrug-3",
-   "title": "Premium Quality Heavy Traditional Crop Top with Shrug",
+   "title": "Premium Quality Heavy Traditional Crop Top with Shrug — Edition 2",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -11176,7 +11310,7 @@
   {
    "handle": "premium-quality-heavy-traditional-crop-top-with-shrug-2",
    "sourceHandle": "premium-quality-heavy-traditional-crop-top-with-shrug-2",
-   "title": "Premium Quality Heavy Traditional Crop Top with Shrug",
+   "title": "Premium Quality Heavy Traditional Crop Top with Shrug — Edition 3",
    "price": 64900,
    "compareAtPrice": 216333,
    "images": [
@@ -11266,7 +11400,7 @@
   {
    "handle": "premium-quality-heavy-traditional-lehenga-choli-2",
    "sourceHandle": "premium-quality-heavy-traditional-lehenga-choli-2",
-   "title": "Premium Quality Heavy Traditional Lehenga Choli",
+   "title": "Premium Quality Heavy Traditional Lehenga Choli — Edition 2",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -11338,7 +11472,7 @@
   {
    "handle": "premium-quality-heavy-traditional-lehenga-choli-1",
    "sourceHandle": "premium-quality-heavy-traditional-lehenga-choli-1",
-   "title": "Premium Quality Heavy Traditional Lehenga Choli",
+   "title": "Premium Quality Heavy Traditional Lehenga Choli — Edition 3",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -11408,7 +11542,7 @@
   {
    "handle": "premium-quality-heavy-traditional-crop-top-with-shrug-1",
    "sourceHandle": "premium-quality-heavy-traditional-crop-top-with-shrug-1",
-   "title": "Premium Quality Heavy Traditional Crop Top with Shrug",
+   "title": "Premium Quality Heavy Traditional Crop Top with Shrug — Edition 4",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -11498,7 +11632,7 @@
   {
    "handle": "premium-quality-heavy-traditional-crop-top-with-shrug",
    "sourceHandle": "premium-quality-heavy-traditional-crop-top-with-shrug",
-   "title": "Premium Quality Heavy Traditional Crop Top with Shrug",
+   "title": "Premium Quality Heavy Traditional Crop Top with Shrug — Edition 5",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -11588,7 +11722,7 @@
   {
    "handle": "premium-quality-heavy-traditional-lehenga-choli",
    "sourceHandle": "premium-quality-heavy-traditional-lehenga-choli",
-   "title": "Premium Quality Heavy Traditional Lehenga Choli",
+   "title": "Premium Quality Heavy Traditional Lehenga Choli — Edition 4",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -12016,7 +12150,7 @@
   {
    "handle": "premium-readymade-suit-set-td-6008",
    "sourceHandle": "premium-readymade-suit-set-td-6008",
-   "title": "PREMIUM READYMADE BLACK & RED SUIT SET TD-6008",
+   "title": "Premium Readymade Black & Red Suit Set Td-6008",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -12348,7 +12482,7 @@
   {
    "handle": "anamika-premium-designer-readymade-gown-with-dupatta-set-kka-1082",
    "sourceHandle": "anamika-premium-designer-readymade-gown-with-dupatta-set-kka-1082",
-   "title": "Anamika Premium Desiner Suit Set",
+   "title": "Anamika Premium Designer Suit Set",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -14925,7 +15059,7 @@
   {
    "handle": "saakshi-s-cosmo-slit-anarkali-premium-suit-set",
    "sourceHandle": "saakshi-s-cosmo-slit-anarkali-premium-suit-set",
-   "title": "Saakshi`s cosmo Slit Anarkali Premium Suit Set",
+   "title": "Saakshi's cosmo Slit Anarkali Premium Suit Set",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -15765,7 +15899,7 @@
   {
    "handle": "premium-designer-velvet-suit-set-rajwadi",
    "sourceHandle": "premium-designer-velvet-suit-set-rajwadi",
-   "title": "RAJWADI VELVET SUIT SET",
+   "title": "Rajwadi Velvet Suit Set",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -16216,7 +16350,7 @@
   {
    "handle": "prachis-pink-havy-vichitra-royal-elegant-suit-set-copy",
    "sourceHandle": "prachis-pink-havy-vichitra-royal-elegant-suit-set-copy",
-   "title": "Prachi's' Black Havy Vichitra Royal Elegant Suit Set",
+   "title": "Prachi's' Black Heavy Vichitra Royal Elegant Suit Set",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -16455,7 +16589,7 @@
   {
    "handle": "premium-quality-gown-anarkali-suit-set-copy",
    "sourceHandle": "premium-quality-gown-anarkali-suit-set-copy",
-   "title": "Premium Quality Roman Silk Gown Anarkali Suit Set",
+   "title": "Premium Quality Roman Silk Gown Anarkali Suit Set — Edition 2",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -16547,7 +16681,7 @@
   {
    "handle": "premium-quality-9-needle-gown-anarkali-suit-set-copy",
    "sourceHandle": "premium-quality-9-needle-gown-anarkali-suit-set-copy",
-   "title": "Premium Quality Roman Silk Gown Anarkali Suit Set",
+   "title": "Premium Quality Roman Silk Gown Anarkali Suit Set — Edition 3",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -16893,7 +17027,7 @@
   {
    "handle": "premium-quality-anarkali-suit-set-copy-2",
    "sourceHandle": "premium-quality-anarkali-suit-set-copy-2",
-   "title": "Premium Quality Kediya Suit Set",
+   "title": "Premium Quality Kediya Suit Set — Edition 2",
    "price": 64900,
    "compareAtPrice": 216333,
    "images": [
@@ -17405,7 +17539,7 @@
   {
    "handle": "alias-premium-suit-copy",
    "sourceHandle": "alias-premium-suit-copy",
-   "title": "Vaanya 's Premium Designer Gown",
+   "title": "Vaanya's Premium Designer Gown",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -18201,7 +18335,7 @@
   {
    "handle": "premium-quality-anarkali-suit-set-copy-1",
    "sourceHandle": "premium-quality-anarkali-suit-set-copy-1",
-   "title": "Premium Quality Anarkali Suit Set",
+   "title": "Premium Quality Anarkali Suit Set — Edition 2",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -18285,7 +18419,7 @@
   {
    "handle": "premium-quality-anarkali-suit-set",
    "sourceHandle": "premium-quality-anarkali-suit-set",
-   "title": "Premium Quality Anarkali Suit Set",
+   "title": "Premium Quality Anarkali Suit Set — Edition 3",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -18466,7 +18600,7 @@
   {
    "handle": "diyas-new-design-premium-anarkali-suit-set",
    "sourceHandle": "diyas-new-design-premium-anarkali-suit-set",
-   "title": "New Design Premium Anarkali Suit Set",
+   "title": "New Design Premium Anarkali Suit Set — White",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -18999,7 +19133,7 @@
   {
    "handle": "liksha-anarkali-style-plazzo-suit-set",
    "sourceHandle": "liksha-anarkali-style-plazzo-suit-set",
-   "title": "Madhuri's Premium Cotton Anarkali Suit Set With Plazzo",
+   "title": "Madhuri's Premium Cotton Anarkali Suit Set With Palazzo",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -19340,7 +19474,7 @@
   {
    "handle": "rani-color-premium-quality-suit-set-dt-273-copy",
    "sourceHandle": "rani-color-premium-quality-suit-set-dt-273-copy",
-   "title": "WINE COLOR PREMIUM QUALITY SUIT SET DT -273",
+   "title": "Wine Color Premium Quality Suit Set Dt -273",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -19393,7 +19527,7 @@
   {
    "handle": "maroon-color-premium-quality-suit-set-dt-273-copy",
    "sourceHandle": "maroon-color-premium-quality-suit-set-dt-273-copy",
-   "title": "PURPLE COLOR PREMIUM QUALITY SUIT SET DT -273",
+   "title": "Purple Color Premium Quality Suit Set Dt -273",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -19446,7 +19580,7 @@
   {
    "handle": "maroon-color-premium-quality-suit-set-dt-273",
    "sourceHandle": "maroon-color-premium-quality-suit-set-dt-273",
-   "title": "MAROON COLOR PREMIUM QUALITY SUIT SET DT -273",
+   "title": "Maroon Color Premium Quality Suit Set Dt -273",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -19951,7 +20085,7 @@
   {
    "handle": "malini-anarkali-dupatta-set",
    "sourceHandle": "malini-anarkali-dupatta-set",
-   "title": "Malini's Beutifull Fancy Anarkali Suit Set",
+   "title": "Malini's Beautiful Fancy Anarkali Suit Set",
    "price": 64900,
    "compareAtPrice": 216333,
    "images": [
@@ -20127,7 +20261,7 @@
   {
    "handle": "pranavi-anarkali-dupatta-set",
    "sourceHandle": "pranavi-anarkali-dupatta-set",
-   "title": "Salini's Beutifull Fancy Anarkali Suit Set",
+   "title": "Salini's Beautiful Fancy Anarkali Suit Set",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -20220,7 +20354,7 @@
   {
    "handle": "sharon-anarkali-dupatta-set",
    "sourceHandle": "sharon-anarkali-dupatta-set",
-   "title": "SHARON ANARKALI DUPATTA SET",
+   "title": "Sharon Anarkali Dupatta Set",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -20485,7 +20619,7 @@
   {
    "handle": "taniyas-new-party-wear-suit-set-td-139-copy",
    "sourceHandle": "taniyas-new-party-wear-suit-set-td-139-copy",
-   "title": "TANIYA'S WHITE PREMIUM QUALITY SUIT SET",
+   "title": "Taniya's White Premium Quality Suit Set",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -20566,7 +20700,7 @@
   {
    "handle": "siyas-mustured-suit-set",
    "sourceHandle": "siyas-mustured-suit-set",
-   "title": "SIYA'S MUSTURED SUIT SET 146",
+   "title": "Siya's Mustured Suit Set 146",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -20825,7 +20959,7 @@
   {
    "handle": "likshas-maroon-embroidered-georgette-suit-set-td-6016",
    "sourceHandle": "likshas-maroon-embroidered-georgette-suit-set-td-6016",
-   "title": "Liksha's Beutifull and Premium Anarkali Suit Set",
+   "title": "Liksha's Beautiful and Premium Anarkali Suit Set",
    "price": 64900,
    "compareAtPrice": 216333,
    "images": [
@@ -20921,7 +21055,7 @@
   {
    "handle": "radhikas-anarkali-suit-set",
    "sourceHandle": "radhikas-anarkali-suit-set",
-   "title": "RADHIKA'S ANARKALI SUIT SET 6017",
+   "title": "Radhika's Anarkali Suit Set 6017",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -21148,7 +21282,7 @@
   {
    "handle": "sunheri-fux-georgette-suit-set-6013",
    "sourceHandle": "sunheri-fux-georgette-suit-set-6013",
-   "title": "SUNHERI FUX GEORGETTE SUIT SET - 6013",
+   "title": "Sunheri Fux Georgette Suit Set - 6013",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -21782,7 +21916,7 @@
   {
    "handle": "nidhis-multi-pista-coloured-anarkali-suit-set-td07",
    "sourceHandle": "nidhis-multi-pista-coloured-anarkali-suit-set-td07",
-   "title": "NIDHI'S MULTI PISTA COLOURED ANARKALI SUIT SET - 07",
+   "title": "Nidhi's Multi Pista Coloured Anarkali Suit Set - 07",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -22463,7 +22597,7 @@
   {
    "handle": "pink-colour-readymade-alia-cut-gown-with-dupatta-set-kka-1070",
    "sourceHandle": "pink-colour-readymade-alia-cut-gown-with-dupatta-set-kka-1070",
-   "title": "PINK COLOUR READYMADE ALIA CUT GOWN WITH DUPATTA SET-KKA-1070",
+   "title": "Pink Colour Readymade Alia Cut Gown with Dupatta Set-Kka-1070",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -22553,12 +22687,14 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2024-03-29T05:01:32-04:00"
+   "publishedAt": "2024-03-29T05:01:32-04:00",
+   "colourGroup": "colour-readymade-alia-cut-gown-with-dupatta-set-kka-1070",
+   "colourName": "Pink"
   },
   {
    "handle": "waine-colour-readymade-alia-cut-gown-with-dupatta-set-kka-1071",
    "sourceHandle": "waine-colour-readymade-alia-cut-gown-with-dupatta-set-kka-1071",
-   "title": "WAINE COLOUR READYMADE ALIA CUT GOWN WITH DUPATTA SET-KKA-1070",
+   "title": "Wine Colour Readymade Alia Cut Gown with Dupatta Set-Kka-1070",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -22645,12 +22781,14 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2024-03-29T04:58:12-04:00"
+   "publishedAt": "2024-03-29T04:58:12-04:00",
+   "colourGroup": "colour-readymade-alia-cut-gown-with-dupatta-set-kka-1070",
+   "colourName": "Wine"
   },
   {
    "handle": "waine-colour-readymade-alia-cut-gown-with-dupatta-set-kka-1070",
    "sourceHandle": "waine-colour-readymade-alia-cut-gown-with-dupatta-set-kka-1070",
-   "title": "Keshavi'S Black Coloured Gown",
+   "title": "Keshavi's Black Coloured Gown",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -22730,7 +22868,7 @@
   {
    "handle": "multi-floral-print-fabric-fully-flair-anarkali-with-duppta-set-pent-ready-to-wear-dkb-265",
    "sourceHandle": "multi-floral-print-fabric-fully-flair-anarkali-with-duppta-set-pent-ready-to-wear-dkb-265",
-   "title": "Premium Quality Silk Gown Anarkali Suit Set",
+   "title": "Premium Quality Silk Gown Anarkali Suit Set — DKB-265",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -23007,7 +23145,7 @@
   {
    "handle": "new-party-wear-suit-set-in-sinon-fabric",
    "sourceHandle": "new-party-wear-suit-set-in-sinon-fabric",
-   "title": "Heena's Printed Desiner Suit Set",
+   "title": "Heena's Printed Designer Suit Set",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -23077,7 +23215,7 @@
   {
    "handle": "pure-soft-fox-georgette-laheriya-print-dkb-264-rani-pink",
    "sourceHandle": "pure-soft-fox-georgette-laheriya-print-dkb-264-rani-pink",
-   "title": "Premium Quality Silk Gown Anarkali Suit Set",
+   "title": "Premium Quality Silk Gown Anarkali Suit Set — Edition 2",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -23258,7 +23396,7 @@
   {
    "handle": "copy-of-pure-soft-fox-georgette-laheriya-print-dkb-264",
    "sourceHandle": "copy-of-pure-soft-fox-georgette-laheriya-print-dkb-264",
-   "title": "Premium Quality Silk Gown Anarkali Suit Set",
+   "title": "Premium Quality Silk Gown Anarkali Suit Set — DKB-264",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -23344,7 +23482,7 @@
   {
    "handle": "copy-of-pure-soft-organza-anarkali-suit-set-with-fully-stitched-dkb-262",
    "sourceHandle": "copy-of-pure-soft-organza-anarkali-suit-set-with-fully-stitched-dkb-262",
-   "title": "Premium Quality Silk Gown Anarkali Suit Set",
+   "title": "Premium Quality Silk Gown Anarkali Suit Set — DKB-262",
    "price": 64900,
    "compareAtPrice": 216333,
    "images": [
@@ -23980,7 +24118,7 @@
   {
    "handle": "night-star-black-embroidered-georgette-suit-set-td-117",
    "sourceHandle": "night-star-black-embroidered-georgette-suit-set-td-117",
-   "title": "NIGHT STAR BLACK SUIT SET -120",
+   "title": "Night Star Black Suit Set -120",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -24133,7 +24271,7 @@
   {
    "handle": "liksh-embroidered-georgette-anarkali-fully-stitched-suit-set-121",
    "sourceHandle": "liksh-embroidered-georgette-anarkali-fully-stitched-suit-set-121",
-   "title": "RANI & WINE EMBROIDERED GEORGETTE ANARKALI SUIT SET",
+   "title": "Rani & Wine Embroidered Georgette Anarkali Suit Set",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -24202,7 +24340,7 @@
   {
    "handle": "pure-soft-organza-anarkali-suit-set-with-fully-stitched-dkb-261-wine",
    "sourceHandle": "pure-soft-organza-anarkali-suit-set-with-fully-stitched-dkb-261-wine",
-   "title": "Premium Quality Silk Gown Anarkali Suit Set",
+   "title": "Premium Quality Silk Gown Anarkali Suit Set — Edition 3",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -24358,7 +24496,7 @@
   {
    "handle": "pure-soft-organza-anarkali-suit-set-with-fully-stitched-dkb-25",
    "sourceHandle": "pure-soft-organza-anarkali-suit-set-with-fully-stitched-dkb-25",
-   "title": "Premium Quality Silk Gown Anarkali Suit Set",
+   "title": "Premium Quality Silk Gown Anarkali Suit Set — Edition 4",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -24443,7 +24581,7 @@
   {
    "handle": "copy-of-pure-soft-organza-anarkali-suit-set-with-fully-stitched-dkb-27",
    "sourceHandle": "copy-of-pure-soft-organza-anarkali-suit-set-with-fully-stitched-dkb-27",
-   "title": "Premium Quality Silk Gown Anarkali Suit Set",
+   "title": "Premium Quality Silk Gown Anarkali Suit Set — Edition 5",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -25046,7 +25184,7 @@
   {
    "handle": "solid-black-long-flair-less-boder-set-with-dupatta-td-114",
    "sourceHandle": "solid-black-long-flair-less-boder-set-with-dupatta-td-114",
-   "title": "MAXI LONG FLAIR WITH LESS BORDER SET WITH DUPATTA SET. AY-114",
+   "title": "Maxi Long Flair with Less Border Set with Dupatta Set. Ay-114",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -25390,7 +25528,7 @@
   {
    "handle": "whispering-breeze-georgette-embroidered-suit-set-td-107",
    "sourceHandle": "whispering-breeze-georgette-embroidered-suit-set-td-107",
-   "title": "WHISPERING PREMIUM SUIT SET - 107",
+   "title": "Whispering Premium Suit Set - 107",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -25669,7 +25807,7 @@
   {
    "handle": "western-style-sleeve-premium-readymade-kalamkari-designer-gown",
    "sourceHandle": "western-style-sleeve-premium-readymade-kalamkari-designer-gown",
-   "title": "WESTERN STYLE SLEEVE PREMIUM READYMADE KALAMKARI DESIGNER GOWN",
+   "title": "Western Style Sleeve Premium Readymade Kalamkari Designer Gown",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -25791,7 +25929,7 @@
   {
    "handle": "sanayas-black-embroidered-georgette-suit-set",
    "sourceHandle": "sanayas-black-embroidered-georgette-suit-set",
-   "title": "SANAYA'S' BLACK Or RED SUIT SET - 101",
+   "title": "SANAYA's' BLACK Or RED SUIT SET - 101",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -26307,7 +26445,7 @@
   {
    "handle": "classic-pink-anarkali-suit-set-15408494084228",
    "sourceHandle": "classic-pink-anarkali-suit-set",
-   "title": "Classic Pink Anarkali Suit Set",
+   "title": "Classic Pink Anarkali Suit Set — Edition 2",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -26399,7 +26537,7 @@
   {
    "handle": "classic-red-karva-chauth-special-anarkali-suit-set",
    "sourceHandle": "classic-red-karva-chauth-special-anarkali-suit-set",
-   "title": "Classic Red Karva Chauth Special Anarkali Suit Set",
+   "title": "Classic Red Karva Chauth Special Anarkali Suit Set — Edition 2",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -26491,7 +26629,7 @@
   {
    "handle": "designer-anarkali-suit-is-luxury-clothing-considered-to-be-high-quality-made-by-thread-sequins-embroidery-this-is-made-for-desirable-womens-who-deserve-it",
    "sourceHandle": "designer-anarkali-suit-is-luxury-clothing-considered-to-be-high-quality-made-by-thread-sequins-embroidery-this-is-made-for-desirable-womens-who-deserve-it",
-   "title": "Designer Anarkali Suit is luxury clothing Considered to be high quality Made by Thread-Sequins Embroidery. This is Made for Desirable Women's who deserve it",
+   "title": "Designer Anarkali Suit",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -26573,7 +26711,7 @@
   {
    "handle": "black-cosmo-slit-anarkali-premium-suit-set-10521452478596",
    "sourceHandle": "black-cosmo-slit-anarkali-premium-suit-set",
-   "title": "Black Cosmo Slit Anarkali Premium Suit Set",
+   "title": "Black Cosmo Slit Anarkali Premium Suit Set — Edition 2",
    "price": 64900,
    "compareAtPrice": 216333,
    "images": [
@@ -26664,7 +26802,7 @@
   {
    "handle": "presenting-new-crunchy-silk-fabric-with-embroidery-sequence-dori-and-jari-work-top-with-dupatta-set-bell-bottom-pent-ready-to-wear",
    "sourceHandle": "presenting-new-crunchy-silk-fabric-with-embroidery-sequence-dori-and-jari-work-top-with-dupatta-set-bell-bottom-pent-ready-to-wear",
-   "title": "PRESENTING NEW CRUNCHY SILK FABRIC WITH EMBROIDERY SEQUENCE,DORI AND JARI WORK,TOP WITH DUPATTA SET,BELL BOTTOM PENT READY TO WEAR",
+   "title": "Presenting New Crunchy Silk Fabric with Embroidery Sequence",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -26741,7 +26879,7 @@
   {
    "handle": "nirus-noir-black-elegance-anarkali-suit-set-10511760359556",
    "sourceHandle": "nirus-noir-black-elegance-anarkali-suit-set",
-   "title": "Niru'S Noir Black Elegance Anarkali Suit Set",
+   "title": "Niru's Noir Black Elegance Anarkali Suit Set — Edition 2",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -26933,7 +27071,7 @@
   {
    "handle": "neha-heavy-pure-vichitra-anarkali-suit-set",
    "sourceHandle": "neha-heavy-pure-vichitra-anarkali-suit-set",
-   "title": "Neha Heavy Pure Vichitra Anarkali Suit Set",
+   "title": "Neha Heavy Pure Vichitra Anarkali Suit Set — Edition 2",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -27024,7 +27162,7 @@
   {
    "handle": "premium-anarkali-suit-set-3-piece",
    "sourceHandle": "premium-anarkali-suit-set-3-piece",
-   "title": "PREMIUM ANARKALI SUIT SET | 3 PIECE",
+   "title": "Premium Anarkali Suit Set | 3 Piece",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -27116,7 +27254,7 @@
   {
    "handle": "trending-anarkali-suit-set-3-pis",
    "sourceHandle": "trending-anarkali-suit-set-3-pis",
-   "title": "TRENDING*ANARKALI*SUIT*SET* *[3 PIS]*",
+   "title": "Trendinganarkalisuitset [3 Pis]",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -27198,7 +27336,7 @@
   {
    "handle": "malveera-premium-quality-anarkali-suit-set-10456594841732",
    "sourceHandle": "malveera-premium-quality-anarkali-suit-set",
-   "title": "Malveera Premium Quality Anarkali Suit Set",
+   "title": "Malveera Premium Quality Anarkali Suit Set — Edition 2",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -27288,7 +27426,7 @@
   {
    "handle": "premium-readymade-anarkali-suit-set-3-pis",
    "sourceHandle": "premium-readymade-anarkali-suit-set-3-pis",
-   "title": "*PREMIUM*READYMADE*ANARKALI*SUIT*SET* *[3 PIS]*",
+   "title": "Premiumreadymadeanarkalisuitset [3 Pis]",
    "price": 64900,
    "compareAtPrice": 216333,
    "images": [
@@ -27381,7 +27519,7 @@
   {
    "handle": "presenting-new-premium-quality-pure-romansilk-fabric-fully-flare-anarkali-with-fancy-dupapta-set-pent-ready-to-wear",
    "sourceHandle": "presenting-new-premium-quality-pure-romansilk-fabric-fully-flare-anarkali-with-fancy-dupapta-set-pent-ready-to-wear",
-   "title": "PRESENTING NEW PREMIUM QUALITY PURE ROMANSILK FABRIC FULLY FLARE ANARKALI,WITH FANCY DUPAPTA SET,PENT READY TO WEAR",
+   "title": "Presenting New Premium Quality Pure Romansilk Fabric Fully Flare Anarkali",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -27470,7 +27608,7 @@
   {
    "handle": "presenting-new-premium-quality-pure-romansilk-chanderi-fabric-fully-flare-anarkali-with-dupapta-set-pent-ready-to-wear",
    "sourceHandle": "presenting-new-premium-quality-pure-romansilk-chanderi-fabric-fully-flare-anarkali-with-dupapta-set-pent-ready-to-wear",
-   "title": "*PRESENTING NEW PREMIUM QUALITY PURE ROMANSILK CHANDERI FABRIC FULLY FLARE ANARKALI,WITH DUPAPTA SET,PENT READY TO WEAR*",
+   "title": "Presenting New Premium Quality Pure Romansilk Chanderi Fabric Fully Flare",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -27655,7 +27793,7 @@
   {
    "handle": "premium-lakhnavi-embroidered-anarkali-suit-set",
    "sourceHandle": "premium-lakhnavi-embroidered-anarkali-suit-set",
-   "title": "Premium Lakhnavi Embroidered Anarkali Suit Set",
+   "title": "Premium Lakhnavi Embroidered Anarkali Suit Set — Edition 2",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -28299,7 +28437,7 @@
   {
    "handle": "premium-anarkali-suit-set-3-pis-6122",
    "sourceHandle": "premium-anarkali-suit-set-3-pis-6122",
-   "title": "*Premium*Anarkali Suit Set* *[3 PIS]* 6122",
+   "title": "PremiumAnarkali Suit Set [3 PIS] 6122",
    "price": 64900,
    "compareAtPrice": 216333,
    "images": [
@@ -28397,7 +28535,7 @@
   {
    "handle": "presenting-new-frendy-silk-fabric-with-embroidery-sequence-dori-and-jari-work-top-with-duppta-set-bell-bottom-pent-ready-to-wear-1",
    "sourceHandle": "presenting-new-frendy-silk-fabric-with-embroidery-sequence-dori-and-jari-work-top-with-duppta-set-bell-bottom-pent-ready-to-wear-1",
-   "title": "PRESENTING NEW FRENDY SILK FABRIC WITH EMBROIDERY SEQUENCE DORI AND JARI WORK,TOP WITH DUPPTA SET,BELL BOTTOM PENT READY TO WEAR",
+   "title": "Presenting New Trendy Silk Fabric with Embroidery Sequence Dori and Zari Work",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -28478,7 +28616,7 @@
   {
    "handle": "presenting-new-crunchy-silk-fabric-with-embroidery-sequence-and-jari-work-top-with-duppta-set-bell-bottom-pent-ready-to-wear-kb-300-tealblue-offwhite-wine",
    "sourceHandle": "presenting-new-crunchy-silk-fabric-with-embroidery-sequence-and-jari-work-top-with-duppta-set-bell-bottom-pent-ready-to-wear-kb-300-tealblue-offwhite-wine",
-   "title": "PRESENTING NEW CRUNCHY SILK FABRIC WITH EMBROIDERY SEQUENCE AND JARI WORK,TOP WITH DUPPTA SET,BELL BOTTOM PENT READY TO WEAR KB-300 TEALBLUE OFFWHITE,WINE",
+   "title": "Presenting New Crunchy Silk Fabric with Embroidery Sequence and Zari Work",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -28815,7 +28953,7 @@
   {
    "handle": "black-havy-rayon-royal-elegant-anarkali-suit-set",
    "sourceHandle": "black-havy-rayon-royal-elegant-anarkali-suit-set",
-   "title": "Black Havy Rayon Royal Elegant Anarkali Suit Set",
+   "title": "Black Heavy Rayon Royal Elegant Anarkali Suit Set",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -28991,7 +29129,7 @@
   {
    "handle": "madhvi-heavy-embroidered-maxi-set-10016283328644",
    "sourceHandle": "madhvi-heavy-embroidered-maxi-set",
-   "title": "Madhvi Heavy Embroidered Maxi Set",
+   "title": "Madhvi Heavy Embroidered Maxi Set — Edition 2",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -29077,7 +29215,7 @@
   {
    "handle": "shavis-peach-havy-zimmy-chu-royal-elegant-suit-set",
    "sourceHandle": "shavis-peach-havy-zimmy-chu-royal-elegant-suit-set",
-   "title": "Shavi's' Peach Havy Zimmy Chu Royal Elegant Suit Set",
+   "title": "Shavi's' Peach Heavy Zimmy Chu Royal Elegant Suit Set",
    "price": 64900,
    "compareAtPrice": 216333,
    "images": [
@@ -29169,7 +29307,7 @@
   {
    "handle": "prachis-pink-havy-vichitra-royal-elegant-suit-set-copy-8228835983492",
    "sourceHandle": "prachis-pink-havy-vichitra-royal-elegant-suit-set-copy",
-   "title": "Prachi's' Black Havy Vichitra Royal Elegant Suit Set",
+   "title": "Prachi's' Black Heavy Vichitra Royal Elegant Suit Set — Edition 2",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -29249,7 +29387,7 @@
   {
    "handle": "premium-quality-roman-silk-gown-anarkali-suit-set-copy-8228835819652",
    "sourceHandle": "premium-quality-roman-silk-gown-anarkali-suit-set-copy",
-   "title": "Premium Quality Roman Silk Gown Anarkali Suit Set",
+   "title": "Premium Quality Roman Silk Gown Anarkali Suit Set — Edition 4",
    "price": 64900,
    "compareAtPrice": 216333,
    "images": [
@@ -29425,7 +29563,7 @@
   {
    "handle": "premium-readymade-anarkali-suit-set-1",
    "sourceHandle": "premium-readymade-anarkali-suit-set-1",
-   "title": "Moksha 's Premium Quality Anarkali Print Suit Set",
+   "title": "Moksha's Premium Quality Anarkali Print Suit Set",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -29514,7 +29652,7 @@
   {
    "handle": "goldenhour-cosmos-suit-set",
    "sourceHandle": "goldenhour-cosmos-suit-set",
-   "title": "GOLDENHOUR COSMOS SUIT SET",
+   "title": "Goldenhour Cosmos Suit Set",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -29840,7 +29978,7 @@
   {
    "handle": "divine-maslin-anarkali-style-plazzo-suit-set",
    "sourceHandle": "divine-maslin-anarkali-style-plazzo-suit-set",
-   "title": "DIVINE MASLIN ANARKALI STYLE PLAZZO SUIT SET",
+   "title": "Divine Maslin Anarkali Style Palazzo Suit Set",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -29984,7 +30122,7 @@
   {
    "handle": "zenny-embroidery-worked-anarkali-suit-set-td-6018",
    "sourceHandle": "zenny-embroidery-worked-anarkali-suit-set-td-6018",
-   "title": "ZENNY EMBROIDERY WORKED ANARKALI SUIT SET",
+   "title": "Zenny Embroidery Worked Anarkali Suit Set",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -30256,7 +30394,7 @@
   {
    "handle": "krishvas-exclusive-blue-floral-organza-anarkali-suit-set-10340442833028",
    "sourceHandle": "krishvas-exclusive-blue-floral-organza-anarkali-suit-set",
-   "title": "Krishva's Exclusive Blue Floral Organza Anarkali Suit Set",
+   "title": "Krishva's Exclusive Blue Floral Organza Anarkali Suit Set — Edition 2",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -30350,7 +30488,7 @@
   {
    "handle": "presenting-new-frendy-silk-fabric-with-embroidery-sequence-dori-and-jari-work-top-with-duppta-set-bell-bottom-pent-ready-to-wear",
    "sourceHandle": "presenting-new-frendy-silk-fabric-with-embroidery-sequence-dori-and-jari-work-top-with-duppta-set-bell-bottom-pent-ready-to-wear",
-   "title": "PRESENTING NEW FRENDY SILK FABRIC WITH EMBROIDERY SEQUENCE DORI AND JARI WORK,TOP WITH DUPPTA SET,BELL BOTTOM PENT READY TO WEAR",
+   "title": "Presenting New Trendy Silk Fabric with Embroidery Sequence Dori and Zari Work — Edition 2",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -30428,7 +30566,7 @@
   {
    "handle": "premium-readymade-anarkali-suit-set-3-pis-1",
    "sourceHandle": "premium-readymade-anarkali-suit-set-3-pis-1",
-   "title": "*PREMIUM*READYMADE*ANARKALI*SUIT*SET* *[3 PIS]*",
+   "title": "Premiumreadymadeanarkalisuitset [3 Pis] — Edition 2",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -30694,7 +30832,7 @@
   {
    "handle": "star-georgette-slik-anarkali-suit-with-skirt-10462901338244",
    "sourceHandle": "star-georgette-slik-anarkali-suit-with-skirt",
-   "title": "Star Georgette Slik Anarkali Suit With Skirt",
+   "title": "Star Georgette Silk Anarkali Suit With Skirt — Edition 2",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -31164,7 +31302,7 @@
   {
    "handle": "light-purple-colour-embroidered-lehenga-choli",
    "sourceHandle": "light-purple-colour-embroidered-lehenga-choli",
-   "title": "Light Purple Colour Embroidered Lehenga Choli",
+   "title": "Light Purple Colour Embroidered Lehenga Choli — Edition 2",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -31299,7 +31437,7 @@
   {
    "handle": "mita-heavy-traditional-embroidered-koti-anarkali-suit-set-15399230865540",
    "sourceHandle": "mita-heavy-traditional-embroidered-koti-anarkali-suit-set",
-   "title": "Mita Heavy Traditional Embroidered Koti Anarkali Suit Set",
+   "title": "Mita Heavy Traditional Embroidered Koti Anarkali Suit Set — Edition 2",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -31390,7 +31528,7 @@
   {
    "handle": "myra-cosmo-slit-anarkali-premium-suit-set-10521552060548",
    "sourceHandle": "myra-cosmo-slit-anarkali-premium-suit-set",
-   "title": "Myra cosmo Slit Anarkali Premium Suit Set",
+   "title": "Myra cosmo Slit Anarkali Premium Suit Set — Edition 2",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -31481,7 +31619,7 @@
   {
    "handle": "ivory-and-maroon-elegant-top-bottom-dupatta-suit-set-10511750529156",
    "sourceHandle": "ivory-and-maroon-elegant-top-bottom-dupatta-suit-set",
-   "title": "Ivory and Maroon Elegant Top Bottom Dupatta Suit Set",
+   "title": "Ivory and Maroon Elegant Top Bottom Dupatta Suit Set — Edition 2",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -31576,7 +31714,7 @@
   {
    "handle": "rang-e-royale-blooming-lehenga-suit-set-1",
    "sourceHandle": "rang-e-royale-blooming-lehenga-suit-set-1",
-   "title": "RANG-E-ROYALE BLOOMING LEHENGA SUIT SET",
+   "title": "Rang-E-Royale Blooming Lehenga Suit Set",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -31669,7 +31807,7 @@
   {
    "handle": "rang-e-royale-blooming-lehenga-suit-set-10511720087684",
    "sourceHandle": "rang-e-royale-blooming-lehenga-suit-set",
-   "title": "RANG-E-ROYALE BLOOMING LEHENGA SUIT SET",
+   "title": "Rang-E-Royale Blooming Lehenga Suit Set — Edition 2",
    "price": 64900,
    "compareAtPrice": 216333,
    "images": [
@@ -31763,7 +31901,7 @@
   {
    "handle": "saumya-neon-sharara-suit-set-10498715058308",
    "sourceHandle": "saumya-neon-sharara-suit-set",
-   "title": "Saumya Neon Sharara Suit Set",
+   "title": "Saumya Neon Sharara Suit Set — Edition 2",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -31857,7 +31995,7 @@
   {
    "handle": "aniska-lakhnavi-embroidered-work-anarkali-suit-set",
    "sourceHandle": "aniska-lakhnavi-embroidered-work-anarkali-suit-set",
-   "title": "Aniska Lakhnavi Embroidered Work Anarkali Suit Set",
+   "title": "Aniska Lakhnavi Embroidered Work Anarkali Suit Set — Edition 2",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -31947,7 +32085,7 @@
   {
    "handle": "alveera-premium-quality-anarkali-suit-set-with-color",
    "sourceHandle": "alveera-premium-quality-anarkali-suit-set-with-color",
-   "title": "Alveera Premium Quality Anarkali Suit Set with Color",
+   "title": "Alveera Premium Quality Anarkali Suit Set with Color — Edition 2",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -32041,7 +32179,7 @@
   {
    "handle": "premium-ivory-royal-zari-work-kali-cut-anarkali-suit-set-10456605851780",
    "sourceHandle": "premium-ivory-royal-zari-work-kali-cut-anarkali-suit-set",
-   "title": "Premium Ivory Royal Zari Work Kali Cut Anarkali Suit Set",
+   "title": "Premium Ivory Royal Zari Work Kali Cut Anarkali Suit Set — Edition 2",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -32136,7 +32274,7 @@
   {
    "handle": "red-anarkali-suit-knb103",
    "sourceHandle": "red-anarkali-suit-knb103",
-   "title": "RED ANARKALI SUIT KNB103",
+   "title": "Red Anarkali Suit Knb103",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -32217,7 +32355,7 @@
   {
    "handle": "premium-readymade-anarkali-suit-set-3-pis-184",
    "sourceHandle": "premium-readymade-anarkali-suit-set-3-pis-184",
-   "title": "*PREMIUM*READYMADE*ANARKALI*SUIT*SET* *[3 PIS]* 184",
+   "title": "Premiumreadymadeanarkalisuitset [3 Pis] 184",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -32310,7 +32448,7 @@
   {
    "handle": "premium-readymade-anarkali-suit-set-6118",
    "sourceHandle": "premium-readymade-anarkali-suit-set-6118",
-   "title": "PREMIUM READYMADE ANARKALI SUIT SET 6118",
+   "title": "Premium Readymade Anarkali Suit Set 6118",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -32399,7 +32537,7 @@
   {
    "handle": "presenting-new-high-premium-quality-pure-fox-georgette-fabric-fully-flare-anarkali-with-koti-dupatta-set-pent-ready-to-wear-k299",
    "sourceHandle": "presenting-new-high-premium-quality-pure-fox-georgette-fabric-fully-flare-anarkali-with-koti-dupatta-set-pent-ready-to-wear-k299",
-   "title": "PRESENTING NEW HIGH PREMIUM QUALITY PURE FOX GEORGETTE FABRIC FULLY FLARE ANARKALI WITH KOTI,DUPATTA SET,PENT READY TO WEAR K299",
+   "title": "Presenting New High Premium Quality Pure Fox Georgette Fabric Fully Flare",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -33067,7 +33205,7 @@
   {
    "handle": "rama-crunchy-silk-anarkali-plazo-suit-set",
    "sourceHandle": "rama-crunchy-silk-anarkali-plazo-suit-set",
-   "title": "Rama Crunchy Silk Anarkali Plazo Suit Set",
+   "title": "Rama Crunchy Silk Anarkali Palazzo Suit Set",
    "price": 64900,
    "compareAtPrice": 216333,
    "images": [
@@ -33159,7 +33297,7 @@
   {
    "handle": "dark-onion-crunchy-silk-anarkali-plazo-suit-set",
    "sourceHandle": "dark-onion-crunchy-silk-anarkali-plazo-suit-set",
-   "title": "Dark Onion Crunchy Silk Anarkali Plazo Suit Set",
+   "title": "Dark Onion Crunchy Silk Anarkali Palazzo Suit Set",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -36284,7 +36422,7 @@
   {
    "handle": "siya-mustured-suit-set",
    "sourceHandle": "siya-mustured-suit-set",
-   "title": "SIYA MUSTURED SUIT SET",
+   "title": "Siya Mustured Suit Set",
    "price": 64900,
    "compareAtPrice": 216333,
    "images": [
@@ -36732,7 +36870,7 @@
   {
    "handle": "radhika-cosmo-slik-anarkali-premium-suit-set",
    "sourceHandle": "radhika-cosmo-slik-anarkali-premium-suit-set",
-   "title": "Radhika Cosmo Slik Anarkali Premium Suit Set",
+   "title": "Radhika Cosmo Silk Anarkali Premium Suit Set",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -36823,7 +36961,7 @@
   {
    "handle": "sakhi-grey-cosmo-slik-anarkali-suit-with-skirt",
    "sourceHandle": "sakhi-grey-cosmo-slik-anarkali-suit-with-skirt",
-   "title": "Sakhi Grey Cosmo Slik Anarkali Suit With Skirt",
+   "title": "Sakhi Grey Cosmo Silk Anarkali Suit With Skirt",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -37166,7 +37304,7 @@
   {
    "handle": "hazels-anarkali-partywear-suit-set-8228836245636",
    "sourceHandle": "hazels-anarkali-partywear-suit-set",
-   "title": "Hazel's Anarkali PartyWear Suit Set",
+   "title": "Hazel's Anarkali PartyWear Suit Set — Edition 2",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -37260,7 +37398,7 @@
   {
    "handle": "premium-quality-9-needle-gown-anarkali-suit-set-copy-8228835426436",
    "sourceHandle": "premium-quality-9-needle-gown-anarkali-suit-set-copy",
-   "title": "Premium Quality Roman Silk Gown Anarkali Suit Set",
+   "title": "Premium Quality Roman Silk Gown Anarkali Suit Set — Edition 5",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -37346,7 +37484,7 @@
   {
    "handle": "prachis-pink-havy-vichitra-royal-elegant-suit-set",
    "sourceHandle": "prachis-pink-havy-vichitra-royal-elegant-suit-set",
-   "title": "Prachi's' PINK Havy Vichitra Royal Elegant Suit Set",
+   "title": "Prachi's' PINK Heavy Vichitra Royal Elegant Suit Set",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -37431,7 +37569,7 @@
   {
    "handle": "chandnis-latest-anarkali-suit-set-8201648537732",
    "sourceHandle": "chandnis-latest-anarkali-suit-set",
-   "title": "Chandni's Latest Anarkali Suit Set",
+   "title": "Chandni's Latest Anarkali Suit Set — Edition 2",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -37702,7 +37840,7 @@
   {
    "handle": "premium-ready-mend-anarkali-suit-set-sku-149",
    "sourceHandle": "premium-ready-mend-anarkali-suit-set-👗sku-149",
-   "title": "PREMIUM READY MADE ANARKALI SUIT SET",
+   "title": "Premium Ready Made Anarkali Suit Set",
    "price": 64900,
    "compareAtPrice": 216333,
    "images": [
@@ -37883,7 +38021,7 @@
   {
    "handle": "radiant-dark-maroon-suit-set-ka-1113",
    "sourceHandle": "radiant-dark-maroon-suit-set-ka-1113",
-   "title": "RADIANT DARK MAROON SUIT SET",
+   "title": "Radiant Dark Maroon Suit Set",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -37972,7 +38110,7 @@
   {
    "handle": "sunheri-fux-georgette-suit-set-6013-7287419895940",
    "sourceHandle": "sunheri-fux-georgette-suit-set-6013",
-   "title": "SUNHERI FUX GEORGETTE SUIT SET",
+   "title": "Sunheri Fux Georgette Suit Set",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -38068,7 +38206,7 @@
   {
    "handle": "manvis-white-coloured-anarkali-suit-set-11-7287410360452",
    "sourceHandle": "manvis-white-coloured-anarkali-suit-set-11",
-   "title": "MANVI'S WHITE COLOURED ANARKALI SUIT SET",
+   "title": "Manvi's White Coloured Anarkali Suit Set — Edition 2",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -38160,7 +38298,7 @@
   {
    "handle": "rukmanis-maroon-coloured-anarkali-suit-set-td09",
    "sourceHandle": "rukmanis-maroon-coloured-anarkali-suit-set-td09",
-   "title": "RUKMANI'S MAROON COLOURED ANARKALI SUIT SET",
+   "title": "Rukmani's Maroon Coloured Anarkali Suit Set",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -38256,7 +38394,7 @@
   {
    "handle": "keshvis-orange-coloured-anarkali-suit-set-05",
    "sourceHandle": "keshvis-orange-coloured-anarkali-suit-set-05",
-   "title": "KESHVI'S ORANGE COLOURED ANARKALI SUIT SET",
+   "title": "Keshvi's Orange Coloured Anarkali Suit Set",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -38349,7 +38487,7 @@
   {
    "handle": "whispering-breeze-georgette-embroidered-suit-set-td-107-7287175708804",
    "sourceHandle": "whispering-breeze-georgette-embroidered-suit-set-td-107",
-   "title": "WHISPERING BREEZE GEORGETTE EMBROIDERED SUIT SET",
+   "title": "Whispering Breeze Georgette Embroidered Suit Set",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -38442,7 +38580,7 @@
   {
    "handle": "black-star-black-embroidered-georgette-suit-set-td-120",
    "sourceHandle": "black-star-black-embroidered-georgette-suit-set-td-120",
-   "title": "BLACK STAR BLACK EMBROIDERED GEORGETTE SUIT SET",
+   "title": "Black Star Black Embroidered Georgette Suit Set",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -38510,7 +38648,7 @@
   {
    "handle": "choclate-star-embroidered-georgette-suit-set-td-120",
    "sourceHandle": "choclate-star-embroidered-georgette-suit-set-td-120",
-   "title": "CHOCLATE STAR EMBROIDERED GEORGETTE SUIT SET",
+   "title": "Choclate Star Embroidered Georgette Suit Set",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -38694,7 +38832,7 @@
   {
    "handle": "sanayas-designer-readymade-gown-collections-kkka-132",
    "sourceHandle": "sanayas-designer-readymade-gown-collections-kkka-132",
-   "title": "SANAYA'S' DESIGNER READYMADE GOWN COLLECTIONS",
+   "title": "Sanaya's' Designer Readymade Gown Collections",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -38781,7 +38919,7 @@
   {
    "handle": "sanayas-designer-readymade-gown-collections-kkka-131",
    "sourceHandle": "sanayas-designer-readymade-gown-collections-kkka-131",
-   "title": "BUFANI'S' DESIGNER READYMADE GOWN COLLECTIONS",
+   "title": "Bufani's' Designer Readymade Gown Collections",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -40001,7 +40139,7 @@
   {
    "handle": "simrans-malticolor-flower-maslin-suit-set",
    "sourceHandle": "simrans-malticolor-flower-maslin-suit-set",
-   "title": "SIMRAN'S MALTICOLOR FLOWER MASLIN SUIT SET",
+   "title": "Simran's Malticolor Flower Maslin Suit Set",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [

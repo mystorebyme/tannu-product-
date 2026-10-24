@@ -7,12 +7,12 @@ import { API_AVAILABLE, apiUrl } from "@/lib/api-base";
 import { formatPrice } from "@/lib/format";
 import { buildUpiUri } from "@/lib/upi";
 import { UpiQr } from "@/components/upi-qr";
-import { UpiApps } from "@/components/upi-apps";
 
 /**
  * UPI payment card — seedha owner ke UPI account me paisa.
  *
- * 1. Customer QR scan karta hai ya "Open UPI app" dabata hai (amount bhara hua aata hai).
+ * 1. Order place karte hi ye page khulta hai; mobile par UPI app khud khul jaati
+ *    hai (`upi://pay` intent, amount bhara hua), desktop par QR scan hota hai.
  * 2. Pay karne ke baad UTR / reference daalta hai.
  * 3. Admin verify karke order confirm karta hai.
  *
@@ -51,6 +51,7 @@ export function UpiPayment({
   const [autoChecked, setAutoChecked] = useState(false);
   const router = useRouter();
   const autoRan = useRef(false);
+  const appOpened = useRef(false);
 
   const callbackUrl = useMemo(() => {
     if (!returnToken) return undefined;
@@ -154,6 +155,25 @@ export function UpiPayment({
   );
   const paid = paymentStatus === "paid";
 
+  /**
+   * "Place order" ke turant baad payment page: mobile par pehli baar apne aap
+   * UPI app (chooser) khulti hai. Browser gesture ke bina bhi intent usually
+   * chalta hai; na chale to QR/UPI ID neeche maujood hai.
+   */
+  useEffect(() => {
+    if (appOpened.current || typeof window === "undefined" || paid) return;
+    if (new URLSearchParams(window.location.search).get("pay") !== "1") return;
+    if (!/android|iphone|ipad|ipod/i.test(navigator.userAgent)) return;
+    appOpened.current = true;
+    const timer = window.setTimeout(() => {
+      window.location.href = upiUri;
+    }, 600);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+
+
   return (
     <div className="mt-4 overflow-hidden border border-[#e6d3a8] bg-[#fdf9ee]" data-testid="upi-payment">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#ecd9b0] bg-[#f8efd9] px-4 py-2.5 sm:px-5">
@@ -208,9 +228,10 @@ export function UpiPayment({
               </p>
             ) : null}
 
-            <div className="mt-3">
-              <UpiApps uri={upiUri} upiId={upiId} amountPaise={amount} />
-            </div>
+            <p className="mt-2 text-[11px] leading-relaxed text-[#8a7a5f]">
+              Mobile par UPI app khud khul jaati hai. Na khule to is page ko refresh karein ya QR scan
+              karein — UPI ID par bhi pay kar sakte hain.
+            </p>
 
             {submitted ? (
               <div className="mt-3 border border-[#c9dcc9] bg-[#eef7ee] px-3 py-2.5" data-testid="upi-submitted">

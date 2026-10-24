@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { ContactForm } from "@/components/contact-form";
 import { ContactDetails } from "@/components/contact-details";
 import { TrackOrderForm } from "@/components/track-order-form";
+import { WhatsAppLink } from "@/components/whatsapp-link";
 
 type PageContent = {
   title: string;
@@ -112,7 +113,7 @@ const pages: Record<string, PageContent> = {
         heading: "7 days replacement",
         body: [
           "If the product is damaged, has a manufacturing defect or was incorrectly shipped, request a replacement within 7 days of delivery.",
-          "The item must be unused, unwashed and have all original tags intact. Share an unboxing video or clear photographs on WhatsApp 8005900581 along with your order number.",
+          "The item must be unused, unwashed and have all original tags intact. Share an unboxing video or clear photographs on WhatsApp along with your order number (number neeche diya hai).",
         ],
       },
       {
@@ -151,7 +152,7 @@ const pages: Record<string, PageContent> = {
       {
         heading: "Your rights",
         body: [
-          "You may request access, correction or deletion of your personal data by emailing Info.likshaclothing@gmail.com. We respond within 30 days.",
+          "You may request access, correction or deletion of your personal data by emailing our support address (Contact page par). We respond within 30 days.",
         ],
       },
     ],
@@ -337,14 +338,10 @@ export default async function ContentPage({
             >
               Shop Anarkali Suits
             </Link>
-            <a
-              href="https://wa.me/918005900581"
-              target="_blank"
-              rel="noreferrer"
+            <WhatsAppLink
+              label="WhatsApp us"
               className="border border-[#862222] px-6 py-3 text-[11px] font-semibold tracking-[.16em] text-[#862222] uppercase"
-            >
-              WhatsApp us
-            </a>
+            />
           </div>
         </div>
       </div>

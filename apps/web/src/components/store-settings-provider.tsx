@@ -9,8 +9,8 @@ import { API_AVAILABLE, apiUrl } from "@/lib/api-base";
  * Owner-editable store details (phone, WhatsApp, email, UPI ID, announcement).
  *
  * Source: admin settings (Postgres/JSON) + owner ki Google Sheet — server
- * `/api/settings` par merge karke deta hai. Client 60s me ek baar refresh karta
- * hai, isliye owner sheet me number badale to site thodi der me update ho jaati hai.
+ * `/api/settings` par merge karke deta hai. Client har 30s me, tab focus par
+ * turant refresh karta hai — sheet me badla number site par bina reload dikhta hai.
  *
  * API na ho (GitHub Pages static preview) to niche wale defaults dikhte hain —
  * layout tootta nahi, koi error toast nahi.
@@ -78,10 +78,19 @@ export function StoreSettingsProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     void refresh();
     if (!API_AVAILABLE) return;
-    const timer = window.setInterval(() => {
+    // sheet change → site: tab wapas focus par turant, warna 30s me
+    const onFocus = () => void refresh();
+    const onVisible = () => {
       if (document.visibilityState === "visible") void refresh();
-    }, 60_000);
-    return () => window.clearInterval(timer);
+    };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisible);
+    const timer = window.setInterval(onVisible, 30_000);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.clearInterval(timer);
+    };
   }, [refresh]);
 
   return (

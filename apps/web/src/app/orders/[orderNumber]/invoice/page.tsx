@@ -244,7 +244,7 @@ export default async function InvoicePage({
                 <p className="text-[9.5px] font-semibold tracking-[.18em] text-[#862222] uppercase">Declaration</p>
                 <p className="mt-1.5 text-[10.5px] leading-relaxed text-[#6b6259]">
                   We declare that this invoice shows the actual price of the goods described and that all
-                  particulars are true and correct. Goods are dispatched from Jaipur, Rajasthan. Prices are
+                  particulars are true and correct. Goods are dispatched from our India warehouse. Prices are
                   inclusive of GST. 7 days replacement on unused products with tags intact. This is a
                   computer-generated invoice.
                 </p>

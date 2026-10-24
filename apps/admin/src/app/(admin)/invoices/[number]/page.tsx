@@ -61,7 +61,7 @@ export default async function ManualInvoicePage({ params }: { params: Promise<{ 
             {/* same to same logo jo PDF/HTML invoice par hai */}
             <img src="/invoice-logo.png" alt="Designer Clothing" width={196} height={51} />
             <p className="invoice-muted" style={{ marginTop: 8 }}>
-              Designer Clothing · Jaipur, Rajasthan
+              Designer Clothing · India
               <br />
               GSTIN: 08AAACL1234K1Z5 · info.likshaclothing@gmail.com
               <br />

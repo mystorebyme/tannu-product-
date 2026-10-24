@@ -7,7 +7,7 @@ import { useStoreSettings } from "@/components/store-settings-provider";
  * Sheet me number badla -> site par bhi badal jaata hai, redeploy nahi.
  */
 export function ContactDetails() {
-  const { whatsapp, supportPhone, supportEmail } = useStoreSettings();
+  const { whatsapp, supportEmail } = useStoreSettings();
   const wa = whatsapp.replace(/\D/g, "").slice(-10);
 
   return (
@@ -22,21 +22,23 @@ export function ContactDetails() {
         <span className="text-[14px] font-medium break-words text-[#862222]">{whatsapp}</span>
       </a>
       <a
-        href={`tel:${supportPhone.replace(/[^\d+]/g, "")}`}
-        className="flex flex-col gap-1 border border-[#eee6de] bg-white p-4 transition hover:border-[#862222]"
-      >
-        <span className="text-[10px] tracking-[.14em] text-[#9c8f82] uppercase">Call</span>
-        <span className="text-[14px] font-medium break-words">{supportPhone}</span>
-      </a>
-      <a
         href={`mailto:${supportEmail}`}
         className="flex flex-col gap-1 border border-[#eee6de] bg-white p-4 transition hover:border-[#862222]"
       >
         <span className="text-[10px] tracking-[.14em] text-[#9c8f82] uppercase">Email</span>
         <span className="text-[14px] font-medium break-all">{supportEmail}</span>
       </a>
+      <a
+        href={`https://wa.me/91${wa}?text=${encodeURIComponent("Hi Designer Clothing, I need help with an order.")}`}
+        target="_blank"
+        rel="noreferrer"
+        className="flex flex-col gap-1 border border-[#eee6de] bg-white p-4 transition hover:border-[#862222]"
+      >
+        <span className="text-[10px] tracking-[.14em] text-[#9c8f82] uppercase">Order help</span>
+        <span className="text-[14px] font-medium break-words">WhatsApp support</span>
+      </a>
       <p className="text-[12px] text-[#6b6259] sm:col-span-3">
-        Customer care hours: Monday to Saturday, 10:00 AM – 8:00 PM IST
+        WhatsApp support: Monday to Saturday, 10:00 AM – 8:00 PM IST (no phone calls)
       </p>
     </div>
   );

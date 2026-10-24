@@ -42,7 +42,7 @@ const defaultAnnouncements = [
 export function SiteHeader() {
   const { count, openCart, lines, removeLine, setQuantity, subtotal } = useCart();
   const { wishlist } = useWishlist();
-  const { whatsapp, supportPhone, announcement } = useStoreSettings();
+  const { whatsapp, supportEmail, supportPhone, announcement } = useStoreSettings();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -165,15 +165,17 @@ export function SiteHeader() {
     <>
       <div className="bg-[#7d1a1a] text-white">
         <div className="mx-auto flex min-h-9 max-w-[1400px] items-center justify-between gap-3 px-4 py-1.5">
-          {/* phone — desktop/tablet par */}
+          {/* WhatsApp hi contact option hai — call nahi (owner request) */}
           <a
-            href={`tel:+91${supportPhone.replace(/\D/g, "").slice(-10)}`}
+            href={`https://wa.me/91${supportPhone.replace(/\D/g, "").slice(-10)}`}
+            target="_blank"
+            rel="noreferrer"
             className="hidden shrink-0 items-center gap-1.5 text-[11px] tracking-[.06em] md:flex"
           >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
-              <path d="M6 3h3l2 5-2 1a12 12 0 0 0 6 6l1-2 5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 4 5a2 2 0 0 1 2-2Z" />
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+              <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.2 14.1c-.2.6-1.2 1.2-1.7 1.2-.5.1-1 .1-1.6-.1a11.6 11.6 0 0 1-5.9-5.2c-.4-.7-.6-1.4-.6-2 0-.6.3-1.2.6-1.6.2-.2.4-.3.6-.3h.5c.2 0 .4 0 .5.4l.7 1.7c.1.2 0 .4-.1.6l-.4.5c-.1.1-.2.3-.1.5a7.5 7.5 0 0 0 3.3 2.9c.2.1.4.1.5-.1l.6-.7c.2-.2.3-.2.5-.1l1.6.8c.2.1.4.2.4.4 0 .2 0 .9-.2 1.4Z" />
             </svg>
-            +91 {supportPhone.replace(/\D/g, "").slice(-10)}
+            WhatsApp {supportPhone.replace(/\D/g, "").slice(-10)}
           </a>
 
           {/* rotating announcement — sab screens par (mobile par akela) */}
@@ -482,8 +484,8 @@ export function SiteHeader() {
               </div>
             </nav>
             <div className="border-t border-[#eee6de] px-5 py-4 text-[11.5px] text-[#5c534b]">
-              <p className="font-medium text-[#862222]">Info.likshaclothing@gmail.com</p>
-              <p className="mt-1">WhatsApp {whatsapp} · {supportPhone}</p>
+              <p className="font-medium text-[#862222]">{supportEmail}</p>
+              <p className="mt-1">WhatsApp {whatsapp}</p>
             </div>
           </div>
         </div>

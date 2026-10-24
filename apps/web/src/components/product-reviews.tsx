@@ -5,6 +5,7 @@ import { SafeImage } from "@/components/safe-image";
 import { Stars } from "@/components/stars";
 import { productUrl } from "@/lib/whatsapp";
 import { ratingBreakdown, type ProductReviewBlock, type Review } from "@/lib/reviews";
+import { useStoreSettings } from "@/components/store-settings-provider";
 
 /**
  * Product reviews — live store ke Trustoo widget jaisa layout:
@@ -20,6 +21,7 @@ export function ProductReviews({
   productTitle: string;
   productHandle: string;
 }) {
+  const { whatsapp } = useStoreSettings();
   const [filter, setFilter] = useState<number | null>(null);
   const [showForm, setShowForm] = useState(false);
 
@@ -30,7 +32,8 @@ export function ProductReviews({
   );
   const visible = filter ? block.reviews.filter((review) => Math.round(review.rating) === filter) : block.reviews;
 
-  const whatsappReview = `https://wa.me/918005900581?text=${encodeURIComponent(
+  const wa = whatsapp.replace(/\D/g, "").slice(-10);
+  const whatsappReview = `https://wa.me/91${wa}?text=${encodeURIComponent(
     `Hi Designer Clothing! I'd like to review "${productTitle}" (${productUrl(productHandle)}). My rating: `,
   )}`;
 

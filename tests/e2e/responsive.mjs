@@ -151,30 +151,32 @@ check("/collections 200", collections.status === 200, `status ${collections.stat
 check("/collections lists collection cards", collections.text.includes('data-testid="collection-card"'));
 check("/collections hides the empty saree collection", !/href="\/collections\/saree"/.test(collections.text));
 
-/* 7. checkout: UPI app chips removed (owner request) ----------------------
- * Checkout ka payment block client-side cart ke saath render hota hai (SSR me
- * khaali cart dikhta hai), isliye yahan source-level check karte hain —
- * dono call sites par `showAppButtons={false}` hona chahiye.
+/* 7. checkout/payment: koi UPI app chip nahi (owner request) ---------------
+ * Payment ki detail sirf order page par hai; checkout par sirf "prepaid" note.
  */
 const checkoutSource = await fs.readFile(
   path.resolve(import.meta.dirname, "../../apps/web/src/components/checkout-form.tsx"),
   "utf8",
 );
-const appCalls = [...checkoutSource.matchAll(/<UpiApps[\s\S]{0,400}?\/>/g)].map((match) => match[0]);
-check("checkout renders UpiApps twice (form + WhatsApp fallback)", appCalls.length === 2, `found ${appCalls.length}`);
-check(
-  "checkout hides GPay/PhonePe/Paytm/BHIM/Amazon Pay chips",
-  appCalls.length > 0 && appCalls.every((call) => call.includes("showAppButtons={false}")),
-);
-check(
-  "checkout keeps QR + 'Open UPI app' + 'Copy UPI ID'",
-  appCalls.length > 0 && appCalls.every((call) => call.includes("uri={buildUpiUri")),
-);
-const upiAppsSource = await fs.readFile(
-  path.resolve(import.meta.dirname, "../../apps/web/src/components/upi-apps.tsx"),
+const paymentSource = await fs.readFile(
+  path.resolve(import.meta.dirname, "../../apps/web/src/components/upi-payment.tsx"),
   "utf8",
 );
-check("per-app chips are opt-in (default on the order page only)", /showAppButtons = true/.test(upiAppsSource));
+check("checkout has no UPI app chips", !/UpiApps|upi-apps/.test(checkoutSource));
+check(
+  "checkout names no UPI app brand",
+  !/GPay|PhonePe|Paytm|BHIM|Amazon Pay/.test(checkoutSource),
+);
+check("checkout shows a short prepaid note", checkoutSource.includes('data-testid="prepaid-note"'));
+check(
+  "order page payment has no UPI app chips either",
+  !/UpiApps|upi-apps/.test(paymentSource) && !/GPay|PhonePe|Paytm|BHIM|Amazon Pay/.test(paymentSource),
+);
+check("order page keeps the QR + UPI ID", paymentSource.includes("UpiQr") && paymentSource.includes("upi-id"));
+check(
+  "order page auto-opens the UPI app after placing the order",
+  /get\("pay"\) !== "1"/.test(paymentSource) && /window\.location\.href = upiUri/.test(paymentSource),
+);
 
 /* 8. responsive CSS rules exist in the built stylesheet -------------------- */
 const cssDir = path.join(PUBLIC, "..", ".next/static/chunks");
