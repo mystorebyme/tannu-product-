@@ -12,15 +12,25 @@ export const logoWhiteUrl = `${LIVE_LOGO}&width=400`;
 export const logoFallback = logoUrl;
 export const logoMark = `${LIVE_LOGO}&width=120`;
 
+/**
+ * Site ka apna URL — WhatsApp / invoice / canonical links isi se banate hain.
+ * Domain lagne ke baad `NEXT_PUBLIC_SITE_URL` set kar dijiye (jaise https://designerclothes.in);
+ * tab tak deployed URL use hota hai. Purani/cloned site ka link kabhi nahi bhejte.
+ */
+export const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
+  process.env.NEXT_PUBLIC_SITE_ORIGIN?.replace(/\/$/, "") ??
+  "https://www.likshaclothing.com";
+
 export const siteConfig = {
-  name: "Liksha Clothing",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.likshaclothing.com",
+  name: "Designer Clothes",
+  url: siteUrl,
   ogImage:
     "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08059_JPG.jpg?width=1200",
   description:
     "Designer Anarkali suits, lehenga choli and printed suit sets, hand-finished for weddings and festivals.",
-  phone: "+91 9879219630",
-  whatsapp: "9909790455",
+  phone: "+91 8005900581",
+  whatsapp: "8005900581",
   email: "Info.likshaclothing@gmail.com",
   address: "Jaipur, Rajasthan, India",
   socials: {

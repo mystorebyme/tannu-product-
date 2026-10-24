@@ -65,6 +65,10 @@ export default async function SettingsPage() {
               <input id="whatsapp" name="whatsapp" defaultValue={settings.whatsapp} />
             </div>
             <div className="field">
+              <label htmlFor="adminUrl">Admin panel link (sheet: admin_url)</label>
+              <input id="adminUrl" name="adminUrl" defaultValue={settings.adminUrl} placeholder="https://admin.yourdomain.com" />
+            </div>
+            <div className="field">
               <label htmlFor="gstin">GSTIN</label>
               <input id="gstin" name="gstin" defaultValue={settings.gstin} />
             </div>

@@ -149,6 +149,7 @@ export async function saveSettingsAction(formData: FormData) {
     supportPhone: String(formData.get("supportPhone") ?? ""),
     supportEmail: String(formData.get("supportEmail") ?? ""),
     whatsapp: String(formData.get("whatsapp") ?? ""),
+    adminUrl: String(formData.get("adminUrl") ?? ""),
   }, actor);
   appendAudit({ actor, action: "settings.updated", target: "store" });
   revalidatePath("/settings");

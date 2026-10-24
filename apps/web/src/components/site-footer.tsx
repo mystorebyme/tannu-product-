@@ -53,7 +53,7 @@ const socials = [
   },
   {
     label: "WhatsApp",
-    href: "https://wa.me/919909790455",
+    href: "https://wa.me/918005900581",
     icon: (
       <>
         <path d="M20 12a8 8 0 0 1-11.7 7.1L4 20l1-4.2A8 8 0 1 1 20 12Z" />
@@ -101,14 +101,14 @@ export function SiteFooter() {
         <div className="flex flex-col items-center">
           <Link
             href="/"
-            aria-label="Liksha Clothing home"
+            aria-label="Designer Clothes home"
             className="inline-block rounded-sm bg-white px-4 py-2.5"
           >
             {/* live store ka hi logo — maroon band par white plate me, same to same */}
             <SafeImage
               src={logoWhiteUrl}
               fallbackSrc={logoFallback}
-              alt="Liksha Clothing"
+              alt="Designer Clothes"
               className="h-14 w-auto object-contain sm:h-16"
             />
           </Link>
@@ -201,7 +201,7 @@ export function SiteFooter() {
           <div>
             <h3 className="text-[15px] font-medium text-white">Sale alerts</h3>
             <p className="mt-2 text-[13px] leading-relaxed text-[#f1dede]">
-              Join the Liksha list for early access to new drops and festive sale prices.
+              Join the Designer Clothes list for early access to new drops and festive sale prices.
             </p>
             <form onSubmit={subscribe} className="mt-3">
               <div className="flex border border-white/40 bg-white">
@@ -242,7 +242,7 @@ export function SiteFooter() {
                 </Link>
               </p>
               <p>
-                <Link href="/pages/track-order" className="transition hover:text-[#e1d256]">
+                <Link href="/track-order" className="transition hover:text-[#e1d256]">
                   Track your order
                 </Link>
               </p>
@@ -253,7 +253,7 @@ export function SiteFooter() {
 
       <div className="border-t border-white/20">
         <div className="mx-auto flex max-w-[1400px] flex-col items-center justify-between gap-2 px-4 py-4 text-[11.5px] text-[#f3e2e2] sm:flex-row lg:px-6">
-          <p>© {new Date().getFullYear()}, Liksha Clothing. All rights reserved.</p>
+          <p>© {new Date().getFullYear()}, Designer Clothes. All rights reserved.</p>
           <p className="text-[10.5px] tracking-[.1em] uppercase">Secure prepaid payments</p>
         </div>
       </div>

@@ -12,6 +12,7 @@ import { buildUpiUri } from "@/lib/upi";
 import { UpiQr } from "@/components/upi-qr";
 import { UpiApps } from "@/components/upi-apps";
 import { postJson, readJson } from "@/lib/http-json";
+import { checkPincodeOffline } from "@/lib/pincode-offline";
 
 const indianStates = [
   "Andhra Pradesh", "Assam", "Bihar", "Chandigarh", "Chhattisgarh", "Delhi", "Goa", "Gujarat",
@@ -63,15 +64,22 @@ export function CheckoutForm() {
     const timer = setTimeout(() => {
       fetch(`/api/delivery/check?pincode=${encodeURIComponent(pin)}`, { cache: "no-store" })
         .then((response) => readJson<{ data?: { serviceable: boolean; message: string; state: string | null; district: string | null } }>(response))
-        .then((parsed) => {
+        .then(async (parsed) => {
           if (!active) return;
-          const result = parsed.data?.data;
-          if (!result) return;
+          // API na ho (static Pages) ya reply kharab ho to India Post data se khud check
+          const result = parsed.data?.data ?? (await checkPincodeOffline(pin));
+          if (!active) return;
           setPinStatus({ ok: result.serviceable, message: result.message, state: result.state, district: result.district });
           // state auto-fill: admin ne jis state ko allow kiya hai wahi select rahe
           if (result.serviceable && result.state) update("state", result.state);
         })
-        .catch(() => undefined)
+        .catch(async () => {
+          if (!active) return;
+          const result = await checkPincodeOffline(pin);
+          if (!active) return;
+          setPinStatus({ ok: result.serviceable, message: result.message, state: result.state, district: result.district });
+          if (result.serviceable && result.state) update("state", result.state);
+        })
         .finally(() => {
           if (active) setPinBusy(false);
         });
@@ -96,7 +104,7 @@ export function CheckoutForm() {
       .map((line) => `• ${line.title} — size ${line.size}${line.colour ? `, ${line.colour}` : ""} × ${line.quantity}`)
       .join("\n");
     const text = [
-      "Hi Liksha Clothing, I want to place this order:",
+      "Hi Designer Clothes, I want to place this order:",
       "",
       itemLines,
       "",
@@ -118,7 +126,11 @@ export function CheckoutForm() {
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     if (lines.length === 0) return;
-    if (pinStatus && !pinStatus.ok) {
+    if (!pinStatus) {
+      setError("Please check your delivery pincode first — we only ship to verified pincodes.");
+      return;
+    }
+    if (!pinStatus.ok) {
       setError(pinStatus.message);
       return;
     }
@@ -268,6 +280,18 @@ export function CheckoutForm() {
                   Payment goes straight to the store account, with no gateway charges.
                 </p>
                 <p className="mt-1.5 break-all text-[11.5px] font-medium text-[#862222]">UPI: {upiId}</p>
+                <div className="mt-2.5">
+                  <UpiApps
+                    uri={buildUpiUri({
+                      vpa: upiId,
+                      name: upiName,
+                      amountPaise: total,
+                      note: "Designer Clothes order",
+                    })}
+                    upiId={upiId}
+                    amountPaise={total}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -333,7 +357,7 @@ export function CheckoutForm() {
                     vpa: upiId,
                     name: upiName,
                     amountPaise: total,
-                    note: "Liksha website order",
+                    note: "Designer Clothes order",
                   })}
                   alt={`UPI QR to pay ${formatPrice(total)}`}
                   className="h-auto w-full"
@@ -346,7 +370,7 @@ export function CheckoutForm() {
                     vpa: upiId,
                     name: upiName,
                     amountPaise: total,
-                    note: "Liksha website order",
+                    note: "Designer Clothes order",
                   })}
                   upiId={upiId}
                   amountPaise={total}

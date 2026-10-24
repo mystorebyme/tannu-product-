@@ -6,7 +6,7 @@ import { SupportChannels } from "@/components/contact-details";
 export const metadata: Metadata = {
   title: "Track your order",
   description:
-    "Track your Liksha Clothing order with your order number — live status from placed to delivered, courier and AWB details.",
+    "Track your Designer Clothes order with your order number — live status from placed to delivered, courier and AWB details.",
   alternates: { canonical: "/track-order" },
 };
 

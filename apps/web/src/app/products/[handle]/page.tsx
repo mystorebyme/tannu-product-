@@ -52,7 +52,7 @@ export default async function ProductPage({
     image: product.images.slice(0, 3),
     description: product.description,
     sku: product.handle,
-    brand: { "@type": "Brand", name: "Liksha Clothing" },
+    brand: { "@type": "Brand", name: "Designer Clothes" },
     offers: {
       "@type": "Offer",
       priceCurrency: "INR",

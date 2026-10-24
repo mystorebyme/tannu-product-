@@ -19,19 +19,22 @@ export type StoreSettings = {
   supportPhone: string;
   supportEmail: string;
   whatsapp: string;
+  /** Admin panel ka link (sirf admin/owner ke liye — public API me nahi jaata) */
+  adminUrl: string;
   updatedAt: string;
   updatedBy: string;
 };
 
 export const DEFAULT_STORE_SETTINGS: StoreSettings = {
-  announcement: "Dussehra · Diwali Sale — Flat 70% OFF · Final price ₹499 onwards",
+  announcement: "Diwali Sale — Flat 70% OFF · Final price ₹499 onwards",
   freeShipping: true,
   upiId: process.env.STORE_UPI_ID ?? "dhakadgourav@fam",
-  upiName: process.env.STORE_UPI_NAME ?? "Liksha Clothing",
+  upiName: process.env.STORE_UPI_NAME ?? "Designer Clothes",
   gstin: process.env.SELLER_GSTIN ?? "",
-  supportPhone: "9909790455",
+  supportPhone: "8005900581",
   supportEmail: "Info.likshaclothing@gmail.com",
-  whatsapp: "9909790455",
+  whatsapp: "8005900581",
+  adminUrl: process.env.ADMIN_PANEL_URL ?? "",
   updatedAt: new Date(0).toISOString(),
   updatedBy: "system",
 };
@@ -53,6 +56,7 @@ export function normalizeStoreSettings(input: unknown): StoreSettings {
     supportPhone: text(raw.supportPhone, base.supportPhone, 16),
     supportEmail: text(raw.supportEmail, base.supportEmail, 120),
     whatsapp: text(raw.whatsapp, base.whatsapp, 16),
+    adminUrl: text(raw.adminUrl, base.adminUrl, 200),
     updatedAt: typeof raw.updatedAt === "string" ? raw.updatedAt : base.updatedAt,
     updatedBy: typeof raw.updatedBy === "string" ? raw.updatedBy : base.updatedBy,
   };
@@ -96,6 +100,7 @@ export async function getStoreSettings(options: { fresh?: boolean } = {}): Promi
         ...(sheet.upiName ? { upiName: sheet.upiName } : {}),
         ...(sheet.gstin ? { gstin: sheet.gstin } : {}),
         ...(typeof sheet.freeShipping === "boolean" ? { freeShipping: sheet.freeShipping } : {}),
+        ...(sheet.adminUrl ? { adminUrl: sheet.adminUrl } : {}),
         ...(sheet.announcement || sheet.upiId || sheet.supportPhone
           ? { updatedAt: new Date().toISOString(), updatedBy: "google-sheet" }
           : {}),

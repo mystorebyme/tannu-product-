@@ -9,7 +9,7 @@ import { useStoreSettings } from "@/components/store-settings-provider";
  * Yahan lightweight fade/slide rotation hai, koi library nahi.
  */
 const MESSAGES = [
-  { text: "Dussehra · Diwali Sale — Flat 70% OFF · Final price ₹499 onwards", href: "/collections/sale" },
+  { text: "Diwali Sale — Flat 70% OFF · Final price ₹499 onwards", href: "/collections/sale" },
   { text: "Express Delivery on Prepaid Orders", href: "/policies/shipping-policy" },
   { text: "Free Shipping within India", href: "/policies/shipping-policy" },
   { text: "Secure Prepaid Checkout — UPI, Cards & Netbanking", href: "/policies/payment-policy" },

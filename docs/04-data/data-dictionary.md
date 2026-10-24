@@ -20,15 +20,15 @@
 
 | Key | Default | Effect |
 | --- | --- | --- |
-| `storeName` | Liksha Clothing | header/footer text |
+| `storeName` | Designer Clothes | header/footer text |
 | `codLimit` | 350000 | checkout gating |
 | `codFee` | 5000 | order total |
 | `freeShipping` | true | shipping line |
 | `upiId` | likshaclothing@upi | manual fallback |
-| `supportPhone` | 9909790455 | header, order page |
+| `supportPhone` | 8005900581 | header, order page |
 | `supportEmail` | Info.likshaclothing@gmail.com | contact |
 | `announcement` | "Free shipping on all orders" | top bar |
-| `whatsappNumber` | 919909790455 | CTAs |
+| `whatsappNumber` | 918005900581 | CTAs |
 
 ## Field-level PII
 

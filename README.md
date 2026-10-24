@@ -1,6 +1,6 @@
-# Liksha Clothing — storefront, admin & API
+# Designer Clothes — storefront, admin & API
 
-Production-grade ecommerce monorepo for **Liksha Clothing** (designer anarkali suits, lehenga choli and
+Production-grade ecommerce monorepo for **Designer Clothes** (designer anarkali suits, lehenga choli and
 printed suit sets). The catalogue mirrors [likshaclothing.com](https://www.likshaclothing.com) exactly:
 same titles, same prices (in paise), same MRP, same sizes, same collections.
 
@@ -92,6 +92,13 @@ admin verify karta hai. Detail: [`docs/09-devops/upi-payments.md`](docs/09-devop
 `Settings` sheet se phone / WhatsApp / email / UPI ID / announcement live update hote hain,
 `Orders` / `Payments` / `Messages` / `Newsletter` sheet me har event ki row append hoti hai.
 Setup 5 minute: [`docs/09-devops/google-sheets.md`](docs/09-devops/google-sheets.md).
+Sheet ka account, admin link (`admin_url`) aur payment ke har stage (`pending` → `reference_submitted` →
+`paid` / `failed`) ki detail usi doc me hai.
+
+## Domain + brand
+
+Apna domain (`designerclothes.in` jaisa) lagane ke steps, Render/Vercel env variables aur
+brand/logo rules: [`docs/09-devops/domain-and-brand.md`](docs/09-devops/domain-and-brand.md).
 
 ## Contact form ("Send us a message")
 
@@ -284,4 +291,4 @@ Human walkthroughs: `agent-guides/`.
 
 ---
 
-© Liksha Clothing. Proprietary — not for redistribution. Built as a production system, not a template.
+© Designer Clothes. Proprietary — not for redistribution. Built as a production system, not a template.

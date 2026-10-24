@@ -8,8 +8,8 @@ export const dynamic = "force-dynamic";
  * Announcement yahin se badla ja sakta hai (turant site par — store settings API).
  * Hero image abhi catalogue/brand asset hai, isliye uski current state yahan dikhti hai.
  */
-/** Storefront ka current Dussehra/Dewali poster (owner-supplied creative) */
-const HERO_IMAGE = "/images/dussehra-sale-70.webp";
+/** Storefront ka current Diwali/Dewali poster (owner-supplied creative) */
+const HERO_IMAGE = "/images/diwali-sale-70.webp";
 const HERO_HREF = "/collections/sale";
 
 export default async function BannersPage() {

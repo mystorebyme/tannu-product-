@@ -37,8 +37,8 @@ export default async function SheetPage() {
         {overview.configured ? (
           <>
             <strong>Connected</strong>
-            {overview.sheet ? <> · {overview.sheet}</> : null} — settings sheet se live aati hain (15 s), aur
-            har order / payment / message row sheet me append hoti hai.
+            {" "}— settings sheet se live aati hain (15 s), aur har order / payment / message row sheet me
+            append hoti hai. Sheet ka link/token sirf server ke paas rehta hai, kabhi website par nahi dikhta.
             {overview.reachable === false ? (
               <div style={{ marginTop: 6, color: "var(--danger)" }}>
                 Sheet URL configured hai par reply nahi aaya — Apps Script deployment (&quot;Anyone&quot;) aur token
@@ -54,6 +54,31 @@ export default async function SheetPage() {
             <span className="mono">GOOGLE_SHEETS_TOKEN</span> set kariye. {overview.hint}
           </>
         )}
+      </div>
+
+      <div className="panel">
+        <div className="panel-head">
+          <h2>Admin panel link</h2>
+          <span className="badge">sheet: admin_url</span>
+        </div>
+        <div className="panel-body">
+          {settings.adminUrl ? (
+            <p style={{ margin: 0 }}>
+              <a href={settings.adminUrl} target="_blank" rel="noreferrer" className="mono">
+                {settings.adminUrl}
+              </a>
+              <span className="small muted" style={{ display: "block", marginTop: 4 }}>
+                Ye link sheet ke <span className="mono">Settings → admin_url</span> se aata hai — customer ko kabhi
+                nahi dikhta.
+              </span>
+            </p>
+          ) : (
+            <p className="small muted" style={{ margin: 0 }}>
+              Sheet ke <span className="mono">Settings</span> tab me <span className="mono">admin_url</span> row me
+              apna admin panel ka link daaliye (jaise https://admin.designerclothes.in) — yahan dikhne lagega.
+            </p>
+          )}
+        </div>
       </div>
 
       <div className="panel">

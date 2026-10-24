@@ -13,6 +13,8 @@ import type { ColourOption, Product } from "@/types/catalog";
 import { ProductGallery } from "@/components/product-gallery";
 import { Stars } from "@/components/product-reviews";
 import { useStoreSettings } from "@/components/store-settings-provider";
+import { productUrl } from "@/lib/whatsapp";
+import { checkPincodeOffline } from "@/lib/pincode-offline";
 
 /** catalogue me hai lekin type import ke liye alias */
 type Variant = ColourOption;
@@ -119,7 +121,7 @@ export function ProductDetail({
       const parsed = await readJson<{
         data?: { serviceable: boolean; message: string; deliveryDays: string | null; district: string | null; state: string | null };
       }>(response);
-      const result = parsed.data?.data;
+      const result = parsed.data?.data ?? (await checkPincodeOffline(pin));
       if (!result) {
         setPinOk(false);
         setPinMessage("We could not check delivery right now. Please try again.");
@@ -132,8 +134,9 @@ export function ProductDetail({
           : result.message,
       );
     } catch {
-      setPinOk(false);
-      setPinMessage("Could not check delivery. Please try again.");
+      const result = await checkPincodeOffline(pin);
+      setPinOk(result.serviceable);
+      setPinMessage(result.message);
     } finally {
       setPinBusy(false);
     }
@@ -176,7 +179,7 @@ export function ProductDetail({
       content: (
         <p className="text-[12.5px] leading-relaxed text-[#5c534b]">
           Simply return it within 7 days for an exchange. The product must be unused with all tags
-          intact. Raise a request on WhatsApp 9909790455 with your order number.
+          intact. Raise a request on WhatsApp 8005900581 with your order number.
         </p>
       ),
     },
@@ -328,7 +331,7 @@ export function ProductDetail({
           </p>
           {sizePricing && !sizePricing.available ? (
             <p className="mt-1 text-[11.5px] text-[#b3261e]">
-              {size} is out of stock — WhatsApp 9909790455 for the next drop.
+              {size} is out of stock — WhatsApp 8005900581 for the next drop.
             </p>
           ) : null}
         </div>
@@ -378,13 +381,13 @@ export function ProductDetail({
           <a
             href={`https://wa.me/91${whatsapp.replace(/\D/g, "").slice(-10)}?text=${encodeURIComponent(
               [
-                `Hi Liksha Clothing, I want to order:`,
+                `Hi Designer Clothes, I want to order:`,
                 `${product.title}`,
                 `Colour: ${active.name}`,
                 `Size: ${size}`,
                 `Quantity: ${quantity}`,
                 `Price: ${formatPrice(price * quantity)}`,
-                `https://www.likshaclothing.com/products/${product.handle}`,
+                productUrl(product.handle),
               ].join("\n"),
             )}`}
             target="_blank"

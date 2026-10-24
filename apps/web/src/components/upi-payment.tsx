@@ -40,6 +40,7 @@ export function UpiPayment({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   const upiUri = useMemo(
     () =>
@@ -80,9 +81,30 @@ export function UpiPayment({
     setBusy(false);
   }
 
+  /** UPI app me payment fail hui — order par failed mark + owner ki sheet me row */
+  async function reportFailed() {
+    if (!/^\d{4}$/.test(last4)) {
+      setError("Payment fail hui? Neeche apne mobile number ke last 4 digit daaliye.");
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    const result = await postJson<{ ok?: boolean; error?: string }>(
+      apiUrl("/api/payments/failed"),
+      { orderNumber, phoneLast4: last4, reason: "Customer reported UPI failure" },
+      { timeoutMs: 15_000 },
+    );
+    setBusy(false);
+    if (!result.data?.ok) {
+      setError(result.data?.error ?? result.error ?? "Report save nahi hua — WhatsApp par bata dijiye.");
+      return;
+    }
+    setFailed(true);
+  }
+
   const wa = whatsapp.replace(/\D/g, "").slice(-10);
   const waText = encodeURIComponent(
-    `Hi Liksha Clothing, I have paid ${formatPrice(amount)} for order ${orderNumber} via UPI (${upiId}). UTR: `,
+    `Hi Designer Clothes, I have paid ${formatPrice(amount)} for order ${orderNumber} via UPI (${upiId}). UTR: `,
   );
   const paid = paymentStatus === "paid";
 
@@ -168,6 +190,21 @@ export function UpiPayment({
                   />
                 </div>
                 {error ? <p className="text-[11px] text-[#b3261e]">{error}</p> : null}
+                {failed ? (
+                  <p className="text-[11px] text-[#8a6a1f]">
+                    Payment failed mark ho gayi — dobara UPI app se try kariye, ya WhatsApp par order confirm kar
+                    dijiye.
+                  </p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={reportFailed}
+                    disabled={busy}
+                    className="text-[10.5px] tracking-[.08em] text-[#8a7a5f] uppercase underline"
+                  >
+                    Payment fail ho gayi? Report kariye
+                  </button>
+                )}
                 <button
                   type="submit"
                   disabled={busy}

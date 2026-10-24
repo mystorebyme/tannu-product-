@@ -50,14 +50,16 @@ var HEADERS = {
 
 /** Settings sheet ke keys — website inhe padhti hai */
 var DEFAULT_SETTINGS = [
-  ['support_phone', '9909790455'],
-  ['whatsapp', '9909790455'],
+  ['support_phone', '8005900581'],
+  ['whatsapp', '8005900581'],
   ['support_email', 'Info.likshaclothing@gmail.com'],
   ['upi_id', 'dhakadgourav@fam'],
-  ['upi_name', 'Liksha Clothing'],
-  ['announcement', 'Dussehra Sale — Flat 70% OFF · Final price ₹499 onwards'],
+  ['upi_name', 'Designer Clothes'],
+  ['announcement', 'Diwali Sale — Flat 70% OFF · Final price ₹499 onwards'],
   ['gstin', ''],
   ['free_shipping', 'true'],
+  // admin panel ka link — sirf owner ke liye (frontend par kabhi nahi dikhta)
+  ['admin_url', ''],
 ];
 
 function json_(payload) {

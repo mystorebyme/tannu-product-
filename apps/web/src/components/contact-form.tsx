@@ -6,7 +6,7 @@ import { useStoreSettings } from "@/components/store-settings-provider";
 
 /** fallback — live value Google Sheet / admin settings se aati hai */
 const FALLBACK_EMAIL = "Info.likshaclothing@gmail.com";
-const FALLBACK_WHATSAPP = "9909790455";
+const FALLBACK_WHATSAPP = "8005900581";
 
 /** static mailto — koi server/API fail ho to bhi ye kaam karta hai */
 function mailtoHref(
@@ -61,7 +61,7 @@ export function ContactForm() {
         </p>
         <div className="mt-3 flex flex-wrap justify-center gap-2">
           <a
-            href={`https://wa.me/91${SUPPORT_WHATSAPP}?text=${encodeURIComponent("Hi Liksha Clothing, I sent a message from the website.")}`}
+            href={`https://wa.me/91${SUPPORT_WHATSAPP}?text=${encodeURIComponent("Hi Designer Clothes, I sent a message from the website.")}`}
             target="_blank"
             rel="noreferrer"
             className="bg-[#25d366] px-4 py-2 text-[11px] font-semibold tracking-[.12em] text-white uppercase"

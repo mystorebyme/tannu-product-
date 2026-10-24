@@ -9,7 +9,23 @@ import { siteConfig } from "@/config/site";
 
 const money = (paise: number) => `Rs. ${(paise / 100).toLocaleString("en-IN")}`;
 
-export const WHATSAPP_NUMBER = "919909790455";
+export const WHATSAPP_NUMBER = "918005900581";
+
+/**
+ * Site ka apna live URL — WhatsApp message me **hamari** site ka link jaata hai,
+ * cloned/purani store ka nahi. Static preview par base path bhi jud jaata hai.
+ */
+export function currentSiteUrl(): string {
+  if (typeof window !== "undefined") {
+    const base = process.env.NEXT_PUBLIC_PAGES_BASE_PATH ?? "";
+    return `${window.location.origin}${base}`;
+  }
+  return siteConfig.url;
+}
+
+export function productUrl(handle: string): string {
+  return `${currentSiteUrl()}/products/${handle}`;
+}
 
 export function whatsappLink(message: string, phone = WHATSAPP_NUMBER): string {
   return `https://wa.me/${phone.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`;
@@ -17,7 +33,7 @@ export function whatsappLink(message: string, phone = WHATSAPP_NUMBER): string {
 
 export function orderWhatsAppMessage(order: Order, origin = siteConfig.url): string {
   const lines: string[] = [];
-  lines.push("*Liksha Clothing — order confirmation*");
+  lines.push("*Designer Clothes — order confirmation*");
   lines.push("");
   lines.push(`Order number: *${order.orderNumber}*`);
   lines.push(`Name: ${order.customerName}`);
@@ -60,7 +76,7 @@ export function cartWhatsAppMessage(
   lines: { title: string; handle: string; size?: string; colour?: string; quantity: number; price: number }[],
   origin = siteConfig.url,
 ): string {
-  const parts = ["*Liksha Clothing — order enquiry*", ""];
+  const parts = ["*Designer Clothes — order enquiry*", ""];
   lines.forEach((line, index) => {
     parts.push(
       `${index + 1}. ${line.title}` +

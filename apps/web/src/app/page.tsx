@@ -16,17 +16,17 @@ import { SafeImage } from "@/components/safe-image";
 export const revalidate = 600;
 
 export const metadata: Metadata = {
-  title: "Liksha Clothing | Designer Anarkali Suits, Lehenga Choli & Suit Sets",
+  title: "Designer Clothes | Designer Anarkali Suits, Lehenga Choli & Suit Sets",
   description:
-    "Shop designer Anarkali suits, lehanga choli and printed suit sets at Liksha Clothing. Hand-finished pieces, free shipping within India and express delivery on prepaid orders.",
+    "Shop designer Anarkali suits, lehanga choli and printed suit sets at Designer Clothes. Hand-finished pieces, free shipping within India and express delivery on prepaid orders.",
   alternates: { canonical: "/" },
 };
 
 /**
- * Festive home banner — owner ka diya hua Dussehra Sale poster (Flat 70% OFF).
+ * Festive home banner — owner ka diya hua Diwali Sale poster (Flat 70% OFF).
  * Local asset hai (public/images), isliye GitHub Pages ke base path ke saath aata hai.
  */
-const HERO_IMAGE = assetUrl("/images/dussehra-sale-70.webp");
+const HERO_IMAGE = assetUrl("/images/diwali-sale-70.webp");
 const HERO_HREF = "/collections/sale";
 
 export default async function HomePage() {
@@ -94,12 +94,12 @@ export default async function HomePage() {
           <Link
             href={HERO_HREF}
             className="group relative order-1 block lg:order-2"
-            aria-label="Shop the Dussehra sale — flat 70% off"
+            aria-label="Shop the Diwali sale — flat 70% off"
           >
             <div className="relative flex h-full items-center justify-center overflow-hidden">
               <SafeImage
                 src={HERO_IMAGE}
-                alt="Liksha Clothing Dussehra Sale — flat 70% off ethnic wear"
+                alt="Designer Clothes Diwali Sale — flat 70% off ethnic wear"
                 loading="eager"
                 fetchPriority="high"
                 className="mx-auto h-auto w-full max-w-[560px] object-contain transition duration-700 group-hover:scale-[1.01] lg:h-full lg:max-h-[78vh] lg:max-w-none"
@@ -109,7 +109,7 @@ export default async function HomePage() {
 
           <div className="order-2 flex flex-col items-center justify-center gap-4 px-6 py-8 text-center lg:order-1 lg:items-start lg:px-12 lg:py-14 lg:text-left xl:px-16">
             <p className="text-[10px] font-semibold tracking-[.34em] text-[#9a5b3c] uppercase sm:text-[11px]">
-              Dussehra · Diwali Sale
+              Diwali Sale
             </p>
             <h1 className="font-display text-[34px] leading-[1.05] font-medium text-[#5c1010] sm:text-[44px] lg:text-[54px]">
               Flat <span className="text-[#862222]">70%</span> Off

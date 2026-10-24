@@ -1,5 +1,5 @@
 /**
- * Sale pricing — Festive (Dussehra / Diwali) Flat 70% OFF.
+ * Sale pricing — Festive (Diwali / Diwali) Flat 70% OFF.
  *
  * Rule (owner, Round 11): har product ki FINAL price in paanch me se ek honi chahiye —
  *   499 · 599 · 549 · 649 · 699

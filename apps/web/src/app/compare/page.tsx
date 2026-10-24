@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { readJson } from "@/lib/http-json";
+import { productsByHandles } from "@/lib/catalog-lite";
 import { useWishlist } from "@/components/wishlist-provider";
 import { useCart } from "@/components/cart-provider";
 import { discountPercent, formatPrice, imageUrl } from "@/lib/format";
@@ -21,15 +21,15 @@ export default function ComparePage() {
       setItems([]);
       return;
     }
-    const controller = new AbortController();
-    fetch(`/api/products?handles=${encodeURIComponent(compare.join(","))}`, { signal: controller.signal })
-      .then((response) => (response.ok ? readJson<{ data?: Product[] }>(response) : null))
-      .then((parsed) => {
-        const byHandle = new Map((parsed?.data?.data ?? []).map((product) => [product.handle, product]));
-        setItems(compare.map((handle) => byHandle.get(handle)).filter((p): p is Product => Boolean(p)));
+    let active = true;
+    productsByHandles(compare)
+      .then((products) => {
+        if (active) setItems(products);
       })
       .catch(() => undefined);
-    return () => controller.abort();
+    return () => {
+      active = false;
+    };
   }, [compare, ready]);
 
   const rows: { label: string; value: (product: Product) => string }[] = [
@@ -75,7 +75,7 @@ export default function ComparePage() {
             href="/collections/likshas-choice"
             className="mt-5 inline-block bg-[#862222] px-7 py-3 text-[11px] font-semibold tracking-[.16em] text-white uppercase"
           >
-            Browse Liksha&apos;s choice
+            Browse our choice
           </Link>
         </div>
       ) : (

@@ -21,13 +21,13 @@ const pages: Record<string, PageContent> = {
     title: "About Us",
     eyebrow: "Our Story",
     intro:
-      "Liksha Clothing is a celebration of Indian craftsmanship — designed for the woman who carries tradition with effortless modernity.",
+      "Designer Clothes is a celebration of Indian craftsmanship — designed for the woman who carries tradition with effortless modernity.",
     sections: [
       {
         heading: "Crafted for your celebrations",
         body: [
           "What began as a small studio in Surat has grown into a destination for hand-finished Anarkali suits, lehengas and printed suit sets loved across India. Every silhouette is developed in-house, from the first sketch to the final dori latkan.",
-          "We work closely with karigars who have spent generations perfecting zari, sequin and thread work. That is why each Liksha piece carries a weight, a drape and a finish you can feel the moment you open the box.",
+          "We work closely with karigars who have spent generations perfecting zari, sequin and thread work. That is why each piece carries a weight, a drape and a finish you can feel the moment you open the box.",
         ],
       },
       {
@@ -112,7 +112,7 @@ const pages: Record<string, PageContent> = {
         heading: "7 days replacement",
         body: [
           "If the product is damaged, has a manufacturing defect or was incorrectly shipped, request a replacement within 7 days of delivery.",
-          "The item must be unused, unwashed and have all original tags intact. Share an unboxing video or clear photographs on WhatsApp 9909790455 along with your order number.",
+          "The item must be unused, unwashed and have all original tags intact. Share an unboxing video or clear photographs on WhatsApp 8005900581 along with your order number.",
         ],
       },
       {
@@ -176,7 +176,7 @@ const pages: Record<string, PageContent> = {
       {
         heading: "Intellectual property",
         body: [
-          "All photography, designs and content on this site belong to Liksha Clothing and may not be reused without written permission.",
+          "All photography, designs and content on this site belong to Designer Clothes and may not be reused without written permission.",
         ],
       },
     ],
@@ -185,7 +185,7 @@ const pages: Record<string, PageContent> = {
     title: "Size Guide",
     eyebrow: "Find your fit",
     intro:
-      "Most Liksha suits are ready-to-wear. Compare your body measurements with the chart below — when in doubt, size up or message us on WhatsApp with your bust, waist and height.",
+      "Most of our suits are ready-to-wear. Compare your body measurements with the chart below — when in doubt, size up or message us on WhatsApp with your bust, waist and height.",
     sections: [
       {
         heading: "How to measure",
@@ -317,7 +317,7 @@ export default async function ContentPage({
               Shop Anarkali Suits
             </Link>
             <a
-              href="https://wa.me/919909790455"
+              href="https://wa.me/918005900581"
               target="_blank"
               rel="noreferrer"
               className="border border-[#862222] px-6 py-3 text-[11px] font-semibold tracking-[.16em] text-[#862222] uppercase"

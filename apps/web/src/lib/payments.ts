@@ -134,7 +134,7 @@ async function razorpayRequest<T>(
 /** store ka UPI — gateway down ho to bhi customer pay kar sake, par order manual verify ke baad confirm */
 export function manualUpiUri(amountPaise: number, orderNumber: string): string {
   const vpa = process.env.STORE_UPI_ID ?? "likshaclothing@upi";
-  const name = process.env.STORE_UPI_NAME ?? "Liksha Clothing";
+  const name = process.env.STORE_UPI_NAME ?? "Designer Clothes";
   const params = new URLSearchParams({
     pa: vpa,
     pn: name,
@@ -267,7 +267,7 @@ export async function createPaymentLink(
           currency: "INR",
           accept_partial: false,
           reference_id: order.orderNumber,
-          description: `Liksha Clothing order ${order.orderNumber}`,
+          description: `Designer Clothes order ${order.orderNumber}`,
           customer: { name: order.customerName, email: order.email, contact: `+91${order.phone}` },
           notify: { sms: true, email: true },
           reminder_enable: true,

@@ -48,12 +48,12 @@ jaye to site chalti rehti hai (sirf owner edits ruk jaate hain) — koi order fa
 
 | key | example | website me kahan |
 | --- | --- | --- |
-| `support_phone` | `9909790455` | footer, contact page, header |
-| `whatsapp` | `9909790455` | WhatsApp buttons (91 lagakar) |
+| `support_phone` | `8005900581` | footer, contact page, header |
+| `whatsapp` | `8005900581` | WhatsApp buttons (91 lagakar) |
 | `support_email` | `Info.likshaclothing@gmail.com` | footer, contact page, mailto |
 | `upi_id` | `dhakadgourav@fam` | checkout + order page QR |
-| `upi_name` | `Liksha Clothing` | UPI app me payee name |
-| `announcement` | `Dussehra Sale — Flat 70% OFF` | top announcement bar |
+| `upi_name` | `Designer Clothes` | UPI app me payee name |
+| `announcement` | `Diwali Sale — Flat 70% OFF` | top announcement bar |
 | `gstin` | `27AAAAA0000A1Z5` | invoice |
 | `free_shipping` | `true` / `false` | shipping text |
 
@@ -116,3 +116,37 @@ curl -s -H "Authorization: Bearer $ADMIN_API_TOKEN" "$STORE/api/admin/sheet" | h
 Sheet me order rows **append hote hain** (overwrite nahi) — isliye ek order ka poora
 timeline mile: `order.placed` → `order.status_changed` → `order.tracking_updated` →
 `payment.reference_submitted` → `payment.paid`.
+
+## 2. Kaunsa Google account? (owner ke liye clear)
+
+Repo me sheet ka URL/token **nahi** hota — sheet aapke Google account me rehti hai, website
+sirf deployed Apps Script se baat karti hai. Isliye:
+
+- Sheet usi Google account me banao jo dukaan ka official account hai —
+  recommended: **`Info.likshaclothing@gmail.com`**.
+- Usi account se **Extensions → Apps Script → Deploy → Web app** kariye (`Execute as: Me`,
+  `Who has access: Anyone`).
+- Sheet ko kisi CA/developer ke personal account me na rakhein; agar karna pade to
+  **Share → Editor** se owner ka email add karein, warna owner ke paas access nahi rahega.
+- Sheet ka naam suggestion: `Designer Clothes — Store` (tab naam `Settings`, `Orders`,
+  `Payments`, `Messages`, `Newsletter` — script khud bana deta hai).
+- Sheet ka link **kabhi website par nahi dikhta**: `/api/settings` sirf public values
+  (phone, WhatsApp, email, UPI ID, announcement) deta hai; sheet URL/token sirf server env me hai.
+- Admin panel ka link sheet ke `Settings` tab ki `admin_url` row se aata hai aur sirf
+  admin panel me dikhta hai (customer-facing pages par nahi).
+
+Agar account badalna ho: nayi sheet + naya Apps Script deploy karo, naya `/exec` URL aur
+token Render ke environment me daalo, redeploy — data purani sheet me safe rehta hai.
+
+## 3. Sheet me payment ka har stage
+
+| Event | Kahan jaata hai | Kab |
+| --- | --- | --- |
+| `order.placed` | `Orders` | order place hote hi |
+| `payment.pending` | `Payments` | order place hote hi (paisa aana baaki) |
+| `payment.reference_submitted` | `Payments` | customer UTR/12-digit reference daalta hai |
+| `payment.paid` | `Payments` | admin payment verify karta hai |
+| `payment.failed` | `Payments` | customer "payment failed" report karta hai (`/api/payments/failed`) |
+| `order.status_changed` / `order.tracking_updated` | `Orders` | admin status/courier update karta hai |
+
+Sab rows append-only hain — ek order ka poora payment timeline sheet me dikhta hai.

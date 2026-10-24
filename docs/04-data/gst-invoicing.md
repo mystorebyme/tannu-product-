@@ -38,7 +38,7 @@ GET /orders/:orderNumber/invoice?phone=XXXX            → printable HTML
 ```bash
 SELLER_GSTIN=08AAFCL1234A1Z5     # apna GSTIN
 SELLER_EMAIL=info.likshaclothing@gmail.com
-SELLER_PHONE=+91 9879219630
+SELLER_PHONE=+91 8005900581
 GST_HSN=6204                     # women's suits/dresses
 ```
 

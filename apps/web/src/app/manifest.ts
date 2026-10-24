@@ -11,8 +11,8 @@ export const dynamic = "force-static";
 export default function manifest(): MetadataRoute.Manifest {
   const base = process.env.NEXT_PUBLIC_PAGES_BASE_PATH ?? "";
   return {
-    name: "Liksha Clothing",
-    short_name: "Liksha",
+    name: "Designer Clothes",
+    short_name: "Designer Clothes",
     description: siteConfig.description,
     start_url: `${base}/` || "/",
     scope: `${base}/` || "/",

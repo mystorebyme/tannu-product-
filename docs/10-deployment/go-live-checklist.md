@@ -5,7 +5,7 @@
 - [ ] 287 products exact title/price/MRP/sizes/images (5 random spot-check vs store)
 - [ ] 9 collections correct products
 - [ ] Policies live: shipping, returns, privacy, terms, FAQ
-- [ ] Contact details: phone 9909790455, email Info.likshaclothing@gmail.com
+- [ ] Contact details: phone 8005900581, email Info.likshaclothing@gmail.com
 - [ ] Footer social links (Instagram, WhatsApp)
 - [ ] Size chart page
 

@@ -268,17 +268,20 @@ export type StoreSettings = {
   supportPhone: string;
   supportEmail: string;
   whatsapp: string;
+  /** admin panel ka link — sheet ke Settings tab se (customer ko nahi dikhta) */
+  adminUrl: string;
 };
 
 const DEFAULT_SETTINGS: StoreSettings = {
-  announcement: "Dussehra Sale — Flat 70% OFF · Final price ₹499 onwards",
+  announcement: "Diwali Sale — Flat 70% OFF · Final price ₹499 onwards",
   freeShipping: true,
   upiId: "dhakadgourav@fam",
-  upiName: "Liksha Clothing",
+  upiName: "Designer Clothes",
   gstin: "27AAAAA0000A1Z5",
-  supportPhone: "9909790455",
+  supportPhone: "8005900581",
   supportEmail: "Info.likshaclothing@gmail.com",
-  whatsapp: "9909790455",
+  whatsapp: "8005900581",
+  adminUrl: process.env.ADMIN_PANEL_URL ?? "",
 };
 
 export type ManualOrderInput = {

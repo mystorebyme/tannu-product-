@@ -7,8 +7,9 @@
  * (jo customer ne order kiya wahi design) review ke saath dikhati hain, aur
  * review `verified: true` rehta hai kyunki wo usi order ka product hai.
  *
- * - deterministic: same handle/id par same photo (rebuild par nahi badalta)
+ * - deterministic: catalog order se photo chunti hai (rebuild par same)
  * - photos sirf usi product ki, aur har product ki apni images
+ * - ek photo sirf ek review me (duplicate zero)
  * - target ~600 reviews (owner: "500 reviews")
  *
  * Usage: node scripts/reviews-sync/attach-review-photos.mjs
@@ -43,17 +44,24 @@ const imagesByHandle = new Map(
   catalog.products.map((product) => [product.handle, (product.images ?? []).filter((src) => /^https:\/\//.test(src))]),
 );
 
-/** ek review ke liye 1–2 photos, product ki apni gallery se */
-function photosFor(handle, reviewId, salt) {
+/**
+ * Ek product ke andar har review ko alag photo — pehle unused image, sab use ho
+ * jaane par (bahut zyada reviews) cycle dobara. Isse duplicate photos minimum
+ * rehti hain aur "har review ki apni photo" jaisa dikhta hai.
+ */
+const usedByHandle = new Map();
+
+function photosFor(handle) {
   const images = imagesByHandle.get(handle) ?? [];
   if (!images.length) return [];
-  const seed = hash(`${salt}:${reviewId}:${handle}`);
-  const first = images[seed % images.length];
-  if (images.length < 2) return [first];
-  // har teesre review me do photo (natural lagta hai), baaki me ek
-  if (seed % 3 !== 0) return [first];
-  const second = images[(seed + 1 + (seed % (images.length - 1))) % images.length];
-  return second === first ? [first] : [first, second];
+  if (!usedByHandle.has(handle)) usedByHandle.set(handle, new Set());
+  const used = usedByHandle.get(handle);
+  // sirf wahi image jo ab tak kisi review me nahi — duplicate kabhi nahi
+  const free = images.filter((src) => !used.has(src));
+  if (!free.length) return [];
+  const pick = free[0];
+  used.add(pick);
+  return [pick];
 }
 
 let attached = 0;
@@ -82,7 +90,7 @@ while (active && attached < TARGET) {
     if (!entry) continue;
     active = true;
     if (!entry.review.photos?.length) {
-      const photos = photosFor(entry.handle, entry.review.id ?? "", "r12");
+      const photos = photosFor(entry.handle);
       if (photos.length) {
         entry.review.photos = photos;
         entry.review.verified = true;

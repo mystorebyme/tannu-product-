@@ -27,7 +27,7 @@ const quickLinks = [
 
 // Fallback copy — admin → Settings se announcement set ho to wahi dikhta hai
 const defaultAnnouncements = [
-  "Dussehra · Diwali Sale — Flat 70% OFF · Final price ₹499 onwards",
+  "Diwali Sale — Flat 70% OFF · Final price ₹499 onwards",
   "Diwali dispatch ✦ order by 4 Nov for delivery before the festival",
   "Free shipping across India — every order",
   "Same-day dispatch on prepaid orders",
@@ -199,7 +199,7 @@ export function SiteHeader() {
             <SafeImage
               src={logoUrl}
               fallbackSrc={logoFallback}
-              alt="Liksha Clothing"
+              alt="Designer Clothes"
               loading="eager"
               className="h-10 w-auto object-contain sm:h-12 lg:h-14"
             />
@@ -405,7 +405,7 @@ export function SiteHeader() {
           />
           <div className="absolute inset-y-0 left-0 flex w-[86%] max-w-[340px] flex-col bg-white shadow-xl">
             <div className="flex items-center justify-between border-b border-[#eee6de] px-4 py-3">
-              <SafeImage src={logoUrl} fallbackSrc={logoFallback} alt="Liksha Clothing" className="h-10 w-auto" />
+              <SafeImage src={logoUrl} fallbackSrc={logoFallback} alt="Designer Clothes" className="h-10 w-auto" />
               <button type="button" onClick={() => setMobileOpen(false)} aria-label="Close" className="p-2">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
                   <path d="M5 5l14 14M19 5 5 19" />

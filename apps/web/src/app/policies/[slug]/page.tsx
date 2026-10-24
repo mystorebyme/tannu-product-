@@ -10,15 +10,15 @@ const POLICY_DIR = path.join(process.cwd(), "src/content/policies");
 const policyMeta: Record<string, { title: string; description: string }> = {
   "privacy-policy": {
     title: "Privacy Policy",
-    description: "How Liksha Clothing collects, uses and protects your personal data under the DPDP Act.",
+    description: "How Designer Clothes collects, uses and protects your personal data under the DPDP Act.",
   },
   "terms-and-conditions": {
     title: "Terms & Conditions",
-    description: "The terms that apply when you shop with Liksha Clothing.",
+    description: "The terms that apply when you shop with Designer Clothes.",
   },
   "refund-and-return-policy": {
     title: "Refund & Return Policy",
-    description: "7 day returns, exchanges and refund timelines at Liksha Clothing.",
+    description: "7 day returns, exchanges and refund timelines at Designer Clothes.",
   },
   "shipping-policy": {
     title: "Shipping Policy",
@@ -69,8 +69,8 @@ export default async function PolicyPage({ params }: { params: Promise<{ slug: s
         <article className="border border-[#eee6de] p-6 sm:p-9">{renderMarkdown(content)}</article>
         <p className="mt-6 text-center text-[11.5px] text-[#8a8078]">
           Questions? WhatsApp{" "}
-          <a className="text-[#862222]" href="https://wa.me/919909790455">
-            9909790455
+          <a className="text-[#862222]" href="https://wa.me/918005900581">
+            8005900581
           </a>{" "}
           or email Info.likshaclothing@gmail.com
         </p>

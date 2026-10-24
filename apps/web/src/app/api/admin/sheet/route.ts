@@ -1,5 +1,5 @@
 import { getStoreSettings } from "@/lib/store-settings";
-import { googleSheetsConfig, readSheetRecent, readSheetSettings, sheetsConfigured } from "@/lib/google-sheets";
+import { readSheetRecent, readSheetSettings, sheetsConfigured } from "@/lib/google-sheets";
 
 export const dynamic = "force-dynamic";
 
@@ -32,13 +32,13 @@ export async function GET(request: Request) {
     readSheetRecent("Messages", 10),
   ]);
 
-  const config = googleSheetsConfig();
   return Response.json({
     configured: true,
     reachable: Boolean(sheetSettings),
     settings: sheetSettings ?? current,
     live: current,
-    sheet: config ? new URL(config.url).host : null,
+    // sheet ka URL/token frontend par kabhi nahi jaata
+    sheet: null,
     recent: {
       orders: orders ?? [],
       payments: payments ?? [],

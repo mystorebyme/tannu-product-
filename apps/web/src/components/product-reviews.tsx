@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { SafeImage } from "@/components/safe-image";
 import { Stars } from "@/components/stars";
+import { productUrl } from "@/lib/whatsapp";
 import { ratingBreakdown, type ProductReviewBlock, type Review } from "@/lib/reviews";
 
 /**
@@ -29,8 +30,8 @@ export function ProductReviews({
   );
   const visible = filter ? block.reviews.filter((review) => Math.round(review.rating) === filter) : block.reviews;
 
-  const whatsappReview = `https://wa.me/919909790455?text=${encodeURIComponent(
-    `Hi Liksha! I'd like to review "${productTitle}" (${productHandle}). My rating: `,
+  const whatsappReview = `https://wa.me/918005900581?text=${encodeURIComponent(
+    `Hi Designer Clothes! I'd like to review "${productTitle}" (${productUrl(productHandle)}). My rating: `,
   )}`;
 
   return (

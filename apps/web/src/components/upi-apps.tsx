@@ -4,49 +4,46 @@ import { useEffect, useMemo, useState } from "react";
 import { formatPrice } from "@/lib/format";
 
 /**
- * UPI app shortcuts.
+ * UPI app detection — "payment ke time saare UPI apps detect ho jaayein".
  *
- * Phone par "Pay with any UPI app" dabate hi OS khud saare installed UPI apps
- * (GPay, PhonePe, Paytm, BHIM, Amazon Pay, bank apps…) ka chooser dikhata hai —
- * amount aur order note pehle se bhare hote hain. Neeche har app ka direct
- * button bhi hai (jo install nahi hai wahan 1.5s me "app nahi khula" hint aata hai).
+ * Browser apps ko enumerate nahi kar sakta (security), isliye hum operating
+ * system ka apna chooser use karte hain: `upi://pay?...` kholte hi Android/iOS
+ * **installed** UPI apps dikhata hai (GPay, PhonePe, Paytm, BHIM, bank apps).
+ * Upar se har popular app ka direct button bhi hai (package-specific intent),
+ * taaki customer ko chunna na pade.
  *
- * Desktop par UPI apps nahi hote, isliye wahan sirf QR + copy UPI ID dikhta hai.
+ * Desktop par UPI apps nahi hote — wahan QR (parent component) hi chalta hai.
  */
 
-type UpiApp = {
+type Platform = "android" | "ios" | "desktop";
+
+type AppTarget = {
   id: string;
-  label: string;
-  /** Android package */
-  android: string;
-  /** iOS scheme (jahan app support karti hai) */
-  ios?: string;
-  tint: string;
+  name: string;
   short: string;
+  color: string;
+  /** Android package (intent me) */
+  packageName: string;
+  /** iOS URL scheme, jahan app support karti hai */
+  iosScheme?: string;
 };
 
-const APPS: UpiApp[] = [
-  { id: "gpay", label: "Google Pay", short: "G", android: "com.google.android.apps.nbu.paisa.user", ios: "gpay", tint: "#1a73e8" },
-  { id: "phonepe", label: "PhonePe", short: "P", android: "com.phonepe.app", ios: "phonepe", tint: "#5f259f" },
-  { id: "paytm", label: "Paytm", short: "P", android: "net.one97.paytm", ios: "paytmmp", tint: "#00b9f1" },
-  { id: "bhim", label: "BHIM", short: "B", android: "in.org.npci.upiapp", ios: "bhim", tint: "#e4572e" },
-  { id: "amazonpay", label: "Amazon Pay", short: "a", android: "in.amazon.mShop.android.shopping", tint: "#ff9900" },
+const APPS: AppTarget[] = [
+  { id: "gpay", name: "Google Pay", short: "G", color: "#1a73e8", packageName: "com.google.android.apps.nbu.paisa.user", iosScheme: "gpay://upi/pay" },
+  { id: "phonepe", name: "PhonePe", short: "Pe", color: "#5f259f", packageName: "com.phonepe.app", iosScheme: "phonepe://pay" },
+  { id: "paytm", name: "Paytm", short: "P", color: "#00b9f1", packageName: "net.one97.paytm", iosScheme: "paytmmp://pay" },
+  { id: "bhim", name: "BHIM", short: "B", color: "#e07b00", packageName: "in.org.npci.upiapp", iosScheme: "upi://pay" },
+  { id: "amazonpay", name: "Amazon Pay", short: "a", color: "#ff9900", packageName: "in.amazon.mShop.android.shopping", iosScheme: "amazonpay://pay" },
 ];
 
+/** `upi://pay?...` ka query part (scheme hata kar) */
 function queryOf(uri: string): string {
   const index = uri.indexOf("?");
   return index === -1 ? "" : uri.slice(index + 1);
 }
 
-function linkFor(app: UpiApp, uri: string, platform: "android" | "ios" | "other"): string {
-  if (platform === "android") {
-    // Android intent — app install hai to seedha khulega, warna Play Store
-    return `intent://pay?${queryOf(uri)}#Intent;scheme=upi;package=${app.android};S.browser_fallback_url=${encodeURIComponent(
-      "https://play.google.com/store/apps/details?id=" + app.android,
-    )};end`;
-  }
-  if (platform === "ios" && app.ios) return `${app.ios}://upi/pay?${queryOf(uri)}`;
-  return uri;
+function androidIntent(uri: string, packageName: string): string {
+  return `intent://pay?${queryOf(uri)}#Intent;scheme=upi;package=${packageName};end`;
 }
 
 export function UpiApps({
@@ -54,33 +51,35 @@ export function UpiApps({
   upiId,
   amountPaise,
 }: {
+  /** `buildUpiUri()` ka output */
   uri: string;
   upiId: string;
   amountPaise: number;
 }) {
-  const [platform, setPlatform] = useState<"android" | "ios" | "other">("other");
+  const [platform, setPlatform] = useState<Platform>("desktop");
   const [copied, setCopied] = useState(false);
-  const [appTried, setAppTried] = useState<string | null>(null);
-  const [appMissed, setAppMissed] = useState(false);
+  const [tried, setTried] = useState<string | null>(null);
 
   useEffect(() => {
     const ua = navigator.userAgent;
     if (/android/i.test(ua)) setPlatform("android");
     else if (/iphone|ipad|ipod/i.test(ua)) setPlatform("ios");
-    else setPlatform("other");
+    else setPlatform("desktop");
   }, []);
 
-  const apps = useMemo(() => APPS.map((app) => ({ ...app, href: linkFor(app, uri, platform) })), [uri, platform]);
-
-  useEffect(() => {
-    if (!appTried) return;
-    setAppMissed(false);
-    // app khula to tab background me chala jaata hai; nahi khula to 1.8s baad page hi visible
-    const timer = window.setTimeout(() => {
-      if (document.visibilityState === "visible") setAppMissed(true);
-    }, 1800);
-    return () => window.clearTimeout(timer);
-  }, [appTried]);
+  const links = useMemo(
+    () =>
+      APPS.map((app) => ({
+        ...app,
+        href:
+          platform === "android"
+            ? androidIntent(uri, app.packageName)
+            : platform === "ios" && app.iosScheme
+              ? `${app.iosScheme}?${queryOf(uri)}`
+              : uri,
+      })),
+    [platform, uri],
+  );
 
   async function copy() {
     try {
@@ -97,54 +96,50 @@ export function UpiApps({
       <div className="flex flex-wrap items-center gap-2">
         <a
           href={uri}
-          data-testid="upi-open-any-app"
-          className="inline-flex h-11 items-center justify-center bg-[#862222] px-5 text-[10.5px] font-semibold tracking-[.14em] text-white uppercase"
+          data-testid="upi-open-app"
+          className="inline-flex h-10 items-center justify-center bg-[#862222] px-4 text-[10.5px] font-semibold tracking-[.14em] text-white uppercase"
         >
-          {platform === "other" ? "Pay with UPI app" : "Pay with any UPI app"}
+          {platform === "desktop" ? "Open UPI app" : "Auto-detect UPI apps"}
         </a>
         <button
           type="button"
           onClick={copy}
-          className="inline-flex h-11 items-center justify-center border border-[#c9a95f] px-4 text-[10px] font-semibold tracking-[.1em] text-[#8a6a1f] uppercase transition hover:bg-[#f3e3bf]"
+          className="inline-flex h-10 items-center justify-center border border-[#ddd2c6] px-4 text-[10.5px] font-semibold tracking-[.12em] text-[#6b6259] uppercase"
         >
-          {copied ? "UPI ID copied" : "Copy UPI ID"}
+          {copied ? "Copied" : "Copy UPI ID"}
         </button>
       </div>
 
-      {platform !== "other" ? (
-        <div className="mt-2.5 flex flex-wrap gap-1.5">
-          {apps.map((app) => (
-            <a
-              key={app.id}
-              href={app.href}
-              onClick={() => setAppTried(app.id)}
-              rel="noreferrer"
-              data-testid={`upi-app-${app.id}`}
-              className="inline-flex h-8 items-center gap-1.5 rounded-full border border-[#e0d5c4] bg-white px-2.5 text-[11px] font-medium text-[#3f3830] transition hover:border-[#862222]"
-            >
-              <span
-                aria-hidden
-                className="flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white"
-                style={{ background: app.tint }}
-              >
-                {app.short}
-              </span>
-              {app.label}
-            </a>
-          ))}
-        </div>
-      ) : null}
-
-      <p className="mt-2 text-[11px] leading-relaxed text-[#8a7a5f]">
-        {platform === "other"
-          ? `QR scan karke ${formatPrice(amountPaise)} pay kariye, phir reference / UTR niche daaliye.`
-          : "UPI app khul jayegi — amount pehle se bhara hoga. Pay karke wapas aaiye aur UTR daaliye."}
+      <p className="mt-2 text-[10.5px] leading-relaxed text-[#8a8078]">
+        {platform === "desktop"
+          ? `Scan the QR to pay ${formatPrice(amountPaise)} — any UPI app works.`
+          : `Phone par ${formatPrice(amountPaise)} ka UPI app khulega — amount pehle se bhara hoga.`}
       </p>
 
-      {appMissed ? (
-        <p className="mt-1.5 text-[11px] leading-relaxed text-[#a11d1d]">
-          Ye app install nahi lagti — upar QR scan kariye ya "Pay with any UPI app" dabaiye, ya UPI ID copy karke
-          apne bank app me pay kariye.
+      <div className="mt-2.5 flex flex-wrap gap-1.5">
+        {links.map((app) => (
+          <a
+            key={app.id}
+            href={app.href}
+            onClick={() => setTried(app.id)}
+            data-testid={`upi-app-${app.id}`}
+            className="inline-flex h-8 items-center gap-1.5 rounded-full border border-[#e5dbd0] bg-white px-2.5 text-[10.5px] font-medium text-[#4a423b] transition hover:border-[#862222]"
+          >
+            <span
+              aria-hidden
+              className="flex h-4 w-4 items-center justify-center rounded-full text-[8.5px] font-bold text-white"
+              style={{ background: app.color }}
+            >
+              {app.short}
+            </span>
+            {app.name}
+          </a>
+        ))}
+      </div>
+
+      {tried ? (
+        <p className="mt-2 text-[10.5px] leading-relaxed text-[#8a8078]">
+          App na khule to QR scan kariye ya UPI ID copy karke apne bank app me pay kariye.
         </p>
       ) : null}
     </div>

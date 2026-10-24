@@ -5,7 +5,7 @@ import { siteConfig } from "@/config/site";
 
 export const metadata: Metadata = {
   title: "My account & order tracking",
-  description: "Track your Liksha Clothing order, download your invoice or get help on WhatsApp.",
+  description: "Track your Designer Clothes order, download your invoice or get help on WhatsApp.",
   robots: { index: true, follow: true },
 };
 

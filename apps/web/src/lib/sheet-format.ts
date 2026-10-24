@@ -14,6 +14,7 @@ export type SheetSettings = {
   upiName?: string;
   gstin?: string;
   freeShipping?: boolean;
+  adminUrl?: string;
 };
 
 function text(value: unknown, max = 240): string | undefined {
@@ -51,6 +52,7 @@ export function normaliseSheetSettings(payload: unknown): SheetSettings | null {
     upiName: text(source.upiName ?? source.upi_name ?? source.payee_name, 80),
     gstin: text(source.gstin ?? source.GSTIN, 20),
     freeShipping: truthy(source.freeShipping ?? source.free_shipping),
+    adminUrl: text(source.adminUrl ?? source.admin_url ?? source.admin_panel, 200),
   };
 
   const hasValue = Object.values(settings).some((value) => value !== undefined);

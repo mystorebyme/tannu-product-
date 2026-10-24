@@ -213,6 +213,8 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
   await writeAll(all);
   // owner ki Google Sheet me turant row (best-effort — order create kabhi fail nahi hota)
   await syncOrderToSheet(order, "order.placed");
+  // payment ka har stage sheet me — pending bhi, taaki owner ko pata rahe kis order ka paisa aana hai
+  await syncOrderToSheet(order, "payment.pending");
   return order;
 }
 

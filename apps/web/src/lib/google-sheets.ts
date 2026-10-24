@@ -92,6 +92,7 @@ export async function writeSheetSettings(settings: {
   upiName?: string;
   gstin?: string;
   freeShipping?: boolean;
+  adminUrl?: string;
 }): Promise<boolean> {
   const config = googleSheetsConfig();
   if (!config) return false;
@@ -112,6 +113,7 @@ export async function writeSheetSettings(settings: {
           upi_name: settings.upiName ?? "",
           gstin: settings.gstin ?? "",
           free_shipping: settings.freeShipping !== false,
+          ...(settings.adminUrl ? { admin_url: settings.adminUrl } : {}),
         },
       }),
       signal: AbortSignal.timeout(WRITE_TIMEOUT_MS),

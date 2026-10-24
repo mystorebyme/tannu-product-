@@ -71,6 +71,27 @@ try {
   fs.mkdirSync(path.join(APP, "public"), { recursive: true });
   fs.writeFileSync(path.join(APP, "public/catalog-index.json"), JSON.stringify(index));
 
+  // wishlist / compare static preview par bhi chalein — poora product (chhota shape)
+  const lite = catalog.products.map((product) => ({
+    handle: product.handle,
+    title: product.title,
+    price: product.price,
+    compareAtPrice: product.compareAtPrice ?? null,
+    images: product.images ?? [],
+    sizes: product.sizes ?? [],
+    sizePricing: product.sizePricing ?? {},
+    inStock: product.inStock !== false,
+    rating: product.rating ?? 0,
+    reviewCount: product.reviewCount ?? 0,
+    colourName: product.colourName ?? null,
+    color: product.color ?? "",
+    fabric: product.fabric ?? "",
+    category: product.category ?? "anarkali",
+    collections: product.collections ?? [],
+    description: product.description ?? "",
+  }));
+  fs.writeFileSync(path.join(APP, "public/catalog-lite.json"), JSON.stringify(lite));
+
   execSync("npm run build --workspace @liksha/web", {
     cwd: ROOT,
     stdio: "inherit",

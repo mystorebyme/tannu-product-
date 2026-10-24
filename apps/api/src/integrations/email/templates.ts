@@ -7,16 +7,16 @@ const wrap = (title: string, body: string) => `<!doctype html>
     <p style="letter-spacing:4px;font-size:9px;color:#862222;margin:0 0 18px">CLOTHING</p>
     <h1 style="font-family:Georgia,serif;font-size:24px;margin:0 0 12px">${title}</h1>
     ${body}
-    <p style="margin-top:24px;font-size:12px;color:#6b6259">Questions? WhatsApp 9909790455 · Info.likshaclothing@gmail.com</p>
+    <p style="margin-top:24px;font-size:12px;color:#6b6259">Questions? WhatsApp 8005900581 · Info.likshaclothing@gmail.com</p>
   </div>
 </body></html>`;
 
 export const templates = {
   "order-placed": (job: Extract<EmailJob, { type: "order-placed" }>) => ({
-    subject: `Order ${job.orderNumber} received — Liksha Clothing`,
+    subject: `Order ${job.orderNumber} received — Designer Clothes`,
     html: wrap(
       "We have your order",
-      `<p style="font-size:14px;line-height:1.6">Thank you for shopping with Liksha Clothing. Your order <strong>${job.orderNumber}</strong> is confirmed.</p>
+      `<p style="font-size:14px;line-height:1.6">Thank you for shopping with Designer Clothes. Your order <strong>${job.orderNumber}</strong> is confirmed.</p>
        <p style="font-size:14px;line-height:1.6">We dispatch within 1–2 working days and share tracking on WhatsApp.</p>`,
     ),
     text: `Order ${job.orderNumber} received. We dispatch within 1-2 working days.`,

@@ -33,3 +33,6 @@ Thumbs.db
 
 # generated heavy artifacts
 apps/*/public/images/products/
+
+# Pages build artifact (scripts/pages/build-preview.mjs generates it)
+apps/web/public/catalog-lite.json

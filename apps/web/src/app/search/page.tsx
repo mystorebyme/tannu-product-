@@ -112,7 +112,7 @@ export default async function SearchPage({
                 Recommended for you
               </h2>
               <p className="mt-1 text-center text-[11px] tracking-[.14em] text-[#9c8f82] uppercase">
-                Trending picks · Liksha&apos;s choice
+                Trending picks
               </p>
               <div className="mt-6">
                 <ProductGrid products={fallback} />

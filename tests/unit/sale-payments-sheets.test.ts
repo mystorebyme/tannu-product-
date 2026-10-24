@@ -59,7 +59,7 @@ test("UPI id validation", () => {
 test("UPI URI carries amount, payee and order note", () => {
   const uri = buildUpiUri({
     vpa: "dhakadgourav@fam",
-    name: "Liksha Clothing",
+    name: "Designer Clothes",
     amountPaise: 49_900,
     note: "Order LK-ABC123",
   });
@@ -88,14 +88,14 @@ test("sheet settings parser handles Apps Script shapes", () => {
     ok: true,
     settings: {
       upi_id: "dhakadgourav@fam",
-      support_phone: "9909790455",
+      support_phone: "8005900581",
       support_email: "Info.likshaclothing@gmail.com",
-      announcement: "Dussehra Sale — Flat 70% OFF",
+      announcement: "Diwali Sale — Flat 70% OFF",
       free_shipping: "yes",
     },
   });
   assert.equal(parsed?.upiId, "dhakadgourav@fam");
-  assert.equal(parsed?.supportPhone, "9909790455");
+  assert.equal(parsed?.supportPhone, "8005900581");
   assert.equal(parsed?.freeShipping, true);
   assert.equal(normaliseSheetSettings({ ok: false }), null);
   assert.equal(normaliseSheetSettings({ settings: {} }), null);
@@ -115,7 +115,7 @@ test("order sheet row carries payment + tracking details", () => {
       couponCode: null,
       items: [{ title: "Anarkali", size: "S [36]", quantity: 1 }],
       customerName: "Test Customer",
-      phone: "9909790455",
+      phone: "8005900581",
       email: "test@example.com",
       address: "12 MG Road",
       city: "Jaipur",

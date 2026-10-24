@@ -2,7 +2,7 @@
 
 ## 1. Business context
 
-Liksha Clothing (Jaipur) — designer ethnic wear label. Sales mainly Instagram DMs aur WhatsApp par.
+Designer Clothes (Jaipur) — designer ethnic wear label. Sales mainly Instagram DMs aur WhatsApp par.
 Problems: repeated questions (price, size availability, COD), order tracking manual, stock
 out-of-sync, koi single source of truth nahi.
 
