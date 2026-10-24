@@ -45,13 +45,25 @@ test("every product has a positive integer price in paise", () => {
   }
 });
 
-test("price range matches the live store snapshot", () => {
-  const prices = products.map((product) => product.price);
-  const livePrices = liveProducts
-    .flatMap((product) => (product.variants ?? []).map((variant: any) => Math.round(Number(variant.price) * 100)))
-    .filter((value: number) => value > 0);
-  assert.equal(Math.min(...prices), Math.min(...livePrices));
-  assert.equal(Math.max(...prices), Math.max(...livePrices));
+test("festive sale: every final price is ₹499 / ₹549 / ₹599 / ₹649 / ₹699", () => {
+  const allowed = [49_900, 54_900, 59_900, 64_900, 69_900];
+  for (const product of products) {
+    assert.ok(
+      allowed.includes(product.price),
+      `${product.handle}: final price ${product.price} sale set me nahi hai`,
+    );
+    // har size par bhi wahi final price
+    for (const [size, pricing] of Object.entries(product.sizePricing ?? {})) {
+      assert.equal(pricing.price, product.price, `${product.handle} ${size} price mismatch`);
+    }
+  }
+});
+
+test("festive sale: discount badge only shows 60% or 70%", () => {
+  for (const product of products) {
+    const percent = Math.round(((product.compareAtPrice! - product.price) / product.compareAtPrice!) * 100);
+    assert.ok([60, 70].includes(percent), `${product.handle}: ${percent}% discount`);
+  }
 });
 
 test("compare-at price is always above selling price when present", () => {

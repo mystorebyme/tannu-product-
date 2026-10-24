@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { assetUrl } from "@/lib/format";
 
-const FALLBACK = "/images/placeholder.svg";
+/** GitHub Pages base path ke saath — warna preview par broken icon */
+const FALLBACK = assetUrl("/images/placeholder.svg");
 
 /**
  * `next/image` remote CDN ke saath use nahi ho raha; plain `<img>` par CDN block hone

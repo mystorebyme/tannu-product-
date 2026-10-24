@@ -73,10 +73,12 @@ export const loginSchema = z.object({
 });
 
 /** ek hi jagah se business rules — UI aur API dono yahi call karein */
-export const COUPONS: Record<string, number> = {
-  LIKSHA10: 10,
-  WELCOME15: 15,
-};
+/**
+ * Festive sale (Round 11): final price already ₹499–₹699 hai, isliye koi
+ * percentage coupon stack nahi hota — warna customer ka final price badal jaata.
+ * Naya offer dena ho to seedha price badlo (scripts/lib/sale-pricing.mjs).
+ */
+export const COUPONS: Record<string, number> = {};
 
 export const COD_MAX_SUBTOTAL = 350_000; // Rs. 3500 in paise
 export const COD_FEE = 5_000; // Rs. 50 in paise

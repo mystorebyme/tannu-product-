@@ -18,6 +18,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { normalizeSizes, canonicalSize } from "./lib/sizes.mjs";
+import { applySalePricing } from "./lib/sale-pricing.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const CDN = "https://cdn.shopify.com/s/files/1/0738/8345/1696/";
@@ -496,6 +497,10 @@ const readExtra = (name, key) => {
     }
   }
   if (overriddenCount) console.log(`admin overrides applied: ${overriddenCount} products`);
+
+  /* ---------- festive sale pricing (Flat 70% / 60%, final ₹499–₹699) ---------- */
+  applySalePricing(products);
+  console.log(`sale pricing: ${products.length} products -> ₹${[...new Set(products.map((p) => p.price / 100))].sort((a, b) => a - b).join(" / ₹")}`);
 
   /* ---------- colour grouping: same design, different colours -> one product ---------- */
   const groupMap = new Map();

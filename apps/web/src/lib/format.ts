@@ -1,3 +1,16 @@
+/**
+ * Local asset (public/ folder) ka URL. GitHub Pages par site `/tannu-product-/`
+ * ke neeche rehti hai, isliye base path add karna zaroori hai — warna image 404.
+ */
+const ASSET_BASE = process.env.NEXT_PUBLIC_PAGES_BASE_PATH ?? "";
+
+export function assetUrl(pathname: string): string {
+  if (!pathname) return pathname;
+  if (/^https?:\/\//.test(pathname) || pathname.startsWith("data:")) return pathname;
+  const clean = pathname.startsWith("/") ? pathname : `/${pathname}`;
+  return `${ASSET_BASE}${clean}`;
+}
+
 /** Paisa -> rupees display. Calculation kabhi float me nahi. */
 export function formatPrice(paise: number): string {
   const rupees = Math.round(paise) / 100;

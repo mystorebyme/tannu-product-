@@ -263,18 +263,22 @@ export type StoreSettings = {
   announcement: string;
   freeShipping: boolean;
   upiId: string;
+  upiName: string;
   gstin: string;
   supportPhone: string;
   supportEmail: string;
+  whatsapp: string;
 };
 
 const DEFAULT_SETTINGS: StoreSettings = {
-  announcement: "Festive dispatch · Free shipping across India · Express delivery on prepaid orders",
+  announcement: "Dussehra Sale — Flat 70% OFF · Final price ₹499 onwards",
   freeShipping: true,
-  upiId: "likshaclothing@upi",
+  upiId: "dhakadgourav@fam",
+  upiName: "Liksha Clothing",
   gstin: "27AAAAA0000A1Z5",
   supportPhone: "9909790455",
   supportEmail: "Info.likshaclothing@gmail.com",
+  whatsapp: "9909790455",
 };
 
 export async function getSettings(): Promise<StoreSettings> {

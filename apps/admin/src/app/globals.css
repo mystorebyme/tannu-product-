@@ -27,7 +27,23 @@ a { color: inherit; text-decoration: none; }
 h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
 
 .shell { display: grid; grid-template-columns: 232px 1fr; min-height: 100vh; }
-@media (max-width: 900px) { .shell { grid-template-columns: 1fr; } }
+/* tablet / mobile: sidebar ek compact horizontal nav ban jaata hai (16 links ki lambi list nahi) */
+@media (max-width: 900px) {
+  .shell { grid-template-columns: 1fr; }
+  .sidebar { padding: 12px 14px; }
+  .sidebar .brand { font-size: 15px; letter-spacing: 4px; }
+  .sidebar nav {
+    flex-direction: row; flex-wrap: nowrap; overflow-x: auto; gap: 6px;
+    margin-top: 10px; padding-bottom: 4px; -webkit-overflow-scrolling: touch;
+  }
+  .sidebar nav a { white-space: nowrap; padding: 6px 10px; background: #ffffff14; font-size: 12px; }
+  .sidebar nav a.active { background: var(--maroon); }
+  .sidebar .foot { margin-top: 10px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .sidebar .foot form { margin: 0; }
+  .content { padding: 16px 14px 40px; max-width: 100%; }
+  table { font-size: 12.5px; }
+  th, td { padding: 8px 10px; }
+}
 
 .sidebar {
   background: #241d1a;
@@ -59,7 +75,8 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
 .card .value { font-size: 24px; font-weight: 600; margin-top: 6px; }
 .card .hint { font-size: 11.5px; color: var(--muted); margin-top: 4px; }
 
-.panel { background: var(--card); border: 1px solid var(--line); border-radius: 10px; margin-top: 16px; overflow: hidden; }
+/* panel apne andar scroll kare — table mobile par cut na ho */
+.panel { background: var(--card); border: 1px solid var(--line); border-radius: 10px; margin-top: 16px; overflow-x: auto; overflow-y: hidden; }
 .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
 .panel-head h2 { font-size: 14px; }
 .panel-body { padding: 16px; }

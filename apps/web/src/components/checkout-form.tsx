@@ -1,15 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useCart } from "@/components/cart-provider";
 import { formatPrice, imageUrl } from "@/lib/format";
-import { COUPONS as COUPON_RULES, computeDiscount } from "@liksha/validation";
 import { SafeImage } from "@/components/safe-image";
 import { PhoneOtp } from "@/components/phone-otp";
-
-const COUPONS: Record<string, number> = COUPON_RULES;
+import { useStoreSettings } from "@/components/store-settings-provider";
+import { API_AVAILABLE, apiUrl } from "@/lib/api-base";
 
 const indianStates = [
   "Andhra Pradesh", "Assam", "Bihar", "Chandigarh", "Chhattisgarh", "Delhi", "Goa", "Gujarat",
@@ -21,13 +20,9 @@ const indianStates = [
 export function CheckoutForm() {
   const { lines, subtotal, count, clear, isOpen, closeCart, removeLine } = useCart();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const couponFromUrl = searchParams.get("coupon")?.toUpperCase() ?? null;
-  const [coupon, setCoupon] = useState<string | null>(
-    couponFromUrl && COUPONS[couponFromUrl] ? couponFromUrl : null,
-  );
-  const [couponInput, setCouponInput] = useState("");
-  const [couponMessage, setCouponMessage] = useState<string | null>(null);
+  // festive sale me final price already 499–699 hai — koi extra coupon nahi
+  const { upiId, whatsapp } = useStoreSettings();
+  const [whatsappHref, setWhatsappHref] = useState<string | null>(null);
   // sirf prepaid — COD option hata diya gaya hai
   const payment = "prepaid" as const;
   const [submitting, setSubmitting] = useState(false);
@@ -94,50 +89,74 @@ export function CheckoutForm() {
     };
   }, [form.pincode]);
 
-  const discount = computeDiscount(subtotal, coupon);
+  const discount = 0;
   const total = Math.max(0, subtotal - discount);
 
   function update(field: keyof typeof form, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
   }
 
-  function applyCoupon() {
-    const normalised = couponInput.trim().toUpperCase();
-    if (COUPONS[normalised]) {
-      setCoupon(normalised);
-      setCouponMessage(`Coupon ${normalised} applied.`);
-    } else {
-      setCoupon(null);
-      setCouponMessage("Invalid coupon code. Try LIKSHA10.");
-    }
+  /** static preview / server down — poora order WhatsApp par (owner usi se confirm karta hai) */
+  function whatsappOrderLink(): string {
+    const itemLines = lines
+      .map((line) => `• ${line.title} — size ${line.size}${line.colour ? `, ${line.colour}` : ""} × ${line.quantity}`)
+      .join("\n");
+    const text = [
+      "Hi Liksha Clothing, I want to place this order:",
+      "",
+      itemLines,
+      "",
+      `Total: ${formatPrice(total)} (prepaid, UPI: ${upiId})`,
+      "",
+      `Name: ${form.customerName}`,
+      `Phone: ${form.phone}`,
+      `Email: ${form.email}`,
+      `Address: ${form.address}, ${form.city}, ${form.state} — ${form.pincode}`,
+      form.notes ? `Notes: ${form.notes}` : "",
+      "",
+      "I will share the UPI payment screenshot here.",
+    ]
+      .filter(Boolean)
+      .join("\n");
+    return `https://wa.me/91${whatsapp.replace(/\D/g, "").slice(-10)}?text=${encodeURIComponent(text)}`;
   }
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     if (lines.length === 0) return;
     if (otpRequired && !phoneToken) {
-      setError("Order place karne se pehle mobile number verify kariye (OTP).");
+      setError("Please verify your mobile number with OTP before placing the order.");
       return;
     }
     if (pinStatus && !pinStatus.ok) {
       setError(pinStatus.message);
       return;
     }
-    setSubmitting(true);
     setError(null);
+    setWhatsappHref(null);
+
+    // GitHub Pages par server nahi hai — order WhatsApp par jaata hai, 404/network error nahi
+    if (!API_AVAILABLE) {
+      setWhatsappHref(whatsappOrderLink());
+      return;
+    }
+
+    setSubmitting(true);
     try {
       // idempotency key -> double click par do order nahi bante
       const idempotencyKey =
         typeof crypto !== "undefined" && "randomUUID" in crypto
           ? crypto.randomUUID()
           : `${Date.now()}-${Math.random()}`;
-      const response = await fetch("/api/orders", {
+      const controller = new AbortController();
+      const timer = window.setTimeout(() => controller.abort(), 25_000);
+      const response = await fetch(apiUrl("/api/orders"), {
         method: "POST",
         headers: { "Content-Type": "application/json", "Idempotency-Key": idempotencyKey },
+        signal: controller.signal,
         body: JSON.stringify({
           ...form,
           phoneToken: phoneToken ?? undefined,
-          couponCode: coupon,
           paymentMethod: payment,
           items: lines.map((line) => ({
             handle: line.handle,
@@ -146,7 +165,8 @@ export function CheckoutForm() {
           })),
         }),
       });
-      const payload = (await response.json()) as { orderNumber?: string; error?: string };
+      window.clearTimeout(timer);
+      const payload = (await response.json().catch(() => ({}))) as { orderNumber?: string; error?: string };
       if (!response.ok || !payload.orderNumber) {
         setError(payload.error ?? "We could not place your order. Please check the details and try again.");
         setSubmitting(false);
@@ -154,8 +174,13 @@ export function CheckoutForm() {
       }
       clear();
       router.push(`/orders/${payload.orderNumber}`);
-    } catch {
-      setError("Network error. Please try again.");
+    } catch (error) {
+      // network/timeout — customer ko gumraah na karo, WhatsApp ka rasta do
+      console.warn("order submit failed", error);
+      setError(
+        "We could not reach our order server just now. Please try again, or send the order on WhatsApp — we confirm it there.",
+      );
+      setWhatsappHref(whatsappOrderLink());
       setSubmitting(false);
     }
   }
@@ -258,12 +283,13 @@ export function CheckoutForm() {
                 <path d="M12 3l7 3v6c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6l7-3z" />
                 <path d="M9 12l2 2 4-4" />
               </svg>
-              <div>
-                <p className="text-[12.5px] font-medium">Prepaid order — UPI / Card / Netbanking</p>
+              <div className="min-w-0">
+                <p className="text-[12.5px] font-medium">Prepaid order — UPI (GPay, PhonePe, Paytm)</p>
                 <p className="mt-0.5 text-[11.5px] leading-relaxed text-[#8a8078]">
-                  Payment link WhatsApp par turant bheja jata hai. Express delivery, priority dispatch
-                  aur free shipping — sab orders par.
+                  Order place karte hi payment page khulega — QR scan kariye ya UPI ID par pay kariye.
+                  Payment seedha store ke account me jaata hai, koi gateway charge nahi.
                 </p>
+                <p className="mt-1.5 break-all text-[11.5px] font-medium text-[#862222]">UPI: {upiId}</p>
               </div>
             </div>
           </div>
@@ -298,25 +324,6 @@ export function CheckoutForm() {
           ))}
         </ul>
 
-        <div className="mt-3 flex">
-          <input
-            value={couponInput}
-            onChange={(event) => setCouponInput(event.target.value)}
-            placeholder="Coupon code"
-            className="h-9 w-full border border-[#ddd2c6] bg-white px-2.5 text-[12px] outline-none focus:border-[#862222]"
-          />
-          <button
-            type="button"
-            onClick={applyCoupon}
-            className="shrink-0 bg-[#222] px-3.5 text-[10px] font-semibold tracking-[.12em] text-white uppercase"
-          >
-            Apply
-          </button>
-        </div>
-        {couponMessage ? (
-          <p className={`mt-1.5 text-[11px] ${coupon ? "text-[#2f7a3f]" : "text-[#b3261e]"}`}>{couponMessage}</p>
-        ) : null}
-
         <div className="mt-4 space-y-2 border-t border-[#e7ddd2] pt-3 text-[12.5px]">
           <div className="flex justify-between">
             <span className="text-[#6b6259]">Subtotal</span>
@@ -326,12 +333,6 @@ export function CheckoutForm() {
             <span className="text-[#6b6259]">Shipping</span>
             <span className="text-[#2f7a3f]">Free</span>
           </div>
-          {discount > 0 ? (
-            <div className="flex justify-between text-[#2f7a3f]">
-              <span>Coupon ({coupon})</span>
-              <span>− {formatPrice(discount)}</span>
-            </div>
-          ) : null}
           <div className="flex items-center justify-between border-t border-[#e7ddd2] pt-2.5 text-[14.5px] font-semibold">
             <span>Total</span>
             <span className="text-[#862222]">{formatPrice(total)}</span>
@@ -339,6 +340,24 @@ export function CheckoutForm() {
         </div>
 
         {error ? <p className="mt-3 text-[11.5px] text-[#b3261e]">{error}</p> : null}
+
+        {whatsappHref ? (
+          <div className="mt-3 border border-[#c9dcc9] bg-[#eef7ee] p-3" data-testid="checkout-whatsapp">
+            <p className="text-[11.5px] leading-relaxed text-[#2f6b3f]">
+              Your order is ready — send it on WhatsApp to confirm. Pay{" "}
+              <strong>{formatPrice(total)}</strong> to UPI <strong className="break-all">{upiId}</strong> and share
+              the screenshot there.
+            </p>
+            <a
+              href={whatsappHref}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-2 inline-flex h-10 items-center bg-[#25D366] px-4 text-[10.5px] font-semibold tracking-[.12em] text-white uppercase"
+            >
+              Send order on WhatsApp
+            </a>
+          </div>
+        ) : null}
 
         <button
           type="submit"
@@ -349,7 +368,7 @@ export function CheckoutForm() {
           {submitting ? "Placing order…" : `Place order · ${formatPrice(total)}`}
         </button>
         <p className="mt-2 text-center text-[10.5px] leading-relaxed text-[#8a8078]">
-          By placing this order you agree to our{" "}
+          Final price is already sale price — no coupon needed. By placing this order you agree to our{" "}
           <Link href="/policies/terms-and-conditions" className="underline">
             Terms &amp; Conditions
           </Link>

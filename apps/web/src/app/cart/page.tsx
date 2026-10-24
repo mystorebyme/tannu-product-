@@ -1,47 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import { useCart } from "@/components/cart-provider";
 import { formatPrice, imageUrl } from "@/lib/format";
-import { COUPONS as COUPON_RULES } from "@liksha/validation";
 import { SafeImage } from "@/components/safe-image";
 import { cartWhatsAppMessage, whatsappLink } from "@/lib/whatsapp";
 
-// shared package se hi rules aate hain (frontend + backend same)
-const COUPONS: Record<string, { percent: number; label: string }> = Object.fromEntries(
-  Object.entries(COUPON_RULES).map(([code, percent]) => [
-    code,
-    { percent, label: `${percent}% off on your order` },
-  ]),
-);
-
 export default function CartPage() {
   const { lines, subtotal, setQuantity, removeLine } = useCart();
-  const [code, setCode] = useState("");
-  const [applied, setApplied] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
-
-  const discount = applied ? Math.round((subtotal * COUPONS[applied].percent) / 100) : 0;
-  const shipping = 0;
-  const total = Math.max(0, subtotal - discount + shipping);
-  const freeShippingMet = subtotal >= 350000;
-
-  function applyCoupon() {
-    const normalised = code.trim().toUpperCase();
-    if (COUPONS[normalised]) {
-      setApplied(normalised);
-      setMessage(`Coupon ${normalised} applied — ${COUPONS[normalised].label}.`);
-    } else {
-      setApplied(null);
-      setMessage("This coupon code is not valid. Try LIKSHA10.");
-    }
-    try {
-      window.sessionStorage.setItem("liksha:coupon", normalised);
-    } catch {
-      /* ignore */
-    }
-  }
+  // festive sale: final price already ₹499–₹699 — koi coupon stack nahi hota
+  const total = Math.max(0, subtotal);
+  const freeShippingMet = true;
 
   return (
     <div className="container-liksha py-8 lg:py-12">
@@ -143,39 +112,18 @@ export default function CartPage() {
             <div className="mt-4 space-y-2 text-[12.5px]">
               <Row label="Subtotal" value={formatPrice(subtotal)} />
               <Row label="Shipping" value={freeShippingMet ? "Free" : "Free (prepaid)"} />
-              {discount > 0 ? <Row label="Coupon discount" value={`− ${formatPrice(discount)}`} accent /> : null}
               <div className="flex items-center justify-between border-t border-[#e7ddd2] pt-2.5 text-[14px] font-semibold">
                 <span>Total</span>
                 <span className="text-[#862222]">{formatPrice(total)}</span>
               </div>
             </div>
 
-            <div className="mt-4">
-              <label className="text-[10.5px] tracking-[.14em] uppercase">Coupon code</label>
-              <div className="mt-1.5 flex">
-                <input
-                  value={code}
-                  onChange={(event) => setCode(event.target.value)}
-                  placeholder="LIKSHA10"
-                  className="h-9 w-full border border-[#ddd2c6] bg-white px-2.5 text-[12px] outline-none focus:border-[#862222]"
-                />
-                <button
-                  type="button"
-                  onClick={applyCoupon}
-                  className="shrink-0 bg-[#222] px-3.5 text-[10px] font-semibold tracking-[.12em] text-white uppercase"
-                >
-                  Apply
-                </button>
-              </div>
-              {message ? (
-                <p className={`mt-1.5 text-[11px] ${applied ? "text-[#2f7a3f]" : "text-[#b3261e]"}`}>{message}</p>
-              ) : (
-                <p className="mt-1.5 text-[10.5px] text-[#9c8f82]">Try LIKSHA10 for 10% off.</p>
-              )}
-            </div>
+            <p className="mt-4 border border-[#eadfce] bg-[#fdf8f0] px-3 py-2.5 text-[11px] leading-relaxed text-[#8a7a5f]">
+              Festive sale price already applied — <strong>no coupon needed</strong>. Free shipping on every prepaid order.
+            </p>
 
             <Link
-              href={`/checkout${applied ? `?coupon=${applied}` : ""}`}
+              href="/checkout"
               className="mt-5 block bg-[#862222] py-3 text-center text-[11.5px] font-semibold tracking-[.16em] text-white uppercase"
             >
               Proceed to checkout

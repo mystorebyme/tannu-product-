@@ -1,32 +1,44 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useStoreSettings } from "@/components/store-settings-provider";
 
 /**
  * Announcement bar — live store par 3 messages rotate hote hain (flickity autoplay).
  * Yahan lightweight fade/slide rotation hai, koi library nahi.
  */
 const MESSAGES = [
-  { text: "Express ✈ Delivery on Prepaid Orders!", href: "/policies/shipping-policy" },
+  { text: "Dussehra · Diwali Sale — Flat 70% OFF · Final price ₹499 onwards", href: "/collections/sale" },
+  { text: "Express Delivery on Prepaid Orders", href: "/policies/shipping-policy" },
   { text: "Free Shipping within India", href: "/policies/shipping-policy" },
   { text: "Secure Prepaid Checkout — UPI, Cards & Netbanking", href: "/policies/payment-policy" },
 ];
 
 export function AnnouncementBar() {
+  const { announcement } = useStoreSettings();
   const [index, setIndex] = useState(0);
   const [visible, setVisible] = useState(true);
 
+  // owner ki Google Sheet / admin se aaya announcement sabse pehle
+  const messages = useMemo(
+    () =>
+      announcement
+        ? [{ text: announcement, href: "/collections/sale" }, ...MESSAGES]
+        : MESSAGES,
+    [announcement],
+  );
+
   useEffect(() => {
-    if (MESSAGES.length < 2) return;
+    if (messages.length < 2) return;
     const timer = window.setInterval(() => {
-      setIndex((current) => (current + 1) % MESSAGES.length);
+      setIndex((current) => (current + 1) % messages.length);
     }, 4200);
     return () => window.clearInterval(timer);
-  }, []);
+  }, [messages.length]);
 
   if (!visible) return null;
-  const message = MESSAGES[index];
+  const message = messages[index % messages.length];
 
   return (
     <div className="relative bg-[#862222] text-white" data-testid="announcement-bar">

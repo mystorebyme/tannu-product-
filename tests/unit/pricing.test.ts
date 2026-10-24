@@ -9,13 +9,11 @@ import {
   computeDiscount,
 } from "@liksha/validation";
 
-test("LIKSHA10 gives 10% on 2519.10", () => {
-  assert.equal(computeDiscount(251_910, "LIKSHA10"), 25_191);
-});
-
-test("coupon codes are case-insensitive", () => {
-  assert.equal(computeDiscount(300_000, "liksha10"), 30_000);
-  assert.equal(computeDiscount(300_000, "Welcome15"), 45_000);
+test("festive sale me koi coupon price ko nahi girata", () => {
+  // final price ₹499–₹699 fix hai — 10%/15% coupon usse tod deta
+  assert.equal(computeDiscount(251_910, "LIKSHA10"), 0);
+  assert.equal(computeDiscount(300_000, "liksha10"), 0);
+  assert.equal(computeDiscount(300_000, "Welcome15"), 0);
 });
 
 test("unknown or empty coupon gives zero discount", () => {
@@ -27,7 +25,7 @@ test("unknown or empty coupon gives zero discount", () => {
 test("discount is always an integer paise value", () => {
   const value = computeDiscount(199_999, "WELCOME15");
   assert.equal(Number.isInteger(value), true);
-  assert.equal(value, 30_000);
+  assert.equal(value, 0);
 });
 
 test("COD fee and limit are the published numbers", () => {
@@ -39,13 +37,13 @@ test("order total = subtotal - discount + cod fee", () => {
   const subtotal = 251_910;
   const discount = computeDiscount(subtotal, "LIKSHA10");
   const total = subtotal - discount + COD_FEE;
-  assert.equal(total, 231_719);
+  assert.equal(total, 256_910);
 });
 
 test("prepaid total has no COD fee", () => {
   const subtotal = 251_910;
   const total = subtotal - computeDiscount(subtotal, "LIKSHA10");
-  assert.equal(total, 226_719);
+  assert.equal(total, 251_910);
 });
 
 test("status machine allows the happy path only", () => {

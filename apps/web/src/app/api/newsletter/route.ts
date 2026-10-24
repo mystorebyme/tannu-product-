@@ -1,5 +1,5 @@
 import { newsletterSchema } from "@liksha/validation";
-import { saveSubscriber } from "@/lib/messages";
+import { mirrorSubscriberToSheet, saveSubscriber } from "@/lib/messages";
 
 export const dynamic = "force-dynamic";
 
@@ -15,5 +15,6 @@ export async function POST(request: Request) {
     return Response.json({ error: "Please enter a valid email address." }, { status: 400 });
   }
   const result = await saveSubscriber(parsed.data.email);
+  if (!result.duplicate) void mirrorSubscriberToSheet(parsed.data.email);
   return Response.json({ ok: true, duplicate: result.duplicate }, { status: 201 });
 }

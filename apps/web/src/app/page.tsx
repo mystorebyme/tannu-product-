@@ -8,7 +8,7 @@ import { Reveal } from "@/components/reveal";
 import { getProducts, getCollection } from "@/lib/store";
 import { RAILS, type RailKey, railPool } from "@/lib/rails";
 import { compactProduct, rotatePick, rotationBucket } from "@/lib/rotation";
-import { imageUrl } from "@/lib/format";
+import { assetUrl, imageUrl } from "@/lib/format";
 import { siteConfig } from "@/config/site";
 import { SafeImage } from "@/components/safe-image";
 
@@ -22,10 +22,12 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
-/** Live store ka home banner (same asset) */
-const HERO_IMAGE =
-  "https://www.likshaclothing.com/cdn/shop/files/Dussehra_Sale__Tradition_Meets_You.png?v=1792479831";
-const HERO_HREF = "/products/ruby-royale-red-anarkali-suit-set";
+/**
+ * Festive home banner — owner ka diya hua Dussehra Sale poster (Flat 70% OFF).
+ * Local asset hai (public/images), isliye GitHub Pages ke base path ke saath aata hai.
+ */
+const HERO_IMAGE = assetUrl("/images/dussehra-sale-70.webp");
+const HERO_HREF = "/collections/sale";
 
 export default async function HomePage() {
   const products = await getProducts();
@@ -79,30 +81,70 @@ export default async function HomePage() {
     telephone: siteConfig.phone,
     email: siteConfig.email,
     address: { "@type": "PostalAddress", addressLocality: "Jaipur", addressRegion: "Rajasthan", addressCountry: "IN" },
-    priceRange: "₹1,499 - ₹4,999",
+    priceRange: "₹499 - ₹699",
   };
 
   return (
     <div>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      {/* ── hero banner: live store jaisa full-bleed poster + slow ken-burns ── */}
-      <section className="relative bg-[#f6ede2]">
-        <Link href={HERO_HREF} className="group block overflow-hidden" aria-label="Shop the festive sale">
-          <div className="relative aspect-[4/5] w-full overflow-hidden sm:aspect-[16/9] lg:aspect-[2.6/1]">
-            <SafeImage
-              src={imageUrl(HERO_IMAGE, 1600)}
-              alt="Liksha Clothing festive sale — tradition meets you"
-              loading="eager"
-              fetchPriority="high"
-              className="animate-kenburns h-full w-full object-cover object-center"
-            />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
-            <span className="absolute inset-x-0 bottom-4 mx-auto w-max bg-white/90 px-6 py-2.5 text-[10.5px] font-semibold tracking-[.2em] text-[#862222] uppercase transition group-hover:bg-white sm:bottom-7">
-              Shop the sale
-            </span>
+      {/* ── hero banner: owner ka festive poster (mobile par poora, desktop par side-by-side) ── */}
+      <section className="relative overflow-hidden bg-[#f7ecdd]" data-testid="hero-banner">
+        <div className="mx-auto grid max-w-[1500px] items-stretch lg:grid-cols-[0.92fr_1.08fr]">
+          <Link
+            href={HERO_HREF}
+            className="group relative order-1 block lg:order-2"
+            aria-label="Shop the Dussehra sale — flat 70% off"
+          >
+            <div className="relative flex h-full items-center justify-center overflow-hidden">
+              <SafeImage
+                src={HERO_IMAGE}
+                alt="Liksha Clothing Dussehra Sale — flat 70% off ethnic wear"
+                loading="eager"
+                fetchPriority="high"
+                className="mx-auto h-auto w-full max-w-[560px] object-contain transition duration-700 group-hover:scale-[1.01] lg:h-full lg:max-h-[78vh] lg:max-w-none"
+              />
+            </div>
+          </Link>
+
+          <div className="order-2 flex flex-col items-center justify-center gap-4 px-6 py-8 text-center lg:order-1 lg:items-start lg:px-12 lg:py-14 lg:text-left xl:px-16">
+            <p className="text-[10px] font-semibold tracking-[.34em] text-[#9a5b3c] uppercase sm:text-[11px]">
+              Dussehra · Diwali Sale
+            </p>
+            <h1 className="font-display text-[34px] leading-[1.05] font-medium text-[#5c1010] sm:text-[44px] lg:text-[54px]">
+              Flat <span className="text-[#862222]">70%</span> Off
+            </h1>
+            <p className="max-w-[420px] text-[13px] leading-relaxed text-[#5c534b] sm:text-[14px]">
+              Every anarkali, lehenga and suit set — final price just{" "}
+              <strong className="font-semibold text-[#862222]">₹499</strong>,{" "}
+              <strong className="font-semibold text-[#862222]">₹549</strong>,{" "}
+              <strong className="font-semibold text-[#862222]">₹599</strong>,{" "}
+              <strong className="font-semibold text-[#862222]">₹649</strong> or{" "}
+              <strong className="font-semibold text-[#862222]">₹699</strong>. No hidden charges.
+            </p>
+            <div className="mt-1 flex w-full max-w-[420px] flex-col gap-2.5 sm:flex-row sm:justify-center lg:justify-start">
+              <Link
+                href="/collections/sale"
+                className="inline-flex h-11 items-center justify-center bg-[#862222] px-7 text-[11px] font-semibold tracking-[.16em] text-white uppercase transition hover:bg-[#6d1b1b]"
+              >
+                Shop the sale
+              </Link>
+              <Link
+                href="/collections/new-arrivals"
+                className="inline-flex h-11 items-center justify-center border border-[#862222] px-7 text-[11px] font-semibold tracking-[.16em] text-[#862222] uppercase transition hover:bg-[#862222] hover:text-white"
+              >
+                New arrivals
+              </Link>
+            </div>
+            <ul className="mt-1 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[11px] text-[#7b6f64] lg:justify-start">
+              <li>Free shipping pan-India</li>
+              <li aria-hidden>·</li>
+              <li>Prepaid only</li>
+              <li aria-hidden>·</li>
+              <li>4–7 din delivery</li>
+            </ul>
           </div>
-        </Link>
+        </div>
       </section>
 
       <CategoryCircles items={circleItems} />

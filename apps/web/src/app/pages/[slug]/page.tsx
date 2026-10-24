@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ContactForm } from "@/components/contact-form";
+import { ContactDetails } from "@/components/contact-details";
+import { TrackOrderForm } from "@/components/track-order-form";
 
 type PageContent = {
   title: string;
@@ -9,6 +11,8 @@ type PageContent = {
   intro: string;
   sections: { heading: string; body: string[] }[];
   showContactForm?: boolean;
+  showContactDetails?: boolean;
+  showTrackOrder?: boolean;
   showSizeTable?: boolean;
 };
 
@@ -47,17 +51,31 @@ const pages: Record<string, PageContent> = {
     intro:
       "Questions on sizing, fabric or your order? Message us on WhatsApp for the fastest response — our stylists reply within a few minutes.",
     sections: [
+    ],
+    showContactDetails: true,
+    showContactForm: true,
+  },
+  "track-order": {
+    title: "Track Your Order",
+    eyebrow: "Order tracking",
+    intro:
+      "Apna order number daaliye aur live status dekhiye — placed se delivered tak, courier aur AWB ke saath.",
+    sections: [
       {
-        heading: "Reach us",
+        heading: "Where do I find my order number?",
         body: [
-          "WhatsApp: 9909790455",
-          "Call: +91 9879219630",
-          "Email: Info.likshaclothing@gmail.com",
-          "Customer care hours: Monday to Saturday, 10:00 AM – 8:00 PM IST",
+          "Order number (jaise LK-1A2B3C) order confirm hone par screen par, WhatsApp par aur confirmation email me milta hai.",
+          "Order ke saath bheje gaye WhatsApp message me bhi wahi number hota hai — us number se status kabhi bhi dekh sakte hain.",
+        ],
+      },
+      {
+        heading: "Need help?",
+        body: [
+          "Status update na dikhe ya parcel late ho to WhatsApp par order number bhejiye — team turant check karke reply karti hai.",
         ],
       },
     ],
-    showContactForm: true,
+    showTrackOrder: true,
   },
   "shipping-policy": {
     title: "Shipping Policy",
@@ -267,6 +285,21 @@ export default async function ContentPage({
                   ))}
                 </tbody>
               </table>
+            </div>
+          ) : null}
+
+          {page.showContactDetails ? (
+            <div className="mt-9">
+              <h2 className="font-display text-[21px] font-medium text-[#862222] sm:text-[24px]">Reach us</h2>
+              <div className="mt-3">
+                <ContactDetails />
+              </div>
+            </div>
+          ) : null}
+
+          {page.showTrackOrder ? (
+            <div className="mt-9 border border-[#eee6de] bg-[#faf8f5] p-5 sm:p-6">
+              <TrackOrderForm />
             </div>
           ) : null}
 

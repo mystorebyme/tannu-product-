@@ -69,6 +69,30 @@ Home ke product rails 10-minute "bucket" se bante hain:
 - `/api/rotation?rail=trendy&bucket=N` sirf card ke liye zaroori fields deta hai (chhota payload),
 - API na chale (static preview) to client usi pool se locally shuffle kar leta hai.
 
+## Festive sale pricing (₹499 / ₹549 / ₹599 / ₹649 / ₹699)
+
+Owner rule: har dress ki **final price** in 5 me se ek honi chahiye, aur badge par 70% ya 60%.
+Pricing deterministic hai (`scripts/lib/sale-pricing.mjs`):
+
+```bash
+npm run pricing:sale           # catalog JSON files par apply
+npm run pricing:sale -- --verify
+```
+
+`npm run catalog:build` bhi yahi function chalata hai, isliye snapshot refresh ke baad price
+wahi rehta hai. Percentage coupons band hain — warna final price ₹499 se neeche chala jaata.
+
+## UPI payments (seedha owner ke account me)
+
+Koi gateway nahi: order page par UPI QR + UPI ID + exact amount, customer UTR daalta hai,
+admin verify karta hai. Detail: [`docs/09-devops/upi-payments.md`](docs/09-devops/upi-payments.md).
+
+## Google Sheets (owner ka control panel)
+
+`Settings` sheet se phone / WhatsApp / email / UPI ID / announcement live update hote hain,
+`Orders` / `Payments` / `Messages` / `Newsletter` sheet me har event ki row append hoti hai.
+Setup 5 minute: [`docs/09-devops/google-sheets.md`](docs/09-devops/google-sheets.md).
+
 ## Contact form ("Send us a message")
 
 Message Postgres me save hota hai + owner ko email jaata hai + admin panel (`/messages`) me dikhta hai.
@@ -107,7 +131,7 @@ Docker alternative: `docker compose up --build` (web 3000, admin 3001, api 4000,
 - Home (hero, category tiles, new arrivals, bestsellers, editorial, reviews, newsletter)
 - 9 collections with sort / price filter / load-more (paginated 24)
 - 287 product pages, all prerendered at build (`generateStaticParams`)
-- Instant search (debounced API), cart drawer, coupon codes (`LIKSHA10`, `WELCOME15`)
+- Instant search (debounced API), cart drawer, festive sale pricing (₹499–₹699, 70%/60% off)
 - Checkout with COD (≤ Rs. 3,500) or prepaid, idempotent order creation
 - Order confirmation + tracking by order number
 - Policies (shipping, returns, privacy, terms) + about / contact / FAQ / size guide

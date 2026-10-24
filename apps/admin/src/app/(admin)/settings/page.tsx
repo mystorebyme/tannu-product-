@@ -47,8 +47,18 @@ export default async function SettingsPage() {
           </div>
           <div className="row">
             <div className="field">
-              <label htmlFor="upiId">UPI ID (manual payments)</label>
-              <input id="upiId" name="upiId" defaultValue={settings.upiId} />
+              <label htmlFor="upiId">UPI ID (payments yahan aate hain)</label>
+              <input id="upiId" name="upiId" defaultValue={settings.upiId} placeholder="name@bank" />
+            </div>
+            <div className="field">
+              <label htmlFor="upiName">UPI payee name</label>
+              <input id="upiName" name="upiName" defaultValue={settings.upiName} />
+            </div>
+          </div>
+          <div className="row">
+            <div className="field">
+              <label htmlFor="whatsapp">WhatsApp number</label>
+              <input id="whatsapp" name="whatsapp" defaultValue={settings.whatsapp} />
             </div>
             <div className="field">
               <label htmlFor="gstin">GSTIN</label>
@@ -66,8 +76,10 @@ export default async function SettingsPage() {
             </div>
           </div>
           <p className="small muted" style={{ marginBottom: 0 }}>
-            Settings `.data/settings.json` me save hoti hain (production me `settings` table). Koi bhi change
-            audit log me record hota hai.
+            Settings database me save hoti hain aur audit log me record hoti hain. Agar Google Sheet
+            configured hai (<code>GOOGLE_SHEETS_WEBAPP_URL</code>) to <strong>Settings sheet ki value</strong>{" "}
+            jeetti hai — owner wahan se phone, email, UPI ID aur announcement bina redeploy badal sakta hai.
+            Detail: <code>docs/09-devops/google-sheets.md</code>.
           </p>
         </div>
       </form>

@@ -8,9 +8,9 @@ export const dynamic = "force-dynamic";
  * Announcement yahin se badla ja sakta hai (turant site par — store settings API).
  * Hero image abhi catalogue/brand asset hai, isliye uski current state yahan dikhti hai.
  */
-const HERO_IMAGE =
-  "https://www.likshaclothing.com/cdn/shop/files/Dussehra_Sale__Tradition_Meets_You.png?v=1792479831";
-const HERO_HREF = "/products/ruby-royale-red-anarkali-suit-set";
+/** Storefront ka current Dussehra/Dewali poster (owner-supplied creative) */
+const HERO_IMAGE = "/images/dussehra-sale-70.webp";
+const HERO_HREF = "/collections/sale";
 
 export default async function BannersPage() {
   const settings = await getSettings();
@@ -55,7 +55,7 @@ export default async function BannersPage() {
         <div className="panel-body">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={HERO_IMAGE}
+            src={`${storeUrl}${HERO_IMAGE}`}
             alt="Current home hero"
             style={{ width: "100%", maxWidth: 560, border: "1px solid #e5dbd0" }}
           />
@@ -63,8 +63,9 @@ export default async function BannersPage() {
             Hero link: <span className="mono">{HERO_HREF}</span>
           </p>
           <p className="small muted">
-            Hero image brand asset hai (marketing creative). Badalna ho to naya image URL dein — next deploy
-            par live ho jaayega. Seasonal sale creative ke liye WhatsApp/Instagram par bheja gaya asset use hota hai.
+            Ye owner ka diya hua festive poster hai (<span className="mono">apps/web/public{HERO_IMAGE}</span>) —
+            flat 70% OFF, final price ₹499–₹699. Nayi creative chahiye to image isi path par replace karke
+            deploy karo; announcement text Settings (ya Google Sheet) se turant badalta hai.
           </p>
         </div>
       </div>

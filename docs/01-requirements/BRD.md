@@ -33,7 +33,7 @@ out-of-sync, koi single source of truth nahi.
 | Multiple items | Rs. 3,500+ par advance payment required |
 | Replacement window | 7 days (unused, tags intact) |
 | Dispatch SLA | 1–2 working days |
-| Coupons | LIKSHA10 (10%), WELCOME15 (15%) |
+| Coupons | Koi percentage coupon nahi — festive sale final price ₹499–₹699 |
 | Payment modes | UPI, card, netbanking (gateway), COD |
 
 ## 5. Success metrics

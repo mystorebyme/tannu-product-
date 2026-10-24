@@ -8,7 +8,7 @@
 | `COD_MAX_ORDER` | paise | `350000` | Rs. 3,500 |
 | `FREE_SHIPPING_THRESHOLD` | paise | `0` | sab orders free |
 | `MAX_QTY_PER_LINE` | int | `10` | |
-| `COUPONS` | map | `LIKSHA10` 10%, `WELCOME15` 15% | koi minimum order nahi |
+| `COUPONS` | map | khaali — sale price final hai | coupon stack nahi hota |
 | `CART_STORAGE_KEY` | string | `liksha:cart:v1` | localStorage |
 | `SESSION_TTL` | seconds | `28800` | 8h admin |
 

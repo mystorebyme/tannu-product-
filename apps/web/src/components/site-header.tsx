@@ -8,6 +8,7 @@ import { formatPrice, imageUrl } from "@/lib/format";
 import { useCart } from "@/components/cart-provider";
 import { useWishlist } from "@/components/wishlist-provider";
 import type { SearchHit } from "@/types/catalog";
+import { useStoreSettings } from "@/components/store-settings-provider";
 import { SafeImage } from "@/components/safe-image";
 import { logoUrl, logoFallback } from "@/config/site";
 
@@ -24,6 +25,7 @@ const quickLinks = [
 
 // Fallback copy — admin → Settings se announcement set ho to wahi dikhta hai
 const defaultAnnouncements = [
+  "Dussehra · Diwali Sale — Flat 70% OFF · Final price ₹499 onwards",
   "Diwali dispatch ✦ order by 4 Nov for delivery before the festival",
   "Free shipping across India — every order",
   "Same-day dispatch on prepaid orders",
@@ -33,29 +35,17 @@ const defaultAnnouncements = [
 export function SiteHeader() {
   const { count, openCart, lines, removeLine, setQuantity, subtotal } = useCart();
   const { wishlist } = useWishlist();
+  const { whatsapp, supportPhone, announcement } = useStoreSettings();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [scrolled, setScrolled] = useState(false);
   const [bannerIndex, setBannerIndex] = useState(0);
-  const [announcements, setAnnouncements] = useState(defaultAnnouncements);
   const pathname = usePathname();
   const router = useRouter();
 
-  // admin panel se announcement badalte hi site par wahi dikhna chahiye
-  useEffect(() => {
-    let active = true;
-    fetch("/api/settings", { cache: "no-store" })
-      .then((response) => (response.ok ? response.json() : null))
-      .then((payload: { data?: { announcement?: string } } | null) => {
-        const text = payload?.data?.announcement?.trim();
-        if (active && text) setAnnouncements([text]);
-      })
-      .catch(() => undefined);
-    return () => {
-      active = false;
-    };
-  }, []);
+  // owner (admin ya Google Sheet) se announcement badalte hi header par wahi dikhta hai
+  const announcements = announcement ? [announcement, ...defaultAnnouncements] : defaultAnnouncements;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -451,7 +441,7 @@ export function SiteHeader() {
             </nav>
             <div className="border-t border-[#eee6de] px-5 py-4 text-[11.5px] text-[#5c534b]">
               <p className="font-medium text-[#862222]">Info.likshaclothing@gmail.com</p>
-              <p className="mt-1">WhatsApp 9909790455 · +91 9879219630</p>
+              <p className="mt-1">WhatsApp {whatsapp} · {supportPhone}</p>
             </div>
           </div>
         </div>

@@ -324,6 +324,46 @@ async function main() {
 
   const settings = await get("/api/settings");
   check("public settings 200", settings.status === 200, `status ${settings.status}`);
+  const settingsBody = JSON.parse(settings.text);
+  check(
+    "settings expose the UPI id customers pay to",
+    typeof settingsBody.data?.upiId === "string" && settingsBody.data.upiId.includes("@"),
+    settingsBody.data?.upiId,
+  );
+  check(
+    "settings expose support whatsapp + email",
+    Boolean(settingsBody.data?.whatsapp) && Boolean(settingsBody.data?.supportEmail),
+  );
+
+  // festive sale: hero poster + ₹499–₹699 final prices
+  check("home shows the new Dussehra sale hero", home.text.includes("dussehra-sale-70.webp"));
+  const salePrices = [...home.text.matchAll(/Rs\. (499|549|599|649|699)\b/g)].map((match) => match[1]);
+  check("home lists sale prices (499/549/599/649/699)", salePrices.length > 0, String(salePrices.length));
+  check(
+    "no old full-price MRP leaks as selling price",
+    !/Rs\. 2,999/.test(home.text) || home.text.includes("Rs. 499"),
+  );
+
+  // track order — footer link se 404 nahi aata
+  const trackPage = await get("/pages/track-order");
+  check("track-order page 200", trackPage.status === 200, `status ${trackPage.status}`);
+  check("track-order has the form", trackPage.text.includes('data-testid="track-order-form"'));
+  const trackShort = await get("/track-order");
+  check("/track-order 200", trackShort.status === 200, `status ${trackShort.status}`);
+
+  // UPI payment reference validation
+  const badReference = await fetch(`${BASE}/api/payments/manual`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ orderNumber: "LK-NOTREAL1", reference: "x" }),
+  });
+  check("payment reference validation rejects junk", badReference.status === 400, `status ${badReference.status}`);
+  const unknownOrder = await fetch(`${BASE}/api/payments/manual`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ orderNumber: "LK-NOTREAL1", reference: "412345678901" }),
+  });
+  check("payment reference for unknown order is 404", unknownOrder.status === 404, `status ${unknownOrder.status}`);
 
   const privateDelivery = await get("/api/admin/delivery");
   check("admin delivery API needs token", privateDelivery.status === 401, `status ${privateDelivery.status}`);

@@ -43,6 +43,11 @@ jobs:
       - name: Build static preview
         env:
           PAGES_BASE_PATH: /${{ github.event.repository.name }}
+          # Live store (Render) ka URL — iske hone se Pages par checkout/payment/tracking
+          # seedha Render API par jaate hain. Khaali ho to WhatsApp order flow chalta hai.
+          # Repo → Settings → Variables → Actions me `STORE_API_URL` set kariye.
+          NEXT_PUBLIC_API_BASE_URL: ${{ vars.STORE_API_URL }}
+          NEXT_PUBLIC_LIVE_STORE_URL: ${{ vars.STORE_API_URL || 'https://likshaclothing.onrender.com' }}
         run: node scripts/pages/build-preview.mjs
 
       # Pages site pehle se enable hai (Settings → Pages → Source: GitHub Actions).

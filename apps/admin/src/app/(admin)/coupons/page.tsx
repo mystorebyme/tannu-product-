@@ -23,6 +23,14 @@ export default function CouponsPage() {
             </tr>
           </thead>
           <tbody>
+            {Object.keys(COUPONS).length === 0 ? (
+              <tr>
+                <td colSpan={3}>
+                  <strong>Koi active coupon nahi.</strong> Festive sale me final price already ₹499–₹699 hai —
+                  extra percentage coupon price ko is range se neeche le jaata, isliye band rakhe hain.
+                </td>
+              </tr>
+            ) : null}
             {Object.entries(COUPONS).map(([code, percent]) => (
               <tr key={code}>
                 <td className="mono">{code}</td>
@@ -38,8 +46,10 @@ export default function CouponsPage() {
         </table>
       </div>
       <div className="notice">
-        Coupon rules `packages/validation/index.ts` me hain — ek hi jagah badalne se storefront aur API
-        dono update ho jaate hain. Database-driven coupons (limits, expiry, per-user) Phase 2 me aayenge.
+        Coupon rules <span className="mono">packages/validation/index.ts</span> me hain — ek hi jagah badalne se
+        storefront aur API dono update ho jaate hain. Sale price hi final price hai, isliye abhi koi code active
+        nahi. Naya offer dena ho to <span className="mono">scripts/lib/sale-pricing.mjs</span> me final price
+        badlo (₹499–₹699 ka set).
       </div>
     </>
   );

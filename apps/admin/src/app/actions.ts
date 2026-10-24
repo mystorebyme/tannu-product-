@@ -142,9 +142,11 @@ export async function saveSettingsAction(formData: FormData) {
     announcement: String(formData.get("announcement") ?? ""),
     freeShipping: formData.get("freeShipping") === "on",
     upiId: String(formData.get("upiId") ?? ""),
+    upiName: String(formData.get("upiName") ?? ""),
     gstin: String(formData.get("gstin") ?? ""),
     supportPhone: String(formData.get("supportPhone") ?? ""),
     supportEmail: String(formData.get("supportEmail") ?? ""),
+    whatsapp: String(formData.get("whatsapp") ?? ""),
   }, actor);
   appendAudit({ actor, action: "settings.updated", target: "store" });
   revalidatePath("/settings");

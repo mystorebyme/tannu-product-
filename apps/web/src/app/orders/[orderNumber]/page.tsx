@@ -7,6 +7,8 @@ import { formatDate, formatPrice, imageUrl } from "@/lib/format";
 import { ORDER_STATUS_COPY } from "@/config/site";
 import { SafeImage } from "@/components/safe-image";
 import { orderWhatsAppLink } from "@/lib/whatsapp";
+import { getStoreSettings } from "@/lib/store-settings";
+import { UpiPayment } from "@/components/upi-payment";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Order confirmed", robots: { index: false } };
@@ -14,6 +16,7 @@ export const metadata: Metadata = { title: "Order confirmed", robots: { index: f
 export default async function OrderPage({ params }: { params: Promise<{ orderNumber: string }> }) {
   const { orderNumber } = await params;
   const order = await getOrder(orderNumber);
+  const settings = await getStoreSettings();
   const headerList = await headers();
   const host = headerList.get("x-forwarded-host") ?? headerList.get("host") ?? "www.likshaclothing.com";
   const proto = headerList.get("x-forwarded-proto") ?? "https";
@@ -40,8 +43,8 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
           </h1>
           <p className="mt-1.5 text-[12.5px] text-[#6b6259]">
             {order.paymentMethod === "cod"
-              ? "Order confirm ho gaya. COD amount delivery ke waqt deejiye."
-              : "Aapka order mil gaya. Payment verify hone ke baad hi order confirm hota hai — WhatsApp par confirm kariye."}
+              ? "Your order is confirmed. Please pay the COD amount at delivery."
+              : "Your order is reserved. Pay via UPI below — your order is confirmed as soon as we verify the payment."}
           </p>
           <a
             href={orderWhatsAppLink(order, siteUrl)}
@@ -56,7 +59,7 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
             Confirm order on WhatsApp
           </a>
           <p className="mt-1.5 text-[11px] text-[#8a8078]">
-            Is button par order number, har item ka link + size + qty aur total — sab WhatsApp par chala jayega.
+            This button sends your order number, every item with size and quantity, and the total on WhatsApp.
           </p>
 
           <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-x-6 gap-y-2 border-t border-[#e9dfd4] pt-4 text-[12px]">
@@ -71,19 +74,16 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
           </div>
         </div>
 
-        {order.paymentStatus === "pending" ? (
-          <div className="mt-4 border border-[#e6d3a8] bg-[#fdf9ee] p-5">
-            <h2 className="text-[11px] font-semibold tracking-[.14em] text-[#8a6a1f] uppercase">
-              Payment pending · {formatPrice(order.total)}
-            </h2>
-            <p className="mt-1.5 text-[12.5px] leading-relaxed text-[#5c534b]">
-              UPI se payment kariye aur screenshot WhatsApp{" "}
-              <a className="font-medium text-[#862222]" href="https://wa.me/919909790455">
-                9909790455
-              </a>{" "}
-              par bhejiye. Team payment verify karte hi order confirm ho jaayega — koi extra charge nahi.
-            </p>
-          </div>
+        {order.paymentMethod !== "cod" ? (
+          <UpiPayment
+            orderNumber={order.orderNumber}
+            amount={order.total}
+            upiId={settings.upiId}
+            upiName={settings.upiName}
+            paymentStatus={order.paymentStatus}
+            reference={order.payment?.reference ?? null}
+            whatsapp={settings.whatsapp}
+          />
         ) : null}
 
         <div className="mt-4 border border-[#eee6de] p-5" data-testid="order-tracking">

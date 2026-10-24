@@ -49,6 +49,17 @@ services:
         fromDatabase:
           name: liksha-db
           property: connectionString
+      # Owner ki Google Sheet (settings read + orders/payments/messages append).
+      # Apps Script deploy karke /exec URL aur token yahan daaliye.
+      - key: GOOGLE_SHEETS_WEBAPP_URL
+        sync: false
+      - key: GOOGLE_SHEETS_TOKEN
+        sync: false
+      # Payment yahan aata hai (Google Sheet settings sheet ise override karti hai)
+      - key: STORE_UPI_ID
+        value: dhakadgourav@fam
+      - key: STORE_UPI_NAME
+        value: Liksha Clothing
 
   - type: web
     name: liksha-admin

@@ -42,10 +42,10 @@ test("catalogue price is used, not any client value", () => {
   assert.match(order.orderNumber, /^LK-[A-Z0-9]{6,12}$/);
 });
 
-test("coupon discount is applied server side", () => {
+test("sale price is final — coupon se total nahi girta", () => {
   const order = service.create({ ...baseOrder, couponCode: "LIKSHA10" });
-  assert.equal(order.discount, Math.round(order.subtotal * 0.1));
-  assert.equal(order.total, order.subtotal - order.discount + 5_000);
+  assert.equal(order.discount, 0);
+  assert.equal(order.total, order.subtotal + 5_000);
 });
 
 test("unknown size is rejected instead of silently substituted", () => {
@@ -62,23 +62,24 @@ test("unknown product is rejected", () => {
   );
 });
 
+// sale pricing ke baad har item ₹699 tak ka hai — COD limit cross karne ke liye quantity
+const bulkItem = (() => {
+  const product = catalog.products.find((item) => item.price >= 64_900)!;
+  return { product, item: { handle: product.handle, size: product.sizes[0]!, quantity: 6 } };
+})();
+
 test("COD above Rs. 3,500 is refused", () => {
-  const expensive = catalog.products.find((item) => item.price > 350_000)!;
+  assert.ok(bulkItem.product.price * bulkItem.item.quantity > 350_000);
   assert.throws(
-    () => service.create({ ...baseOrder, items: [{ handle: expensive.handle, size: expensive.sizes[0]!, quantity: 1 }] }),
+    () => service.create({ ...baseOrder, paymentMethod: "cod", items: [bulkItem.item] }),
     /COD/i,
   );
 });
 
 test("prepaid order above the COD limit is accepted", () => {
-  const expensive = catalog.products.find((item) => item.price > 350_000)!;
-  const order = service.create({
-    ...baseOrder,
-    paymentMethod: "prepaid",
-    items: [{ handle: expensive.handle, size: expensive.sizes[0]!, quantity: 1 }],
-  });
+  const order = service.create({ ...baseOrder, paymentMethod: "prepaid", items: [bulkItem.item] });
   assert.equal(order.paymentStatus, "pending");
-  assert.equal(order.total, expensive.price);
+  assert.equal(order.total, bulkItem.product.price * bulkItem.item.quantity);
 });
 
 test("status transitions are enforced", () => {

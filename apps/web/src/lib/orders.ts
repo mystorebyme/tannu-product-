@@ -16,6 +16,7 @@ import { dataFile } from "./data-dir";
 import { dbEnabled } from "./db";
 import { checkPincode } from "./delivery";
 import { products } from "./store";
+import { syncOrderToSheet } from "./google-sheets";
 
 type StoredOrder = Order;
 
@@ -206,6 +207,8 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
   const all = await readAll();
   all.unshift(order);
   await writeAll(all);
+  // owner ki Google Sheet me turant row (best-effort — order create kabhi fail nahi hota)
+  await syncOrderToSheet(order, "order.placed");
   return order;
 }
 
@@ -250,6 +253,7 @@ export async function updateOrderStatus(
   };
   all[index] = updated;
   await writeAll(all);
+  await syncOrderToSheet(updated, `order.status.${status}`);
   return updated;
 }
 
@@ -332,6 +336,7 @@ export async function setTracking(
   };
   all[index] = updated;
   await writeAll(all);
+  await syncOrderToSheet(updated, "order.tracking_updated");
   return updated;
 }
 
@@ -401,13 +406,25 @@ export async function markPaymentPaid(orderNumberValue: string, reference: strin
   const index = all.findIndex((order) => order.orderNumber === orderNumberValue);
   if (index === -1) return undefined;
   const order = all[index]!;
+  const now = new Date().toISOString();
   all[index] = {
     ...order,
     paymentStatus: "paid",
     status: order.status === "placed" ? "confirmed" : order.status,
+    payment: {
+      gateway: order.payment?.gateway ?? "manual-upi",
+      reference: reference || order.payment?.reference || null,
+      upiUri: order.payment?.upiUri ?? null,
+      amount: order.payment?.amount ?? order.total,
+      status: "paid",
+      createdAt: order.payment?.createdAt ?? now,
+      verifiedAt: now,
+      verifiedBy: "admin",
+      failureReason: null,
+    },
     audit: [
       {
-        at: new Date().toISOString(),
+        at: now,
         actor: "webhook",
         action: "payment.paid",
         meta: { reference },
@@ -416,7 +433,54 @@ export async function markPaymentPaid(orderNumberValue: string, reference: strin
     ],
   };
   await writeAll(all);
+  await syncOrderToSheet(all[index]!, "payment.paid");
   return all[index];
+}
+
+/**
+ * Customer UPI app se pay karke reference (UTR) submit karta hai.
+ * Paisa verify admin karta hai — status tab tak `pending` hi rehta hai.
+ */
+export async function submitPaymentReference(
+  orderNumberValue: string,
+  reference: string,
+): Promise<Order> {
+  const all = await readAll();
+  const index = all.findIndex((order) => order.orderNumber === orderNumberValue);
+  if (index === -1) throw new OrderError("Order not found.", 404, "order_not_found");
+  const order = all[index]!;
+  if (order.paymentStatus === "paid") {
+    throw new OrderError("This order is already paid.", 409, "already_paid");
+  }
+  const now = new Date().toISOString();
+  const alreadySame = order.payment?.reference === reference;
+  const updated: Order = {
+    ...order,
+    payment: {
+      gateway: "manual-upi",
+      reference,
+      upiUri: order.payment?.upiUri ?? null,
+      amount: order.payment?.amount ?? order.total,
+      status: "pending",
+      createdAt: order.payment?.createdAt ?? now,
+      verifiedAt: null,
+      verifiedBy: null,
+      failureReason: null,
+    },
+    audit: [
+      {
+        at: now,
+        actor: "customer",
+        action: "payment.reference_submitted",
+        meta: { reference },
+      },
+      ...order.audit,
+    ],
+  };
+  all[index] = updated;
+  await writeAll(all);
+  if (!alreadySame) await syncOrderToSheet(updated, "payment.reference_submitted");
+  return updated;
 }
 
 
@@ -544,6 +608,7 @@ export async function confirmPayment(
   };
   orders[index] = paidOrder;
   await writeAll(orders);
+  await syncOrderToSheet(paidOrder, "payment.paid");
   return { order: paidOrder, alreadyPaid: false };
 }
 
@@ -577,6 +642,7 @@ export async function failPayment(
     ],
   };
   await writeAll(orders);
+  await syncOrderToSheet(orders[index]!, "payment.failed");
   return orders[index]!;
 }
 

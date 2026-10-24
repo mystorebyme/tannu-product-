@@ -1,12 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { useStoreSettings } from "@/components/store-settings-provider";
 
-const SUPPORT_EMAIL = "Info.likshaclothing@gmail.com";
-const SUPPORT_WHATSAPP = "9909790455";
+/** fallback — live value Google Sheet / admin settings se aati hai */
+const FALLBACK_EMAIL = "Info.likshaclothing@gmail.com";
+const FALLBACK_WHATSAPP = "9909790455";
 
 /** static mailto — koi server/API fail ho to bhi ye kaam karta hai */
-function mailtoHref(form: { name: string; email: string; phone: string; subject: string; message: string }) {
+function mailtoHref(
+  form: { name: string; email: string; phone: string; subject: string; message: string },
+  supportEmail: string,
+) {
   const body = [
     `Name: ${form.name}`,
     `Email: ${form.email}`,
@@ -16,10 +21,13 @@ function mailtoHref(form: { name: string; email: string; phone: string; subject:
   ]
     .filter(Boolean)
     .join("\n");
-  return `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(`[Website] ${form.subject}`)}&body=${encodeURIComponent(body)}`;
+  return `mailto:${supportEmail}?subject=${encodeURIComponent(`[Website] ${form.subject}`)}&body=${encodeURIComponent(body)}`;
 }
 
 export function ContactForm() {
+  const { supportEmail, whatsapp } = useStoreSettings();
+  const SUPPORT_EMAIL = supportEmail || FALLBACK_EMAIL;
+  const SUPPORT_WHATSAPP = whatsapp || FALLBACK_WHATSAPP;
   const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "Order enquiry", message: "" });
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
@@ -121,7 +129,7 @@ export function ContactForm() {
       {error ? (
         <p className="mt-2 text-[11.5px] text-[#b3261e]" role="alert">
           {error}{" "}
-          <a href={mailtoHref(form)} className="underline">
+          <a href={mailtoHref(form, SUPPORT_EMAIL)} className="underline">
             Email us instead
           </a>
           .
@@ -137,7 +145,7 @@ export function ContactForm() {
           {status === "loading" ? "Sending…" : "Send message"}
         </button>
         <a
-          href={mailtoHref(form)}
+          href={mailtoHref(form, SUPPORT_EMAIL)}
           data-testid="contact-mailto"
           className="text-[11.5px] text-[#5c534b] underline decoration-[#c9b9a8] underline-offset-4 hover:text-[#862222]"
         >

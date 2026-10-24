@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { FloatingHelp } from "@/components/floating-help";
 import { AnnouncementBar } from "@/components/announcement-bar";
 import { WishlistProvider } from "@/components/wishlist-provider";
+import { StoreSettingsProvider } from "@/components/store-settings-provider";
 import { siteConfig } from "@/config/site";
 
 export const metadata: Metadata = {
@@ -61,6 +62,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <noscript>
           <style>{".reveal-init{opacity:1!important;transform:none!important}"}</style>
         </noscript>
+        <StoreSettingsProvider>
         <CartProvider>
           <WishlistProvider>
             <AnnouncementBar />
@@ -70,6 +72,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <FloatingHelp />
           </WishlistProvider>
         </CartProvider>
+        </StoreSettingsProvider>
       </body>
     </html>
   );

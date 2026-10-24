@@ -18,6 +18,7 @@
     "catalog:sync": "node scripts/catalog-sync/fetch-live.mjs && npm run catalog:build",
     "catalog:sync-live": "npm run catalog:sync",
     "catalog:verify": "node scripts/verify-catalog.mjs",
+    "pricing:sale": "node scripts/pricing/apply-sale-prices.mjs",
     "db:migrate": "node scripts/db/migrate.mjs",
     "db:migrate:require": "node scripts/db/migrate.mjs --require",
     "dev": "npm run dev --workspace @liksha/web",

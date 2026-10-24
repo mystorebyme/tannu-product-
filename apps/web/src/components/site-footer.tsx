@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { SafeImage } from "@/components/safe-image";
 import { logoWhiteUrl, logoFallback } from "@/config/site";
+import { useStoreSettings } from "@/components/store-settings-provider";
 
 /**
  * Footer — live store (likshaclothing.com) ka same structure:
@@ -17,6 +18,7 @@ const supportLinks = [
   { label: "Replacement Policy", href: "/policies/refund-and-return-policy" },
   { label: "Shipping Policy", href: "/policies/shipping-policy" },
   { label: "Contact Information", href: "/pages/contact" },
+  { label: "Track your order", href: "/track-order" },
   { label: "About Us", href: "/pages/about-us" },
   { label: "Terms and Conditions", href: "/policies/terms-and-conditions" },
 ];
@@ -72,6 +74,7 @@ const socials = [
 ];
 
 export function SiteFooter() {
+  const { whatsapp, supportEmail, supportPhone } = useStoreSettings();
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
 
@@ -120,22 +123,29 @@ export function SiteFooter() {
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" className="mt-0.5 shrink-0" aria-hidden>
                   <path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z" />
                 </svg>
-                <span>Please contact On WhatsApp 9909790455</span>
+                <a
+                  href={`https://wa.me/91${whatsapp.replace(/\D/g, "").slice(-10)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="transition hover:text-[#e1d256]"
+                >
+                  WhatsApp {whatsapp}
+                </a>
               </li>
               <li className="flex items-start gap-2">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" className="mt-0.5 shrink-0" aria-hidden>
                   <path d="M2 5.5 12 12l10-6.5V19a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5.5Z" />
                 </svg>
-                <a href="mailto:info.likshaclothing@gmail.com" className="transition hover:text-[#e1d256]">
-                  info.likshaclothing@gmail.com
+                <a href={`mailto:${supportEmail}`} className="break-all transition hover:text-[#e1d256]">
+                  {supportEmail}
                 </a>
               </li>
               <li className="flex items-start gap-2">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" className="mt-0.5 shrink-0" aria-hidden>
                   <path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.6.1.4 0 .7-.2 1l-2.3 2.2Z" />
                 </svg>
-                <a href="tel:+919879219630" className="transition hover:text-[#e1d256]">
-                  +91 9879219630
+                <a href={`tel:${supportPhone.replace(/[^\d+]/g, "")}`} className="transition hover:text-[#e1d256]">
+                  {supportPhone}
                 </a>
               </li>
             </ul>
@@ -189,9 +199,9 @@ export function SiteFooter() {
 
           {/* Newsletter */}
           <div>
-            <h3 className="text-[15px] font-medium text-white">Get 10% off</h3>
+            <h3 className="text-[15px] font-medium text-white">Sale alerts</h3>
             <p className="mt-2 text-[13px] leading-relaxed text-[#f1dede]">
-              Join the Liksha list for early access to new drops and festive offers.
+              Join the Liksha list for early access to new drops and festive sale prices.
             </p>
             <form onSubmit={subscribe} className="mt-3">
               <div className="flex border border-white/40 bg-white">
@@ -213,7 +223,7 @@ export function SiteFooter() {
                 </button>
               </div>
               {status === "done" ? (
-                <p className="mt-1.5 text-[11.5px] text-[#d9f0d9]">You&apos;re in! Use code LIKSHA10 at checkout.</p>
+                <p className="mt-1.5 text-[11.5px] text-[#d9f0d9]">You&apos;re in! Sale alerts on the way.</p>
               ) : null}
               {status === "error" ? (
                 <p className="mt-1.5 text-[11.5px] text-[#ffd6cf]">Please try again.</p>
