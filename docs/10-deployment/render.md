@@ -64,7 +64,9 @@ karta hai wo turant customer ko dikhta hai.
    milega. Paid plan lene par yeh issue khatam.
 2. Free web service 15 min idle par sleep karti hai → pehla request ~50s (cold start).
 3. Free plan par disk nahi hota — isliye orders Postgres me hain, disk par nahi.
-4. Admin ke settings/manual-invoice data abhi admin service ke local dir me hain (redeploy par reset).
+4. Settings, delivery rules, manual invoices aur status notes sab Postgres me hain (migrations `0002`–`0004`),
+   isliye redeploy par reset nahi hote. Sirf catalogue edits (title/price/photo/publish) repo checkout
+   par chalte hain — deployed panel un forms par "read-only mode" notice dikhata hai.
 
 ## Health / verify
 
@@ -82,3 +84,20 @@ npm run test:db                                      # Postgres path ka test (WA
 
 Naya migration add karna ho to `database/migrations/0002_xxx.sql` banao — blueprint ke start command
 se apne aap apply ho jayega (advisory lock se double-run nahi hota).
+
+## Blueprint deploy — exact steps (Round 8)
+
+1. Render dashboard → **New +** → **Blueprint** → repo `mystorebyme/tannu-product-` connect kariye
+   (private repo hai, isliye Render ko GitHub access dena hoga) → branch `arena/f713eef1-tannu-product`
+   (main par merge hone ke baad `main`).
+2. Render `render.yaml` padh kar 4 resources dikhayega — **Apply** dabaiye:
+   `liksha-db`, `liksha-storefront`, `liksha-admin`, `liksha-preview`.
+3. `liksha-admin` → Environment → `ADMIN_PASSWORD` set kariye (login: `admin@likshaclothing.com`).
+   `ADMIN_API_TOKEN` khud generate hota hai aur storefront se `fromService` se aata hai.
+4. Deploy ke baad verify:
+   - `https://likshaclothing.onrender.com/api/health` → `"ordersStore": "postgres"`
+   - admin panel login → Orders → koi order kholiye → status note / UTR verify / courier save
+   - customer `/orders/LK-XXXX` → wahi note, payment reference aur tracking dikhe
+   - `https://likshaclothing.onrender.com/api/settings` → 200
+5. Blueprint dobara apply karne par naye env vars (jaise `OTP_TOKEN_SECRET`) regenerate hote hain —
+   production me unhe dashboard se fix kar dena behtar hai.

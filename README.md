@@ -29,6 +29,16 @@ api       →  api.likshaclothing.com        (REST /api/v1 for partners, mobile,
 
 ---
 
+## Deploy
+
+| Target | Kya milta hai | Kaise |
+| --- | --- | --- |
+| Render (full app) | storefront + admin + Postgres + static preview | dashboard → New → Blueprint → repo → Apply (`render.yaml`), phir admin me `ADMIN_PASSWORD` set |
+| GitHub Pages | static preview (browse) | repo → Settings → Pages → Source = GitHub Actions (workflow ready) |
+| Vercel | storefront preview | project `liksha-clothing` (root `apps/web`) — Vercel GitHub App ko repo access chahiye |
+
+Detail: [`docs/10-deployment/render.md`](docs/10-deployment/render.md), [`docs/10-deployment/vercel.md`](docs/10-deployment/vercel.md).
+
 ## Quickstart
 
 ```bash
