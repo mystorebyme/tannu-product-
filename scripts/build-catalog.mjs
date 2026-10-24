@@ -88,9 +88,93 @@ const TITLE_FIXES = [
   [/\bpents?\b/gi, "Pant"],
   [/\bjari\b/gi, "Zari"],
   [/\bwaine\b/gi, "Wine"],
+  [/\boff\s*white\b/gi, "Off White"],
+  [/\bSuitSe\b/g, "Suit Set"],
 ];
 
 const SMALL_WORDS = new Set(["and", "with", "for", "of", "the", "in", "to", "a", "an", "on", "by"]);
+
+/**
+ * Scraped titles me words chipke hue aate hain — "Premiumreadymadeanarkalisuitset",
+ * "Trendinganarkalisuitset". Card aur Google par wo automated lagta hai, isliye
+ * lambe (12+ chars) token ko known words par tod dete hain. Chhote asli words
+ * ("Sunset", "Suitcase") chhune se bachne ke liye length guard hai.
+ */
+const GLUED_WORDS = [
+  "Readymade",
+  /* colour + style words bhi — "OffwhiteTrendy" jaisa junk todne ke liye */
+  "Off",
+  "White",
+  "Black",
+  "Red",
+  "Pink",
+  "Blue",
+  "Green",
+  "Maroon",
+  "Yellow",
+  "Purple",
+  "Ivory",
+  "Peach",
+  "Cream",
+  "Orange",
+  "Wine",
+  "Golden",
+  "Grey",
+  "Navy",
+  "Sky",
+  "Trendy",
+  "Anarkali",
+  "Trending",
+  "Premium",
+  "Designer",
+  "Embroidered",
+  "Lehenga",
+  "Choli",
+  "Kurta",
+  "Gown",
+  "Suit",
+  "Set",
+  "Silk",
+  "Georgette",
+  "Chinon",
+  "Sharara",
+  "Palazzo",
+  "Dupatta",
+  "Party",
+  "Wear",
+];
+
+function unglueWords(title) {
+  const sorted = [...GLUED_WORDS].sort((a, b) => b.length - a.length);
+  /** token ko poora known words me tod do — warna chhod do (safe) */
+  const segment = (token) => {
+    const lower = token.toLowerCase();
+    const failed = new Set();
+    const walk = (index) => {
+      if (index === lower.length) return [];
+      if (failed.has(index)) return null;
+      for (const word of sorted) {
+        const piece = word.toLowerCase();
+        if (!lower.startsWith(piece, index)) continue;
+        const rest = walk(index + piece.length);
+        if (rest) return [token.slice(index, index + piece.length), ...rest];
+      }
+      failed.add(index);
+      return null;
+    };
+    const pieces = walk(0);
+    return pieces && pieces.length > 1 ? pieces : null;
+  };
+  return title
+    .split(" ")
+    .map((token) => {
+      if (token.length < 7) return token;
+      const pieces = segment(token);
+      if (!pieces) return token;
+      return pieces.map((piece) => piece.charAt(0).toUpperCase() + piece.slice(1)).join(" ");
+    })
+    .join(" ");
+}
 
 function smartTitleCase(value) {
   return value
@@ -179,6 +263,19 @@ function polishTitle(value) {
   if (wasAllCaps) {
     title = smartTitleCase(title).replace(/(^|[-\/])([a-z])/g, (_, sep, letter) => `${sep}${letter.toUpperCase()}`);
   }
+
+  // chipke hue words ("Premiumreadymadeanarkalisuitset" → "Premium Readymade Anarkali Suit Set")
+  title = unglueWords(title);
+
+  /** Scraped junk jo title me automated lagta hai:
+   *  "[3 Pis]" / "[3 PIS]" → "3 Pieces", "[Sleeves Fabric Attached]" → hata do.
+   *  Trailing supplier code (6122, 6129) **chhod dete hain** — wo hi do alag
+   *  designs ko alag rakhta hai (same title, alag fabric/price/photos). */
+  title = title
+    .replace(/\s*[\[(]\s*3\s*pi?e?c?e?s?\s*[\])]/gi, " 3 Pieces")
+    .replace(/\s*[\[(]\s*sleeves?\s*fabric\s*attached\s*[\])]/gi, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
 
   // punctuation ke aage space nahi, comma ke baad space
   title = title.replace(/\s+([,.;:!?])/g, "$1").replace(/,([^\s])/g, ", $1");
@@ -867,10 +964,22 @@ const readExtra = (name, key) => {
   for (const product of titleOrder) {
     let title = product.title;
     let attempt = title;
+    /**
+     * Suffix candidates: colour → style code → fabric → product type.
+     * "— Edition 2" sirf last resort hai (wo automated lagta hai, owner ne
+     * titles saaf chahiye the) — fabric/product type se title padhne layak
+     * rehta hai: "Manvi's White Coloured Anarkali Suit Set — Georgette".
+     */
     const candidates = [
       String(product.colourName || product.color || "").trim(),
       styleCodeOf(product),
-    ].filter((value) => value && !/^(as shown|multi|multicolour|multi colour)$/i.test(value));
+      String(product.fabric || "").trim(),
+      String(product.productType || "").trim(),
+    ].filter(
+      (value) =>
+        value &&
+        !/^(as shown|multi|multicolour|multi colour|multi color|suit set|anarkali suit|na|n\/a)$/i.test(value),
+    );
     for (const candidate of candidates) {
       if (!titleSeen.has(attempt.toLowerCase())) break;
       if (attempt.toLowerCase().includes(candidate.toLowerCase())) continue;
@@ -890,6 +999,13 @@ const readExtra = (name, key) => {
     titleSeen.add(product.title.toLowerCase());
   }
   if (retitled) console.log(`duplicate titles resolved: ${retitled}`);
+
+  /* group ka title representative ke final title se sync — warna group meta me
+     "— Style 2" jaisa purana suffix reh jaata hai (card clean, meta ganda) */
+  for (const group of Object.values(colourGroups)) {
+    const representative = products.find((product) => product.handle === group.handle);
+    if (representative) group.title = representative.title;
+  }
 
   /** listed products: ek group ka sirf representative (cards duplicate na dikhein) */
   const listedProducts = products.filter(

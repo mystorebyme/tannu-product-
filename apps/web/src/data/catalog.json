@@ -5,7 +5,7 @@
   "cdn": "https://cdn.shopify.com/s/files/1/0738/8345/1696/",
   "currency": "INR",
   "moneyUnit": "paise",
-  "builtAt": "2026-10-24T19:23:32.826Z",
+  "builtAt": "2026-10-24T19:32:06.927Z",
   "snapshotAt": "2026-10-24T06:51:35.543Z",
   "productCount": 446,
   "liveProductCount": 287,
@@ -107,7 +107,7 @@
  "colourGroups": {
   "colour-anarkali-suit-set": {
    "key": "colour-anarkali-suit-set",
-   "title": "Colour Anarkali suit set",
+   "title": "Peach Colour Anarkali suit set",
    "handle": "light-pink-anarkali-suit-set",
    "colours": [
     {
@@ -163,7 +163,7 @@
   },
   "luxe-lucknowi-sequence-anarkali-suit-set": {
    "key": "luxe-lucknowi-sequence-anarkali-suit-set",
-   "title": "Luxe Lucknowi Sequence Anarkali Suit Set",
+   "title": "Black Luxe Lucknowi Sequence Anarkali Suit Set",
    "handle": "black-luxe-lucknowi-sequence-anarkali-suit-set",
    "colours": [
     {
@@ -289,7 +289,7 @@
   },
   "premium-anarkali-suit-set": {
    "key": "premium-anarkali-suit-set",
-   "title": "Premium Anarkali Suit Set",
+   "title": "Premium Maroon Anarkali Suit Set",
    "handle": "premium-maroon-anarkali-suit-set",
    "colours": [
     {
@@ -416,7 +416,7 @@
   },
   "coloured-designer-anarkali-suit": {
    "key": "coloured-designer-anarkali-suit",
-   "title": "Coloured Designer Anarkali Suit",
+   "title": "Red Coloured Designer Anarkali Suit",
    "handle": "red-coloured-designer-anarkali-suit",
    "colours": [
     {
@@ -542,15 +542,15 @@
     }
    ]
   },
-  "kishika-color-anarkali-suit-set-sleeves-fabric-attached": {
-   "key": "kishika-color-anarkali-suit-set-sleeves-fabric-attached",
-   "title": "Kishika Color Anarkali Suit Set [Sleeves Fabric Attached]",
+  "kishika-color-anarkali-suit-set": {
+   "key": "kishika-color-anarkali-suit-set",
+   "title": "Kishika Yellow Color Anarkali Suit Set",
    "handle": "kishika-yellow-color-anarkali-suit-set-sleeves-fabric-attached",
    "colours": [
     {
      "name": "Maroon",
      "handle": "niyara-maroon-color-anarkali-suit-set",
-     "title": "Kishika Maroon Color Anarkali Suit Set [Sleeves Fabric Attached]",
+     "title": "Kishika Maroon Color Anarkali Suit Set",
      "price": 49900,
      "compareAtPrice": 124750,
      "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_2389.jpg",
@@ -609,7 +609,7 @@
     {
      "name": "Yellow",
      "handle": "kishika-yellow-color-anarkali-suit-set-sleeves-fabric-attached",
-     "title": "Kishika Yellow Color Anarkali Suit Set [Sleeves Fabric Attached]",
+     "title": "Kishika Yellow Color Anarkali Suit Set",
      "price": 59900,
      "compareAtPrice": 199667,
      "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6174793384342964030_y_17f947bc-48f6-4313-afc5-ccba3201964c.jpg",
@@ -672,7 +672,7 @@
   },
   "sandhiya-premium-quality-anarkali-suit-set": {
    "key": "sandhiya-premium-quality-anarkali-suit-set",
-   "title": "Sandhiya Premium Quality Anarkali Suit Set",
+   "title": "Sandhiya Red Premium Quality Anarkali Suit Set",
    "handle": "priyankas-new-gown-with-dupatta-collaction-lw-9150",
    "colours": [
     {
@@ -743,7 +743,7 @@
   },
   "premium-quality-lukhnowi-suit-set": {
    "key": "premium-quality-lukhnowi-suit-set",
-   "title": "Premium Quality Lukhnowi Suit Set",
+   "title": "Premium Quality Lukhnowi Peach Suit Set",
    "handle": "premium-quality-kediya-suit-set-copy-1",
    "colours": [
     {
@@ -870,7 +870,7 @@
   },
   "premium-quality-roman-silk-anarkali-suit-set": {
    "key": "premium-quality-roman-silk-anarkali-suit-set",
-   "title": "Premium Quality Roman Silk Anarkali Suit Set",
+   "title": "Premium Quality Roman Silk Pista Anarkali Suit Set",
    "handle": "premium-quality-roman-silk-pink-anarkali-suit-set-copy",
    "colours": [
     {
@@ -997,7 +997,7 @@
   },
   "premium-quality-5-layers-anarkali-suit-set": {
    "key": "premium-quality-5-layers-anarkali-suit-set",
-   "title": "Premium Quality 5 Layers Anarkali Suit Set",
+   "title": "Premium Quality 5 Layers Blue Anarkali Suit Set",
    "handle": "premium-quality-lukhnowi-green-suit-set-copy",
    "colours": [
     {
@@ -1123,7 +1123,7 @@
   },
   "premium-quality-bandhej-anarkali-suit-set": {
    "key": "premium-quality-bandhej-anarkali-suit-set",
-   "title": "Premium Quality Bandhej Anarkali Suit Set",
+   "title": "Premium Quality Bandhej Red Anarkali Suit Set",
    "handle": "premium-quality-anarkali-suit-set-copy-3",
    "colours": [
     {
@@ -1248,7 +1248,7 @@
   },
   "colour-readymade-alia-cut-gown-with-dupatta-set-kka-1070": {
    "key": "colour-readymade-alia-cut-gown-with-dupatta-set-kka-1070",
-   "title": "Colour Readymade Alia Cut Gown with Dupatta Set-Kka-1070",
+   "title": "Wine Colour Readymade Alia Cut Gown with Dupatta Set-Kka-1070",
    "handle": "waine-colour-readymade-alia-cut-gown-with-dupatta-set-kka-1071",
    "colours": [
     {
@@ -1382,7 +1382,7 @@
   },
   "peacock-design-heavy-traditional-crop-top-with-shrug": {
    "key": "peacock-design-heavy-traditional-crop-top-with-shrug",
-   "title": "Peacock Design Heavy Traditional Crop Top with Shrug ( )",
+   "title": "Peacock Design Heavy Traditional Crop Top with Shrug (Purple)",
    "handle": "peacock-design-heavy-traditional-crop-top-with-shrug-purple",
    "colours": [
     {
@@ -1564,7 +1564,7 @@
   },
   "embroidery-kurta-set": {
    "key": "embroidery-kurta-set",
-   "title": "Embroidery Kurta Set",
+   "title": "Purple Embroidery Kurta Set",
    "handle": "purple-embroidery-kurta-set",
    "colours": [
     {
@@ -4419,15 +4419,15 @@
     }
    ]
   },
-  "same-hazel-s-anarkali-partywear-suit-set-anarkali": {
-   "key": "same-hazel-s-anarkali-partywear-suit-set-anarkali",
-   "title": "Hazel's Anarkali PartyWear Suit Set",
+  "same-hazel-s-anarkali-party-wear-suit-set-anarkali": {
+   "key": "same-hazel-s-anarkali-party-wear-suit-set-anarkali",
+   "title": "Hazel's Anarkali Party Wear Suit Set",
    "handle": "hazels-anarkali-partywear-suit-set",
    "colours": [
     {
      "name": "Style 1",
      "handle": "hazels-anarkali-partywear-suit-set",
-     "title": "Hazel's Anarkali PartyWear Suit Set",
+     "title": "Hazel's Anarkali Party Wear Suit Set",
      "price": 49900,
      "compareAtPrice": 124750,
      "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/55746.jpg",
@@ -4491,7 +4491,7 @@
     {
      "name": "Style 2",
      "handle": "hazels-anarkali-partywear-suit-set-8228836245636",
-     "title": "Hazel's Anarkali PartyWear Suit Set",
+     "title": "Hazel's Anarkali Party Wear Suit Set",
      "price": 59900,
      "compareAtPrice": 199667,
      "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/55746.jpg",
@@ -5935,15 +5935,15 @@
     }
    ]
   },
-  "same-premiumreadymadeanarkalisuitset-3-pis-anarkali": {
-   "key": "same-premiumreadymadeanarkalisuitset-3-pis-anarkali",
-   "title": "Premiumreadymadeanarkalisuitset [3 Pis]",
+  "same-premium-readymade-anarkali-suit-set-3-pieces-anarkali": {
+   "key": "same-premium-readymade-anarkali-suit-set-3-pieces-anarkali",
+   "title": "Premium Readymade Anarkali Suit Set 3 Pieces",
    "handle": "premium-readymade-anarkali-suit-set-3-pis-1",
    "colours": [
     {
      "name": "Style 2",
      "handle": "premium-readymade-anarkali-suit-set-3-pis",
-     "title": "Premiumreadymadeanarkalisuitset [3 Pis]",
+     "title": "Premium Readymade Anarkali Suit Set 3 Pieces",
      "price": 64900,
      "compareAtPrice": 216333,
      "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/6336793967294353592.jpg",
@@ -6006,7 +6006,7 @@
     {
      "name": "Style 1",
      "handle": "premium-readymade-anarkali-suit-set-3-pis-1",
-     "title": "Premiumreadymadeanarkalisuitset [3 Pis]",
+     "title": "Premium Readymade Anarkali Suit Set 3 Pieces",
      "price": 69900,
      "compareAtPrice": 233000,
      "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6064423200264753383_y.jpg",
@@ -7772,7 +7772,7 @@
   {
    "handle": "off-whitetrendy-anarkali-suit-set",
    "sourceHandle": "off-whitetrendy-anarkali-suit-set",
-   "title": "Off whiteTrendy Anarkali Suit Set",
+   "title": "Off White Trendy Anarkali Suit Set",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -17238,7 +17238,7 @@
   {
    "handle": "azira-rama-color-premium-anarkali-suit-set",
    "sourceHandle": "azira-rama-color-premium-anarkali-suit-set",
-   "title": "Azira Rama And Maroon Color Premium Anarkali Suit Set [Sleeves Fabric Attached]",
+   "title": "Azira Rama And Maroon Color Premium Anarkali Suit Set",
    "price": 64900,
    "compareAtPrice": 216333,
    "images": [
@@ -18040,7 +18040,7 @@
   {
    "handle": "kishika-yellow-color-anarkali-suit-set-sleeves-fabric-attached",
    "sourceHandle": "kishika-yellow-color-anarkali-suit-set-sleeves-fabric-attached",
-   "title": "Kishika Yellow Color Anarkali Suit Set [Sleeves Fabric Attached]",
+   "title": "Kishika Yellow Color Anarkali Suit Set",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -18121,13 +18121,13 @@
    "inStock": true,
    "featured": false,
    "publishedAt": "2025-09-06T02:23:22-04:00",
-   "colourGroup": "kishika-color-anarkali-suit-set-sleeves-fabric-attached",
+   "colourGroup": "kishika-color-anarkali-suit-set",
    "colourName": "Yellow"
   },
   {
    "handle": "kiyara-bkack-color-anarkali-suit-set-sleeves-fabric-attached",
    "sourceHandle": "kiyara-bkack-color-anarkali-suit-set-sleeves-fabric-attached",
-   "title": "Kiyara Black Color Anarkali Suit Set [Sleeves Fabric Attached]",
+   "title": "Kiyara Black Color Anarkali Suit Set",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -18550,7 +18550,7 @@
   {
    "handle": "kiyara-mahendi-color-anarkali-suit-set",
    "sourceHandle": "kiyara-mahendi-color-anarkali-suit-set",
-   "title": "Kiyara Mahendi Color Anarkali Suit Set [Sleeves Fabric Attached]",
+   "title": "Kiyara Mahendi Color Anarkali Suit Set",
    "price": 64900,
    "compareAtPrice": 216333,
    "images": [
@@ -18634,7 +18634,7 @@
   {
    "handle": "niyara-maroon-color-anarkali-suit-set",
    "sourceHandle": "niyara-maroon-color-anarkali-suit-set",
-   "title": "Kishika Maroon Color Anarkali Suit Set [Sleeves Fabric Attached]",
+   "title": "Kishika Maroon Color Anarkali Suit Set",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -18713,7 +18713,7 @@
    "inStock": true,
    "featured": false,
    "publishedAt": "2025-08-22T09:48:55-04:00",
-   "colourGroup": "kishika-color-anarkali-suit-set-sleeves-fabric-attached",
+   "colourGroup": "kishika-color-anarkali-suit-set",
    "colourName": "Maroon"
   },
   {
@@ -20835,7 +20835,7 @@
   {
    "handle": "hazels-anarkali-partywear-suit-set",
    "sourceHandle": "hazels-anarkali-partywear-suit-set",
-   "title": "Hazel's Anarkali PartyWear Suit Set",
+   "title": "Hazel's Anarkali Party Wear Suit Set",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -20925,7 +20925,7 @@
    "inStock": true,
    "featured": false,
    "publishedAt": "2025-02-28T09:49:07-05:00",
-   "colourGroup": "same-hazel-s-anarkali-partywear-suit-set-anarkali",
+   "colourGroup": "same-hazel-s-anarkali-party-wear-suit-set-anarkali",
    "colourName": "Style 1"
   },
   {
@@ -31883,7 +31883,7 @@
   {
    "handle": "trending-anarkali-suit-set-3-pis",
    "sourceHandle": "trending-anarkali-suit-set-3-pis",
-   "title": "Trendinganarkalisuitset [3 Pis]",
+   "title": "Trending Anarkali Suit Set 3 Pieces",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -32057,7 +32057,7 @@
   {
    "handle": "premium-readymade-anarkali-suit-set-3-pis",
    "sourceHandle": "premium-readymade-anarkali-suit-set-3-pis",
-   "title": "Premiumreadymadeanarkalisuitset [3 Pis] — Style 2",
+   "title": "Premium Readymade Anarkali Suit Set 3 Pieces — Style 2",
    "price": 64900,
    "compareAtPrice": 216333,
    "images": [
@@ -32146,7 +32146,7 @@
    "inStock": true,
    "featured": false,
    "publishedAt": "2026-08-15T11:57:36+05:30",
-   "colourGroup": "same-premiumreadymadeanarkalisuitset-3-pis-anarkali",
+   "colourGroup": "same-premium-readymade-anarkali-suit-set-3-pieces-anarkali",
    "colourName": "Style 2"
   },
   {
@@ -33072,7 +33072,7 @@
   {
    "handle": "premium-anarkali-suit-set-3-pis-6122",
    "sourceHandle": "premium-anarkali-suit-set-3-pis-6122",
-   "title": "PremiumAnarkali Suit Set [3 PIS] 6122",
+   "title": "Premium Anarkali Suit Set 3 Pieces 6122",
    "price": 64900,
    "compareAtPrice": 216333,
    "images": [
@@ -33329,7 +33329,7 @@
   {
    "handle": "lucknowi-special-premium-readymade-anarkali-suitset-6116",
    "sourceHandle": "lucknowi-special-premium-readymade-anarkali-suitset-6116",
-   "title": "Lucknowi Special Premium Readymade Anarkali SuitSet 6116",
+   "title": "Lucknowi Special Premium Readymade Anarkali Suit Set 6116",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -35209,7 +35209,7 @@
   {
    "handle": "premium-readymade-anarkali-suit-set-3-pis-1",
    "sourceHandle": "premium-readymade-anarkali-suit-set-3-pis-1",
-   "title": "Premiumreadymadeanarkalisuitset [3 Pis]",
+   "title": "Premium Readymade Anarkali Suit Set 3 Pieces",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -35285,7 +35285,7 @@
    "inStock": true,
    "featured": false,
    "publishedAt": "2026-08-22T18:34:05+05:30",
-   "colourGroup": "same-premiumreadymadeanarkalisuitset-3-pis-anarkali",
+   "colourGroup": "same-premium-readymade-anarkali-suit-set-3-pieces-anarkali",
    "colourName": "Style 1"
   },
   {
@@ -36272,7 +36272,7 @@
   {
    "handle": "ivory-and-maroon-elegant-top-bottom-dupatta-suit-set-10511750529156",
    "sourceHandle": "ivory-and-maroon-elegant-top-bottom-dupatta-suit-set",
-   "title": "Ivory and Maroon Elegant Top Bottom Dupatta Suit Set — Edition 2",
+   "title": "Ivory and Maroon Elegant Top Bottom Dupatta Suit Set — Vichitra Silk",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -36654,7 +36654,7 @@
   {
    "handle": "aniska-lakhnavi-embroidered-work-anarkali-suit-set",
    "sourceHandle": "aniska-lakhnavi-embroidered-work-anarkali-suit-set",
-   "title": "Aniska Lakhnavi Embroidered Work Anarkali Suit Set — Edition 2",
+   "title": "Aniska Lakhnavi Embroidered Work Anarkali Suit Set — Georgette",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -37018,7 +37018,7 @@
   {
    "handle": "premium-readymade-anarkali-suit-set-3-pis-184",
    "sourceHandle": "premium-readymade-anarkali-suit-set-3-pis-184",
-   "title": "Premiumreadymadeanarkalisuitset [3 Pis] 184",
+   "title": "Premium Readymade Anarkali Suit Set 3 Pieces 184",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -37361,7 +37361,7 @@
   {
    "handle": "eid-special-premium-readymade-off-white-anarkali-suitse-6115",
    "sourceHandle": "eid-special-premium-readymade-off-white-anarkali-suitse-6115",
-   "title": "Eid Special Premium Readymade off white Anarkali SuitSe 6115",
+   "title": "Eid Special Premium Readymade Off White Anarkali Suit Set 6115",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -41967,7 +41967,7 @@
   {
    "handle": "hazels-anarkali-partywear-suit-set-8228836245636",
    "sourceHandle": "hazels-anarkali-partywear-suit-set",
-   "title": "Hazel's Anarkali PartyWear Suit Set — Style 2",
+   "title": "Hazel's Anarkali Party Wear Suit Set — Style 2",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -42057,7 +42057,7 @@
    "inStock": true,
    "featured": false,
    "publishedAt": "2025-03-11T18:21:48+05:30",
-   "colourGroup": "same-hazel-s-anarkali-partywear-suit-set-anarkali",
+   "colourGroup": "same-hazel-s-anarkali-party-wear-suit-set-anarkali",
    "colourName": "Style 2"
   },
   {
@@ -42875,7 +42875,7 @@
   {
    "handle": "manvis-white-coloured-anarkali-suit-set-11-7287410360452",
    "sourceHandle": "manvis-white-coloured-anarkali-suit-set-11",
-   "title": "Manvi's White Coloured Anarkali Suit Set — Edition 2",
+   "title": "Manvi's White Coloured Anarkali Suit Set — Georgette",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [

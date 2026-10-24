@@ -79,3 +79,30 @@ source admin Settings hai.
 | PDP price | Rs. 549 (owner-approved), "You save Rs. 1,281" |
 | Live payment + tracking workflow (`live-payments.yml`, run 40125338823) | **21 / 0** — order place → pay page → pending → UTR → processing → tracking, unknown order → not-found |
 | CI (`ci.yml`, run 40125342883) | success |
+
+## 7. Title polish (automated junk hataya)
+
+Catalogue merge ke baad bache hue "scraped" title bugs fix kiye — 18 titles badle, counts same
+(446 products / 388 cards / 42 groups / koi duplicate title nahi):
+
+| Pehle | Ab |
+| --- | --- |
+| `Premiumreadymadeanarkalisuitset [3 Pis]` | `Premium Readymade Anarkali Suit Set 3 Pieces` |
+| `Trendinganarkalisuitset [3 Pis]` | `Trending Anarkali Suit Set 3 Pieces` |
+| `PremiumAnarkali Suit Set [3 PIS] 6122` | `Premium Anarkali Suit Set 3 Pieces 6122` |
+| `Off whiteTrendy Anarkali Suit Set` | `Off White Trendy Anarkali Suit Set` |
+| `Eid Special Premium Readymade off white Anarkali SuitSe 6115` | `… Off White Anarkali Suit Set 6115` |
+| `Hazel's Anarkali PartyWear Suit Set` | `Hazel's Anarkali Party Wear Suit Set` |
+| `… Anarkali Suit Set [Sleeves Fabric Attached]` (5 titles) | bracket hata diya |
+| `Manvi's White … Suit Set — Edition 2` | `… Suit Set — Georgette` (fabric suffix) |
+
+Rules (`scripts/build-catalog.mjs`):
+
+- **Chipke hue words** (`GLUED_WORDS` se poora-token segmentation) — sirf tab todta hai jab token
+  poora known words me divide ho, isliye `Sunset`/`Suitcase` jaisa asli word nahi todta.
+- `[3 Pis]` / `[3 PIS]` → `3 Pieces`; `[Sleeves Fabric Attached]` → hata diya.
+- `off white` → `Off White`, `SuitSe` → `Suit Set`.
+- Trailing supplier code (`6122`, `6129`) **rakha** gaya — wahi do alag designs ko alag rakhta hai
+  (same title, alag fabric/price/photos; unhe merge karna galat hota).
+- Duplicate title pass ka suffix: colour → style code → **fabric** → product type → `Edition N`
+  (last resort). Group meta titles representative ke final title se sync.

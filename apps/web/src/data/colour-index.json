@@ -52,7 +52,7 @@
     }
    ]
   },
-  "kishika-color-anarkali-suit-set-sleeves-fabric-attached": {
+  "kishika-color-anarkali-suit-set": {
    "handle": "kishika-yellow-color-anarkali-suit-set-sleeves-fabric-attached",
    "colours": [
     {
@@ -440,7 +440,7 @@
     }
    ]
   },
-  "same-hazel-s-anarkali-partywear-suit-set-anarkali": {
+  "same-hazel-s-anarkali-party-wear-suit-set-anarkali": {
    "handle": "hazels-anarkali-partywear-suit-set",
    "colours": [
     {
@@ -584,7 +584,7 @@
     }
    ]
   },
-  "same-premiumreadymadeanarkalisuitset-3-pis-anarkali": {
+  "same-premium-readymade-anarkali-suit-set-3-pieces-anarkali": {
    "handle": "premium-readymade-anarkali-suit-set-3-pis-1",
    "colours": [
     {
@@ -620,8 +620,8 @@
   "premium-maroon-anarkali-suit-set": "premium-anarkali-suit-set",
   "maroon-coloured-designer-anarkali-suit": "coloured-designer-anarkali-suit",
   "red-coloured-designer-anarkali-suit": "coloured-designer-anarkali-suit",
-  "niyara-maroon-color-anarkali-suit-set": "kishika-color-anarkali-suit-set-sleeves-fabric-attached",
-  "kishika-yellow-color-anarkali-suit-set-sleeves-fabric-attached": "kishika-color-anarkali-suit-set-sleeves-fabric-attached",
+  "niyara-maroon-color-anarkali-suit-set": "kishika-color-anarkali-suit-set",
+  "kishika-yellow-color-anarkali-suit-set-sleeves-fabric-attached": "kishika-color-anarkali-suit-set",
   "sandhiya-black-premium-quality-anarkali-suit-set": "sandhiya-premium-quality-anarkali-suit-set",
   "priyankas-new-gown-with-dupatta-collaction-lw-9150": "sandhiya-premium-quality-anarkali-suit-set",
   "premium-quality-lukhnowi-peach-suit-set-copy": "premium-quality-lukhnowi-suit-set",
@@ -682,8 +682,8 @@
   "neha-heavy-pure-vichitra-anarkali-suit-set": "same-neha-heavy-pure-vichitra-anarkali-suit-set-anarkali",
   "madhvi-heavy-embroidered-maxi-set": "same-madhvi-heavy-embroidered-maxi-set-anarkali",
   "madhvi-heavy-embroidered-maxi-set-10016283328644": "same-madhvi-heavy-embroidered-maxi-set-anarkali",
-  "hazels-anarkali-partywear-suit-set": "same-hazel-s-anarkali-partywear-suit-set-anarkali",
-  "hazels-anarkali-partywear-suit-set-8228836245636": "same-hazel-s-anarkali-partywear-suit-set-anarkali",
+  "hazels-anarkali-partywear-suit-set": "same-hazel-s-anarkali-party-wear-suit-set-anarkali",
+  "hazels-anarkali-partywear-suit-set-8228836245636": "same-hazel-s-anarkali-party-wear-suit-set-anarkali",
   "prachis-pink-havy-vichitra-royal-elegant-suit-set-copy": "same-prachi-s-black-heavy-vichitra-royal-elegant-suit-set-anarkal",
   "prachis-pink-havy-vichitra-royal-elegant-suit-set-copy-8228835983492": "same-prachi-s-black-heavy-vichitra-royal-elegant-suit-set-anarkal",
   "premium-quality-roman-silk-gown-anarkali-suit-set-copy": "same-premium-quality-roman-silk-gown-anarkali-suit-set-anarkali",
@@ -708,8 +708,8 @@
   "copy-of-pure-soft-organza-anarkali-suit-set-with-fully-stitched-dkb-27": "same-premium-quality-silk-gown-anarkali-suit-set-anarkali",
   "light-purple-colour-embroidered-attractive-faux-georgette-lehenga-choli-lc170": "same-light-purple-colour-embroidered-lehenga-choli-lehnga",
   "light-purple-colour-embroidered-lehenga-choli": "same-light-purple-colour-embroidered-lehenga-choli-lehnga",
-  "premium-readymade-anarkali-suit-set-3-pis": "same-premiumreadymadeanarkalisuitset-3-pis-anarkali",
-  "premium-readymade-anarkali-suit-set-3-pis-1": "same-premiumreadymadeanarkalisuitset-3-pis-anarkali",
+  "premium-readymade-anarkali-suit-set-3-pis": "same-premium-readymade-anarkali-suit-set-3-pieces-anarkali",
+  "premium-readymade-anarkali-suit-set-3-pis-1": "same-premium-readymade-anarkali-suit-set-3-pieces-anarkali",
   "rang-e-royale-blooming-lehenga-suit-set-1": "same-rang-e-royale-blooming-lehenga-suit-set-lehnga",
   "rang-e-royale-blooming-lehenga-suit-set-10511720087684": "same-rang-e-royale-blooming-lehenga-suit-set-lehnga"
  }
