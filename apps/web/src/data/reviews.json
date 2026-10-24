@@ -1,0 +1,13 @@
+{
+ "meta": {
+  "source": "trustoo",
+  "shopId": "73883451696",
+  "syncedAt": null,
+  "note": "scripts/reviews-sync/fetch-reviews.mjs (GitHub Actions daily) is file ko likhta hai — haath se edit na karein."
+ },
+ "shop": {
+  "rating": 0,
+  "count": 0
+ },
+ "products": {}
+}

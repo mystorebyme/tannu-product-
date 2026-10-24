@@ -16,6 +16,23 @@ const priceFilters: Record<string, (product: Product) => boolean> = {
  */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
+  // wishlist / compare page: chune hue handles ka data ek hi call me
+  const handlesParam = searchParams.get("handles");
+  if (handlesParam) {
+    const handles = handlesParam
+      .split(",")
+      .map((handle) => handle.trim())
+      .filter(Boolean)
+      .slice(0, 24);
+    const all = await getProducts();
+    const data = handles
+      .map((handle) => all.find((product) => product.handle === handle))
+      .filter((product): product is Product => Boolean(product));
+    return Response.json(
+      { data, total: data.length, offset: 0, limit: data.length },
+      { headers: { "Cache-Control": "private, max-age=30" } },
+    );
+  }
   const collection = searchParams.get("collection") ?? "all";
   const q = (searchParams.get("q") ?? "").trim().toLowerCase();
   const sort = searchParams.get("sort") ?? "featured";

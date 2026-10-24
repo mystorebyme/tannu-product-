@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { FloatingHelp } from "@/components/floating-help";
 import { AnnouncementBar } from "@/components/announcement-bar";
+import { WishlistProvider } from "@/components/wishlist-provider";
 import { siteConfig } from "@/config/site";
 
 export const metadata: Metadata = {
@@ -61,11 +62,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <style>{".reveal-init{opacity:1!important;transform:none!important}"}</style>
         </noscript>
         <CartProvider>
-          <AnnouncementBar />
-          <SiteHeader />
-          <main className="min-h-[60vh]">{children}</main>
-          <SiteFooter />
-          <FloatingHelp />
+          <WishlistProvider>
+            <AnnouncementBar />
+            <SiteHeader />
+            <main className="min-h-[60vh]">{children}</main>
+            <SiteFooter />
+            <FloatingHelp />
+          </WishlistProvider>
         </CartProvider>
       </body>
     </html>

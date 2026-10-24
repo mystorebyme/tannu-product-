@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { navigationCollections } from "@/lib/collections";
 import { formatPrice, imageUrl } from "@/lib/format";
 import { useCart } from "@/components/cart-provider";
+import { useWishlist } from "@/components/wishlist-provider";
 import type { SearchHit } from "@/types/catalog";
 import { SafeImage } from "@/components/safe-image";
 import { logoUrl, logoFallback } from "@/config/site";
@@ -31,6 +32,7 @@ const announcements = [
 
 export function SiteHeader() {
   const { count, openCart, lines, removeLine, setQuantity, subtotal } = useCart();
+  const { wishlist } = useWishlist();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -199,6 +201,21 @@ export function SiteHeader() {
                 <circle cx="12" cy="8" r="4" />
                 <path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" />
               </svg>
+            </Link>
+            <Link
+              href="/wishlist"
+              aria-label="Wishlist"
+              data-testid="header-wishlist"
+              className="relative flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-[#f6f1ec] hover:text-[#862222]"
+            >
+              <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+                <path d="M20.8 5.6a5 5 0 0 0-7.1 0L12 7.3l-1.7-1.7a5 5 0 1 0-7.1 7.1L12 21.5l8.8-8.8a5 5 0 0 0 0-7.1Z" />
+              </svg>
+              {wishlist.length > 0 ? (
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#c2185b] px-1 text-[9px] font-semibold text-white">
+                  {wishlist.length}
+                </span>
+              ) : null}
             </Link>
             <button
               type="button"

@@ -6,6 +6,7 @@ import { useCart } from "@/components/cart-provider";
 import { formatPrice, imageUrl } from "@/lib/format";
 import { COUPONS as COUPON_RULES } from "@liksha/validation";
 import { SafeImage } from "@/components/safe-image";
+import { cartWhatsAppMessage, whatsappLink } from "@/lib/whatsapp";
 
 // shared package se hi rules aate hain (frontend + backend same)
 const COUPONS: Record<string, { percent: number; label: string }> = Object.fromEntries(
@@ -179,6 +180,18 @@ export default function CartPage() {
             >
               Proceed to checkout
             </Link>
+            <a
+              href={whatsappLink(cartWhatsAppMessage(lines))}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid="cart-whatsapp"
+              className="mt-2.5 flex items-center justify-center gap-2 border border-[#25D366] py-2.5 text-[10.5px] font-semibold tracking-[.14em] text-[#128c4b] uppercase transition hover:bg-[#f1fbf4]"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.2 14.1c-.2.6-1.2 1.2-1.7 1.2-.5.1-1 .1-1.6-.1a11.6 11.6 0 0 1-5.9-5.2c-.4-.7-.6-1.4-.6-2 0-.6.3-1.2.6-1.6.2-.2.4-.3.6-.3h.5c.2 0 .4 0 .5.4l.7 1.7c.1.2 0 .4-.1.6l-.4.5c-.1.1-.2.3-.1.5a7.5 7.5 0 0 0 3.3 2.9c.2.1.4.1.5-.1l.6-.7c.2-.2.3-.2.5-.1l1.6.8c.2.1.4.2.4.4 0 .2 0 .9-.2 1.4Z" />
+              </svg>
+              Order on WhatsApp
+            </a>
             <p className="mt-2.5 text-center text-[10.5px] text-[#8a8078]">
               100% secure prepaid payment · UPI, cards & netbanking
             </p>

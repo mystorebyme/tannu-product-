@@ -9,11 +9,23 @@ import { categoryHref, categoryLabel } from "@/lib/categories";
 import { colourSwatch } from "@/lib/colour";
 import type { ColourOption, Product } from "@/types/catalog";
 import { ProductGallery } from "@/components/product-gallery";
+import { Stars } from "@/components/product-reviews";
 
 /** catalogue me hai lekin type import ke liye alias */
 type Variant = ColourOption;
 
-export function ProductDetail({ product, colours = [] }: { product: Product; colours?: Variant[] }) {
+export function ProductDetail({
+  product,
+  colours = [],
+  rating = 0,
+  reviewCount = 0,
+}: {
+  product: Product;
+  colours?: Variant[];
+  /** synced reviews se aata hai (0 = abhi koi review nahi) */
+  rating?: number;
+  reviewCount?: number;
+}) {
   const { addItem } = useCart();
   const router = useRouter();
 
@@ -164,6 +176,19 @@ export function ProductDetail({ product, colours = [] }: { product: Product; col
         <h1 className="mt-1.5 font-display text-[22px] leading-snug font-medium text-[#2f2a25] sm:text-[26px] lg:text-[30px]">
           {product.title}
         </h1>
+
+        <button
+          type="button"
+          onClick={() => {
+            document.getElementById("reviews")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
+          className="mt-2 flex items-center gap-1.5 text-[11.5px] text-[#6b6259] transition hover:text-[#862222]"
+        >
+          <Stars value={rating} size={13} />
+          <span className="underline">
+            {reviewCount > 0 ? `${reviewCount} reviews` : "Write the first review"}
+          </span>
+        </button>
 
         <div className="mt-3 flex flex-wrap items-baseline gap-2.5">
           <span className="text-[22px] font-semibold text-[#862222]" data-testid="product-price">

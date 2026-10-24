@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ProductDetail } from "@/components/product-detail";
+import { ProductReviews, Stars } from "@/components/product-reviews";
+import { reviewsFor } from "@/lib/reviews";
 import { ProductGrid } from "@/components/product-card";
 import { colourOptionsFor, getProduct, getRelatedProducts, products } from "@/lib/store";
 import { categoryHref, categoryLabel } from "@/lib/categories";
@@ -41,9 +43,37 @@ export default async function ProductPage({
   const product = await getProduct(handle);
   if (!product) notFound();
   const related = await getRelatedProducts(product, 4);
+  const reviewBlock = reviewsFor(product.handle);
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.title,
+    image: product.images.slice(0, 3),
+    description: product.description,
+    sku: product.handle,
+    brand: { "@type": "Brand", name: "Liksha Clothing" },
+    offers: {
+      "@type": "Offer",
+      priceCurrency: "INR",
+      price: (product.price / 100).toFixed(2),
+      availability: product.inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      url: `https://www.likshaclothing.com/products/${product.handle}`,
+    },
+    ...(reviewBlock.count > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: reviewBlock.rating.toFixed(1),
+            reviewCount: reviewBlock.count,
+          },
+        }
+      : {}),
+  };
 
   return (
     <div className="container-liksha py-6 lg:py-9">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <nav aria-label="Breadcrumb" className="mb-4">
         <ol className="flex flex-wrap items-center gap-1.5 text-[11px] text-[#9c8f82]">
           <li>
@@ -60,7 +90,14 @@ export default async function ProductPage({
         </ol>
       </nav>
 
-      <ProductDetail product={product} colours={colourOptionsFor(product)} />
+      <ProductDetail
+        product={product}
+        colours={colourOptionsFor(product)}
+        rating={reviewBlock.rating}
+        reviewCount={reviewBlock.count}
+      />
+
+      <ProductReviews block={reviewBlock} productTitle={product.title} productHandle={product.handle} />
 
       <section className="mt-14 border-t border-[#eee6de] pt-9">
         <div className="text-center">

@@ -1,10 +1,12 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 import { getOrder } from "@/lib/orders";
 import { formatDate, formatPrice, imageUrl } from "@/lib/format";
 import { ORDER_STATUS_COPY } from "@/config/site";
 import { SafeImage } from "@/components/safe-image";
+import { orderWhatsAppLink } from "@/lib/whatsapp";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Order confirmed", robots: { index: false } };
@@ -12,6 +14,10 @@ export const metadata: Metadata = { title: "Order confirmed", robots: { index: f
 export default async function OrderPage({ params }: { params: Promise<{ orderNumber: string }> }) {
   const { orderNumber } = await params;
   const order = getOrder(orderNumber);
+  const headerList = await headers();
+  const host = headerList.get("x-forwarded-host") ?? headerList.get("host") ?? "www.likshaclothing.com";
+  const proto = headerList.get("x-forwarded-proto") ?? "https";
+  const siteUrl = `${proto}://${host}`;
   if (!order) notFound();
 
   const eta = new Date(order.createdAt);
@@ -37,6 +43,22 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
               ? "Order confirm ho gaya. COD amount delivery ke waqt deejiye."
               : "Order confirm ho gaya. Payment link WhatsApp par bheja ja raha hai."}
           </p>
+          <a
+            href={orderWhatsAppLink(order, siteUrl)}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-testid="confirm-whatsapp"
+            className="mt-4 inline-flex items-center gap-2 bg-[#25D366] px-6 py-3 text-[11px] font-semibold tracking-[.14em] text-white uppercase transition hover:bg-[#1eb457]"
+          >
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+              <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.2 14.1c-.2.6-1.2 1.2-1.7 1.2-.5.1-1 .1-1.6-.1a11.6 11.6 0 0 1-5.9-5.2c-.4-.7-.6-1.4-.6-2 0-.6.3-1.2.6-1.6.2-.2.4-.3.6-.3h.5c.2 0 .4 0 .5.4l.7 1.7c.1.2 0 .4-.1.6l-.4.5c-.1.1-.2.3-.1.5a7.5 7.5 0 0 0 3.3 2.9c.2.1.4.1.5-.1l.6-.7c.2-.2.3-.2.5-.1l1.6.8c.2.1.4.2.4.4 0 .2 0 .9-.2 1.4Z" />
+            </svg>
+            Confirm order on WhatsApp
+          </a>
+          <p className="mt-1.5 text-[11px] text-[#8a8078]">
+            Is button par order number, har item ka link + size + qty aur total — sab WhatsApp par chala jayega.
+          </p>
+
           <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-x-6 gap-y-2 border-t border-[#e9dfd4] pt-4 text-[12px]">
             <span>
               Order:{" "}
@@ -214,10 +236,12 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
             Continue shopping
           </Link>
           <a
-            href={`https://wa.me/919909790455?text=${encodeURIComponent(`Hi Liksha, my order number is ${order.orderNumber}`)}`}
+            href={orderWhatsAppLink(order, siteUrl)}
+            target="_blank"
+            rel="noopener noreferrer"
             className="border border-[#862222] px-7 py-3 text-[11px] font-semibold tracking-[.16em] text-[#862222] uppercase"
           >
-            Chat on WhatsApp
+            Send order on WhatsApp
           </a>
         </div>
       </div>

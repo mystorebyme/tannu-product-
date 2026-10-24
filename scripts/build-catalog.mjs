@@ -253,11 +253,25 @@ const groupKeyOf = (base) => base.toLowerCase().replace(/[^a-z0-9]+/g, "-").repl
 
   const usedHandles = new Set();
   const products = [];
-  const stats = { images: 0, sizes: new Set(), noImage: [] };
+  const stats = { images: 0, sizes: new Set(), noImage: [], duplicateImages: [] };
+  /** poore catalogue me ek image sirf ek product par */
+  const usedImages = new Set();
 
   for (const source of liveProducts) {
     if (!source.handle || !source.title) continue;
-    const images = (source.images ?? []).map((image) => image.src.split("?")[0]).filter(Boolean);
+    const rawImages = (source.images ?? []).map((image) => image.src.split("?")[0]).filter(Boolean);
+    // ek hi photo do products par nahi — pehla product photo ka owner, baad wale skip karte hain
+    const images = [];
+    for (const src of rawImages) {
+      if (usedImages.has(src)) {
+        stats.duplicateImages.push(`${source.handle} :: ${src.split("/").pop()}`);
+        continue;
+      }
+      usedImages.add(src);
+      images.push(src);
+    }
+    // sab photos duplicate nikle to kam se kam first photo rakho (product bina image ka na rahe)
+    if (!images.length && rawImages.length) images.push(rawImages[0]);
     const liveCollectionsForProduct = collectionOf.get(source.handle) ?? new Set();
     // COD/partial-payment jaisi internal "products" storefront par nahi jaati
     if (!images.length && liveCollectionsForProduct.size === 0) continue;
@@ -465,6 +479,12 @@ const groupKeyOf = (base) => base.toLowerCase().replace(/[^a-z0-9]+/g, "-").repl
   );
   write("apps/web/src/data/colour-index.json", `${JSON.stringify(colourIndex, null, 1)}\n`);
 
+  // reviews (Trustoo sync) — web app ko build ke waqt copy
+  const reviewsSrc = path.join(ROOT, "database/seeds/reviews/reviews.json");
+  if (fs.existsSync(reviewsSrc)) {
+    write("apps/web/src/data/reviews.json", fs.readFileSync(reviewsSrc, "utf8"));
+  }
+
   const json = JSON.stringify(catalog, null, 1);
   write("database/seeds/catalog.json", json);
   write("apps/web/src/data/catalog.json", json);
@@ -478,4 +498,7 @@ const groupKeyOf = (base) => base.toLowerCase().replace(/[^a-z0-9]+/g, "-").repl
     console.log(`  ${collection.handle.padEnd(18)} ${String(collection.productCount).padStart(3)}`);
   }
   if (stats.noImage.length) console.warn(`no image (${stats.noImage.length}):`, stats.noImage.slice(0, 8));
+  if (stats.duplicateImages.length) {
+    console.log(`duplicate photos skipped: ${stats.duplicateImages.length} (ek image sirf ek product par)`);
+  }
 })();

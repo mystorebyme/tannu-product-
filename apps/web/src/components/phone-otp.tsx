@@ -30,6 +30,7 @@ export function PhoneOtp({
   const [message, setMessage] = useState<string | null>(null);
   const recaptchaRef = useRef<HTMLDivElement | null>(null);
   const confirmationRef = useRef<unknown>(null);
+  const verifierRef = useRef<{ clear: () => void } | null>(null);
 
   useEffect(() => {
     if (!verified) setStage("idle");
@@ -37,12 +38,42 @@ export function PhoneOtp({
 
   async function sendFirebaseOtp(fullPhone: string) {
     const auth = getFirebaseAuthClient();
-    if (!auth) throw new Error("Firebase initialize nahi hua.");
+    if (!auth) throw new Error("Firebase initialize nahi hua — page refresh kar ke try kariye.");
     const { RecaptchaVerifier, signInWithPhoneNumber } = await import("firebase/auth");
-    if (!recaptchaRef.current) throw new Error("reCAPTCHA container missing.");
+    if (!recaptchaRef.current) throw new Error("reCAPTCHA container missing — page refresh kariye.");
+    // purana verifier clear karo, warna dobara "Send OTP" par reCAPTCHA render fail hota hai
+    try {
+      verifierRef.current?.clear();
+    } catch {
+      /* ignore */
+    }
     const verifier = new RecaptchaVerifier(auth, recaptchaRef.current, { size: "invisible" });
-    const confirmation = await signInWithPhoneNumber(auth, `+91${fullPhone}`, verifier);
-    confirmationRef.current = confirmation;
+    verifierRef.current = verifier;
+    try {
+      const confirmation = await signInWithPhoneNumber(auth, `+91${fullPhone}`, verifier);
+      confirmationRef.current = confirmation;
+    } catch (error) {
+      try {
+        verifier.clear();
+      } catch {
+        /* ignore */
+      }
+      verifierRef.current = null;
+      throw error;
+    }
+  }
+
+  /** Firebase ke technical codes ko customer-friendly message me badlo */
+  function friendlyFirebaseError(error: unknown): string {
+    const code = (error as { code?: string })?.code ?? "";
+    if (code.includes("invalid-phone-number")) return "Ye mobile number valid nahi lagta — 10 digit daaliye.";
+    if (code.includes("too-many-requests")) return "Bahut zyada attempts ho gaye. 10 minute baad try kariye.";
+    if (code.includes("quota-exceeded")) return "SMS quota khatam hai — WhatsApp 9909790455 par message kariye.";
+    if (code.includes("captcha-check-failed")) return "Verification fail hua — page refresh kar ke dobara try kariye.";
+    if (code.includes("app-credential")) return "Firebase config adhoora hai — support ko batayein (docs/07-security/phone-otp.md).";
+    if (code.includes("operation-not-allowed")) return "Is project me phone sign-in enable nahi hai.";
+    if (code.includes("network")) return "Network issue — internet check kar ke dobara try kariye.";
+    return error instanceof Error ? error.message : "OTP bhejne me dikkat aayi.";
   }
 
   async function send() {
@@ -80,8 +111,23 @@ export function PhoneOtp({
       setMessage(`OTP ${fullPhone.slice(0, 2)}****${fullPhone.slice(-2)} par bheja gaya.`);
     } catch (error) {
       setStage("idle");
-      setMessage(error instanceof Error ? error.message : "OTP bhejne me dikkat aayi.");
+      setMessage(friendlyFirebaseError(error));
     }
+  }
+
+  function reset() {
+    try {
+      verifierRef.current?.clear();
+    } catch {
+      /* ignore */
+    }
+    verifierRef.current = null;
+    confirmationRef.current = null;
+    setStage("idle");
+    setCode("");
+    setDevCode(null);
+    setMessage(null);
+    onVerified(null);
   }
 
   async function verify() {
@@ -115,7 +161,14 @@ export function PhoneOtp({
       setMessage("Mobile number verified ✓");
     } catch (error) {
       setStage("sent");
-      setMessage(error instanceof Error ? error.message : "OTP verify nahi hua.");
+      const code = (error as { code?: string })?.code ?? "";
+      setMessage(
+        code.includes("invalid-verification-code")
+          ? "OTP galat hai — dobara check kariye."
+          : code.includes("code-expired")
+            ? "OTP expire ho gaya — Resend dabaiye."
+            : friendlyFirebaseError(error),
+      );
     }
   }
 
@@ -141,8 +194,11 @@ export function PhoneOtp({
           className="h-11 w-full border border-[#ddd2c6] bg-white px-3 text-[13px] outline-none focus:border-[#862222] disabled:bg-[#faf8f5]"
         />
         {verified ? (
-          <span className="flex h-11 shrink-0 items-center bg-[#e6f2e8] px-3 text-[10.5px] font-semibold tracking-[.12em] text-[#2f7a3f] uppercase">
+          <span className="flex h-11 shrink-0 items-center gap-2 bg-[#e6f2e8] px-3 text-[10.5px] font-semibold tracking-[.12em] text-[#2f7a3f] uppercase">
             Verified
+            <button type="button" onClick={reset} className="text-[9.5px] text-[#6b6259] underline">
+              change
+            </button>
           </span>
         ) : (
           <button
@@ -190,7 +246,7 @@ export function PhoneOtp({
           {message}
         </p>
       ) : null}
-      {!firebaseConfigured ? (
+      {!firebaseConfigured && process.env.NODE_ENV !== "production" ? (
         <p className="mt-1 text-[10.5px] text-[#a49a90]">
           Firebase keys set karte hi asli SMS OTP chalu ho jaayega — docs/07-security/phone-otp.md
         </p>

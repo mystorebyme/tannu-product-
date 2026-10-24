@@ -2,6 +2,7 @@ import "server-only";
 
 import PDFDocument from "pdfkit";
 import { amountInWords } from "@/lib/amount-in-words";
+import { invoiceLogoBuffer } from "@/lib/invoice-logo";
 import type { InvoiceLine, InvoiceView } from "@/lib/invoice";
 
 const rupee = (paise: number) =>
@@ -31,15 +32,30 @@ export function renderInvoicePdf(view: InvoiceView): Promise<Buffer> {
     const right = doc.page.width - doc.page.margins.right;
     const width = right - left;
 
-    /* ── masthead ── */
-    doc.rect(left, 36, width, 58).fill(MAROON);
-    doc.fillColor("#ffffff").font("Helvetica-Bold").fontSize(19).text(view.seller.name.toUpperCase(), left + 16, 47, { width: width * 0.6 });
-    doc.fillColor("#f6dcd6").font("Helvetica").fontSize(7.5).text("Designer Anarkali Suits · Lehenga Choli · Suit Sets", left + 16, 70, { width: width * 0.6 });
-    doc.fillColor("#ffffff").font("Helvetica-Bold").fontSize(13).text("TAX INVOICE", left, 47, { width: width - 16, align: "right" });
-    doc.fillColor("#f6dcd6").font("Helvetica").fontSize(7).text("ORIGINAL FOR RECIPIENT", left, 66, { width: width - 16, align: "right" });
+    /* ── masthead: brand logo (exact wordmark) + tax invoice label ── */
+    try {
+      doc.image(invoiceLogoBuffer(), left, 34, { height: 46 });
+    } catch {
+      // logo render fail ho jaye to bhi invoice rukna nahi chahiye
+      doc.fillColor(MAROON).font("Helvetica-Bold").fontSize(19).text(view.seller.name.toUpperCase(), left, 44);
+    }
+    doc
+      .fillColor(MAROON)
+      .font("Helvetica-Bold")
+      .fontSize(14)
+      .text("TAX INVOICE", left, 38, { width, align: "right" });
+    doc
+      .fillColor(MUTED)
+      .font("Helvetica")
+      .fontSize(7)
+      .text("ORIGINAL FOR RECIPIENT", left, 56, { width, align: "right" })
+      .text("Designer Anarkali Suits · Lehenga Choli · Suit Sets", left, 68, { width, align: "right" });
+
+    doc.moveTo(left, 90).lineTo(right, 90).lineWidth(1.2).strokeColor(MAROON).stroke();
+    doc.moveTo(left, 93).lineTo(right, 93).lineWidth(0.5).strokeColor("#c9a86a").stroke();
 
     /* ── sold by / invoice meta ── */
-    let y = 106;
+    let y = 108;
     const halfWidth = width / 2 - 12;
 
     doc.fillColor(MAROON).font("Helvetica-Bold").fontSize(7.5).text("SOLD BY", left, y);

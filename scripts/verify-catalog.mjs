@@ -111,13 +111,28 @@ if (fs.existsSync(path.join(LIVE_DIR, "products.json"))) {
       continue;
     }
     const liveImages = (source.images ?? []).length;
-    if (product.images.length !== liveImages) {
-      fail(`${product.handle}: ${product.images.length}/${liveImages} images — snapshot se gallery adhoori`);
+    // images sirf dedupe ki wajah se kam ho sakti hain (kabhi zyada nahi)
+    if (product.images.length > liveImages) {
+      fail(`${product.handle}: ${product.images.length} images > snapshot ${liveImages}`);
     }
+    if (!product.images.length) fail(`${product.handle}: koi image nahi`);
     if (!source.body_html && !product.descriptionHtml) fail(`${product.handle}: description missing in both`);
     if (liveImages === 1) missingGallery += 1;
   }
   if (missingGallery) warnings.push(`${missingGallery} products ki live gallery me bhi ek hi image hai`);
+
+  // ek image poore catalogue me sirf ek hi product par honi chahiye
+  const imageOwner = new Map();
+  const shared = [];
+  for (const product of products) {
+    for (const image of product.images ?? []) {
+      const owner = imageOwner.get(image);
+      if (owner) shared.push(`${image.split("/").pop()} → ${owner} + ${product.handle}`);
+      else imageOwner.set(image, product.handle);
+    }
+  }
+  if (shared.length) fail(`shared images (${shared.length}): ${shared.slice(0, 5).join("; ")}`);
+  console.log(`images unique across products: ${imageOwner.size}`);
 
   const membership = JSON.parse(fs.readFileSync(path.join(LIVE_DIR, "membership.json"), "utf8")).collections;
   const counts = {};

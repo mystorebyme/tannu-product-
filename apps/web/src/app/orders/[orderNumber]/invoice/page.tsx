@@ -93,11 +93,17 @@ export default async function InvoicePage({
           {/* masthead */}
           <div className="flex flex-wrap items-center justify-between gap-3 bg-[#862222] px-5 py-4 text-white sm:px-8">
             <div>
-              <p className="font-display text-[24px] leading-none font-semibold tracking-[.08em]">
-                {view.seller.name.toUpperCase()}
-              </p>
+              {/* brand logo — PDF par bhi yahi exact asset lagta hai */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/site/invoice-logo.png"
+                alt={view.seller.name}
+                width={196}
+                height={57}
+                className="h-[52px] w-auto rounded-sm bg-white px-2 py-1"
+              />
               <p className="mt-1.5 text-[10px] tracking-[.14em] text-[#f6dcd6] uppercase">
-                Designer Anarkali Suits · Lehenga Choli · Suit Sets
+                Designer Anarkali Suits · Lehanga Choli · Suit Sets
               </p>
             </div>
             <div className="text-right">

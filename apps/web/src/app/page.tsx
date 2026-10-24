@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ProductGrid } from "@/components/product-card";
+import { ProductCarousel } from "@/components/product-carousel";
+import { CategoryCircles } from "@/components/category-circles";
+import { ReviewsStrip } from "@/components/reviews-strip";
 import { EditorialBand, OccasionStrip } from "@/components/occasion-strip";
 import { Reveal } from "@/components/reveal";
 import { getProducts, getCollection } from "@/lib/store";
@@ -35,6 +37,22 @@ export default async function HomePage() {
   const anarkaliCollection = await getCollection("party-wear-gown");
   const lehngaCollection = await getCollection("lehnga-choli");
   const printedCollection = await getCollection("printed-suit-set");
+  const newArrivalsCollection = await getCollection("new-arrivals");
+  const saleCollection = await getCollection("sale");
+  const choiceCollection = await getCollection("likshas-choice");
+
+  // live home ka "LEHNGA CHOLI" rail
+  const lehngaRail = byCollection("lehnga-choli").slice(0, 8);
+  // "Shop by edit" circles — ek line me, live store ka style
+  const circleItems = [
+    { href: "/collections/party-wear-gown", title: "Anarkali Suit", image: anarkaliCollection?.image, count: byCollection("party-wear-gown").length },
+    { href: "/collections/lehnga-choli", title: "Lehnga Choli", image: lehngaCollection?.image, count: byCollection("lehnga-choli").length },
+    { href: "/collections/printed-suit-set", title: "Printed Suit Set", image: printedCollection?.image, count: byCollection("printed-suit-set").length },
+    { href: "/collections/new-arrivals", title: "New Arrivals", image: newArrivalsCollection?.image, count: byCollection("new-arrivals").length },
+    { href: "/collections/likshas-choice", title: "Liksha's Choice", image: choiceCollection?.image, count: byCollection("likshas-choice").length },
+    { href: "/collections/sale", title: "Sale", image: saleCollection?.image, count: byCollection("sale").length },
+    { href: "/collections/weddin-collection", title: "Wedding", image: undefined, count: byCollection("weddin-collection").length },
+  ];
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -72,20 +90,7 @@ export default async function HomePage() {
         </Link>
       </section>
 
-      {/* ── category tiles: live store ke counts ── */}
-      <section className="container-liksha pt-6 lg:pt-9">
-        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3 sm:gap-4">
-          {[
-            { href: "/collections/party-wear-gown", image: anarkaliCollection?.image, title: "ANARKALI SUIT", count: byCollection("party-wear-gown").length },
-            { href: "/collections/lehnga-choli", image: lehngaCollection?.image, title: "LEHNGA CHOLI", count: byCollection("lehnga-choli").length },
-            { href: "/collections/printed-suit-set", image: printedCollection?.image, title: "PRINTED SUIT SET", count: byCollection("printed-suit-set").length },
-          ].map((tile, index) => (
-            <Reveal key={tile.href} delay={index * 90}>
-              <CategoryTile href={tile.href} image={imageUrl(tile.image, 800)} title={tile.title} count={`${tile.count} Products`} />
-            </Reveal>
-          ))}
-        </div>
-      </section>
+      <CategoryCircles items={circleItems} />
 
       <ProductRail
         title="Trendy Anarkali Sets"
@@ -98,9 +103,19 @@ export default async function HomePage() {
         title="New Arrivals"
         subtitle="Freshly dropped, straight from the studio"
         href="/collections/new-arrivals"
-        products={newArrivals.slice(0, 6)}
+        products={newArrivals.slice(0, 8)}
       />
 
+      {lehngaRail.length ? (
+        <ProductRail
+          title="Lehnga Choli"
+          subtitle="Our range of designer lehnga choli"
+          href="/collections/lehnga-choli"
+          products={lehngaRail}
+        />
+      ) : null}
+
+      <ReviewsStrip />
       <OccasionStrip />
       <EditorialBand />
 
@@ -129,7 +144,7 @@ function ProductRail({
         <p className="mt-1 text-[11.5px] tracking-[.14em] text-[#9c8f82] uppercase">{subtitle}</p>
       </Reveal>
       <Reveal className="mt-7" delay={80}>
-        <ProductGrid products={products} columns={3} />
+        <ProductCarousel products={products} perView={3} />
       </Reveal>
       <div className="mt-8 flex justify-center">
         <Link
@@ -140,37 +155,5 @@ function ProductRail({
         </Link>
       </div>
     </section>
-  );
-}
-
-function CategoryTile({
-  href,
-  image,
-  title,
-  count,
-}: {
-  href: string;
-  image: string;
-  title: string;
-  count: string;
-}) {
-  return (
-    <Link href={href} className="group relative block overflow-hidden bg-[#f3ece4]">
-      <div className="relative aspect-[4/5] w-full overflow-hidden">
-        <SafeImage
-          src={image}
-          alt={title}
-          sizes="(max-width: 640px) 100vw, 33vw"
-          className="h-full w-full object-cover transition-transform duration-[900ms] group-hover:scale-[1.05]"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/5 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 p-4 text-center sm:p-5">
-          <h2 className="font-display text-xl font-medium tracking-[.08em] text-white uppercase drop-shadow sm:text-2xl">
-            {title}
-          </h2>
-          <p className="mt-0.5 text-[10.5px] tracking-[.14em] text-white/85 uppercase">{count}</p>
-        </div>
-      </div>
-    </Link>
   );
 }

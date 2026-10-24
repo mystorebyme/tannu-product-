@@ -1,6 +1,13 @@
-/** live store ka asli logo (shop CDN). Fallback: local SVG. */
-export const logoUrl = "https://www.likshaclothing.com/cdn/shop/files/Pink_Abstract_Watercolor_Creative_Logo_3_copy_2.png?v=1734092749&width=320";
+/**
+ * Brand wordmark — repo ke andar hi rakha hai (public/images/site).
+ * CDN par depend nahi karta, isliye header, footer, invoice aur admin sab par
+ * bilkul same logo dikhta hai (kabhi broken/adha nahi).
+ */
+export const logoUrl = "/images/site/logo.png";
+/** dark (maroon) footer ke liye white wordmark */
+export const logoWhiteUrl = "/images/site/logo-white.png";
 export const logoFallback = "/images/site/logo.svg";
+export const logoMark = "/images/site/mark.png";
 
 export const siteConfig = {
   name: "Liksha Clothing",

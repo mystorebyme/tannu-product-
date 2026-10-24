@@ -31,9 +31,9 @@ export async function POST(request: Request) {
   }
 
   const code = createDevCode(phone);
-  // Dev mode tabhi chalta hai jab Firebase config hi nahi hai. Code response me tab hi
-  // jaata hai jab OTP_DEV_MODE explicitly "off" na ho (production me "off" rakhein).
-  const expose = process.env.OTP_DEV_MODE !== "off";
+  // Code response me sirf tab jaata hai jab build production ka na ho aur OTP_DEV_MODE ne
+  // explicitly block na kiya ho. Deployed site par OTP kabhi screen par nahi aata.
+  const expose = process.env.NODE_ENV !== "production" && process.env.OTP_DEV_MODE !== "off";
   console.info(`[otp:dev] ${phone.slice(0, 2)}****${phone.slice(-2)} code ${expose ? code : "hidden"}`);
   return Response.json({ mode, phone, ...(expose ? { devCode: code } : {}) });
 }
