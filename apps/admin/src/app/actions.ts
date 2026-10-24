@@ -14,7 +14,6 @@ import {
   createManualInvoice,
   getDelivery,
   saveDelivery,
-  saveOverride,
   saveSettings,
   setOrderNote,
   setOrderTracking,
@@ -65,7 +64,7 @@ export async function updateStockAction(formData: FormData) {
   const handle = String(formData.get("handle") ?? "");
   const inStock = formData.get("inStock") === "true";
   const actor = session.email;
-  saveOverride(handle, { inStock });
+  if (!saveProductOverride(handle, { inStock }, actor)) return;
   appendAudit({ actor, action: inStock ? "product.in_stock" : "product.out_of_stock", target: handle });
   revalidatePath("/products");
   revalidatePath("/inventory");
@@ -77,7 +76,7 @@ export async function updatePriceAction(formData: FormData) {
   const rupees = Number(formData.get("price") ?? 0);
   const actor = session.email;
   if (!Number.isFinite(rupees) || rupees <= 0) return;
-  saveOverride(handle, { price: Math.round(rupees * 100) });
+  if (!saveProductOverride(handle, { price: Math.round(rupees * 100) }, actor)) return;
   appendAudit({ actor, action: "product.price_updated", target: handle, meta: { rupees } });
   revalidatePath("/products");
 }

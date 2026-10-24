@@ -56,3 +56,23 @@ PATCH /orders/LK-05K05TGG/status
 { "status": "shipped", "note": "AWB 1234567890" }
 ```
 Invalid transition → `409 INVALID_TRANSITION`.
+
+## Storefront admin endpoints (Next app, `apps/web`)
+
+Ye `api` service ke nahi, storefront app ke route handlers hain — admin panel inhe call karta hai
+(`STORE_API_URL` + `ADMIN_API_TOKEN`). Detail: [admin-order-updates.md](./admin-order-updates.md).
+
+| Method | Path | Auth | Description |
+| --- | --- | --- | --- |
+| GET | `/api/admin/orders` | Bearer admin | list orders |
+| GET | `/api/admin/orders/:orderNumber` | Bearer admin | single order |
+| PATCH | `/api/admin/orders/:orderNumber` | Bearer admin | `action`: `status` \| `tracking` \| `note` \| `payment` \| `payment_failed` |
+| GET | `/api/admin/invoices` | Bearer admin | manual invoices |
+| POST | `/api/admin/invoices` | Bearer admin | manual invoice banao (`LK/MANUAL/0001`) |
+| GET | `/api/admin/invoices/:number` | Bearer admin | single manual invoice |
+| GET | `/api/admin/delivery` | Bearer admin | delivery rules |
+| PUT | `/api/admin/delivery` | Bearer admin | state/pincode rules save |
+| GET | `/api/admin/settings` | Bearer admin | store settings |
+| PUT | `/api/admin/settings` | Bearer admin | store settings save |
+| GET | `/api/delivery/check?pincode=` | — | serviceability |
+| GET | `/api/settings` | — | public store settings (header/footer) |

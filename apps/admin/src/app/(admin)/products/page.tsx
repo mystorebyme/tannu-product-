@@ -3,6 +3,7 @@ import { getProducts } from "@/lib/data";
 import { inr } from "@/lib/format";
 import { updateStockAction } from "@/app/actions";
 import { getSession } from "@/lib/session";
+import { ReadOnlyNotice } from "@/components/read-only-notice";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +31,8 @@ export default async function ProductsPage({
 
   return (
     <>
+      <ReadOnlyNotice what="Product edits" />
+
       <div className="topbar">
         <div>
           <h1>Products</h1>

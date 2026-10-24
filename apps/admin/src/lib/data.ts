@@ -10,6 +10,7 @@ import type {
 } from "@liksha/types";
 import { canTransition } from "@liksha/validation";
 import catalogJson from "../data/catalog.json";
+import { mergedProducts } from "@/lib/catalog-admin";
 
 export function repoRoot(): string {
   let dir = process.cwd();
@@ -43,38 +44,13 @@ function writeRows<T>(name: string, rows: T[]) {
   fs.renameSync(tmp, file);
 }
 
-export type Override = { handle: string; price?: number; inStock?: boolean; updatedAt: string };
-
-/** Catalogue base JSON hai; admin ke edits override file me jaate hain (source data safe rehta hai) */
+/**
+ * Catalogue base JSON hai; admin ke edits ek hi jagah (`catalog-admin` overrides)
+ * jaate hain — product edit page, inventory aur price form sab wahi file likhte hain,
+ * isliye ek jagah kiya gaya edit doosri jagah bhi dikhta hai.
+ */
 export function getProducts(): Product[] {
-  const catalog = catalogJson as unknown as Catalog;
-  const overrides = readRows<Override>("catalog-overrides.json");
-  if (overrides.length === 0) return catalog.products;
-  const map = new Map(overrides.map((row) => [row.handle, row]));
-  return catalog.products.map((product) => {
-    const override = map.get(product.handle);
-    return override
-      ? {
-          ...product,
-          price: override.price ?? product.price,
-          inStock: override.inStock ?? product.inStock,
-        }
-      : product;
-  });
-}
-
-export function saveOverride(handle: string, patch: { price?: number; inStock?: boolean }) {
-  const rows = readRows<Override>("catalog-overrides.json");
-  const index = rows.findIndex((row) => row.handle === handle);
-  const next: Override = {
-    ...rows[index],
-    handle,
-    ...patch,
-    updatedAt: new Date().toISOString(),
-  };
-  if (index === -1) rows.push(next);
-  else rows[index] = next;
-  writeRows("catalog-overrides.json", rows);
+  return mergedProducts();
 }
 
 export function getCollections() {

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getProducts } from "@/lib/data";
 import { updateStockAction } from "@/app/actions";
 import { getSession } from "@/lib/session";
+import { ReadOnlyNotice } from "@/components/read-only-notice";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +21,8 @@ export default async function InventoryPage() {
         </div>
       </div>
 
+      <ReadOnlyNotice what="Stock updates" />
+
       <div className="notice">
         Phase 1 me stock product-level hai (Shopify jaisa). Size-wise stock aur atomic reservation
         Phase 2 me aayega — tab `inventory` module Postgres transaction se decrement karega.
@@ -31,7 +34,7 @@ export default async function InventoryPage() {
           <span className="badge badge-danger">{out.length}</span>
         </div>
         {out.length === 0 ? (
-          <div className="empty">Sab kuch stock me hai 🎉</div>
+          <div className="empty">Sab kuch stock me hai.</div>
         ) : (
           <table>
             <thead>
