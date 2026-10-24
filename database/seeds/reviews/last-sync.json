@@ -1,17 +1,31 @@
 {
  "steps": [
-  "page: 347410 bytes",
-  "widget: reviews-292/assets/swiper-reviews.min.js → 0 endpoint hints"
+  "page: 348589 bytes",
+  "widget: reviews-292/assets/swiper-reviews.min.js → 3 endpoint hints"
  ],
- "endpoints": [],
+ "endpoints": [
+  "/apps/trustoo/api/v1/reviews/collect?",
+  "/apps/trustoo/api/v1/reviews/get_product_list",
+  "/apps/trustoo/api/v1/reviews/collect"
+ ],
  "scriptUrls": [
   "https://cdn.shopify.com/extensions/01a15e0a-e410-7740-a068-d265bda59b79/cwilltrustoo-reviews-292/assets/swiper-reviews.min.js",
   "https://cdn.shopify.com/extensions/01a15e0a-e410-7740-a068-d265bda59b79/cwilltrustoo-reviews-292/assets/seal-review.min.js",
   "https://cdn.shopify.com/extensions/01a15e0a-e410-7740-a068-d265bda59b79/cwilltrustoo-reviews-292/assets/trustoo-sign.min.js",
   "https://cdn.shopify.com/extensions/01a15e0a-e410-7740-a068-d265bda59b79/cwilltrustoo-reviews-292/assets/trustoo-sign-test.min.js"
  ],
+ "appProxy": [
+  "/apps/simprosys-google-shopping-feed/blocks/core_settings_block/1f0b859e-9fa6-4007-97e8-4513aff5ff3b"
+ ],
+ "urlsFound": [
+  "/apps/trustoo/api/v1/reviews/collect?",
+  "https://api.trustoo.io/api/v1/reviews/",
+  "/apps/trustoo/api/v1/reviews/get_product_list",
+  "/apps/trustoo/api/v1/reviews/collect",
+  "https://api.trustoo.io/api/v1/reviews/collect_event"
+ ],
  "scriptBytes": 58322,
  "found": 0,
  "saved": 0,
- "at": "2026-10-24T08:09:52.670Z"
+ "at": "2026-10-24T08:10:43.713Z"
 }
