@@ -1,6 +1,7 @@
 /**
  * Brand logo — live store (likshaclothing.com) ka hi asli asset, same to same.
- * Local mirror (public/images/site/logo.png) sirf fallback hai agar CDN na mile.
+ * Koi local/duplicate logo nahi: fallback bhi wahi URL hai, taaki galti se
+ * doosra logo kabhi render na ho.
  */
 const LIVE_LOGO =
   "https://www.likshaclothing.com/cdn/shop/files/Pink_Abstract_Watercolor_Creative_Logo_3_copy_2.png?v=1734092749";
@@ -8,7 +9,7 @@ const LIVE_LOGO =
 export const logoUrl = `${LIVE_LOGO}&width=400`;
 /** footer bhi wahi logo (maroon band par white plate ke saath) */
 export const logoWhiteUrl = `${LIVE_LOGO}&width=400`;
-export const logoFallback = "/images/site/logo.png";
+export const logoFallback = logoUrl;
 export const logoMark = `${LIVE_LOGO}&width=120`;
 
 export const siteConfig = {

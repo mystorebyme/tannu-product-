@@ -21,7 +21,7 @@ const LINE = "#dcd2c7";
 const SOFT = "#f7f2ec";
 
 export async function renderInvoicePdf(view: InvoiceView): Promise<Buffer> {
-  // masthead logo pehle load (live store ka asli logo, fallback embedded)
+  // masthead logo pehle load (live store ka asli logo; na mile to text masthead)
   const logo = await invoiceLogoImage();
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ size: "A4", margin: 36, bufferPages: true });
@@ -36,6 +36,7 @@ export async function renderInvoicePdf(view: InvoiceView): Promise<Buffer> {
 
     /* ── masthead: brand logo (exact wordmark) + tax invoice label ── */
     try {
+      if (!logo) throw new Error("logo unavailable");
       doc.image(logo, left, 34, { fit: [150, 46], valign: "center" });
     } catch {
       // logo render fail ho jaye to bhi invoice rukna nahi chahiye
