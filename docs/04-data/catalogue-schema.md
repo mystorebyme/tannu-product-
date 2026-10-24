@@ -53,3 +53,11 @@ type Collection = {
 | `sizePricing` | `Record<size, {price, compareAtPrice, available}>` | per-size price/MRP/stock |
 | `productType` | `string \| null` | Shopify product_type (reference only) |
 | `publishedAt` | ISO string | "New Arrivals" ordering ke liye |
+
+## Review photos (Round 13 rule)
+
+- Review me **sirf customer ki asli photo** dikhti hai (Trustoo uploads, `img.trustoo.io`).
+- Wo image kabhi nahi jo product ki gallery me pehle se hai — `scripts/reviews-sync/attach-review-photos.mjs`
+  har sync ke baad catalogue images ko review photos se hata deta hai.
+- Ek photo sirf ek review me (duplicate zero). Sample/seed reviews me koi photo nahi.
+- Numbers (24 Oct 2026): 1,690 live reviews · 147 with a customer photo · 252 unique photos · 38 products.

@@ -17,7 +17,13 @@
 ## 2. Brand
 
 - Naam: `Designer Clothing` (`apps/web/src/config/site.ts` → `siteConfig.name`).
-- Logo: wahi live store ka asset (`logoUrl`, `logoMark`) — same to same, kabhi change nahi.
+- Logo (owner ka final): gold crown + gown mark with `DESIGNER / CLOTHING` wordmark.
+  - `apps/web/public/images/logo-mark.png` — 512×512 mark (header badge, footer, favicon,
+    manifest, invoice PDF masthead, admin sidebar/login)
+  - `apps/web/public/images/logo.png` / `.webp` — poora lockup (share/invoice ke liye)
+  - `apps/web/public/images/og-image.jpg` — social share card (1200×630)
+  - Ek hi component: `apps/web/src/components/brand-lockup.tsx` (header, mobile menu, footer)
+  - Admin: `apps/admin/public/invoice-logo.png` (wahi mark) + sidebar/login brand
 - Phone / WhatsApp: `8005900581` (Settings sheet se override ho sakta hai:
   `support_phone`, `whatsapp`).
 - UPI: `dhakadgourav@fam` (`upi_id`, `upi_name` sheet se).

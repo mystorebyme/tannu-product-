@@ -54,7 +54,7 @@ async function main() {
   check("home shows category counts from the live store", /ANARKALI SUIT/i.test(home.text) && /Products/i.test(home.text));
   check("home hero pricing paragraph removed (Round 12)", !/No hidden charges/i.test(home.text));
   check("tab title carries the brand name", /<title>[^<]*Designer Clothing[^<]*<\/title>/i.test(home.text));
-  check("tab icon points at the brand logo", /rel="icon"[^>]*likshaclothing/i.test(home.text));
+  check("tab icon points at the brand logo", /rel="icon"[^>]*\/images\/logo-mark\.png/i.test(home.text));
 
   const manifest = await get("/manifest.webmanifest");
   check("manifest served for installed app", manifest.status === 200 && /Designer Clothing/.test(manifest.text), `status ${manifest.status}`);
