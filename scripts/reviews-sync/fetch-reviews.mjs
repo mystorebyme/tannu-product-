@@ -183,6 +183,7 @@ async function main() {
 
   // 2) har product ke reviews
   const products = {};
+  const aggregatesPreview = {};
   let total = 0;
   let reviewedProducts = 0;
   for (const entry of productEntries) {
@@ -191,16 +192,32 @@ async function main() {
     if (!productId || !handle) continue;
 
     let reviews = [];
-    const reviewEndpoints = [...endpointNames].filter((name) => !/product_list|collect/.test(name));
-    for (const name of reviewEndpoints.slice(0, 6)) {
-      if (reviews.length) break;
+    let aggregate = null;
+    for (let pageNo = 1; pageNo <= 10; pageNo += 1) {
+      let payload = null;
       try {
-        const payload = await fetchJson(`${proxy}/${name}?shop_id=${shopId}&product_id=${productId}&page=1&limit=50`);
-        reviews = asList(payload).map(normaliseReview).filter((review) => review.body);
+        payload = await fetchJson(
+          `${proxy}/get_product_reviews?shop_id=${shopId}&product_id=${productId}&page=${pageNo}&limit=50`,
+        );
       } catch {
-        /* next endpoint */
+        break;
       }
+      const rawList = asList(payload);
+      if (pageNo === 1) {
+        const total = payload?.data?.total_rating;
+        if (total) {
+          aggregate = {
+            rating: Math.round(Number(total.rating ?? 0) * 10) / 10,
+            count: Number(total.total_reviews ?? 0),
+          };
+        }
+        if (rawList[0] && !diagnostics.reviewKeys) diagnostics.reviewKeys = Object.keys(rawList[0]);
+      }
+      reviews.push(...rawList.map(normaliseReview).filter((review) => review.body));
+      const totalPages = Number(payload?.data?.page?.total_page ?? 1);
+      if (!rawList.length || pageNo >= totalPages) break;
     }
+    if (aggregate?.count) aggregatesPreview[handle] = aggregate;
     if (!reviews.length) continue;
 
     // ek hi product par duplicate reviews na aayein
@@ -221,15 +238,7 @@ async function main() {
     total += reviews.length;
   }
 
-  const aggregates = {};
-  for (const entry of productEntries) {
-    const productId = String(entry.product_id ?? entry.productId ?? entry.id ?? "");
-    const handle = handles.get(productId);
-    if (!handle) continue;
-    const rating = Number(entry.rating ?? entry.avg_rating ?? entry.average_rating ?? entry.star ?? 0);
-    const count = Number(entry.review_count ?? entry.count ?? entry.total ?? entry.reviews_count ?? 0);
-    if (rating > 0 && count > 0) aggregates[handle] = { rating: Math.round(rating * 10) / 10, count };
-  }
+  const aggregates = { ...aggregatesPreview };
   fs.writeFileSync(
     path.join(ROOT, "database/seeds/reviews/aggregates.json"),
     `${JSON.stringify({ syncedAt: new Date().toISOString(), products: aggregates }, null, 1)}\n`,
@@ -239,7 +248,7 @@ async function main() {
   const all = Object.values(products).flatMap((block) => block.reviews);
   fs.writeFileSync(
     path.join(ROOT, "database/seeds/reviews/last-sync.json"),
-    `${JSON.stringify({ ...diagnostics, reviewedProducts, total }, null, 1)}\n`,
+    `${JSON.stringify({ ...diagnostics, reviewedProducts, total, aggregates: Object.keys(aggregates).length }, null, 1)}\n`,
   );
 
   if (!total) {
