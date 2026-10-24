@@ -50,4 +50,11 @@ jobs:
           BASE_URL: ${{ inputs.base_url }}
           # khaali = admin steps skip (token public repo me nahi jaata)
           ADMIN_API_TOKEN: ""
-        run: node tests/e2e/payments.mjs
+        run: |
+          set +e
+          node tests/e2e/payments.mjs 2>&1 | tee flow.log
+          code=${PIPESTATUS[0]}
+          grep -E "FAIL|payments:" flow.log | while IFS= read -r line; do
+            echo "::error title=live-flow::${line}"
+          done
+          exit $code
