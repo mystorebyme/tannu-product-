@@ -57,6 +57,33 @@ function asciiHandle(handle) {
     .toLowerCase();
 }
 
+/**
+ * product image → catalogue handle.
+ * Trustoo ke product_list me har product ki ek image aati hai, aur wahi image
+ * hamare catalogue me hoti hai. Live snapshot (288 products) purana ho jaye to
+ * bhi is mapping se saare review-wale products mil jaate hain.
+ */
+function imageMap() {
+  const byImage = new Map();
+  const clean = (src) => String(src).split("?")[0].replace(/\/+$/, "").toLowerCase();
+  for (const file of ["database/seeds/catalog.json", "apps/web/src/data/catalog.json"]) {
+    const full = path.join(ROOT, file);
+    if (!fs.existsSync(full)) continue;
+    try {
+      const catalog = JSON.parse(fs.readFileSync(full, "utf8"));
+      for (const product of catalog.products ?? []) {
+        for (const image of product.images ?? []) {
+          if (!byImage.has(clean(image))) byImage.set(clean(image), product.handle);
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+    if (byImage.size) break;
+  }
+  return { byImage, clean };
+}
+
 /** title/marketing naam → catalogue handle (jo products live snapshot me nahi hain unke liye) */
 function titleMap() {
   const byTitle = new Map();
@@ -158,13 +185,23 @@ async function main() {
 
   const handles = handleMap();
   const titles = titleMap();
-  note("catalog", `${handles.size} product ids, ${titles.size} titles`);
+  const images = imageMap();
+  note(
+    "catalog",
+    `${handles.size} product ids, ${titles.size} titles, ${images.byImage.size} product images (new sync)`,
+  );
 
   /** entry → catalogue handle (id map pehle, phir title, phir ascii title slug) */
   const resolveHandle = (entry) => {
     const productId = String(entry.product_id ?? entry.productId ?? entry.id ?? "");
     const direct = handles.get(productId);
     if (direct) return direct;
+    // image match — sabse reliable (live snapshot purana ho to bhi chalta hai)
+    const image = entry.image_src ?? entry.image ?? entry.imageSrc ?? "";
+    if (image) {
+      const byImage = images.byImage.get(images.clean(image));
+      if (byImage) return byImage;
+    }
     const title = String(entry.title ?? "").trim();
     if (!title) return null;
     return titles.get(title.toLowerCase()) ?? titles.get(asciiHandle(title)) ?? null;
@@ -289,7 +326,8 @@ async function main() {
         }
         if (rawList[0] && !diagnostics.reviewKeys) diagnostics.reviewKeys = Object.keys(rawList[0]);
       }
-      reviews.push(...rawList.map(normaliseReview).filter((review) => review.body));
+      // photo-only review bhi rakho — customer ne photo di hai to wo dikhni chahiye
+      reviews.push(...rawList.map(normaliseReview).filter((review) => review.body || review.photos?.length));
       const totalPages = Number(payload?.data?.page?.total_page ?? 1);
       if (!rawList.length || pageNo >= totalPages) break;
     }
@@ -299,14 +337,15 @@ async function main() {
     // ek hi product par duplicate reviews na aayein
     const seen = new Set();
     reviews = reviews.filter((review) => {
-      const key = `${review.author}-${review.body.slice(0, 60)}`;
+      const key = `${review.author}-${(review.body || review.photos?.[0] || "").slice(0, 60)}`;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
     });
 
     products[handle] = {
-      rating: Math.round((reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length) * 10) / 10,
+      rating:
+        Math.round((reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length) * 10) / 10,
       count: reviews.length,
       reviews,
     };
