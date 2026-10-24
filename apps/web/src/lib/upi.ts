@@ -18,6 +18,8 @@ export type UpiTarget = {
   note: string;
   /** optional transaction reference */
   txnRef?: string;
+  /** UPI app payment ke baad yahan wapas aata hai (https URL + signed token) */
+  callbackUrl?: string;
 };
 
 /** UPI ID validate — "name@bank" shape, koi space/special nahi */
@@ -42,6 +44,9 @@ export function buildUpiUri(target: UpiTarget): string {
     tn: target.note.slice(0, 50),
   });
   if (target.txnRef) params.set("tr", target.txnRef.slice(0, 35));
+  // NPCI deep-link spec: `url` = callback. Jahan app support karta hai, payment
+  // ke baad customer seedha order page par wapas aata hai (auto-confirm ke liye).
+  if (target.callbackUrl) params.set("url", target.callbackUrl.slice(0, 512));
   return `upi://pay?${params.toString()}`;
 }
 

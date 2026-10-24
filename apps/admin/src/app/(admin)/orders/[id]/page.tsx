@@ -5,6 +5,7 @@ import { dateTime, inr } from "@/lib/format";
 import {
   setOrderNoteAction,
   updateOrderStatusAction,
+  reversePaymentAction,
   updateTrackingAction,
   verifyPaymentAction,
 } from "@/app/actions";
@@ -205,12 +206,28 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             </div>
             <div className="panel-body">
               {order.paymentStatus === "paid" ? (
+                <>
                 <p className="small" style={{ marginBottom: 0 }}>
                   Payment <strong>paid</strong>
                   {order.payment?.verifiedAt ? ` — verified ${dateTime(order.payment.verifiedAt)}` : ""}
                   {order.payment?.reference ? ` (ref ${order.payment.reference})` : ""}. Customer ke order page par
                   bhi yahi dikhta hai.
                 </p>
+                <form action={reversePaymentAction} style={{ marginTop: 12 }}>
+                  <input type="hidden" name="orderNumber" value={order.orderNumber} />
+                  <div className="field">
+                    <label htmlFor="reverseReason">Bank me paisa nahi mila? (undo)</label>
+                    <input id="reverseReason" name="reason" placeholder="e.g. UPI statement me entry nahi hai" />
+                  </div>
+                  <button type="submit" className="btn btn-ghost">
+                    Payment not received — wapas pending kariye
+                  </button>
+                  <p className="small muted" style={{ marginBottom: 0 }}>
+                    Isse payment pending ho jaata hai aur order (agar confirm tha) wapas placed. Sheet me
+                    <code> payment.reversed </code> row jaati hai.
+                  </p>
+                </form>
+                </>
               ) : (
                 <form action={verifyPaymentAction}>
                   <input type="hidden" name="orderNumber" value={order.orderNumber} />

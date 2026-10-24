@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { postJson } from "@/lib/http-json";
 import { API_AVAILABLE, apiUrl } from "@/lib/api-base";
 import { formatPrice } from "@/lib/format";
@@ -26,6 +27,8 @@ export function UpiPayment({
   paymentStatus,
   reference,
   whatsapp,
+  returnToken,
+  siteUrl,
 }: {
   orderNumber: string;
   amount: number;
@@ -34,6 +37,10 @@ export function UpiPayment({
   paymentStatus: string;
   reference?: string | null;
   whatsapp: string;
+  /** UPI return callback ka signed token (server par banta hai) */
+  returnToken?: string;
+  /** apni site ka URL — callback isi par wapas aata hai */
+  siteUrl?: string;
 }) {
   const [value, setValue] = useState("");
   const [last4, setLast4] = useState("");
@@ -41,6 +48,44 @@ export function UpiPayment({
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [autoChecked, setAutoChecked] = useState(false);
+  const router = useRouter();
+  const autoRan = useRef(false);
+
+  const callbackUrl = useMemo(() => {
+    if (!returnToken) return undefined;
+    const base = (siteUrl ?? (typeof window !== "undefined" ? window.location.origin : "")).replace(/\/+$/, "");
+    if (!base) return undefined;
+    return `${base}/orders/${encodeURIComponent(orderNumber)}?${new URLSearchParams({ upi: "return", t: returnToken })}`;
+  }, [orderNumber, returnToken, siteUrl]);
+
+  /**
+   * UPI app se wapas aane par (deep link ka `url` callback) order **auto-confirm**.
+   * Server token verify karta hai; owner admin panel se undo kar sakta hai.
+   */
+  useEffect(() => {
+    if (autoRan.current || paymentStatus === "paid" || typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("upi") !== "return") return;
+    const token = params.get("t") ?? returnToken;
+    if (!token) return;
+    autoRan.current = true;
+    void (async () => {
+      const result = await postJson<{ ok?: boolean; alreadyPaid?: boolean }>(
+        apiUrl("/api/payments/return"),
+        { orderNumber, token, search: window.location.search },
+        { timeoutMs: 20_000 },
+      );
+      setAutoChecked(true);
+      if (result.data?.ok) {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("upi");
+        url.searchParams.delete("t");
+        window.history.replaceState({}, "", url.toString());
+        router.refresh();
+      }
+    })();
+  }, [orderNumber, paymentStatus, returnToken, router]);
 
   const upiUri = useMemo(
     () =>
@@ -50,8 +95,9 @@ export function UpiPayment({
         amountPaise: amount,
         note: `Order ${orderNumber}`,
         txnRef: orderNumber.replace(/[^A-Za-z0-9]/g, "").slice(0, 35),
+        callbackUrl,
       }),
-    [upiId, upiName, amount, orderNumber],
+    [upiId, upiName, amount, orderNumber, callbackUrl],
   );
 
   async function submit(event: React.FormEvent) {
@@ -154,6 +200,13 @@ export function UpiPayment({
             <p className="mt-1 break-words text-[11.5px] text-[#6b6259]">
               {upiName} · Amount <strong>{formatPrice(amount)}</strong> (exact — no extra charges)
             </p>
+
+            {autoChecked && paymentStatus !== "paid" ? (
+              <p className="mt-2 border border-[#e6d3a8] bg-[#fbf3df] px-2.5 py-2 text-[11px] leading-relaxed text-[#7a5c14]">
+                UPI app se confirmation nahi mila. Neeche reference (UTR) daal dijiye ya WhatsApp par screenshot
+                bhej dijiye — team turant verify karegi.
+              </p>
+            ) : null}
 
             <div className="mt-3">
               <UpiApps uri={upiUri} upiId={upiId} amountPaise={amount} />

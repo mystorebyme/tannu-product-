@@ -574,7 +574,7 @@ export async function applyPaymentIntent(
 /** Backend verify ke baad hi called hota hai. Idempotent: dobara aane par kuch nahi badalta. */
 export async function confirmPayment(
   orderNumber: string,
-  input: { gateway: string; reference: string | null; amount: number; actor: string },
+  input: { gateway: string; reference: string | null; amount: number; actor: string; auto?: boolean },
 ): Promise<{ order: Order; alreadyPaid: boolean } | null> {
   const orders = await readAll();
   const index = orders.findIndex((order) => order.orderNumber === orderNumber);
@@ -603,7 +603,7 @@ export async function confirmPayment(
       {
         at: now,
         actor: input.actor,
-        action: "payment.verified",
+        action: input.auto ? "payment.auto_confirmed" : "payment.verified",
         meta: { gateway: input.gateway, reference: input.reference, amount: input.amount },
       },
       ...(order.status === "placed"
@@ -614,8 +614,54 @@ export async function confirmPayment(
   };
   orders[index] = paidOrder;
   await writeAll(orders);
-  await syncOrderToSheet(paidOrder, "payment.paid");
+  await syncOrderToSheet(paidOrder, input.auto ? "payment.auto_confirmed" : "payment.paid");
   return { order: paidOrder, alreadyPaid: false };
+}
+
+/**
+ * Owner ne bank me credit nahi dekha → payment ko wapas "pending" kar do.
+ * UPI-return auto-confirm ko undo karne ke liye (admin panel → order → Not received).
+ * Shipped/delivered order par payment status nahi chhedte — wahan sirf note chalta hai.
+ */
+export async function reversePayment(
+  orderNumber: string,
+  input: { actor: string; reason: string },
+): Promise<Order | null> {
+  const orders = await readAll();
+  const index = orders.findIndex((order) => order.orderNumber === orderNumber);
+  if (index === -1) return null;
+  const order = orders[index]!;
+  if (order.paymentStatus !== "paid") return order;
+
+  const now = new Date().toISOString();
+  const reason = input.reason.trim().slice(0, 200) || "payment not received";
+  const backToPlaced = order.status === "confirmed";
+  orders[index] = {
+    ...order,
+    paymentStatus: "pending",
+    status: backToPlaced ? "placed" : order.status,
+    payment: {
+      gateway: order.payment?.gateway ?? "upi-return",
+      reference: order.payment?.reference ?? null,
+      upiUri: order.payment?.upiUri ?? null,
+      amount: order.payment?.amount ?? order.total,
+      status: "pending",
+      createdAt: order.payment?.createdAt ?? now,
+      verifiedAt: null,
+      verifiedBy: null,
+      failureReason: reason,
+    },
+    audit: [
+      { at: now, actor: input.actor, action: "payment.reversed", meta: { reason } },
+      ...(backToPlaced
+        ? [{ at: now, actor: input.actor, action: "order.status.placed", meta: { reason: "payment reversed" } }]
+        : []),
+      ...order.audit,
+    ],
+  };
+  await writeAll(orders);
+  await syncOrderToSheet(orders[index]!, "payment.reversed");
+  return orders[index]!;
 }
 
 export async function failPayment(

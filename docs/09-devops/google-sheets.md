@@ -175,6 +175,8 @@ token Render ke environment me daalo, redeploy — data purani sheet me safe reh
 | `payment.pending` | `Payments` | order place hote hi (paisa aana baaki) |
 | `payment.reference_submitted` | `Payments` | customer UTR/12-digit reference daalta hai |
 | `payment.paid` | `Payments` | admin payment verify karta hai |
+| `payment.auto_confirmed` | `Payments` | UPI app se wapas aane par order auto-confirm (signed token) |
+| `payment.reversed` | `Payments` | owner ne "payment not received" kaha — wapas pending |
 | `payment.failed` | `Payments` | customer "payment failed" report karta hai (`/api/payments/failed`) |
 | `order.status_changed` / `order.tracking_updated` | `Orders` | admin status/courier update karta hai |
 

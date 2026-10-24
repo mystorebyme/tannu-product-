@@ -19,6 +19,7 @@ import {
   saveSettings,
   setOrderNote,
   setOrderTracking,
+  reverseOrderPayment,
   updateOrderStatus,
   verifyOrderPayment,
 } from "@/lib/data";
@@ -385,6 +386,24 @@ export async function verifyPaymentAction(formData: FormData) {
   });
   if (updated) {
     appendAudit({ actor: session.email, action: "payment.verified", target: orderNumber, meta: { reference } });
+  }
+  revalidatePath("/payments");
+  revalidatePath("/orders");
+  revalidatePath(`/orders/${orderNumber}`);
+}
+
+/**
+ * Auto-confirm undo — UPI return se paid mark hua order, par bank me paisa nahi
+ * aaya. Payment wapas pending + (confirm tha to) order placed.
+ */
+export async function reversePaymentAction(formData: FormData) {
+  const session = await requireSession();
+  const orderNumber = String(formData.get("orderNumber") ?? "").trim();
+  const reason = String(formData.get("reason") ?? "").trim() || "payment not received";
+  if (!orderNumber) return;
+  const updated = await reverseOrderPayment(orderNumber, { actor: session.email, reason });
+  if (updated) {
+    appendAudit({ actor: session.email, action: "payment.reversed", target: orderNumber, meta: { reason } });
   }
   revalidatePath("/payments");
   revalidatePath("/orders");

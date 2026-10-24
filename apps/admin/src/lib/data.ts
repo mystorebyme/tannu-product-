@@ -555,6 +555,53 @@ export async function verifyOrderPayment(
   return rows[index]!;
 }
 
+/**
+ * Auto-confirm undo — owner bank me credit na dekhe to payment wapas pending.
+ * Remote mode me storefront API (`action: "payment_reverse"`) chalta hai.
+ */
+export async function reverseOrderPayment(
+  orderNumber: string,
+  input: { actor: string; reason: string },
+): Promise<Order | null> {
+  if (remoteMode()) {
+    const payload = await storeRequest<{ order: Order }>(`/api/admin/orders/${encodeURIComponent(orderNumber)}`, {
+      method: "PATCH",
+      body: JSON.stringify({ action: "payment_reverse", ...input }),
+    });
+    return payload?.order ?? null;
+  }
+
+  const rows = readRows<Order>("orders.json");
+  const index = rows.findIndex((order) => order.orderNumber === orderNumber);
+  if (index === -1) return null;
+  const current = rows[index]!;
+  if (current.paymentStatus !== "paid") return current;
+  const now = new Date().toISOString();
+  const reason = input.reason.trim().slice(0, 200) || "payment not received";
+  rows[index] = {
+    ...current,
+    paymentStatus: "pending",
+    status: current.status === "confirmed" ? "placed" : current.status,
+    payment: {
+      gateway: current.payment?.gateway ?? "upi-return",
+      reference: current.payment?.reference ?? null,
+      upiUri: current.payment?.upiUri ?? null,
+      amount: current.payment?.amount ?? current.total,
+      status: "pending",
+      createdAt: current.payment?.createdAt ?? now,
+      verifiedAt: null,
+      verifiedBy: null,
+      failureReason: reason,
+    },
+    audit: [
+      { at: now, actor: input.actor, action: "payment.reversed", meta: { reason } },
+      ...current.audit,
+    ],
+  };
+  writeRows("orders.json", rows);
+  return rows[index]!;
+}
+
 export async function pendingPayments() {
   const orders = await getOrders();
   return orders.filter((order) => order.paymentStatus !== "paid" && order.paymentStatus !== "cod");

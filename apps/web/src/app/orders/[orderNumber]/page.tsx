@@ -9,6 +9,7 @@ import { SafeImage } from "@/components/safe-image";
 import { orderWhatsAppLink } from "@/lib/whatsapp";
 import { getStoreSettings } from "@/lib/store-settings";
 import { UpiPayment } from "@/components/upi-payment";
+import { signUpiReturn } from "@/lib/upi-return";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Order confirmed", robots: { index: false } };
@@ -45,7 +46,9 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
           <p className="mt-1.5 text-[12.5px] text-[#6b6259]">
             {order.paymentMethod === "cod"
               ? "Your order is confirmed. Please pay the COD amount at delivery."
-              : "Your order is reserved. Pay via UPI below — your order is confirmed as soon as we verify the payment."}
+              : order.paymentStatus === "paid"
+                ? "Payment received — thank you! Your order is confirmed and being prepared for dispatch."
+                : "Your order is reserved. Pay via UPI below — returning from your UPI app confirms it instantly."}
           </p>
           <a
             href={orderWhatsAppLink(order, siteUrl)}
@@ -84,6 +87,8 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
             paymentStatus={order.paymentStatus}
             reference={order.payment?.reference ?? null}
             whatsapp={settings.whatsapp}
+            returnToken={signUpiReturn(order.orderNumber)}
+            siteUrl={siteUrl}
           />
         ) : null}
 

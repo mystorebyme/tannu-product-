@@ -1,6 +1,6 @@
 import type { OrderStatus } from "@liksha/types";
 import { getOrder, OrderError, setStatusNote, setTracking, updateOrderStatus } from "@/lib/orders";
-import { confirmPayment, failPayment } from "@/lib/orders";
+import { confirmPayment, failPayment, reversePayment } from "@/lib/orders";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +27,7 @@ export async function GET(request: Request, context: { params: Promise<{ orderNu
  *   { action: "tracking", courier, awb, url }→ courier/AWB customer ko dikhta hai
  *   { action: "payment", reference, amount, note? } → manual UPI verify
  *   { action: "payment_failed", reason }     → payment fail mark
+ *   { action: "payment_reverse", reason }    → auto-confirm undo (paisa nahi mila)
  */
 export async function PATCH(request: Request, context: { params: Promise<{ orderNumber: string }> }) {
   if (!authorize(request)) return Response.json({ error: "Unauthorized" }, { status: 401 });
@@ -77,6 +78,15 @@ export async function PATCH(request: Request, context: { params: Promise<{ order
       });
       if (!result) return Response.json({ error: "Order nahi mila" }, { status: 404 });
       return Response.json({ order: result.order, alreadyPaid: result.alreadyPaid });
+    }
+
+    if (action === "payment_reverse") {
+      const order = await reversePayment(orderNumber, {
+        actor,
+        reason: String(body.reason ?? "payment not received"),
+      });
+      if (!order) return Response.json({ error: "Order nahi mila" }, { status: 404 });
+      return Response.json({ order });
     }
 
     if (action === "payment_failed") {
