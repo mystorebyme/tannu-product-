@@ -27,6 +27,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    outputs:
+      pages: ${{ steps.pages.outcome == 'success' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -42,17 +44,29 @@ jobs:
           PAGES_BASE_PATH: /${{ github.event.repository.name }}
         run: node scripts/pages/build-preview.mjs
 
-      - uses: actions/configure-pages@v5
+      # Pages site enable karna repo admin ka kaam hai (GITHUB_TOKEN ke paas
+      # wo right nahi hota). Isliye yeh step optional hai: fail ho to build
+      # artifact download ke liye available rehta hai, workflow laal nahi hota.
+      - id: pages
+        uses: actions/configure-pages@v5
+        continue-on-error: true
         with:
-          # Pages site pehli baar khud enable ho jaye (workflow build type)
           enablement: true
 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: static-preview
+          path: dist
+          retention-days: 14
+
       - uses: actions/upload-pages-artifact@v3
+        if: steps.pages.outcome == 'success'
         with:
           path: dist
 
   deploy:
     needs: build
+    if: needs.build.outputs.pages == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages

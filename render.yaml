@@ -1,6 +1,7 @@
 # Render blueprint — https://likshaclothing.onrender.com
 #
-# Do web services: storefront (public) + admin (private URL) aur ek Postgres.
+# Teen cheezein: storefront (public) + admin (private URL) + ek Postgres,
+# aur ek static "preview" site (bina login/checkout, sirf pages dekhne ke liye).
 # Render dashboard → New → Blueprint → repo select → ye file khud padh lega.
 #
 # Important:
@@ -78,3 +79,17 @@ services:
         value: https://likshaclothing.onrender.com
       - key: NEXT_PUBLIC_STORE_URL
         value: https://likshaclothing.onrender.com
+
+  # Static preview — sirf browse karne ke liye (GitHub Pages jaisa).
+  # Cart/checkout/order-tracking yahan nahi chalte, wo storefront par hain.
+  - type: web
+    name: liksha-preview
+    runtime: static
+    plan: free
+    branch: arena/f713eef1-tannu-product
+    buildCommand: npm ci && node scripts/pages/build-preview.mjs
+    staticPublishPath: dist
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
