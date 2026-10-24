@@ -1,0 +1,69 @@
+# Round 20 — colour/style merge, GST invoice seller block, 3-step checkout
+
+Date: 2026-10-25 · Branch: `arena/f713eef1-tannu-product`
+
+## 1. "Same product, multiple colours" — 49 duplicate listings merge
+
+Pehle 49 listings ka title same tha, isliye har ek ko `— Edition 2`, `— DKB-265` jaisa suffix
+de kar unique kiya gaya tha. Ab unhe **ek product, multiple options** me merge kar diya hai.
+
+| | Pehle | Ab |
+| --- | --- | --- |
+| Product URLs | 446 | 446 (koi URL nahi toota) |
+| Listing cards (grid) | 446 | **388** |
+| Colour/style groups | 13 | **42** |
+| Titles | 446 unique | 446 unique |
+
+Kaise:
+
+- `scripts/build-catalog.mjs` me naya pass: **same-title merge** — ek hi title + category ke
+  listings ek `colourGroup` me jaate hain. Label priority: asli colour → style code (`DKB-265`)
+  → `Style 1/2/3…`.
+- Representative (sabse zyada photos wala) clean title ke saath listing par dikhta hai; baaki
+  options PDP ke swatches se khulte hain ("Colour / style: Style 2").
+- Cards duplicate nahi dikhte (server + static preview dono me same behaviour).
+- Ye mapping build script me hai, isliye har catalogue sync par bhi merge bana rahega.
+
+## 2. GST invoice — seller address + GSTIN (sirf admin)
+
+Owner ne kaha: GST invoice ke liye seller details wahi banayega — isliye ye values **admin panel →
+Settings** me hain, website par kahin nahi dikhtin (public `/api/settings` me bhi nahi).
+
+- Naye fields: `sellerName`, `sellerAddress`, `sellerState`, `GSTIN` (Settings DB me save).
+- Invoice (customer ka PDF/print + admin ka manual invoice) inhi values se banta hai; GSTIN khaali
+  ho to invoice par **"GSTIN pending"** chhapta hai — koi fake number nahi.
+- **Fake data hataya:** admin me pehle `27AAAAA0000A1Z5` (dummy GSTIN) aur "Designer Clothing · India"
+  hard-coded tha — ab hata diya, address missing ho to Settings ka link dikhta hai.
+- `sellerState` se CGST+SGST vs IGST decide hota hai (place of supply).
+
+Envs (`SELLER_NAME`, `SELLER_ADDRESS`, `SELLER_GSTIN`, `SELLER_STATE`) sirf fallback hain — asli
+source admin Settings hai.
+
+## 3. Checkout — 3 steps (address aur payment alag)
+
+```
+1 · Delivery details  →  2 · Review  →  3 · Payment (alag page /orders/<LK-…>/pay)
+```
+
+- Step indicator har step par dikhta hai.
+- Step 1 me sirf delivery details (+ pincode serviceability check); "Continue to review".
+- Step 2 read-only review (naam, address, items, total) + "Edit" — order sirf yahan se place hota hai.
+- Step 3 = payment page (UPI QR + UPI ID + UTR). **Checkout par UPI/QR kabhi nahi.**
+- Order number payment page par hi banta/dikhta hai; payment confirm hone par hi order confirm.
+
+## 4. Tests
+
+| Suite | Result |
+| --- | --- |
+| Unit (`npm run test:unit`) | **93 / 0** (4 naye: checkout 3-step guard) |
+| Integration | 40 / 0 |
+| DB | 9 / 0 |
+| Payments E2E (local) | 27 / 0 |
+| Smoke · Links · Responsive · Breakpoints · Round16 | 87 · 40 · 42 · 48 · 37 — sab 0 fail |
+| Typecheck (web + admin) · Build (web + admin) | 0 errors · success |
+| Catalogue verify | `catalog ok` |
+
+## 5. Pending (sirf owner ke paas)
+
+- **Domain** `likshaclothing.com` → Vercel DNS + `NEXT_PUBLIC_SITE_URL` update.
+- **Mail ID** — email bhejne ka setup (Resend/SMTP keys) jab aap decide karein.

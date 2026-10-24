@@ -264,7 +264,11 @@ export type StoreSettings = {
   freeShipping: boolean;
   upiId: string;
   upiName: string;
+  /** GST invoice ka seller block — customer ko website par nahi dikhta */
   gstin: string;
+  sellerName: string;
+  sellerAddress: string;
+  sellerState: string;
   supportPhone: string;
   supportEmail: string;
   whatsapp: string;
@@ -277,7 +281,11 @@ const DEFAULT_SETTINGS: StoreSettings = {
   freeShipping: true,
   upiId: "dhakadgourav@fam",
   upiName: "Designer Clothing",
-  gstin: "27AAAAA0000A1Z5",
+  // GSTIN khaali — owner apna asli number Settings me daalega (fake number kabhi nahi)
+  gstin: "",
+  sellerName: "Designer Clothing",
+  sellerAddress: "",
+  sellerState: "Rajasthan",
   supportPhone: "8005900581",
   supportEmail: "Info.likshaclothing@gmail.com",
   whatsapp: "8005900581",

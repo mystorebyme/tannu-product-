@@ -68,9 +68,51 @@ export default async function SettingsPage() {
               <label htmlFor="adminUrl">Admin panel link (sheet: admin_url)</label>
               <input id="adminUrl" name="adminUrl" defaultValue={settings.adminUrl} placeholder="https://admin.yourdomain.com" />
             </div>
+          </div>
+
+          {/*
+            GST invoice ka seller block — sirf admin panel me. Customer ko website
+            par kabhi nahi dikhta; sirf invoice PDF/print par chhapta hai.
+            Owner apna asli GSTIN/address yahan daalega (fake number hard-code nahi).
+          */}
+          <div className="panel-head" style={{ paddingInline: 0 }}>
+            <h3 style={{ margin: 0 }}>GST invoice — seller details</h3>
+            <span className="small muted">Sirf invoice par chhapta hai (public site par nahi)</span>
+          </div>
+          <div className="row">
+            <div className="field">
+              <label htmlFor="sellerName">Registered business name</label>
+              <input id="sellerName" name="sellerName" defaultValue={settings.sellerName} placeholder="Designer Clothing" />
+            </div>
+            <div className="field">
+              <label htmlFor="sellerState">State (CGST/SGST vs IGST ke liye)</label>
+              <input id="sellerState" name="sellerState" defaultValue={settings.sellerState} placeholder="Rajasthan" />
+            </div>
+          </div>
+          <div className="field">
+            <label htmlFor="sellerAddress">Full seller address (invoice par chhapta hai)</label>
+            <textarea
+              id="sellerAddress"
+              name="sellerAddress"
+              rows={3}
+              defaultValue={settings.sellerAddress}
+              placeholder="Shop / building, street, area, city, state, PIN"
+            />
+          </div>
+          <div className="row">
             <div className="field">
               <label htmlFor="gstin">GSTIN</label>
-              <input id="gstin" name="gstin" defaultValue={settings.gstin} />
+              <input id="gstin" name="gstin" defaultValue={settings.gstin} placeholder="08ABCDE1234F1Z5" />
+            </div>
+            <div className="field">
+              <label>&nbsp;</label>
+              <p className="small muted" style={{ margin: 0 }}>
+                {settings.gstin ? (
+                  <>Invoice par <span className="mono">{settings.gstin}</span> chhapega.</>
+                ) : (
+                  <>GSTIN khaali hai — invoice par <strong>“GSTIN pending”</strong> chhapega (galat number nahi).</>
+                )}
+              </p>
             </div>
           </div>
           <div className="row">

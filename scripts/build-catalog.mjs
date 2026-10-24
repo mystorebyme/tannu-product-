@@ -753,16 +753,118 @@ const readExtra = (name, key) => {
     console.log(`colour groups: ${Object.keys(colourGroups).length} designs / ${groupedCount} colourways`);
   }
 
-  /* ---------- duplicate titles: colour/style code se unique ---------- */
+  /* ---------- style code (title unique karne + variant label ke liye) ---------- */
   const styleCodeOf = (product) => {
     const match = String(product.handle).match(/(?:([a-z]{2,4})-)?(\d{3,})$/);
     // Shopify ke lambe internal IDs title me bhddhe lagte hain — unhe chhod dete hain
     if (!match || match[2].length > 8) return "";
     return match[1] ? `${match[1].toUpperCase()}-${match[2]}` : `Style ${match[2]}`;
   };
-  const titleSeen = new Set();
-  let retitled = 0;
+
+  /**
+   * Same-title listings → ek product, multiple colours.
+   *
+   * Source store par kai designs (same title, alag colour ya style code) alag
+   * listings hain — customer ko wahi design 4-5 cards me dikhta hai. Owner ka
+   * rule: "same product different colours = one product". Pehle wala colour
+   * grouping title ke andar colour word dhundhta hai; yahan baaki same-title
+   * listings ko group karte hain aur unique label (colour → style code →
+   * variant number) dete hain. Listing par sirf ek card, PDP par swatches.
+   */
+  const GENERIC_COLOUR = /^(as shown|multi|multicolour|multi colour|multi color|na|n\/a)$/i;
+  const titleBuckets = new Map();
   for (const product of products) {
+    if (product.colourGroup) continue; // pehle se grouped
+    const key = `${product.title.toLowerCase()}::${product.category}`;
+    if (!titleBuckets.has(key)) titleBuckets.set(key, []);
+    titleBuckets.get(key).push(product);
+  }
+
+  let mergedSameTitle = 0;
+  for (const [bucketKey, members] of titleBuckets) {
+    if (members.length < 2) continue;
+
+    // representative: sabse zyada photos (tie -> sabse purana publish)
+    const representative = [...members].sort((a, b) => {
+      const images = b.images.length - a.images.length;
+      if (images !== 0) return images;
+      return String(a.publishedAt ?? "").localeCompare(String(b.publishedAt ?? ""));
+    })[0];
+    // representative pehle — usi ka label "Style 1" / asli colour banta hai
+    const ordered = [representative, ...members.filter((member) => member !== representative)];
+
+    // label: asli colour → style code → "Style N" (sab unique)
+    const labels = new Map();
+    const usedLabels = new Set();
+    const colourOf = (product) => {
+      const value = String(product.colourName || product.color || "").trim();
+      return value && !GENERIC_COLOUR.test(value) ? value : "";
+    };
+    for (const product of ordered) {
+      const colour = colourOf(product);
+      if (!colour || usedLabels.has(colour.toLowerCase())) continue;
+      usedLabels.add(colour.toLowerCase());
+      labels.set(product, colour);
+    }
+    let variant = 1;
+    for (const product of ordered) {
+      if (labels.has(product)) continue;
+      if (variant === 1) {
+        // pehla fallback label bhi "Style 1" — readable aur predictable
+      }
+      let label = "";
+      const code = styleCodeOf(product);
+      if (code && !usedLabels.has(code.toLowerCase())) label = code;
+      while (!label || usedLabels.has(label.toLowerCase())) {
+        label = `Style ${variant}`;
+        variant += 1;
+      }
+      usedLabels.add(label.toLowerCase());
+      labels.set(product, label);
+    }
+
+    const groupKey = `same-${bucketKey.replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60)}`;
+    if (colourGroups[groupKey]) continue;
+
+    for (const member of members) {
+      member.colourGroup = groupKey;
+      member.colourName = labels.get(member);
+    }
+
+    colourGroups[groupKey] = {
+      key: groupKey,
+      title: representative.title,
+      handle: representative.handle,
+      colours: members.map((member) => ({
+        name: labels.get(member),
+        handle: member.handle,
+        title: member.title,
+        price: member.price,
+        compareAtPrice: member.compareAtPrice,
+        image: member.images[0] ?? "",
+        images: member.images,
+        sizes: member.sizes,
+        sizePricing: member.sizePricing,
+        inStock: member.inStock,
+        colourCode: member.color,
+      })),
+    };
+    mergedSameTitle += members.length - 1;
+  }
+  if (mergedSameTitle) {
+    console.log(
+      `same-title merge: ${mergedSameTitle} duplicate listings folded into colour groups (${Object.keys(colourGroups).length} groups total)`,
+    );
+  }
+
+  /* ---------- duplicate titles: colour/style code se unique ---------- */  const titleSeen = new Set();
+  let retitled = 0;
+  /** group ka representative hi clean title rakhta hai — baaki ko suffix */
+  const representativeHandles = new Set(Object.values(colourGroups).map((group) => group.handle));
+  const titleOrder = [...products].sort(
+    (a, b) => Number(representativeHandles.has(b.handle)) - Number(representativeHandles.has(a.handle)),
+  );
+  for (const product of titleOrder) {
     let title = product.title;
     let attempt = title;
     const candidates = [

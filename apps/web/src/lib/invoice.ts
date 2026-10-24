@@ -43,16 +43,37 @@ export interface InvoiceView {
   totals: { gross: number; taxable: number; cgst: number; sgst: number; igst: number; tax: number };
 }
 
-/** Seller details — GSTIN env se aata hai; na hone par invoice par "pending" chhapta hai. */
-export function sellerDetails() {
+export type SellerInfo = InvoiceView["seller"];
+
+/**
+ * Seller block (naam, poora address, GSTIN, state) — **admin panel → Settings** se.
+ *
+ * Owner ne kaha: GST invoice ke liye seller address + GSTIN wahi banayega, isliye
+ * ye values DB (settings) me rehti hain aur admin se edit hoti hain. Env sirf
+ * fallback hai. GSTIN khaali ho to invoice par "GSTIN pending" chhapta hai —
+ * galat number kabhi nahi.
+ */
+export function sellerFromSettings(settings?: {
+  sellerName?: string;
+  sellerAddress?: string;
+  sellerState?: string;
+  gstin?: string;
+  supportEmail?: string;
+  supportPhone?: string;
+}): SellerInfo {
   return {
-    name: "Designer Clothing",
-    address: "India",
-    gstin: process.env.SELLER_GSTIN?.trim() || "GSTIN pending",
-    email: process.env.SELLER_EMAIL?.trim() || "info.likshaclothing@gmail.com",
-    phone: process.env.SELLER_PHONE?.trim() || "+91 8005900581",
-    state: SELLER_STATE,
+    name: settings?.sellerName?.trim() || process.env.SELLER_NAME?.trim() || "Designer Clothing",
+    address: settings?.sellerAddress?.trim() || process.env.SELLER_ADDRESS?.trim() || "India",
+    gstin: settings?.gstin?.trim() || process.env.SELLER_GSTIN?.trim() || "GSTIN pending",
+    email: settings?.supportEmail?.trim() || process.env.SELLER_EMAIL?.trim() || "info.likshaclothing@gmail.com",
+    phone: settings?.supportPhone?.trim() || process.env.SELLER_PHONE?.trim() || "+91 8005900581",
+    state: settings?.sellerState?.trim() || process.env.SELLER_STATE?.trim() || SELLER_STATE,
   };
+}
+
+/** Purana naam — env/default seller (settings ke bina). */
+export function sellerDetails() {
+  return sellerFromSettings();
 }
 
 /**
@@ -64,10 +85,16 @@ export function sellerDetails() {
  * - Shipping/handling service hai -> 18%.
  * - Same state (Rajasthan) = CGST+SGST, warna IGST.
  */
-export function buildInvoice(order: Order, number: string, issuedAt: string): InvoiceView {
-  const seller = sellerDetails();
-  const placeOfSupply = order.state?.trim() || SELLER_STATE;
-  const interState = placeOfSupply.toLowerCase() !== SELLER_STATE.toLowerCase();
+export function buildInvoice(
+  order: Order,
+  number: string,
+  issuedAt: string,
+  sellerOverride?: SellerInfo,
+): InvoiceView {
+  const seller = sellerOverride ?? sellerDetails();
+  const sellerState = seller.state || SELLER_STATE;
+  const placeOfSupply = order.state?.trim() || sellerState;
+  const interState = placeOfSupply.toLowerCase() !== sellerState.toLowerCase();
   const discountRatio = order.subtotal > 0 ? Math.min(order.discount / order.subtotal, 1) : 0;
 
   const lines: InvoiceLine[] = order.items.map((item) => {

@@ -29,6 +29,11 @@ export function CheckoutForm() {
   // sirf prepaid — COD option hata diya gaya hai
   const payment = "prepaid" as const;
   const [submitting, setSubmitting] = useState(false);
+  /**
+   * 3-step checkout (owner request): 1) delivery details → 2) review → 3) payment
+   * page (alag URL). Address aur payment kabhi ek hi screen par nahi aate.
+   */
+  const [step, setStep] = useState<"details" | "review">("details");
   // OTP step hata diya gaya hai (owner request) — order sirf details par
   const [error, setError] = useState<string | null>(null);
   // delivery check — admin ke rules + India Post data se
@@ -92,6 +97,35 @@ export function CheckoutForm() {
 
   const discount = 0;
   const total = Math.max(0, subtotal - discount);
+
+  /** Step 1 → Step 2: delivery details theek hon tabhi aage */
+  function goToReview() {
+    const missing =
+      form.customerName.trim().length < 2
+        ? "Poora naam likhiye."
+        : !/^\S+@\S+\.\S+$/.test(form.email.trim())
+          ? "Email theek likhiye — invoice/update isi par aata hai."
+          : form.phone.replace(/\D/g, "").length !== 10
+            ? "10 digit ka mobile number daaliye."
+            : form.address.trim().length < 8
+              ? "Poora address likhiye (house, street, area)."
+              : form.city.trim().length < 2
+                ? "City likhiye."
+                : form.pincode.length !== 6
+                  ? "6 digit pincode daaliye."
+                  : !pinStatus
+                    ? "Pincode check hone dein — delivery availability verify ho rahi hai."
+                    : !pinStatus.ok
+                      ? pinStatus.message
+                      : null;
+    if (missing) {
+      setError(missing);
+      return;
+    }
+    setError(null);
+    setStep("review");
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
   function update(field: keyof typeof form, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -193,6 +227,30 @@ export function CheckoutForm() {
   return (
     <form onSubmit={submit} className="grid gap-8 lg:grid-cols-[1.5fr_1fr]">
       <div className="space-y-6">
+        {/* 3-step indicator — payment apne page par (step 3) */}
+        <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] tracking-[.14em] uppercase" data-testid="checkout-steps">
+          {[
+            { n: 1, label: "Delivery", active: step === "details", href: null },
+            { n: 2, label: "Review", active: step === "review", href: null },
+            { n: 3, label: "Payment", active: false, href: null },
+          ].map((item, index) => (
+            <li key={item.n} className="flex items-center gap-2">
+              {index > 0 ? <span className="text-[#c9bfb4]">→</span> : null}
+              <span
+                className={
+                  item.active
+                    ? "bg-[#862222] px-2.5 py-1 text-white"
+                    : "border border-[#e0d6ca] px-2.5 py-1 text-[#9a8f85]"
+                }
+              >
+                {item.n} · {item.label}
+              </span>
+            </li>
+          ))}
+        </ol>
+
+        {step === "details" ? (
+        <>
         <section>
           <h2 className="text-[11px] font-semibold tracking-[.16em] text-[#862222] uppercase">Contact</h2>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -280,6 +338,77 @@ export function CheckoutForm() {
             </p>
           </div>
         </section>
+        </>
+        ) : (
+          <>
+            {/* Step 2 — review. Yahan koi input nahi, sirf confirm (payment next page). */}
+            <section data-testid="checkout-review">
+              <h2 className="text-[11px] font-semibold tracking-[.16em] text-[#862222] uppercase">
+                Review your order
+              </h2>
+              <div className="mt-3 border border-[#eee6de] bg-white p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[10.5px] tracking-[.12em] text-[#9a8f85] uppercase">Deliver to</p>
+                    <p className="mt-1 text-[13px] font-medium text-[#2f2a25]">{form.customerName}</p>
+                    <p className="mt-0.5 text-[12px] leading-relaxed text-[#5c534b]">
+                      {form.address}, {form.city}, {form.state} — {form.pincode}
+                    </p>
+                    <p className="mt-1 text-[12px] text-[#5c534b]">
+                      {form.phone} · {form.email}
+                    </p>
+                    {form.notes ? (
+                      <p className="mt-1 text-[11.5px] text-[#8a8078]">Note: {form.notes}</p>
+                    ) : null}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setStep("details")}
+                    className="shrink-0 border border-[#862222] px-3 py-1.5 text-[10px] font-semibold tracking-[.12em] text-[#862222] uppercase"
+                  >
+                    Edit
+                  </button>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 className="text-[11px] font-semibold tracking-[.16em] text-[#862222] uppercase">
+                Items ({count})
+              </h2>
+              <ul className="mt-3 divide-y divide-[#eee6de] border border-[#eee6de] bg-white">
+                {lines.map((line) => (
+                  <li key={line.key} className="flex gap-3 p-3">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <SafeImage src={imageUrl(line.image, 160)} alt={line.title} className="h-16 w-12 shrink-0 object-cover" />
+                    <div className="min-w-0 flex-1">
+                      <p className="line-clamp-2 text-[12px] leading-snug">{line.title}</p>
+                      <p className="mt-0.5 text-[11px] text-[#8a8078]">
+                        Size {line.size}
+                        {line.colour ? ` · ${line.colour}` : ""} · Qty {line.quantity}
+                      </p>
+                    </div>
+                    <span className="text-[12px] font-medium">{formatPrice(line.price * line.quantity)}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+
+            <section>
+              <h2 className="text-[11px] font-semibold tracking-[.16em] text-[#862222] uppercase">Payment</h2>
+              <div className="mt-3 flex items-start gap-3 border border-[#e5dbd0] bg-[#fdf8f7] p-3.5">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#862222" strokeWidth="1.7" className="mt-0.5 shrink-0" aria-hidden>
+                  <path d="M12 3l7 3v6c0 4.2-2.9 7.6-7 7.6S5 16.2 5 12V6l7-3z" />
+                  <path d="M9 12l2 2 4-4" />
+                </svg>
+                <p className="text-[12.5px] leading-relaxed text-[#4a423b]" data-testid="prepaid-note">
+                  Prepaid order. <strong>Place order</strong> dabate hi order number banega aur payment ka
+                  alag page khulega (UPI QR + UPI ID). Payment confirm hone par hi order confirm hoga.
+                </p>
+              </div>
+            </section>
+          </>
+        )}
       </div>
 
       <aside className="h-fit border border-[#eee6de] bg-[#faf8f5] p-5 lg:sticky lg:top-[92px]">
@@ -364,14 +493,34 @@ export function CheckoutForm() {
           </div>
         ) : null}
 
-        <button
-          type="submit"
-          data-testid="checkout-submit"
-          disabled={submitting}
-          className="mt-4 w-full bg-[#862222] py-3 text-[11.5px] font-semibold tracking-[.16em] text-white uppercase disabled:opacity-60"
-        >
-          {submitting ? "Placing order…" : `Place order · ${formatPrice(total)}`}
-        </button>
+        {step === "details" ? (
+          <button
+            type="button"
+            onClick={goToReview}
+            data-testid="checkout-continue"
+            className="mt-4 w-full bg-[#862222] py-3 text-[11.5px] font-semibold tracking-[.16em] text-white uppercase"
+          >
+            Continue to review
+          </button>
+        ) : (
+          <>
+            <button
+              type="submit"
+              data-testid="checkout-submit"
+              disabled={submitting}
+              className="mt-4 w-full bg-[#862222] py-3 text-[11.5px] font-semibold tracking-[.16em] text-white uppercase disabled:opacity-60"
+            >
+              {submitting ? "Placing order…" : `Place order & pay · ${formatPrice(total)}`}
+            </button>
+            <button
+              type="button"
+              onClick={() => setStep("details")}
+              className="mt-2 w-full border border-[#ddd2c6] py-2.5 text-[10.5px] font-semibold tracking-[.14em] text-[#6b6259] uppercase"
+            >
+              ← Edit delivery details
+            </button>
+          </>
+        )}
         <p className="mt-2 text-center text-[10.5px] leading-relaxed text-[#8a8078]">
           Final price is already sale price — no coupon needed. By placing this order you agree to our{" "}
           <Link href="/policies/terms-and-conditions" className="underline">

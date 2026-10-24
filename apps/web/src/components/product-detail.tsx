@@ -262,7 +262,7 @@ export function ProductDetail({
         {variants.length > 1 ? (
           <div className="mt-4" data-testid="colour-options">
             <p className="text-[11px] font-semibold tracking-[.14em] uppercase">
-              Colour: <span className="text-[#862222]">{active.name}</span>{" "}
+              Colour / style: <span className="text-[#862222]">{active.name}</span>{" "}
               <span className="font-normal text-[#9c8f82]">({variants.length} available)</span>
             </p>
             <div className="mt-2 flex flex-wrap items-center gap-2">

@@ -5,13 +5,13 @@
   "cdn": "https://cdn.shopify.com/s/files/1/0738/8345/1696/",
   "currency": "INR",
   "moneyUnit": "paise",
-  "builtAt": "2026-10-24T18:20:02.726Z",
+  "builtAt": "2026-10-24T19:23:32.826Z",
   "snapshotAt": "2026-10-24T06:51:35.543Z",
   "productCount": 446,
   "liveProductCount": 287,
   "extraProductCount": 159,
-  "listedProductCount": 432,
-  "colourGroupCount": 13,
+  "listedProductCount": 388,
+  "colourGroupCount": 42,
   "imageCount": 2898
  },
  "collections": [
@@ -21,7 +21,7 @@
    "subtitle": "Freshly dropped festive favourites",
    "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08096_JPG.jpg",
    "sortOrder": 1,
-   "productCount": 398
+   "productCount": 362
   },
   {
    "handle": "party-wear-gown",
@@ -29,7 +29,7 @@
    "subtitle": "Designer Anarkali Suits",
    "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_9512.webp",
    "sortOrder": 2,
-   "productCount": 275
+   "productCount": 240
   },
   {
    "handle": "likshas-choice",
@@ -37,15 +37,15 @@
    "subtitle": "Handpicked by our stylists",
    "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08059_JPG.jpg",
    "sortOrder": 3,
-   "productCount": 128
+   "productCount": 110
   },
   {
    "handle": "lehnga-choli",
    "title": "Lehenga Choli",
    "subtitle": "Our Range of Designer Lehenga Choli",
-   "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6167693120506630697_y.jpg",
+   "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_9782.jpg",
    "sortOrder": 4,
-   "productCount": 29
+   "productCount": 20
   },
   {
    "handle": "printed-suit-set",
@@ -53,7 +53,7 @@
    "subtitle": "Everyday ethnic ease",
    "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8778_3062c1c0-4a26-4ac6-9ae4-93acf7da5361.jpg",
    "sortOrder": 5,
-   "productCount": 55
+   "productCount": 41
   },
   {
    "handle": "trending",
@@ -61,7 +61,7 @@
    "subtitle": "Top view in this week",
    "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WeddingSagabyIdahoClothing_Launchingourelegantpurpleembroideredmaxiset_beautifully_3__jpg.jpg",
    "sortOrder": 6,
-   "productCount": 5
+   "productCount": 4
   },
   {
    "handle": "weddin-collection",
@@ -69,7 +69,7 @@
    "subtitle": "Bridal & trousseau edit",
    "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6183469660666268753_y.jpg",
    "sortOrder": 7,
-   "productCount": 19
+   "productCount": 18
   },
   {
    "handle": "sale",
@@ -77,7 +77,7 @@
    "subtitle": "Limited-time festive prices",
    "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08106_JPG.jpg",
    "sortOrder": 8,
-   "productCount": 29
+   "productCount": 27
   },
   {
    "handle": "saree",
@@ -91,17 +91,17 @@
    "handle": "best-seller",
    "title": "BEST SELLING",
    "subtitle": "",
-   "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/Picsart_25-09-12_10-24-36-032.webp",
+   "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6210722319081085181_y.jpg",
    "sortOrder": 100,
-   "productCount": 35
+   "productCount": 31
   },
   {
    "handle": "suit-set-gown",
    "title": "SUIT SET & GOWN",
    "subtitle": "",
-   "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6210722319081085181_y.jpg",
+   "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/IMG_2191.jpg",
    "sortOrder": 101,
-   "productCount": 107
+   "productCount": 103
   }
  ],
  "colourGroups": {
@@ -1680,6 +1680,4529 @@
      "colourCode": "Black"
     }
    ]
+  },
+  "same-black-cosmo-slit-anarkali-premium-suit-set-anarkali": {
+   "key": "same-black-cosmo-slit-anarkali-premium-suit-set-anarkali",
+   "title": "Black Cosmo Slit Anarkali Premium Suit Set",
+   "handle": "black-cosmo-slit-anarkali-premium-suit-set",
+   "colours": [
+    {
+     "name": "Black",
+     "handle": "black-cosmo-slit-anarkali-premium-suit-set",
+     "title": "Black Cosmo Slit Anarkali Premium Suit Set",
+     "price": 54900,
+     "compareAtPrice": 183000,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6183781930558494256_y.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6183781930558494256_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6183781930558494259_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6183781930558494258_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6183781930558494257_y.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "S [36]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "Black"
+    },
+    {
+     "name": "Style 1",
+     "handle": "black-cosmo-slit-anarkali-premium-suit-set-10521452478596",
+     "title": "Black Cosmo Slit Anarkali Premium Suit Set",
+     "price": 64900,
+     "compareAtPrice": 216333,
+     "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/IMG_5839.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/IMG_5839.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/IMG_5842.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/9cafa87b-930e-4852-9884-93dcd8a3607a.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/IMG_5840.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "S [36]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "M [38]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "L [40]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "Black"
+    }
+   ]
+  },
+  "same-myra-cosmo-slit-anarkali-premium-suit-set-anarkali": {
+   "key": "same-myra-cosmo-slit-anarkali-premium-suit-set-anarkali",
+   "title": "Myra cosmo Slit Anarkali Premium Suit Set",
+   "handle": "myra-cosmo-slit-anarkali-premium-suit-set-10521552060548",
+   "colours": [
+    {
+     "name": "Style 2",
+     "handle": "myra-cosmo-slit-anarkali-premium-suit-set",
+     "title": "Myra cosmo Slit Anarkali Premium Suit Set",
+     "price": 49900,
+     "compareAtPrice": 124750,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6183781930558494252_y.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6183781930558494252_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6183781930558494251_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6183781930558494250_y.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "S [36]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "M [38]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "L [40]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "Multi"
+    },
+    {
+     "name": "Style 1",
+     "handle": "myra-cosmo-slit-anarkali-premium-suit-set-10521552060548",
+     "title": "Myra cosmo Slit Anarkali Premium Suit Set",
+     "price": 49900,
+     "compareAtPrice": 124750,
+     "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/IMG_5822.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/IMG_5822.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/IMG_5823.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/IMG_5821.png",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/IMG_5824.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "S [36]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "M [38]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "L [40]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    }
+   ]
+  },
+  "same-rang-f-royale-blooming-lehenga-suit-set-lehnga": {
+   "key": "same-rang-f-royale-blooming-lehenga-suit-set-lehnga",
+   "title": "Rang-F-Royale Blooming Lehenga Suit Set",
+   "handle": "rang-e-royale-blooming-lehenga-suit-set",
+   "colours": [
+    {
+     "name": "Style 2",
+     "handle": "rang-f-royale-blooming-lehenga-suit-set",
+     "title": "Rang-F-Royale Blooming Lehenga Suit Set",
+     "price": 69900,
+     "compareAtPrice": 233000,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6167693120506630697_y.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6167693120506630697_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6167693120506630698_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6167693120506630699_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6167693120506630700_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6167693120506630701_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6167693120506630702_y.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "S [36]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Style 1",
+     "handle": "rang-e-royale-blooming-lehenga-suit-set",
+     "title": "Rang-F-Royale Blooming Lehenga Suit Set",
+     "price": 69900,
+     "compareAtPrice": 233000,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6167693120506630710_y.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6167693120506630710_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6167693120506630709_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6167693120506630711_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6167693120506630712_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6167693120506630708_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6167693120506630713_y.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "S [36]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    }
+   ]
+  },
+  "same-malveera-premium-quality-anarkali-suit-set-anarkali": {
+   "key": "same-malveera-premium-quality-anarkali-suit-set-anarkali",
+   "title": "Malveera Premium Quality Anarkali Suit Set",
+   "handle": "malveera-premium-quality-anarkali-suit-set",
+   "colours": [
+    {
+     "name": "Style 1",
+     "handle": "malveera-premium-quality-anarkali-suit-set",
+     "title": "Malveera Premium Quality Anarkali Suit Set",
+     "price": 49900,
+     "compareAtPrice": 124750,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2026-07-14at11.58.53AM.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2026-07-14at11.58.53AM.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2026-07-14at11.58.53AM_1.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2026-07-14at11.59.13AM.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2026-07-14at11.59.10AM.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "S [36]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "M [38]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "L [40]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Style 2",
+     "handle": "malveera-premium-quality-anarkali-suit-set-10456594841732",
+     "title": "Malveera Premium Quality Anarkali Suit Set",
+     "price": 69900,
+     "compareAtPrice": 233000,
+     "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/WhatsAppImage2026-07-14at11.59.10AM.webp",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/WhatsAppImage2026-07-14at11.59.10AM.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/WhatsAppImage2026-07-14at11.59.13AM.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/WhatsAppImage2026-07-14at11.58.53AM.webp"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "S [36]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    }
+   ]
+  },
+  "same-maroon-trendy-anarkali-suit-set-anarkali": {
+   "key": "same-maroon-trendy-anarkali-suit-set-anarkali",
+   "title": "Maroon Trendy Anarkali Suit Set",
+   "handle": "maroon-trendy-anarkali-suit-set",
+   "colours": [
+    {
+     "name": "Style 1",
+     "handle": "maroon-trendy-anarkali-suit-set-1",
+     "title": "Maroon Trendy Anarkali Suit Set",
+     "price": 49900,
+     "compareAtPrice": 124750,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/140b230e-89b0-4ffa-b9e9-1f973e55b542.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/140b230e-89b0-4ffa-b9e9-1f973e55b542.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/842e50b0-87f3-49e1-a614-8d055a3abd34.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2026-09-09at1.18.42PM.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/634527c3-5ea5-4b35-8558-01144ce2b75c.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/60940174-6ca1-472f-bd2b-ff871c606596.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/cb39a17f-7308-4394-a498-2ae8b8c22125.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/983cd176-ae4a-4a34-ae40-26e25716d2db.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2026-09-09at1.18.43PM.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "S [36]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "M [38]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "L [40]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "Maroon"
+    },
+    {
+     "name": "Maroon",
+     "handle": "maroon-trendy-anarkali-suit-set",
+     "title": "Maroon Trendy Anarkali Suit Set",
+     "price": 54900,
+     "compareAtPrice": 183000,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8960.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8960.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8958.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8961.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8954.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8959.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8957.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8955.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8956.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8964.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8962.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "S [36]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "Maroon"
+    }
+   ]
+  },
+  "same-premium-ivory-royal-zari-work-kali-cut-anarkali-suit-set-ana": {
+   "key": "same-premium-ivory-royal-zari-work-kali-cut-anarkali-suit-set-ana",
+   "title": "Premium Ivory Royal Zari Work Kali Cut Anarkali Suit Set",
+   "handle": "premium-ivory-royal-zari-work-kali-cut-anarkali-suit-set",
+   "colours": [
+    {
+     "name": "Ivory",
+     "handle": "premium-ivory-royal-zari-work-kali-cut-anarkali-suit-set",
+     "title": "Premium Ivory Royal Zari Work Kali Cut Anarkali Suit Set",
+     "price": 69900,
+     "compareAtPrice": 233000,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08132.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08132.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08134.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08133.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08130.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08131.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08127.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08128.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08129.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08126.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08135.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08136.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08137.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "S [36]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "Ivory"
+    },
+    {
+     "name": "Style 1",
+     "handle": "premium-ivory-royal-zari-work-kali-cut-anarkali-suit-set-10456605851780",
+     "title": "Premium Ivory Royal Zari Work Kali Cut Anarkali Suit Set",
+     "price": 49900,
+     "compareAtPrice": 124750,
+     "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/DSC08133.webp",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/DSC08133.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/DSC08126.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/DSC08137.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/DSC08128.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/DSC08131.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/DSC08134.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/DSC08132.webp"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "S [36]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "M [38]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "L [40]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "Ivory"
+    }
+   ]
+  },
+  "same-niru-s-noir-black-elegance-anarkali-suit-set-anarkali": {
+   "key": "same-niru-s-noir-black-elegance-anarkali-suit-set-anarkali",
+   "title": "Niru's Noir Black Elegance Anarkali Suit Set",
+   "handle": "nirus-noir-black-elegance-anarkali-suit-set",
+   "colours": [
+    {
+     "name": "Black",
+     "handle": "nirus-noir-black-elegance-anarkali-suit-set",
+     "title": "Niru's Noir Black Elegance Anarkali Suit Set",
+     "price": 69900,
+     "compareAtPrice": 233000,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6314601600692982394_y_9f86173c-1041-4014-ae4b-95baae7cddda.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6314601600692982394_y_9f86173c-1041-4014-ae4b-95baae7cddda.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6314601600692982397_y_a4b35678-5c15-4514-814c-a0af68d4ece2.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6314601600692982396_y_c86b4002-02aa-4029-a011-c4fec544d458.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6314601600692982398_y_32e94403-44c4-4af8-8aa0-169f265a7fc2.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6314601600692982399_y_73ce30ec-d61e-4d5c-be8a-ffa5eb657616.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6314601600692982395_y_eecff7b2-3f62-4edd-b3e3-55305c35d4d4.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6314601600692982400_y_9edc57ff-d9dd-4833-b6df-ead99bd9fc4a.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6314601600692982403_y_9b828529-422d-4771-88d1-b1cb9ee19482.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6314601600692982402_y_feb02f74-1681-4694-9463-f75092fc4fbe.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6314601600692982401_y_f9694f8c-25f3-40ce-a030-ff698cc6a6e3.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6314601600692982404_y_fdb5f6d9-ffc9-4529-a5f8-970cda3fdbd9.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "S [36]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "Black"
+    },
+    {
+     "name": "Style 1",
+     "handle": "nirus-noir-black-elegance-anarkali-suit-set-10511760359556",
+     "title": "Niru's Noir Black Elegance Anarkali Suit Set",
+     "price": 49900,
+     "compareAtPrice": 124750,
+     "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/e7979fbb-98bb-4df5-af31-01507c9e98d7.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/e7979fbb-98bb-4df5-af31-01507c9e98d7.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/fe03d5e7-b586-4c9b-924f-b64db542dae2.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/7e80c1fa-ccb8-404b-adaa-d4954a73666b.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/acd868d9-b42b-4cb5-a29b-30828c6240c0.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/f0dc7e91-297c-446b-9255-159a8145c213.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/c9eebd4f-8876-48e5-9a01-0022a2f64fbd.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/940d2a09-1d00-4cc0-ad6d-3ddd6759e220.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/461ab3f4-a522-4ea7-86e0-091bcc72c58b.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6314601600692982394_y.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "S [36]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "M [38]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "L [40]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "Black"
+    }
+   ]
+  },
+  "same-mita-heavy-traditional-embroidered-koti-anarkali-suit-set-an": {
+   "key": "same-mita-heavy-traditional-embroidered-koti-anarkali-suit-set-an",
+   "title": "Mita Heavy Traditional Embroidered Koti Anarkali Suit Set",
+   "handle": "mita-heavy-traditional-embroidered-koti-anarkali-suit-set",
+   "colours": [
+    {
+     "name": "Style 1",
+     "handle": "mita-heavy-traditional-embroidered-koti-anarkali-suit-set",
+     "title": "Mita Heavy Traditional Embroidered Koti Anarkali Suit Set",
+     "price": 64900,
+     "compareAtPrice": 216333,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/545fe8d2-4bcb-475b-9cd3-100b03118c45_1800x1800_f98a725b-d6f7-49b3-ac2e-75c30f10f5da.webp",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/545fe8d2-4bcb-475b-9cd3-100b03118c45_1800x1800_f98a725b-d6f7-49b3-ac2e-75c30f10f5da.webp",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/6036452d-585d-4c6c-a1cf-593abb11de0d_1000x_60b1613d-63ac-4f17-9ae5-9e0292692b9e.webp",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/d54e7d6e-0fd4-4d70-8b9b-a023aa36be47_1800x1800_73f3da40-7f99-404f-8d75-6ae2e41e1c19.webp",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/552c749e-0736-4008-8e19-0b13194a0c4b_1800x1800_e6e1311c-c4dc-4f19-a230-ec607f7b5311.webp",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/048b81f3-957f-4fe4-b4ec-536c79d0af05_1800x1800_f6b97af6-ede3-4574-85e5-5c88320a8978.webp"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "S [36]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "M [38]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "L [40]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Style 2",
+     "handle": "mita-heavy-traditional-embroidered-koti-anarkali-suit-set-15399230865540",
+     "title": "Mita Heavy Traditional Embroidered Koti Anarkali Suit Set",
+     "price": 54900,
+     "compareAtPrice": 183000,
+     "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/6036452d-585d-4c6c-a1cf-593abb11de0d_1000x_60b1613d-63ac-4f17-9ae5-9e0292692b9e.webp",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/6036452d-585d-4c6c-a1cf-593abb11de0d_1000x_60b1613d-63ac-4f17-9ae5-9e0292692b9e.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/552c749e-0736-4008-8e19-0b13194a0c4b_1800x1800_e6e1311c-c4dc-4f19-a230-ec607f7b5311.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/d54e7d6e-0fd4-4d70-8b9b-a023aa36be47_1800x1800_73f3da40-7f99-404f-8d75-6ae2e41e1c19.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/545fe8d2-4bcb-475b-9cd3-100b03118c45_1800x1800_f98a725b-d6f7-49b3-ac2e-75c30f10f5da_1.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/545fe8d2-4bcb-475b-9cd3-100b03118c45_1800x1800_f98a725b-d6f7-49b3-ac2e-75c30f10f5da.webp"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "S [36]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    }
+   ]
+  },
+  "same-premium-lakhnavi-embroidered-anarkali-suit-set-anarkali": {
+   "key": "same-premium-lakhnavi-embroidered-anarkali-suit-set-anarkali",
+   "title": "Premium Lakhnavi Embroidered Anarkali Suit Set",
+   "handle": "premium-lakhnavi-embroidered-work-anarkali-suit-set",
+   "colours": [
+    {
+     "name": "Style 1",
+     "handle": "premium-lakhnavi-embroidered-work-anarkali-suit-set",
+     "title": "Premium Lakhnavi Embroidered Anarkali Suit Set",
+     "price": 49900,
+     "compareAtPrice": 124750,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2026-07-18at11.14.11AM.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2026-07-18at11.14.11AM.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2026-07-18at11.14.12AM.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2026-07-18at11.14.14AM.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2026-07-18at11.14.16AM.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2026-07-18at11.14.13AM.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2026-07-18at11.14.15AM.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "S [36]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "M [38]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "L [40]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Style 2",
+     "handle": "premium-lakhnavi-embroidered-anarkali-suit-set",
+     "title": "Premium Lakhnavi Embroidered Anarkali Suit Set",
+     "price": 49900,
+     "compareAtPrice": 124750,
+     "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/WhatsAppImage2026-07-30at1.28.33PM_1.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/WhatsAppImage2026-07-30at1.28.33PM_1.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/WhatsAppImage2026-07-30at1.28.33PM.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/WhatsAppImage2026-07-30at1.28.32PM_2.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/WhatsAppImage2026-07-30at1.28.32PM_1.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/WhatsAppImage2026-07-30at1.28.32PM.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/WhatsAppImage2026-07-30at1.28.31PM.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "S [36]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "M [38]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "L [40]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    }
+   ]
+  },
+  "same-krishva-s-exclusive-blue-floral-organza-anarkali-suit-set-an": {
+   "key": "same-krishva-s-exclusive-blue-floral-organza-anarkali-suit-set-an",
+   "title": "Krishva's Exclusive Blue Floral Organza Anarkali Suit Set",
+   "handle": "krishvas-exclusive-blue-floral-organza-anarkali-suit-set",
+   "colours": [
+    {
+     "name": "Blue",
+     "handle": "krishvas-exclusive-blue-floral-organza-anarkali-suit-set",
+     "title": "Krishva's Exclusive Blue Floral Organza Anarkali Suit Set",
+     "price": 59900,
+     "compareAtPrice": 199667,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2026-03-27at11.33.04AM_caa2578f-511a-48bf-a15e-87ad27b0acfb.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2026-03-27at11.33.04AM_caa2578f-511a-48bf-a15e-87ad27b0acfb.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2026-03-27at11.34.54AM_188b8856-2960-4539-87c3-32d152042dd5.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2026-03-27at11.37.39AM_4b4055ab-5ed7-4c01-b412-1669a052a2d3.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2026-03-27at11.37.57AM_ae50acfe-bed8-45e4-bd5b-527696b7beec.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2026-03-27at11.36.25AM_d45f3cd6-16ab-4c62-845e-983f5df17999.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2026-03-27at11.38.27AM_dd10abff-1a91-449e-a11f-b88b3fd759a7.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2026-03-27at11.36.50AM_af6ba28a-08a3-444c-81de-3cb5768fc423.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2026-03-27at11.33.33AM_f6cdafae-de8a-40c0-a52c-424d077ab8e0.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2026-03-27at11.35.58AM_4b33f3e7-4b40-44d4-ad31-09906540db87.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2026-03-27at11.35.20AM_699ca7f6-c367-451a-8154-2d2f18585a7f.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "S [36]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "M [38]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "L [40]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "Blue"
+    },
+    {
+     "name": "Style 1",
+     "handle": "krishvas-exclusive-blue-floral-organza-anarkali-suit-set-10340442833028",
+     "title": "Krishva's Exclusive Blue Floral Organza Anarkali Suit Set",
+     "price": 59900,
+     "compareAtPrice": 199667,
+     "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/WhatsAppImage2026-03-27at11.33.04AM_caa2578f-511a-48bf-a15e-87ad27b0acfb.webp",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/WhatsAppImage2026-03-27at11.33.04AM_caa2578f-511a-48bf-a15e-87ad27b0acfb.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/WhatsAppImage2026-03-27at11.35.20AM_699ca7f6-c367-451a-8154-2d2f18585a7f.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/WhatsAppImage2026-03-27at11.35.58AM_4b33f3e7-4b40-44d4-ad31-09906540db87.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/WhatsAppImage2026-03-27at11.36.25AM_d45f3cd6-16ab-4c62-845e-983f5df17999.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/WhatsAppImage2026-03-27at11.36.50AM_af6ba28a-08a3-444c-81de-3cb5768fc423.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/WhatsAppImage2026-03-27at11.37.39AM_4b4055ab-5ed7-4c01-b412-1669a052a2d3.webp"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "S [36]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "M [38]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "L [40]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "Blue"
+    }
+   ]
+  },
+  "same-star-georgette-silk-anarkali-suit-with-skirt-anarkali": {
+   "key": "same-star-georgette-silk-anarkali-suit-with-skirt-anarkali",
+   "title": "Star Georgette Silk Anarkali Suit With Skirt",
+   "handle": "star-georgette-slik-anarkali-suit-with-skirt",
+   "colours": [
+    {
+     "name": "Style 1",
+     "handle": "star-georgette-slik-anarkali-suit-with-skirt",
+     "title": "Star Georgette Silk Anarkali Suit With Skirt",
+     "price": 69900,
+     "compareAtPrice": 233000,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8726_d1949028-1173-46bc-81e2-1583afec2aaf.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8726_d1949028-1173-46bc-81e2-1583afec2aaf.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8725.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8724.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8727.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": false
+      },
+      "S [36]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": false
+      },
+      "M [38]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": false
+      },
+      "L [40]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": false
+      },
+      "XL [42]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": false
+      },
+      "2XL [44]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": false
+      },
+      "3XL [46]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": false
+      }
+     },
+     "inStock": false,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Style 2",
+     "handle": "star-georgette-slik-anarkali-suit-with-skirt-10462901338244",
+     "title": "Star Georgette Silk Anarkali Suit With Skirt",
+     "price": 59900,
+     "compareAtPrice": 199667,
+     "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6084675555908326580_y.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6084675555908326580_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6084675555908326581_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6084675555908326582_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6084675555908326583_y.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "S [36]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "M [38]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "L [40]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    }
+   ]
+  },
+  "same-premium-quality-heavy-traditional-crop-top-with-shrug-anarka": {
+   "key": "same-premium-quality-heavy-traditional-crop-top-with-shrug-anarka",
+   "title": "Premium Quality Heavy Traditional Crop Top with Shrug",
+   "handle": "premium-quality-heavy-traditional-crop-top-with-shrug-5",
+   "colours": [
+    {
+     "name": "Style 1",
+     "handle": "premium-quality-heavy-traditional-crop-top-with-shrug-5",
+     "title": "Premium Quality Heavy Traditional Crop Top with Shrug",
+     "price": 59900,
+     "compareAtPrice": 199667,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2025-12-24at12.45.04PM.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2025-12-24at12.45.04PM.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2025-12-24at12.45.05PM.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2025-12-24at12.45.06PM_1.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2025-12-24at12.45.06PM.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2025-12-24at12.45.05PM_2.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2025-12-24at12.45.05PM_1.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2025-12-24at12.45.06PM_2.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": false
+      },
+      "S [36]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": false
+      },
+      "M [38]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": false
+      },
+      "L [40]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": false
+      },
+      "XL [42]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": false
+      },
+      "2XL [44]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": false
+      },
+      "3XL [46]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": false
+      }
+     },
+     "inStock": false,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Style 2",
+     "handle": "premium-quality-heavy-traditional-crop-top-with-shrug-3",
+     "title": "Premium Quality Heavy Traditional Crop Top with Shrug",
+     "price": 69900,
+     "compareAtPrice": 233000,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6084656348814576795_y.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6084656348814576795_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6084656348814576797_y.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": false
+      },
+      "S [36]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": false
+      },
+      "L [40]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": false
+      },
+      "XL [42]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": false
+      },
+      "2XL [44]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": false
+      },
+      "3XL [46]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": false
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Style 3",
+     "handle": "premium-quality-heavy-traditional-crop-top-with-shrug-2",
+     "title": "Premium Quality Heavy Traditional Crop Top with Shrug",
+     "price": 64900,
+     "compareAtPrice": 216333,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6084656348814576809_y.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6084656348814576809_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6084656348814576805_y.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": false
+      },
+      "S [36]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": false
+      },
+      "M [38]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": false
+      },
+      "L [40]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": false
+      },
+      "XL [42]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": false
+      },
+      "2XL [44]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": false
+      },
+      "3XL [46]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": false
+      }
+     },
+     "inStock": false,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Style 4",
+     "handle": "premium-quality-heavy-traditional-crop-top-with-shrug-1",
+     "title": "Premium Quality Heavy Traditional Crop Top with Shrug",
+     "price": 54900,
+     "compareAtPrice": 183000,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6134381938274405417_y.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6134381938274405417_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6134381938274405416_y.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "S [36]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Style 5",
+     "handle": "premium-quality-heavy-traditional-crop-top-with-shrug",
+     "title": "Premium Quality Heavy Traditional Crop Top with Shrug",
+     "price": 69900,
+     "compareAtPrice": 233000,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6134381938274405408_y.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6134381938274405408_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6134381938274405403_y.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "S [36]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    }
+   ]
+  },
+  "same-premium-quality-heavy-traditional-lehenga-choli-lehnga": {
+   "key": "same-premium-quality-heavy-traditional-lehenga-choli-lehnga",
+   "title": "Premium Quality Heavy Traditional Lehenga Choli",
+   "handle": "premium-quality-heavy-traditional-lehenga-choli-3",
+   "colours": [
+    {
+     "name": "Style 1",
+     "handle": "premium-quality-heavy-traditional-lehenga-choli-3",
+     "title": "Premium Quality Heavy Traditional Lehenga Choli",
+     "price": 64900,
+     "compareAtPrice": 216333,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6181228374932524012_y.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6181228374932524012_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6181228374932524010_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6181228374932524023_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6181228374932524032_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6181228374932524046_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6181228374932524059_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6181228374932524055_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6181228374932524044_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6181228374932524043_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6181228374932524040_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6181228374932524037_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6181228374932524030_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6181228374932524028_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6181228374932524025_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6181228374932524014_y.jpg"
+     ],
+     "sizes": [
+      "Free Size"
+     ],
+     "sizePricing": {
+      "Free Size": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Style 2",
+     "handle": "premium-quality-heavy-traditional-lehenga-choli-2",
+     "title": "Premium Quality Heavy Traditional Lehenga Choli",
+     "price": 54900,
+     "compareAtPrice": 183000,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6129472008971029308_y_fa7e9c22-2811-4aac-8cfa-7736a3ba61e2.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6129472008971029308_y_fa7e9c22-2811-4aac-8cfa-7736a3ba61e2.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6129472008971029307_y_c798f639-39ca-489d-82ee-cf2ffcadff3c.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6129472008971029306_y_19a2a1b7-fffe-4bc1-b9db-a7f4f393f23f.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6129472008971029305_y_94d0c181-f643-49e3-ab84-6d97e6265e69.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6129472008971029304_y_7910567b-3370-42d9-8d55-4a4ac45c48ff.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6129472008971029303_y_f4c946eb-8dab-4b6b-b958-eb49b2a7808d.jpg"
+     ],
+     "sizes": [
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]"
+     ],
+     "sizePricing": {
+      "M [38]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Style 3",
+     "handle": "premium-quality-heavy-traditional-lehenga-choli-1",
+     "title": "Premium Quality Heavy Traditional Lehenga Choli",
+     "price": 59900,
+     "compareAtPrice": 199667,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6129472008971029299_y.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6129472008971029299_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6129472008971029297_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6129472008971029301_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6129472008971029298_y.jpg"
+     ],
+     "sizes": [
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]"
+     ],
+     "sizePricing": {
+      "M [38]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "L [40]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Style 4",
+     "handle": "premium-quality-heavy-traditional-lehenga-choli",
+     "title": "Premium Quality Heavy Traditional Lehenga Choli",
+     "price": 69900,
+     "compareAtPrice": 233000,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/7bea7857-3668-4ec4-a6f5-1330c40889fd.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/7bea7857-3668-4ec4-a6f5-1330c40889fd.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/a135e98c-25c5-416f-816e-50d327fdb3c8.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/a958ae5c-2745-4b91-9f91-6ca6a92328be.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/e8c611ad-a090-4b9d-a275-3bb5de913b4f.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/fa55f66d-db7d-4080-956c-469c5608ecdd.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/fa382f43-6866-470c-b238-d5e246684deb.jpg"
+     ],
+     "sizes": [
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]"
+     ],
+     "sizePricing": {
+      "M [38]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    }
+   ]
+  },
+  "same-classic-pink-anarkali-suit-set-anarkali": {
+   "key": "same-classic-pink-anarkali-suit-set-anarkali",
+   "title": "Classic Pink Anarkali Suit Set",
+   "handle": "classic-pink-anarkali-suit-set-15408494084228",
+   "colours": [
+    {
+     "name": "Style 1",
+     "handle": "classic-pink-anarkali-suit-set",
+     "title": "Classic Pink Anarkali Suit Set",
+     "price": 69900,
+     "compareAtPrice": 233000,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6210914763676962376_y.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6210914763676962376_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6210914763676962377_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6210914763676962375_y.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "S [36]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "Pink"
+    },
+    {
+     "name": "Pink",
+     "handle": "classic-pink-anarkali-suit-set-15408494084228",
+     "title": "Classic Pink Anarkali Suit Set",
+     "price": 59900,
+     "compareAtPrice": 199667,
+     "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6208470519267398995_y.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6208470519267398995_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6208470519267398993_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6208470519267398994_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6208470519267398992_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6208470519267398991_y.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "S [36]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "M [38]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "L [40]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "Pink"
+    }
+   ]
+  },
+  "same-classic-red-karva-chauth-special-anarkali-suit-set-anarkali": {
+   "key": "same-classic-red-karva-chauth-special-anarkali-suit-set-anarkali",
+   "title": "Classic Red Karva Chauth Special Anarkali Suit Set",
+   "handle": "red-chilli-slit-anarkali-premium-suit-set",
+   "colours": [
+    {
+     "name": "Red",
+     "handle": "red-chilli-slit-anarkali-premium-suit-set",
+     "title": "Classic Red Karva Chauth Special Anarkali Suit Set",
+     "price": 69900,
+     "compareAtPrice": 233000,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/Picsart_25-09-12_10-24-36-032.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/Picsart_25-09-12_10-24-36-032.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/Picsart_25-09-12_10-25-29-690.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/3793A27D-E435-4233-9AB8-CCB4033A1190.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/Picsart_25-09-12_10-26-43-418.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/inehabhandari-20250912-0001.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/Picsart_25-09-12_10-23-19-035.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/Picsart_25-09-12_10-27-21-518.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/FA3E3FCA-42AB-4258-A6F6-17D73683A57E.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "S [36]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "Red"
+    },
+    {
+     "name": "Style 1",
+     "handle": "classic-red-karva-chauth-special-anarkali-suit-set",
+     "title": "Classic Red Karva Chauth Special Anarkali Suit Set",
+     "price": 54900,
+     "compareAtPrice": 183000,
+     "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/Picsart_25-09-12_10-24-36-032.webp",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/Picsart_25-09-12_10-24-36-032.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/25c29a29-2b5f-48a4-9867-26e43e58c5ee.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6208470519267398989_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6208470519267398988_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/Picsart_25-09-12_10-26-43-418.webp"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "S [36]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "Red"
+    }
+   ]
+  },
+  "same-saumya-neon-sharara-suit-set-sharara": {
+   "key": "same-saumya-neon-sharara-suit-set-sharara",
+   "title": "Saumya Neon Sharara Suit Set",
+   "handle": "saumya-neon-sharara-suit-set",
+   "colours": [
+    {
+     "name": "Style 1",
+     "handle": "saumya-neon-sharara-suit-set",
+     "title": "Saumya Neon Sharara Suit Set",
+     "price": 69900,
+     "compareAtPrice": 233000,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/2_739d8644-9d9d-421a-bb3c-cb08e25b70af.png",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/2_739d8644-9d9d-421a-bb3c-cb08e25b70af.png",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/5_7238a86f-d16f-4a59-a22b-ecead77e41bf.png",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/mirayaz_jpr-20250427-0003.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/mirayaz_jpr-20250427-0001.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/mirayaz_jpr-20250427-0004.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/mirayaz_jpr-20250427-0005.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/mirayaz_jpr-20250427-0002.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/mirayaz_jpr-20250427-0006.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "S [36]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Style 2",
+     "handle": "saumya-neon-sharara-suit-set-10498715058308",
+     "title": "Saumya Neon Sharara Suit Set",
+     "price": 59900,
+     "compareAtPrice": 199667,
+     "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6197274484419530933_y_630c1868-49df-4789-83c9-083a325a1bff.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6197274484419530933_y_630c1868-49df-4789-83c9-083a325a1bff.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6197274484419530938_y_eb15627c-0985-4848-a3d3-f1cfc728c2ea.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6197274484419530937_y_327cb87d-45ab-4b5d-b76e-90bf980cd411.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6197274484419530936_y_43118ac5-81bd-48b7-b25b-6467660f74ad.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6197274484419530935_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6197274484419530934_y_662e377e-c29b-4739-b2bb-aa5ef7885b6d.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6197274484419530932_y_018d2e7f-a9e4-435c-ab61-55de78fef0f6.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "S [36]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "M [38]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "L [40]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    }
+   ]
+  },
+  "same-alveera-premium-quality-anarkali-suit-set-with-color-anarkal": {
+   "key": "same-alveera-premium-quality-anarkali-suit-set-with-color-anarkal",
+   "title": "Alveera Premium Quality Anarkali Suit Set with Color",
+   "handle": "alveera-premium-quality-anarkali-suit-set-with-color",
+   "colours": [
+    {
+     "name": "Style 2",
+     "handle": "monshika-premium-quality-maroon-anarkali-suit-set",
+     "title": "Alveera Premium Quality Anarkali Suit Set with Color",
+     "price": 54900,
+     "compareAtPrice": 183000,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/Picsart_25-04-17_20-31-07-303.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/Picsart_25-04-17_20-31-07-303.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsApp_Image_2026-04-18_at_11.45.56_PM.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/Picsart_25-04-17_20-33-33-526.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/Picsart_25-04-17_20-38-32-676_1.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/Picsart_25-04-17_20-38-32-676.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsApp_Image_2026-04-18_at_11.45.56_PM_1.jpg"
+     ],
+     "sizes": [
+      "Free Size"
+     ],
+     "sizePricing": {
+      "Free Size": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Style 1",
+     "handle": "alveera-premium-quality-anarkali-suit-set-with-color",
+     "title": "Alveera Premium Quality Anarkali Suit Set with Color",
+     "price": 49900,
+     "compareAtPrice": 124750,
+     "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/WhatsApp_Image_2026-04-18_at_11.45.56_PM.webp",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/WhatsApp_Image_2026-04-18_at_11.45.56_PM.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/WhatsApp_Image_2026-04-18_at_11.45.56_PM_1.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/1000226308.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/pari1.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/Picsart_25-04-17_20-38-32-676_4aaddc1c-52c8-4079-a5d6-6c85f71614db.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/Picsart_25-04-17_20-38-32-676_1_db93ec71-2aa9-46f4-8967-0c13879562f1.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/Picsart_25-04-17_20-33-33-526_b3589f4c-048d-4bb2-8c24-beaf762742fb.webp"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "S [36]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "M [38]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "L [40]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    }
+   ]
+  },
+  "same-neha-heavy-pure-vichitra-anarkali-suit-set-anarkali": {
+   "key": "same-neha-heavy-pure-vichitra-anarkali-suit-set-anarkali",
+   "title": "Neha Heavy Pure Vichitra Anarkali Suit Set",
+   "handle": "nehas-premium-anarkali-suit-set",
+   "colours": [
+    {
+     "name": "Style 1",
+     "handle": "nehas-premium-anarkali-suit-set",
+     "title": "Neha Heavy Pure Vichitra Anarkali Suit Set",
+     "price": 64900,
+     "compareAtPrice": 216333,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/6053216840311750508_1.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/6053216840311750508_1.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/6053216840311750509_2.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/6053216840311750510.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/6053216840311750507.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "S [36]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "M [38]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "L [40]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Style 2",
+     "handle": "neha-heavy-pure-vichitra-anarkali-suit-set",
+     "title": "Neha Heavy Pure Vichitra Anarkali Suit Set",
+     "price": 69900,
+     "compareAtPrice": 233000,
+     "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/6053216840311750508_1.webp",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/6053216840311750508_1.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/6053216840311750509_2.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/6053216840311750507.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/6053216840311750510.webp"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "S [36]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    }
+   ]
+  },
+  "same-madhvi-heavy-embroidered-maxi-set-anarkali": {
+   "key": "same-madhvi-heavy-embroidered-maxi-set-anarkali",
+   "title": "Madhvi Heavy Embroidered Maxi Set",
+   "handle": "madhvi-heavy-embroidered-maxi-set",
+   "colours": [
+    {
+     "name": "Style 1",
+     "handle": "madhvi-heavy-embroidered-maxi-set",
+     "title": "Madhvi Heavy Embroidered Maxi Set",
+     "price": 54900,
+     "compareAtPrice": 183000,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_1325_35dc0b08-e5b3-4dce-8c66-7c8baf2834c0.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_1325_35dc0b08-e5b3-4dce-8c66-7c8baf2834c0.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_1324_7432f968-eab4-449e-9579-d952fa7f11bf.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_1322_3fd0b9b8-9e51-4a50-97f8-50a5339569f9.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_1323_0ea58b7b-a8c8-4d7b-9714-3cf375392c68.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_1326_6666ddf9-cc9b-4a03-971a-012d4020494b.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "S [36]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Style 2",
+     "handle": "madhvi-heavy-embroidered-maxi-set-10016283328644",
+     "title": "Madhvi Heavy Embroidered Maxi Set",
+     "price": 54900,
+     "compareAtPrice": 183000,
+     "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/IMG_1324_7432f968-eab4-449e-9579-d952fa7f11bf.webp",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/IMG_1324_7432f968-eab4-449e-9579-d952fa7f11bf.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/IMG_1325_35dc0b08-e5b3-4dce-8c66-7c8baf2834c0.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/IMG_1322_3fd0b9b8-9e51-4a50-97f8-50a5339569f9.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/IMG_1326_6666ddf9-cc9b-4a03-971a-012d4020494b.webp"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "S [36]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    }
+   ]
+  },
+  "same-hazel-s-anarkali-partywear-suit-set-anarkali": {
+   "key": "same-hazel-s-anarkali-partywear-suit-set-anarkali",
+   "title": "Hazel's Anarkali PartyWear Suit Set",
+   "handle": "hazels-anarkali-partywear-suit-set",
+   "colours": [
+    {
+     "name": "Style 1",
+     "handle": "hazels-anarkali-partywear-suit-set",
+     "title": "Hazel's Anarkali PartyWear Suit Set",
+     "price": 49900,
+     "compareAtPrice": 124750,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/55746.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/55746.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/55755.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/55761.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/55739.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/55734_5f26180c-dbba-4f46-ab0a-aaf343e8150b.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/55752.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "S [36]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "M [38]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "L [40]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Style 2",
+     "handle": "hazels-anarkali-partywear-suit-set-8228836245636",
+     "title": "Hazel's Anarkali PartyWear Suit Set",
+     "price": 59900,
+     "compareAtPrice": 199667,
+     "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/55746.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/55746.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/55755.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/55761.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/55739.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/55734_5f26180c-dbba-4f46-ab0a-aaf343e8150b.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/55752.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "S [36]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "M [38]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "L [40]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    }
+   ]
+  },
+  "same-prachi-s-black-heavy-vichitra-royal-elegant-suit-set-anarkal": {
+   "key": "same-prachi-s-black-heavy-vichitra-royal-elegant-suit-set-anarkal",
+   "title": "Prachi's' Black Heavy Vichitra Royal Elegant Suit Set",
+   "handle": "prachis-pink-havy-vichitra-royal-elegant-suit-set-copy",
+   "colours": [
+    {
+     "name": "Black",
+     "handle": "prachis-pink-havy-vichitra-royal-elegant-suit-set-copy",
+     "title": "Prachi's' Black Heavy Vichitra Royal Elegant Suit Set",
+     "price": 59900,
+     "compareAtPrice": 199667,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsApp_Image_2025-02-08_at_3.11.10_PM_1.webp",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsApp_Image_2025-02-08_at_3.11.10_PM_1.webp",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2025-02-08at3.11.10PM.webp",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WhatsAppImage2025-02-08at3.11.10PM_1.webp"
+     ],
+     "sizes": [
+      "S [36]",
+      "M [38]"
+     ],
+     "sizePricing": {
+      "S [36]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "M [38]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "Black"
+    },
+    {
+     "name": "Style 1",
+     "handle": "prachis-pink-havy-vichitra-royal-elegant-suit-set-copy-8228835983492",
+     "title": "Prachi's' Black Heavy Vichitra Royal Elegant Suit Set",
+     "price": 54900,
+     "compareAtPrice": 183000,
+     "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/WhatsApp_Image_2025-02-08_at_3.11.10_PM_1.webp",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/WhatsApp_Image_2025-02-08_at_3.11.10_PM_1.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/WhatsAppImage2025-02-08at3.11.10PM.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/WhatsAppImage2025-02-08at3.11.10PM_1.webp"
+     ],
+     "sizes": [
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "S [36]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "Black"
+    }
+   ]
+  },
+  "same-premium-quality-roman-silk-gown-anarkali-suit-set-anarkali": {
+   "key": "same-premium-quality-roman-silk-gown-anarkali-suit-set-anarkali",
+   "title": "Premium Quality Roman Silk Gown Anarkali Suit Set",
+   "handle": "premium-quality-9-needle-gown-anarkali-suit-set-copy",
+   "colours": [
+    {
+     "name": "Style 2",
+     "handle": "premium-quality-roman-silk-gown-anarkali-suit-set-copy",
+     "title": "Premium Quality Roman Silk Gown Anarkali Suit Set",
+     "price": 69900,
+     "compareAtPrice": 233000,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/YellowWomenClothingPromoMobileVideo_21.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/YellowWomenClothingPromoMobileVideo_21.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/YellowWomenClothingPromoMobileVideo_20.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/YellowWomenClothingPromoMobileVideo_22.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/YellowWomenClothingPromoMobileVideo_23.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/Yellow_Women_Clothing_Promo_Mobile_Video_25.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/YellowWomenClothingPromoMobileVideo_24.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/YellowWomenClothingPromoMobileVideo_19.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/Yellow_Women_Clothing_Promo_Mobile_Video_26.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "S [36]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Style 3",
+     "handle": "premium-quality-gown-anarkali-suit-set-copy",
+     "title": "Premium Quality Roman Silk Gown Anarkali Suit Set",
+     "price": 49900,
+     "compareAtPrice": 124750,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/YellowWomenClothingPromoMobileVideo_10.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/YellowWomenClothingPromoMobileVideo_10.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/YellowWomenClothingPromoMobileVideo_12.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/YellowWomenClothingPromoMobileVideo_15.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/YellowWomenClothingPromoMobileVideo_13.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/YellowWomenClothingPromoMobileVideo_17.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/YellowWomenClothingPromoMobileVideo_16.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/YellowWomenClothingPromoMobileVideo_18.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/YellowWomenClothingPromoMobileVideo_14.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/YellowWomenClothingPromoMobileVideo_11.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "S [36]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "M [38]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "L [40]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Style 1",
+     "handle": "premium-quality-9-needle-gown-anarkali-suit-set-copy",
+     "title": "Premium Quality Roman Silk Gown Anarkali Suit Set",
+     "price": 54900,
+     "compareAtPrice": 183000,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/YellowWomenClothingPromoMobileVideo_c0becb8c-22f0-4a06-a3cb-7a0ccb395e90.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/YellowWomenClothingPromoMobileVideo_c0becb8c-22f0-4a06-a3cb-7a0ccb395e90.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/YellowWomenClothingPromoMobileVideo_1.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/YellowWomenClothingPromoMobileVideo_6.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/YellowWomenClothingPromoMobileVideo_2.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/YellowWomenClothingPromoMobileVideo_5.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/YellowWomenClothingPromoMobileVideo_4.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/Yellow_Women_Clothing_Promo_Mobile_Video_9.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/YellowWomenClothingPromoMobileVideo_3.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/YellowWomenClothingPromoMobileVideo_8.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/YellowWomenClothingPromoMobileVideo_7.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "S [36]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Style 4",
+     "handle": "premium-quality-roman-silk-gown-anarkali-suit-set-copy-8228835819652",
+     "title": "Premium Quality Roman Silk Gown Anarkali Suit Set",
+     "price": 64900,
+     "compareAtPrice": 216333,
+     "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/YellowWomenClothingPromoMobileVideo_21.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/YellowWomenClothingPromoMobileVideo_21.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/YellowWomenClothingPromoMobileVideo_20.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/YellowWomenClothingPromoMobileVideo_22.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/YellowWomenClothingPromoMobileVideo_23.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/Yellow_Women_Clothing_Promo_Mobile_Video_25.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/YellowWomenClothingPromoMobileVideo_24.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/YellowWomenClothingPromoMobileVideo_19.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/Yellow_Women_Clothing_Promo_Mobile_Video_26.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "S [36]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "M [38]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "L [40]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Style 5",
+     "handle": "premium-quality-9-needle-gown-anarkali-suit-set-copy-8228835426436",
+     "title": "Premium Quality Roman Silk Gown Anarkali Suit Set",
+     "price": 54900,
+     "compareAtPrice": 183000,
+     "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/YellowWomenClothingPromoMobileVideo_c0becb8c-22f0-4a06-a3cb-7a0ccb395e90.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/YellowWomenClothingPromoMobileVideo_c0becb8c-22f0-4a06-a3cb-7a0ccb395e90.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/YellowWomenClothingPromoMobileVideo_1.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/YellowWomenClothingPromoMobileVideo_6.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/YellowWomenClothingPromoMobileVideo_2.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/YellowWomenClothingPromoMobileVideo_5.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/YellowWomenClothingPromoMobileVideo_4.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/Yellow_Women_Clothing_Promo_Mobile_Video_9.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/YellowWomenClothingPromoMobileVideo_3.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/YellowWomenClothingPromoMobileVideo_8.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/YellowWomenClothingPromoMobileVideo_7.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "S [36]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    }
+   ]
+  },
+  "same-premium-quality-anarkali-suit-set-anarkali": {
+   "key": "same-premium-quality-anarkali-suit-set-anarkali",
+   "title": "Premium Quality Anarkali Suit Set",
+   "handle": "premium-quality-anarkali-suit-set",
+   "colours": [
+    {
+     "name": "Style 2",
+     "handle": "premium-quality-anarkali-suit-set-copy",
+     "title": "Premium Quality Anarkali Suit Set",
+     "price": 69900,
+     "compareAtPrice": 233000,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8762.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8762.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8759.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8751.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8761.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8764.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8766.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "S [36]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Style 3",
+     "handle": "premium-quality-anarkali-suit-set-copy-1",
+     "title": "Premium Quality Anarkali Suit Set",
+     "price": 54900,
+     "compareAtPrice": 183000,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8730.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8730.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8737.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8738.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8734.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8726.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8736.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "S [36]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Style 1",
+     "handle": "premium-quality-anarkali-suit-set",
+     "title": "Premium Quality Anarkali Suit Set",
+     "price": 59900,
+     "compareAtPrice": 199667,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8780.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8780.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8774.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8776.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8777.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8778.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8779.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8771.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "S [36]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "M [38]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "L [40]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    }
+   ]
+  },
+  "same-premium-quality-kediya-suit-set-anarkali": {
+   "key": "same-premium-quality-kediya-suit-set-anarkali",
+   "title": "Premium Quality Kediya Suit Set",
+   "handle": "premium-quality-anarkali-suit-set-copy-2",
+   "colours": [
+    {
+     "name": "Style 2",
+     "handle": "premium-quality-kediya-suit-set-copy",
+     "title": "Premium Quality Kediya Suit Set",
+     "price": 64900,
+     "compareAtPrice": 216333,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_2210.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_2210.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "S [36]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "M [38]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "L [40]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Style 1",
+     "handle": "premium-quality-anarkali-suit-set-copy-2",
+     "title": "Premium Quality Kediya Suit Set",
+     "price": 64900,
+     "compareAtPrice": 216333,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_2190.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_2190.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_2186.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_2192.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_2193.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_2195.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_2191.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "S [36]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "M [38]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "L [40]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    }
+   ]
+  },
+  "same-chandni-s-latest-anarkali-suit-set-anarkali": {
+   "key": "same-chandni-s-latest-anarkali-suit-set-anarkali",
+   "title": "Chandni's Latest Anarkali Suit Set",
+   "handle": "chandnis-latest-anarkali-suit-set",
+   "colours": [
+    {
+     "name": "Style 1",
+     "handle": "chandnis-latest-anarkali-suit-set",
+     "title": "Chandni's Latest Anarkali Suit Set",
+     "price": 69900,
+     "compareAtPrice": 233000,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6253559923455672476_y_1.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6253559923455672476_y_1.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6253559923455672475_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6253559923455672473_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6253559923455672474_y.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "S [36]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Style 2",
+     "handle": "chandnis-latest-anarkali-suit-set-8201648537732",
+     "title": "Chandni's Latest Anarkali Suit Set",
+     "price": 54900,
+     "compareAtPrice": 183000,
+     "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6253559923455672476_y_1_1.webp",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6253559923455672476_y_1_1.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6253559923455672474_y.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6253559923455672473_y.webp",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6253559923455672475_y.webp"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "S [36]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    }
+   ]
+  },
+  "same-premium-quality-silk-gown-anarkali-suit-set-anarkali": {
+   "key": "same-premium-quality-silk-gown-anarkali-suit-set-anarkali",
+   "title": "Premium Quality Silk Gown Anarkali Suit Set",
+   "handle": "anarkali-pink-suit",
+   "colours": [
+    {
+     "name": "Red",
+     "handle": "anarkali-pink-suit",
+     "title": "Premium Quality Silk Gown Anarkali Suit Set",
+     "price": 49900,
+     "compareAtPrice": 124750,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_5876_4b777e58-8260-4ffc-8166-a8b45f6253c1.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_5876_4b777e58-8260-4ffc-8166-a8b45f6253c1.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_5877_87070539-7a59-4363-9dd4-14b9cad29bf5.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_5878_2c41b761-94ac-427d-a67b-6bc99533ac55.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_5882_2b7128fe-58a4-4c8e-9034-f7b7001445c2.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_5883.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8682.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8917.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8918.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8919.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8921.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8922.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8863.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8862.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8859.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8857.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8861.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_8858.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "S [36]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "M [38]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "L [40]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "Red"
+    },
+    {
+     "name": "DKB-265",
+     "handle": "multi-floral-print-fabric-fully-flair-anarkali-with-duppta-set-pent-ready-to-wear-dkb-265",
+     "title": "Premium Quality Silk Gown Anarkali Suit Set",
+     "price": 59900,
+     "compareAtPrice": 199667,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_4502_c0d8cc20-f811-47e3-9dba-aef7de2081ff.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_4502_c0d8cc20-f811-47e3-9dba-aef7de2081ff.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_4503_4122f784-0b98-4b9a-aeb7-f4a69b49e961.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_4500_64e4d130-2769-4750-b166-4c394fe3ef51.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_4497_ea3f4b4c-1b6b-4f67-9ed2-9d4168ac3df7.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_4496_56fc421a-1ec1-4a2b-b0be-3bc75e14adf6.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_4498_dd458f73-1f44-4dbe-8161-698e2a9c9723.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_4499_9274a69c-91a9-4dca-be95-8441cd119493.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_4504_4f5035de-76c5-461c-82af-2b6552b2e52d.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "S [36]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "M [38]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "L [40]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Style 1",
+     "handle": "pure-soft-fox-georgette-laheriya-print-dkb-264-rani-pink",
+     "title": "Premium Quality Silk Gown Anarkali Suit Set",
+     "price": 54900,
+     "compareAtPrice": 183000,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_3653.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_3653.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_3652.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_3648.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_3651.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_3650.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_3649.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_3647.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_3654.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "S [36]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": false
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "DKB-264",
+     "handle": "copy-of-pure-soft-fox-georgette-laheriya-print-dkb-264",
+     "title": "Premium Quality Silk Gown Anarkali Suit Set",
+     "price": 54900,
+     "compareAtPrice": 183000,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_3670_1d0204d7-2e23-4690-a166-2c0bdb72ad0f.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_3670_1d0204d7-2e23-4690-a166-2c0bdb72ad0f.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_3667.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_3671_3d7123d0-3e7d-4b57-9dfb-e2f841a4bf07.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_3667_6bef2df3-0014-4050-b22b-25a6fe7089e1.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_3669_c13a837c-9818-4d1e-962b-1c0df0e3f0f4.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_3666_069b6aef-32b3-4bb2-af10-fed4bb7d8d02.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_3664.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "S [36]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "DKB-262",
+     "handle": "copy-of-pure-soft-organza-anarkali-suit-set-with-fully-stitched-dkb-262",
+     "title": "Premium Quality Silk Gown Anarkali Suit Set",
+     "price": 64900,
+     "compareAtPrice": 216333,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_3638.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_3638.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_3631.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_3635.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_3630.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_3637.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_3632.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_3629.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_3636.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "S [36]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "M [38]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "L [40]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Style 2",
+     "handle": "pure-soft-organza-anarkali-suit-set-with-fully-stitched-dkb-261-wine",
+     "title": "Premium Quality Silk Gown Anarkali Suit Set",
+     "price": 69900,
+     "compareAtPrice": 233000,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_5873.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_5873.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_5875.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_5872.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_5874.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_5870.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_5871.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_5867.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_5873_4fd563b3-d283-405c-b721-8d128e133c26.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "S [36]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Style 3",
+     "handle": "pure-soft-organza-anarkali-suit-set-with-fully-stitched-dkb-25",
+     "title": "Premium Quality Silk Gown Anarkali Suit Set",
+     "price": 54900,
+     "compareAtPrice": 183000,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_1263.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_1263.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_1261.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_1260.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_1259.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_1258.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "S [36]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 54900,
+       "compareAtPrice": 183000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Style 4",
+     "handle": "copy-of-pure-soft-organza-anarkali-suit-set-with-fully-stitched-dkb-27",
+     "title": "Premium Quality Silk Gown Anarkali Suit Set",
+     "price": 49900,
+     "compareAtPrice": 124750,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_5877.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_5877.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_5880.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_5882.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_5884.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_5878.jpg",
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_5876.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "S [36]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "M [38]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "L [40]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    }
+   ]
+  },
+  "same-light-purple-colour-embroidered-lehenga-choli-lehnga": {
+   "key": "same-light-purple-colour-embroidered-lehenga-choli-lehnga",
+   "title": "Light Purple Colour Embroidered Lehenga Choli",
+   "handle": "light-purple-colour-embroidered-lehenga-choli",
+   "colours": [
+    {
+     "name": "Style 170",
+     "handle": "light-purple-colour-embroidered-attractive-faux-georgette-lehenga-choli-lc170",
+     "title": "Light Purple Colour Embroidered Lehenga Choli",
+     "price": 49900,
+     "compareAtPrice": 124750,
+     "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/products/170.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0738/8345/1696/products/170.jpg"
+     ],
+     "sizes": [
+      "Free Size"
+     ],
+     "sizePricing": {
+      "Free Size": {
+       "price": 49900,
+       "compareAtPrice": 124750,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "Purple"
+    },
+    {
+     "name": "Purple",
+     "handle": "light-purple-colour-embroidered-lehenga-choli",
+     "title": "Light Purple Colour Embroidered Lehenga Choli",
+     "price": 59900,
+     "compareAtPrice": 199667,
+     "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/6143366017716438446.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/6143366017716438446.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/6143366017716438445.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/6143366017716438444.jpg"
+     ],
+     "sizes": [
+      "Free Size"
+     ],
+     "sizePricing": {
+      "Free Size": {
+       "price": 59900,
+       "compareAtPrice": 199667,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "Purple"
+    }
+   ]
+  },
+  "same-premiumreadymadeanarkalisuitset-3-pis-anarkali": {
+   "key": "same-premiumreadymadeanarkalisuitset-3-pis-anarkali",
+   "title": "Premiumreadymadeanarkalisuitset [3 Pis]",
+   "handle": "premium-readymade-anarkali-suit-set-3-pis-1",
+   "colours": [
+    {
+     "name": "Style 2",
+     "handle": "premium-readymade-anarkali-suit-set-3-pis",
+     "title": "Premiumreadymadeanarkalisuitset [3 Pis]",
+     "price": 64900,
+     "compareAtPrice": 216333,
+     "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/6336793967294353592.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/6336793967294353592.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/6336793967294353594.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/6336793967294353593.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/6336793967294353595.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/6336793967294353596.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "S [36]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "M [38]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "L [40]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Style 1",
+     "handle": "premium-readymade-anarkali-suit-set-3-pis-1",
+     "title": "Premiumreadymadeanarkalisuitset [3 Pis]",
+     "price": 69900,
+     "compareAtPrice": 233000,
+     "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6064423200264753383_y.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6064423200264753383_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6064423200264753388_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6064423200264753387_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6064423200264753386_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6064423200264753385_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6064423200264753384_y.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "S [36]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    }
+   ]
+  },
+  "same-rang-e-royale-blooming-lehenga-suit-set-lehnga": {
+   "key": "same-rang-e-royale-blooming-lehenga-suit-set-lehnga",
+   "title": "Rang-E-Royale Blooming Lehenga Suit Set",
+   "handle": "rang-e-royale-blooming-lehenga-suit-set-10511720087684",
+   "colours": [
+    {
+     "name": "Style 2",
+     "handle": "rang-e-royale-blooming-lehenga-suit-set-1",
+     "title": "Rang-E-Royale Blooming Lehenga Suit Set",
+     "price": 69900,
+     "compareAtPrice": 233000,
+     "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/72fb7192-b7bc-4950-9863-5e00a941c114.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/72fb7192-b7bc-4950-9863-5e00a941c114.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/a95e4d8e-40ab-4284-aba1-d666cb2d7f13.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/aaf162b4-5b10-4c78-894b-2f7282ccfa88.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/1f2380bb-1197-46e3-899e-ab232fd19b75.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/f6e8be8c-3927-4905-9b05-85f0d271ccd9.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6167693120506630708_y.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "S [36]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "M [38]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "L [40]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 69900,
+       "compareAtPrice": 233000,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    },
+    {
+     "name": "Style 1",
+     "handle": "rang-e-royale-blooming-lehenga-suit-set-10511720087684",
+     "title": "Rang-E-Royale Blooming Lehenga Suit Set",
+     "price": 64900,
+     "compareAtPrice": 216333,
+     "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6167693120506630699_y.jpg",
+     "images": [
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6167693120506630699_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6167693120506630697_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6167693120506630702_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6167693120506630701_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/photo_6167693120506630700_y.jpg",
+      "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/d040b624-2a63-479f-b063-57fb159fd446.jpg"
+     ],
+     "sizes": [
+      "XS [34]",
+      "S [36]",
+      "M [38]",
+      "L [40]",
+      "XL [42]",
+      "2XL [44]",
+      "3XL [46]"
+     ],
+     "sizePricing": {
+      "XS [34]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "S [36]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "M [38]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "L [40]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "XL [42]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "2XL [44]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      },
+      "3XL [46]": {
+       "price": 64900,
+       "compareAtPrice": 216333,
+       "available": true
+      }
+     },
+     "inStock": true,
+     "colourCode": "As Shown"
+    }
+   ]
   }
  },
  "products": [
@@ -2705,12 +7228,14 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2026-09-29T03:04:17-04:00"
+   "publishedAt": "2026-09-29T03:04:17-04:00",
+   "colourGroup": "same-black-cosmo-slit-anarkali-premium-suit-set-anarkali",
+   "colourName": "Black"
   },
   {
    "handle": "myra-cosmo-slit-anarkali-premium-suit-set",
    "sourceHandle": "myra-cosmo-slit-anarkali-premium-suit-set",
-   "title": "Myra cosmo Slit Anarkali Premium Suit Set",
+   "title": "Myra cosmo Slit Anarkali Premium Suit Set — Style 2",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -2795,12 +7320,14 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2026-09-29T02:58:28-04:00"
+   "publishedAt": "2026-09-29T02:58:28-04:00",
+   "colourGroup": "same-myra-cosmo-slit-anarkali-premium-suit-set-anarkali",
+   "colourName": "Style 2"
   },
   {
    "handle": "rang-f-royale-blooming-lehenga-suit-set",
    "sourceHandle": "rang-f-royale-blooming-lehenga-suit-set",
-   "title": "Rang-F-Royale Blooming Lehenga Suit Set",
+   "title": "Rang-F-Royale Blooming Lehenga Suit Set — Style 2",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -2889,12 +7416,14 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2026-09-26T02:28:00-04:00"
+   "publishedAt": "2026-09-26T02:28:00-04:00",
+   "colourGroup": "same-rang-f-royale-blooming-lehenga-suit-set-lehnga",
+   "colourName": "Style 2"
   },
   {
    "handle": "rang-e-royale-blooming-lehenga-suit-set",
    "sourceHandle": "rang-e-royale-blooming-lehenga-suit-set",
-   "title": "Rang-F-Royale Blooming Lehenga Suit Set — Edition 2",
+   "title": "Rang-F-Royale Blooming Lehenga Suit Set",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -2983,7 +7512,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2026-09-23T06:03:29-04:00"
+   "publishedAt": "2026-09-23T06:03:29-04:00",
+   "colourGroup": "same-rang-f-royale-blooming-lehenga-suit-set-lehnga",
+   "colourName": "Style 1"
   },
   {
    "handle": "malveera-premium-quality-anarkali-suit-set",
@@ -3074,7 +7605,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2026-09-19T06:26:55-04:00"
+   "publishedAt": "2026-09-19T06:26:55-04:00",
+   "colourGroup": "same-malveera-premium-quality-anarkali-suit-set-anarkali",
+   "colourName": "Style 1"
   },
   {
    "handle": "vibhutis-wine-coloured-anarkali-suit-set-td06",
@@ -3328,7 +7861,7 @@
   {
    "handle": "maroon-trendy-anarkali-suit-set-1",
    "sourceHandle": "maroon-trendy-anarkali-suit-set-1",
-   "title": "Maroon Trendy Anarkali Suit Set",
+   "title": "Maroon Trendy Anarkali Suit Set — Style 1",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -3412,7 +7945,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2026-09-09T03:51:40-04:00"
+   "publishedAt": "2026-09-09T03:51:40-04:00",
+   "colourGroup": "same-maroon-trendy-anarkali-suit-set-anarkali",
+   "colourName": "Style 1"
   },
   {
    "handle": "gulabo-trendy-anarkali-suit-set",
@@ -3506,7 +8041,7 @@
   {
    "handle": "maroon-trendy-anarkali-suit-set",
    "sourceHandle": "maroon-trendy-anarkali-suit-set",
-   "title": "Maroon Trendy Anarkali Suit Set — Edition 2",
+   "title": "Maroon Trendy Anarkali Suit Set",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -3592,7 +8127,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2026-09-09T03:28:07-04:00"
+   "publishedAt": "2026-09-09T03:28:07-04:00",
+   "colourGroup": "same-maroon-trendy-anarkali-suit-set-anarkali",
+   "colourName": "Maroon"
   },
   {
    "handle": "yellow-trendy-anarkali-suit-set",
@@ -4399,7 +8936,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": true,
-   "publishedAt": "2026-08-13T01:27:58-04:00"
+   "publishedAt": "2026-08-13T01:27:58-04:00",
+   "colourGroup": "same-premium-ivory-royal-zari-work-kali-cut-anarkali-suit-set-ana",
+   "colourName": "Ivory"
   },
   {
    "handle": "premium-ivory-anarkali-with-royal-finish-elegance-anarkali-suit-set",
@@ -4697,7 +9236,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2026-08-06T07:38:22-04:00"
+   "publishedAt": "2026-08-06T07:38:22-04:00",
+   "colourGroup": "same-niru-s-noir-black-elegance-anarkali-suit-set-anarkali",
+   "colourName": "Black"
   },
   {
    "handle": "ruby-royale-red-anarkali-suit-set",
@@ -5242,7 +9783,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2026-08-03T07:17:26-04:00"
+   "publishedAt": "2026-08-03T07:17:26-04:00",
+   "colourGroup": "same-mita-heavy-traditional-embroidered-koti-anarkali-suit-set-an",
+   "colourName": "Style 1"
   },
   {
    "handle": "rikva-premium-vichitra-royal-elegant-suit-set",
@@ -5975,7 +10518,9 @@
    "reviewCount": 10,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2026-07-19T13:37:09-04:00"
+   "publishedAt": "2026-07-19T13:37:09-04:00",
+   "colourGroup": "same-premium-lakhnavi-embroidered-anarkali-suit-set-anarkali",
+   "colourName": "Style 1"
   },
   {
    "handle": "luxury-dark-pink-anarkali-suit-set",
@@ -7832,7 +12377,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2026-03-27T02:34:13-04:00"
+   "publishedAt": "2026-03-27T02:34:13-04:00",
+   "colourGroup": "same-krishva-s-exclusive-blue-floral-organza-anarkali-suit-set-an",
+   "colourName": "Blue"
   },
   {
    "handle": "rayon-gown-kurta-and-pent-set-ac-7005",
@@ -9138,7 +13685,9 @@
    "reviewCount": 0,
    "inStock": false,
    "featured": false,
-   "publishedAt": "2026-01-29T07:55:10-05:00"
+   "publishedAt": "2026-01-29T07:55:10-05:00",
+   "colourGroup": "same-star-georgette-silk-anarkali-suit-with-skirt-anarkali",
+   "colourName": "Style 1"
   },
   {
    "handle": "piink-shades-lakhnavi-embroidered-work-anarkali-suit-set",
@@ -10313,7 +14862,9 @@
    "reviewCount": 15,
    "inStock": false,
    "featured": false,
-   "publishedAt": "2025-12-24T02:21:25-05:00"
+   "publishedAt": "2025-12-24T02:21:25-05:00",
+   "colourGroup": "same-premium-quality-heavy-traditional-crop-top-with-shrug-anarka",
+   "colourName": "Style 1"
   },
   {
    "handle": "dusty-rose-shades-crunchy-silk-anarkali-plazo-suit-set",
@@ -10658,7 +15209,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-12-15T08:20:52-05:00"
+   "publishedAt": "2025-12-15T08:20:52-05:00",
+   "colourGroup": "same-premium-quality-heavy-traditional-lehenga-choli-lehnga",
+   "colourName": "Style 1"
   },
   {
    "handle": "anastasia-lehenga-choli",
@@ -11220,7 +15773,7 @@
   {
    "handle": "premium-quality-heavy-traditional-crop-top-with-shrug-3",
    "sourceHandle": "premium-quality-heavy-traditional-crop-top-with-shrug-3",
-   "title": "Premium Quality Heavy Traditional Crop Top with Shrug — Edition 2",
+   "title": "Premium Quality Heavy Traditional Crop Top with Shrug — Style 2",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -11305,12 +15858,14 @@
    "reviewCount": 8,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-11-30T08:39:30-05:00"
+   "publishedAt": "2025-11-30T08:39:30-05:00",
+   "colourGroup": "same-premium-quality-heavy-traditional-crop-top-with-shrug-anarka",
+   "colourName": "Style 2"
   },
   {
    "handle": "premium-quality-heavy-traditional-crop-top-with-shrug-2",
    "sourceHandle": "premium-quality-heavy-traditional-crop-top-with-shrug-2",
-   "title": "Premium Quality Heavy Traditional Crop Top with Shrug — Edition 3",
+   "title": "Premium Quality Heavy Traditional Crop Top with Shrug — Style 3",
    "price": 64900,
    "compareAtPrice": 216333,
    "images": [
@@ -11395,12 +15950,14 @@
    "reviewCount": 0,
    "inStock": false,
    "featured": false,
-   "publishedAt": "2025-11-30T08:35:17-05:00"
+   "publishedAt": "2025-11-30T08:35:17-05:00",
+   "colourGroup": "same-premium-quality-heavy-traditional-crop-top-with-shrug-anarka",
+   "colourName": "Style 3"
   },
   {
    "handle": "premium-quality-heavy-traditional-lehenga-choli-2",
    "sourceHandle": "premium-quality-heavy-traditional-lehenga-choli-2",
-   "title": "Premium Quality Heavy Traditional Lehenga Choli — Edition 2",
+   "title": "Premium Quality Heavy Traditional Lehenga Choli — Style 2",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -11467,12 +16024,14 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-11-30T08:31:47-05:00"
+   "publishedAt": "2025-11-30T08:31:47-05:00",
+   "colourGroup": "same-premium-quality-heavy-traditional-lehenga-choli-lehnga",
+   "colourName": "Style 2"
   },
   {
    "handle": "premium-quality-heavy-traditional-lehenga-choli-1",
    "sourceHandle": "premium-quality-heavy-traditional-lehenga-choli-1",
-   "title": "Premium Quality Heavy Traditional Lehenga Choli — Edition 3",
+   "title": "Premium Quality Heavy Traditional Lehenga Choli — Style 3",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -11537,12 +16096,14 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-11-30T08:30:06-05:00"
+   "publishedAt": "2025-11-30T08:30:06-05:00",
+   "colourGroup": "same-premium-quality-heavy-traditional-lehenga-choli-lehnga",
+   "colourName": "Style 3"
   },
   {
    "handle": "premium-quality-heavy-traditional-crop-top-with-shrug-1",
    "sourceHandle": "premium-quality-heavy-traditional-crop-top-with-shrug-1",
-   "title": "Premium Quality Heavy Traditional Crop Top with Shrug — Edition 4",
+   "title": "Premium Quality Heavy Traditional Crop Top with Shrug — Style 4",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -11627,12 +16188,14 @@
    "reviewCount": 1,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-11-30T08:23:08-05:00"
+   "publishedAt": "2025-11-30T08:23:08-05:00",
+   "colourGroup": "same-premium-quality-heavy-traditional-crop-top-with-shrug-anarka",
+   "colourName": "Style 4"
   },
   {
    "handle": "premium-quality-heavy-traditional-crop-top-with-shrug",
    "sourceHandle": "premium-quality-heavy-traditional-crop-top-with-shrug",
-   "title": "Premium Quality Heavy Traditional Crop Top with Shrug — Edition 5",
+   "title": "Premium Quality Heavy Traditional Crop Top with Shrug — Style 5",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -11717,12 +16280,14 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-11-30T08:18:21-05:00"
+   "publishedAt": "2025-11-30T08:18:21-05:00",
+   "colourGroup": "same-premium-quality-heavy-traditional-crop-top-with-shrug-anarka",
+   "colourName": "Style 5"
   },
   {
    "handle": "premium-quality-heavy-traditional-lehenga-choli",
    "sourceHandle": "premium-quality-heavy-traditional-lehenga-choli",
-   "title": "Premium Quality Heavy Traditional Lehenga Choli — Edition 4",
+   "title": "Premium Quality Heavy Traditional Lehenga Choli — Style 4",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -11789,7 +16354,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-11-30T08:06:31-05:00"
+   "publishedAt": "2025-11-30T08:06:31-05:00",
+   "colourGroup": "same-premium-quality-heavy-traditional-lehenga-choli-lehnga",
+   "colourName": "Style 4"
   },
   {
    "handle": "molins-fendy-silk-blush-red-anarkali-premium-suit-set",
@@ -12932,7 +17499,7 @@
   {
    "handle": "classic-pink-anarkali-suit-set",
    "sourceHandle": "classic-pink-anarkali-suit-set",
-   "title": "Classic Pink Anarkali Suit Set",
+   "title": "Classic Pink Anarkali Suit Set — Style 1",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -13017,7 +17584,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-09-14T01:25:53-04:00"
+   "publishedAt": "2025-09-14T01:25:53-04:00",
+   "colourGroup": "same-classic-pink-anarkali-suit-set-anarkali",
+   "colourName": "Style 1"
   },
   {
    "handle": "stunning-red-colour-premium-anarkali-suit-set",
@@ -13284,7 +17853,9 @@
    "reviewCount": 20,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-09-10T07:33:19-04:00"
+   "publishedAt": "2025-09-10T07:33:19-04:00",
+   "colourGroup": "same-classic-red-karva-chauth-special-anarkali-suit-set-anarkali",
+   "colourName": "Red"
   },
   {
    "handle": "pridha-purple-anarkali-suit-set",
@@ -15436,7 +20007,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-05-10T11:33:29-04:00"
+   "publishedAt": "2025-05-10T11:33:29-04:00",
+   "colourGroup": "same-saumya-neon-sharara-suit-set-sharara",
+   "colourName": "Style 1"
   },
   {
    "handle": "likshas-premium-quality-traditional-lehenga-choli-145",
@@ -15660,7 +20233,7 @@
   {
    "handle": "monshika-premium-quality-maroon-anarkali-suit-set",
    "sourceHandle": "monshika-premium-quality-maroon-anarkali-suit-set",
-   "title": "Alveera Premium Quality Anarkali Suit Set with Color",
+   "title": "Alveera Premium Quality Anarkali Suit Set with Color — Style 2",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -15712,7 +20285,9 @@
    "reviewCount": 23,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-04-17T11:12:44-04:00"
+   "publishedAt": "2025-04-17T11:12:44-04:00",
+   "colourGroup": "same-alveera-premium-quality-anarkali-suit-set-with-color-anarkal",
+   "colourName": "Style 2"
   },
   {
    "handle": "nehas-premium-anarkali-suit-set",
@@ -15803,7 +20378,9 @@
    "reviewCount": 55,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-04-03T12:05:03-04:00"
+   "publishedAt": "2025-04-03T12:05:03-04:00",
+   "colourGroup": "same-neha-heavy-pure-vichitra-anarkali-suit-set-anarkali",
+   "colourName": "Style 1"
   },
   {
    "handle": "madhvi-heavy-embroidered-maxi-set",
@@ -15894,7 +20471,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-04-03T03:25:24-04:00"
+   "publishedAt": "2025-04-03T03:25:24-04:00",
+   "colourGroup": "same-madhvi-heavy-embroidered-maxi-set-anarkali",
+   "colourName": "Style 1"
   },
   {
    "handle": "premium-designer-velvet-suit-set-rajwadi",
@@ -16345,7 +20924,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-02-28T09:49:07-05:00"
+   "publishedAt": "2025-02-28T09:49:07-05:00",
+   "colourGroup": "same-hazel-s-anarkali-partywear-suit-set-anarkali",
+   "colourName": "Style 1"
   },
   {
    "handle": "prachis-pink-havy-vichitra-royal-elegant-suit-set-copy",
@@ -16405,7 +20986,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-02-22T12:39:15-05:00"
+   "publishedAt": "2025-02-22T12:39:15-05:00",
+   "colourGroup": "same-prachi-s-black-heavy-vichitra-royal-elegant-suit-set-anarkal",
+   "colourName": "Black"
   },
   {
    "handle": "premium-quality-lukhnowi-peach-suit-set-copy",
@@ -16499,7 +21082,7 @@
   {
    "handle": "premium-quality-roman-silk-gown-anarkali-suit-set-copy",
    "sourceHandle": "premium-quality-roman-silk-gown-anarkali-suit-set-copy",
-   "title": "Premium Quality Roman Silk Gown Anarkali Suit Set",
+   "title": "Premium Quality Roman Silk Gown Anarkali Suit Set — Style 2",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -16584,12 +21167,14 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-02-18T00:23:05-05:00"
+   "publishedAt": "2025-02-18T00:23:05-05:00",
+   "colourGroup": "same-premium-quality-roman-silk-gown-anarkali-suit-set-anarkali",
+   "colourName": "Style 2"
   },
   {
    "handle": "premium-quality-gown-anarkali-suit-set-copy",
    "sourceHandle": "premium-quality-gown-anarkali-suit-set-copy",
-   "title": "Premium Quality Roman Silk Gown Anarkali Suit Set — Edition 2",
+   "title": "Premium Quality Roman Silk Gown Anarkali Suit Set — Style 3",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -16676,12 +21261,14 @@
    "reviewCount": 1,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-02-18T00:10:09-05:00"
+   "publishedAt": "2025-02-18T00:10:09-05:00",
+   "colourGroup": "same-premium-quality-roman-silk-gown-anarkali-suit-set-anarkali",
+   "colourName": "Style 3"
   },
   {
    "handle": "premium-quality-9-needle-gown-anarkali-suit-set-copy",
    "sourceHandle": "premium-quality-9-needle-gown-anarkali-suit-set-copy",
-   "title": "Premium Quality Roman Silk Gown Anarkali Suit Set — Edition 3",
+   "title": "Premium Quality Roman Silk Gown Anarkali Suit Set",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -16769,12 +21356,14 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-02-17T23:53:20-05:00"
+   "publishedAt": "2025-02-17T23:53:20-05:00",
+   "colourGroup": "same-premium-quality-roman-silk-gown-anarkali-suit-set-anarkali",
+   "colourName": "Style 1"
   },
   {
    "handle": "premium-quality-anarkali-suit-set-copy",
    "sourceHandle": "premium-quality-anarkali-suit-set-copy",
-   "title": "Premium Quality Anarkali Suit Set",
+   "title": "Premium Quality Anarkali Suit Set — Style 2",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -16853,7 +21442,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-02-14T05:46:29-05:00"
+   "publishedAt": "2025-02-14T05:46:29-05:00",
+   "colourGroup": "same-premium-quality-anarkali-suit-set-anarkali",
+   "colourName": "Style 2"
   },
   {
    "handle": "premium-quality-kediya-suit-set-copy-1",
@@ -16947,7 +21538,7 @@
   {
    "handle": "premium-quality-kediya-suit-set-copy",
    "sourceHandle": "premium-quality-kediya-suit-set-copy",
-   "title": "Premium Quality Kediya Suit Set",
+   "title": "Premium Quality Kediya Suit Set — Style 2",
    "price": 64900,
    "compareAtPrice": 216333,
    "images": [
@@ -17022,12 +21613,14 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-02-10T08:51:54-05:00"
+   "publishedAt": "2025-02-10T08:51:54-05:00",
+   "colourGroup": "same-premium-quality-kediya-suit-set-anarkali",
+   "colourName": "Style 2"
   },
   {
    "handle": "premium-quality-anarkali-suit-set-copy-2",
    "sourceHandle": "premium-quality-anarkali-suit-set-copy-2",
-   "title": "Premium Quality Kediya Suit Set — Edition 2",
+   "title": "Premium Quality Kediya Suit Set",
    "price": 64900,
    "compareAtPrice": 216333,
    "images": [
@@ -17107,7 +21700,9 @@
    "reviewCount": 2,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-02-10T08:51:53-05:00"
+   "publishedAt": "2025-02-10T08:51:53-05:00",
+   "colourGroup": "same-premium-quality-kediya-suit-set-anarkali",
+   "colourName": "Style 1"
   },
   {
    "handle": "prachis-red-havy-vichitra-royal-elegant-suit-set-copy",
@@ -18335,7 +22930,7 @@
   {
    "handle": "premium-quality-anarkali-suit-set-copy-1",
    "sourceHandle": "premium-quality-anarkali-suit-set-copy-1",
-   "title": "Premium Quality Anarkali Suit Set — Edition 2",
+   "title": "Premium Quality Anarkali Suit Set — Style 3",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -18414,12 +23009,14 @@
    "reviewCount": 1,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-01-21T06:41:36-05:00"
+   "publishedAt": "2025-01-21T06:41:36-05:00",
+   "colourGroup": "same-premium-quality-anarkali-suit-set-anarkali",
+   "colourName": "Style 3"
   },
   {
    "handle": "premium-quality-anarkali-suit-set",
    "sourceHandle": "premium-quality-anarkali-suit-set",
-   "title": "Premium Quality Anarkali Suit Set — Edition 3",
+   "title": "Premium Quality Anarkali Suit Set",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -18499,7 +23096,9 @@
    "reviewCount": 4,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-01-21T06:32:06-05:00"
+   "publishedAt": "2025-01-21T06:32:06-05:00",
+   "colourGroup": "same-premium-quality-anarkali-suit-set-anarkali",
+   "colourName": "Style 1"
   },
   {
    "handle": "vedikas-purple-coloured-premium-quality-anarkali-suit-set",
@@ -18749,7 +23348,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2024-12-26T08:22:58-05:00"
+   "publishedAt": "2024-12-26T08:22:58-05:00",
+   "colourGroup": "same-chandni-s-latest-anarkali-suit-set-anarkali",
+   "colourName": "Style 1"
   },
   {
    "handle": "white-colored-embroidered-georgette-anarkali-fully-stitched-suit-set-ay-341",
@@ -20614,7 +25215,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2024-09-10T11:02:23-04:00"
+   "publishedAt": "2024-09-10T11:02:23-04:00",
+   "colourGroup": "same-premium-quality-silk-gown-anarkali-suit-set-anarkali",
+   "colourName": "Red"
   },
   {
    "handle": "taniyas-new-party-wear-suit-set-td-139-copy",
@@ -22951,7 +27554,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2024-03-26T05:21:24-04:00"
+   "publishedAt": "2024-03-26T05:21:24-04:00",
+   "colourGroup": "same-premium-quality-silk-gown-anarkali-suit-set-anarkali",
+   "colourName": "DKB-265"
   },
   {
    "handle": "trendy-off-white-suit-set-with-embroidery-and-sequnce-work",
@@ -23215,7 +27820,7 @@
   {
    "handle": "pure-soft-fox-georgette-laheriya-print-dkb-264-rani-pink",
    "sourceHandle": "pure-soft-fox-georgette-laheriya-print-dkb-264-rani-pink",
-   "title": "Premium Quality Silk Gown Anarkali Suit Set — Edition 2",
+   "title": "Premium Quality Silk Gown Anarkali Suit Set — Style 1",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -23297,7 +27902,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2024-03-09T05:21:20-05:00"
+   "publishedAt": "2024-03-09T05:21:20-05:00",
+   "colourGroup": "same-premium-quality-silk-gown-anarkali-suit-set-anarkali",
+   "colourName": "Style 1"
   },
   {
    "handle": "copy-of-sunaina-mustard-gown-digital-printed-faux-georgette-7011",
@@ -23477,7 +28084,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2024-03-07T09:02:51-05:00"
+   "publishedAt": "2024-03-07T09:02:51-05:00",
+   "colourGroup": "same-premium-quality-silk-gown-anarkali-suit-set-anarkali",
+   "colourName": "DKB-264"
   },
   {
    "handle": "copy-of-pure-soft-organza-anarkali-suit-set-with-fully-stitched-dkb-262",
@@ -23564,7 +28173,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2024-02-19T04:33:28-05:00"
+   "publishedAt": "2024-02-19T04:33:28-05:00",
+   "colourGroup": "same-premium-quality-silk-gown-anarkali-suit-set-anarkali",
+   "colourName": "DKB-262"
   },
   {
    "handle": "copy-of-lakhnawi-embroidered-georgette-anarkali-fully-stitched-suit-set-waite-115",
@@ -24340,7 +28951,7 @@
   {
    "handle": "pure-soft-organza-anarkali-suit-set-with-fully-stitched-dkb-261-wine",
    "sourceHandle": "pure-soft-organza-anarkali-suit-set-with-fully-stitched-dkb-261-wine",
-   "title": "Premium Quality Silk Gown Anarkali Suit Set — Edition 3",
+   "title": "Premium Quality Silk Gown Anarkali Suit Set — Style 2",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -24423,7 +29034,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2024-01-11T01:57:26-05:00"
+   "publishedAt": "2024-01-11T01:57:26-05:00",
+   "colourGroup": "same-premium-quality-silk-gown-anarkali-suit-set-anarkali",
+   "colourName": "Style 2"
   },
   {
    "handle": "gajgamini-brown-maxi-set",
@@ -24496,7 +29109,7 @@
   {
    "handle": "pure-soft-organza-anarkali-suit-set-with-fully-stitched-dkb-25",
    "sourceHandle": "pure-soft-organza-anarkali-suit-set-with-fully-stitched-dkb-25",
-   "title": "Premium Quality Silk Gown Anarkali Suit Set — Edition 4",
+   "title": "Premium Quality Silk Gown Anarkali Suit Set — Style 3",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -24576,12 +29189,14 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2023-12-28T05:39:15-05:00"
+   "publishedAt": "2023-12-28T05:39:15-05:00",
+   "colourGroup": "same-premium-quality-silk-gown-anarkali-suit-set-anarkali",
+   "colourName": "Style 3"
   },
   {
    "handle": "copy-of-pure-soft-organza-anarkali-suit-set-with-fully-stitched-dkb-27",
    "sourceHandle": "copy-of-pure-soft-organza-anarkali-suit-set-with-fully-stitched-dkb-27",
-   "title": "Premium Quality Silk Gown Anarkali Suit Set — Edition 5",
+   "title": "Premium Quality Silk Gown Anarkali Suit Set — Style 4",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -24662,7 +29277,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2023-12-28T02:09:53-05:00"
+   "publishedAt": "2023-12-28T02:09:53-05:00",
+   "colourGroup": "same-premium-quality-silk-gown-anarkali-suit-set-anarkali",
+   "colourName": "Style 4"
   },
   {
    "handle": "copy-of-aniska-white-embroidered-georgette-anarkali-fully-stitched-suit-set",
@@ -26227,7 +30844,7 @@
   {
    "handle": "light-purple-colour-embroidered-attractive-faux-georgette-lehenga-choli-lc170",
    "sourceHandle": "light-purple-colour-embroidered-attractive-faux-georgette-lehenga-choli-lc170",
-   "title": "Light Purple Colour Embroidered Lehenga Choli",
+   "title": "Light Purple Colour Embroidered Lehenga Choli — Style 170",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -26271,7 +30888,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2023-03-21T13:18:32-04:00"
+   "publishedAt": "2023-03-21T13:18:32-04:00",
+   "colourGroup": "same-light-purple-colour-embroidered-lehenga-choli-lehnga",
+   "colourName": "Style 170"
   },
   {
    "handle": "saniya-s-pink-gown",
@@ -26445,7 +31064,7 @@
   {
    "handle": "classic-pink-anarkali-suit-set-15408494084228",
    "sourceHandle": "classic-pink-anarkali-suit-set",
-   "title": "Classic Pink Anarkali Suit Set — Edition 2",
+   "title": "Classic Pink Anarkali Suit Set",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -26532,12 +31151,14 @@
    "reviewCount": 11,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2026-10-07T14:21:02+05:30"
+   "publishedAt": "2026-10-07T14:21:02+05:30",
+   "colourGroup": "same-classic-pink-anarkali-suit-set-anarkali",
+   "colourName": "Pink"
   },
   {
    "handle": "classic-red-karva-chauth-special-anarkali-suit-set",
    "sourceHandle": "classic-red-karva-chauth-special-anarkali-suit-set",
-   "title": "Classic Red Karva Chauth Special Anarkali Suit Set — Edition 2",
+   "title": "Classic Red Karva Chauth Special Anarkali Suit Set — Style 1",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -26624,7 +31245,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2026-10-07T14:16:47+05:30"
+   "publishedAt": "2026-10-07T14:16:47+05:30",
+   "colourGroup": "same-classic-red-karva-chauth-special-anarkali-suit-set-anarkali",
+   "colourName": "Style 1"
   },
   {
    "handle": "designer-anarkali-suit-is-luxury-clothing-considered-to-be-high-quality-made-by-thread-sequins-embroidery-this-is-made-for-desirable-womens-who-deserve-it",
@@ -26711,7 +31334,7 @@
   {
    "handle": "black-cosmo-slit-anarkali-premium-suit-set-10521452478596",
    "sourceHandle": "black-cosmo-slit-anarkali-premium-suit-set",
-   "title": "Black Cosmo Slit Anarkali Premium Suit Set — Edition 2",
+   "title": "Black Cosmo Slit Anarkali Premium Suit Set — Style 1",
    "price": 64900,
    "compareAtPrice": 216333,
    "images": [
@@ -26797,7 +31420,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2026-09-29T17:40:53+05:30"
+   "publishedAt": "2026-09-29T17:40:53+05:30",
+   "colourGroup": "same-black-cosmo-slit-anarkali-premium-suit-set-anarkali",
+   "colourName": "Style 1"
   },
   {
    "handle": "presenting-new-crunchy-silk-fabric-with-embroidery-sequence-dori-and-jari-work-top-with-dupatta-set-bell-bottom-pent-ready-to-wear",
@@ -26879,7 +31504,7 @@
   {
    "handle": "nirus-noir-black-elegance-anarkali-suit-set-10511760359556",
    "sourceHandle": "nirus-noir-black-elegance-anarkali-suit-set",
-   "title": "Niru's Noir Black Elegance Anarkali Suit Set — Edition 2",
+   "title": "Niru's Noir Black Elegance Anarkali Suit Set — Style 1",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -26971,7 +31596,9 @@
    "reviewCount": 9,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2026-09-24T12:26:59+05:30"
+   "publishedAt": "2026-09-24T12:26:59+05:30",
+   "colourGroup": "same-niru-s-noir-black-elegance-anarkali-suit-set-anarkali",
+   "colourName": "Style 1"
   },
   {
    "handle": "kaumya-neon-elegant-sharara-suit-set-6061-sky",
@@ -27071,7 +31698,7 @@
   {
    "handle": "neha-heavy-pure-vichitra-anarkali-suit-set",
    "sourceHandle": "neha-heavy-pure-vichitra-anarkali-suit-set",
-   "title": "Neha Heavy Pure Vichitra Anarkali Suit Set — Edition 2",
+   "title": "Neha Heavy Pure Vichitra Anarkali Suit Set — Style 2",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -27157,7 +31784,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2026-09-10T12:50:39+05:30"
+   "publishedAt": "2026-09-10T12:50:39+05:30",
+   "colourGroup": "same-neha-heavy-pure-vichitra-anarkali-suit-set-anarkali",
+   "colourName": "Style 2"
   },
   {
    "handle": "premium-anarkali-suit-set-3-piece",
@@ -27336,7 +31965,7 @@
   {
    "handle": "malveera-premium-quality-anarkali-suit-set-10456594841732",
    "sourceHandle": "malveera-premium-quality-anarkali-suit-set",
-   "title": "Malveera Premium Quality Anarkali Suit Set — Edition 2",
+   "title": "Malveera Premium Quality Anarkali Suit Set — Style 2",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -27421,12 +32050,14 @@
    "reviewCount": 18,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2026-08-22T12:49:48+05:30"
+   "publishedAt": "2026-08-22T12:49:48+05:30",
+   "colourGroup": "same-malveera-premium-quality-anarkali-suit-set-anarkali",
+   "colourName": "Style 2"
   },
   {
    "handle": "premium-readymade-anarkali-suit-set-3-pis",
    "sourceHandle": "premium-readymade-anarkali-suit-set-3-pis",
-   "title": "Premiumreadymadeanarkalisuitset [3 Pis]",
+   "title": "Premiumreadymadeanarkalisuitset [3 Pis] — Style 2",
    "price": 64900,
    "compareAtPrice": 216333,
    "images": [
@@ -27514,7 +32145,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2026-08-15T11:57:36+05:30"
+   "publishedAt": "2026-08-15T11:57:36+05:30",
+   "colourGroup": "same-premiumreadymadeanarkalisuitset-3-pis-anarkali",
+   "colourName": "Style 2"
   },
   {
    "handle": "presenting-new-premium-quality-pure-romansilk-fabric-fully-flare-anarkali-with-fancy-dupapta-set-pent-ready-to-wear",
@@ -27697,7 +32330,7 @@
   {
    "handle": "new-arrival-premium-designer-collection-fall-in-love-with-elegance",
    "sourceHandle": "💜-new-arrival-premium-designer-collection-💜-fall-in-love-with-elegance-✨",
-   "title": "Premium Designer Silk Suit Set",
+   "title": "Premium Designer Collection Fall in love with elegance!",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -27793,7 +32426,7 @@
   {
    "handle": "premium-lakhnavi-embroidered-anarkali-suit-set",
    "sourceHandle": "premium-lakhnavi-embroidered-anarkali-suit-set",
-   "title": "Premium Lakhnavi Embroidered Anarkali Suit Set — Edition 2",
+   "title": "Premium Lakhnavi Embroidered Anarkali Suit Set — Style 2",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -27880,7 +32513,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2026-07-30T13:32:54+05:30"
+   "publishedAt": "2026-07-30T13:32:54+05:30",
+   "colourGroup": "same-premium-lakhnavi-embroidered-anarkali-suit-set-anarkali",
+   "colourName": "Style 2"
   },
   {
    "handle": "kunza-black-royal-anarkali-set-6127",
@@ -28616,7 +33251,7 @@
   {
    "handle": "presenting-new-crunchy-silk-fabric-with-embroidery-sequence-and-jari-work-top-with-duppta-set-bell-bottom-pent-ready-to-wear-kb-300-tealblue-offwhite-wine",
    "sourceHandle": "presenting-new-crunchy-silk-fabric-with-embroidery-sequence-and-jari-work-top-with-duppta-set-bell-bottom-pent-ready-to-wear-kb-300-tealblue-offwhite-wine",
-   "title": "Presenting New Crunchy Silk Fabric with Embroidery Sequence and Zari Work",
+   "title": "Wine Crunchy Silk Embroidered Gown Set",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -29129,7 +33764,7 @@
   {
    "handle": "madhvi-heavy-embroidered-maxi-set-10016283328644",
    "sourceHandle": "madhvi-heavy-embroidered-maxi-set",
-   "title": "Madhvi Heavy Embroidered Maxi Set — Edition 2",
+   "title": "Madhvi Heavy Embroidered Maxi Set — Style 2",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -29210,7 +33845,9 @@
    "reviewCount": 10,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-05-03T16:52:42+05:30"
+   "publishedAt": "2025-05-03T16:52:42+05:30",
+   "colourGroup": "same-madhvi-heavy-embroidered-maxi-set-anarkali",
+   "colourName": "Style 2"
   },
   {
    "handle": "shavis-peach-havy-zimmy-chu-royal-elegant-suit-set",
@@ -29307,7 +33944,7 @@
   {
    "handle": "prachis-pink-havy-vichitra-royal-elegant-suit-set-copy-8228835983492",
    "sourceHandle": "prachis-pink-havy-vichitra-royal-elegant-suit-set-copy",
-   "title": "Prachi's' Black Heavy Vichitra Royal Elegant Suit Set — Edition 2",
+   "title": "Prachi's' Black Heavy Vichitra Royal Elegant Suit Set — Style 1",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -29382,12 +34019,14 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-03-11T18:21:18+05:30"
+   "publishedAt": "2025-03-11T18:21:18+05:30",
+   "colourGroup": "same-prachi-s-black-heavy-vichitra-royal-elegant-suit-set-anarkal",
+   "colourName": "Style 1"
   },
   {
    "handle": "premium-quality-roman-silk-gown-anarkali-suit-set-copy-8228835819652",
    "sourceHandle": "premium-quality-roman-silk-gown-anarkali-suit-set-copy",
-   "title": "Premium Quality Roman Silk Gown Anarkali Suit Set — Edition 4",
+   "title": "Premium Quality Roman Silk Gown Anarkali Suit Set — Style 4",
    "price": 64900,
    "compareAtPrice": 216333,
    "images": [
@@ -29465,7 +34104,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-06-28T16:31:35+05:30"
+   "publishedAt": "2025-06-28T16:31:35+05:30",
+   "colourGroup": "same-premium-quality-roman-silk-gown-anarkali-suit-set-anarkali",
+   "colourName": "Style 4"
   },
   {
    "handle": "black-faux-blooming-anarkali-style-sarara-suit-set-copy",
@@ -30394,7 +35035,7 @@
   {
    "handle": "krishvas-exclusive-blue-floral-organza-anarkali-suit-set-10340442833028",
    "sourceHandle": "krishvas-exclusive-blue-floral-organza-anarkali-suit-set",
-   "title": "Krishva's Exclusive Blue Floral Organza Anarkali Suit Set — Edition 2",
+   "title": "Krishva's Exclusive Blue Floral Organza Anarkali Suit Set — Style 1",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -30483,7 +35124,9 @@
    "reviewCount": 11,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2026-05-25T15:57:51+05:30"
+   "publishedAt": "2026-05-25T15:57:51+05:30",
+   "colourGroup": "same-krishva-s-exclusive-blue-floral-organza-anarkali-suit-set-an",
+   "colourName": "Style 1"
   },
   {
    "handle": "presenting-new-frendy-silk-fabric-with-embroidery-sequence-dori-and-jari-work-top-with-duppta-set-bell-bottom-pent-ready-to-wear",
@@ -30566,7 +35209,7 @@
   {
    "handle": "premium-readymade-anarkali-suit-set-3-pis-1",
    "sourceHandle": "premium-readymade-anarkali-suit-set-3-pis-1",
-   "title": "Premiumreadymadeanarkalisuitset [3 Pis] — Edition 2",
+   "title": "Premiumreadymadeanarkalisuitset [3 Pis]",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -30641,7 +35284,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2026-08-22T18:34:05+05:30"
+   "publishedAt": "2026-08-22T18:34:05+05:30",
+   "colourGroup": "same-premiumreadymadeanarkalisuitset-3-pis-anarkali",
+   "colourName": "Style 1"
   },
   {
    "handle": "premium-rust-embroidered-anarkali-suit-set",
@@ -30832,7 +35477,7 @@
   {
    "handle": "star-georgette-slik-anarkali-suit-with-skirt-10462901338244",
    "sourceHandle": "star-georgette-slik-anarkali-suit-with-skirt",
-   "title": "Star Georgette Silk Anarkali Suit With Skirt — Edition 2",
+   "title": "Star Georgette Silk Anarkali Suit With Skirt — Style 2",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -30912,7 +35557,9 @@
    "reviewCount": 10,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2026-08-26T18:27:28+05:30"
+   "publishedAt": "2026-08-26T18:27:28+05:30",
+   "colourGroup": "same-star-georgette-silk-anarkali-suit-with-skirt-anarkali",
+   "colourName": "Style 2"
   },
   {
    "handle": "peacock-design-heavy-traditional-crop-top-with-shrug",
@@ -31302,7 +35949,7 @@
   {
    "handle": "light-purple-colour-embroidered-lehenga-choli",
    "sourceHandle": "light-purple-colour-embroidered-lehenga-choli",
-   "title": "Light Purple Colour Embroidered Lehenga Choli — Edition 2",
+   "title": "Light Purple Colour Embroidered Lehenga Choli",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -31343,7 +35990,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-07-02T14:27:16+05:30"
+   "publishedAt": "2025-07-02T14:27:16+05:30",
+   "colourGroup": "same-light-purple-colour-embroidered-lehenga-choli-lehnga",
+   "colourName": "Purple"
   },
   {
    "handle": "peacock-design-heavy-traditional-crop-top-with-shrug-sky-blue",
@@ -31437,7 +36086,7 @@
   {
    "handle": "mita-heavy-traditional-embroidered-koti-anarkali-suit-set-15399230865540",
    "sourceHandle": "mita-heavy-traditional-embroidered-koti-anarkali-suit-set",
-   "title": "Mita Heavy Traditional Embroidered Koti Anarkali Suit Set — Edition 2",
+   "title": "Mita Heavy Traditional Embroidered Koti Anarkali Suit Set — Style 2",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -31523,12 +36172,14 @@
    "reviewCount": 11,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2026-10-02T12:53:46+05:30"
+   "publishedAt": "2026-10-02T12:53:46+05:30",
+   "colourGroup": "same-mita-heavy-traditional-embroidered-koti-anarkali-suit-set-an",
+   "colourName": "Style 2"
   },
   {
    "handle": "myra-cosmo-slit-anarkali-premium-suit-set-10521552060548",
    "sourceHandle": "myra-cosmo-slit-anarkali-premium-suit-set",
-   "title": "Myra cosmo Slit Anarkali Premium Suit Set — Edition 2",
+   "title": "Myra cosmo Slit Anarkali Premium Suit Set",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -31614,7 +36265,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2026-09-29T17:48:58+05:30"
+   "publishedAt": "2026-09-29T17:48:58+05:30",
+   "colourGroup": "same-myra-cosmo-slit-anarkali-premium-suit-set-anarkali",
+   "colourName": "Style 1"
   },
   {
    "handle": "ivory-and-maroon-elegant-top-bottom-dupatta-suit-set-10511750529156",
@@ -31714,7 +36367,7 @@
   {
    "handle": "rang-e-royale-blooming-lehenga-suit-set-1",
    "sourceHandle": "rang-e-royale-blooming-lehenga-suit-set-1",
-   "title": "Rang-E-Royale Blooming Lehenga Suit Set",
+   "title": "Rang-E-Royale Blooming Lehenga Suit Set — Style 2",
    "price": 69900,
    "compareAtPrice": 233000,
    "images": [
@@ -31802,12 +36455,14 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2026-09-24T12:03:48+05:30"
+   "publishedAt": "2026-09-24T12:03:48+05:30",
+   "colourGroup": "same-rang-e-royale-blooming-lehenga-suit-set-lehnga",
+   "colourName": "Style 2"
   },
   {
    "handle": "rang-e-royale-blooming-lehenga-suit-set-10511720087684",
    "sourceHandle": "rang-e-royale-blooming-lehenga-suit-set",
-   "title": "Rang-E-Royale Blooming Lehenga Suit Set — Edition 2",
+   "title": "Rang-E-Royale Blooming Lehenga Suit Set",
    "price": 64900,
    "compareAtPrice": 216333,
    "images": [
@@ -31896,12 +36551,14 @@
    "reviewCount": 1,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2026-09-24T11:59:30+05:30"
+   "publishedAt": "2026-09-24T11:59:30+05:30",
+   "colourGroup": "same-rang-e-royale-blooming-lehenga-suit-set-lehnga",
+   "colourName": "Style 1"
   },
   {
    "handle": "saumya-neon-sharara-suit-set-10498715058308",
    "sourceHandle": "saumya-neon-sharara-suit-set",
-   "title": "Saumya Neon Sharara Suit Set — Edition 2",
+   "title": "Saumya Neon Sharara Suit Set — Style 2",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -31990,7 +36647,9 @@
    "reviewCount": 22,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2026-09-19T13:55:17+05:30"
+   "publishedAt": "2026-09-19T13:55:17+05:30",
+   "colourGroup": "same-saumya-neon-sharara-suit-set-sharara",
+   "colourName": "Style 2"
   },
   {
    "handle": "aniska-lakhnavi-embroidered-work-anarkali-suit-set",
@@ -32085,7 +36744,7 @@
   {
    "handle": "alveera-premium-quality-anarkali-suit-set-with-color",
    "sourceHandle": "alveera-premium-quality-anarkali-suit-set-with-color",
-   "title": "Alveera Premium Quality Anarkali Suit Set with Color — Edition 2",
+   "title": "Alveera Premium Quality Anarkali Suit Set with Color",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -32174,12 +36833,14 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2026-08-24T12:04:04+05:30"
+   "publishedAt": "2026-08-24T12:04:04+05:30",
+   "colourGroup": "same-alveera-premium-quality-anarkali-suit-set-with-color-anarkal",
+   "colourName": "Style 1"
   },
   {
    "handle": "premium-ivory-royal-zari-work-kali-cut-anarkali-suit-set-10456605851780",
    "sourceHandle": "premium-ivory-royal-zari-work-kali-cut-anarkali-suit-set",
-   "title": "Premium Ivory Royal Zari Work Kali Cut Anarkali Suit Set — Edition 2",
+   "title": "Premium Ivory Royal Zari Work Kali Cut Anarkali Suit Set — Style 1",
    "price": 49900,
    "compareAtPrice": 124750,
    "images": [
@@ -32269,7 +36930,9 @@
    "reviewCount": 6,
    "inStock": true,
    "featured": true,
-   "publishedAt": "2026-08-22T13:01:35+05:30"
+   "publishedAt": "2026-08-22T13:01:35+05:30",
+   "colourGroup": "same-premium-ivory-royal-zari-work-kali-cut-anarkali-suit-set-ana",
+   "colourName": "Style 1"
   },
   {
    "handle": "red-anarkali-suit-knb103",
@@ -37304,7 +41967,7 @@
   {
    "handle": "hazels-anarkali-partywear-suit-set-8228836245636",
    "sourceHandle": "hazels-anarkali-partywear-suit-set",
-   "title": "Hazel's Anarkali PartyWear Suit Set — Edition 2",
+   "title": "Hazel's Anarkali PartyWear Suit Set — Style 2",
    "price": 59900,
    "compareAtPrice": 199667,
    "images": [
@@ -37393,12 +42056,14 @@
    "reviewCount": 5,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-03-11T18:21:48+05:30"
+   "publishedAt": "2025-03-11T18:21:48+05:30",
+   "colourGroup": "same-hazel-s-anarkali-partywear-suit-set-anarkali",
+   "colourName": "Style 2"
   },
   {
    "handle": "premium-quality-9-needle-gown-anarkali-suit-set-copy-8228835426436",
    "sourceHandle": "premium-quality-9-needle-gown-anarkali-suit-set-copy",
-   "title": "Premium Quality Roman Silk Gown Anarkali Suit Set — Edition 5",
+   "title": "Premium Quality Roman Silk Gown Anarkali Suit Set — Style 5",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -37479,7 +42144,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-06-28T16:32:17+05:30"
+   "publishedAt": "2025-06-28T16:32:17+05:30",
+   "colourGroup": "same-premium-quality-roman-silk-gown-anarkali-suit-set-anarkali",
+   "colourName": "Style 5"
   },
   {
    "handle": "prachis-pink-havy-vichitra-royal-elegant-suit-set",
@@ -37569,7 +42236,7 @@
   {
    "handle": "chandnis-latest-anarkali-suit-set-8201648537732",
    "sourceHandle": "chandnis-latest-anarkali-suit-set",
-   "title": "Chandni's Latest Anarkali Suit Set — Edition 2",
+   "title": "Chandni's Latest Anarkali Suit Set — Style 2",
    "price": 54900,
    "compareAtPrice": 183000,
    "images": [
@@ -37655,7 +42322,9 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2025-06-28T16:32:57+05:30"
+   "publishedAt": "2025-06-28T16:32:57+05:30",
+   "colourGroup": "same-chandni-s-latest-anarkali-suit-set-anarkali",
+   "colourName": "Style 2"
   },
   {
    "handle": "black-faux-blooming-anarkali-style-sarara-suit-set",

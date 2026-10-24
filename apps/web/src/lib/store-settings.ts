@@ -16,6 +16,10 @@ export type StoreSettings = {
   upiId: string;
   upiName: string;
   gstin: string;
+  /** GST invoice ka seller block — sirf admin panel se edit hota hai, public API me nahi jaata */
+  sellerName: string;
+  sellerAddress: string;
+  sellerState: string;
   supportPhone: string;
   supportEmail: string;
   whatsapp: string;
@@ -31,6 +35,9 @@ export const DEFAULT_STORE_SETTINGS: StoreSettings = {
   upiId: process.env.STORE_UPI_ID ?? "dhakadgourav@fam",
   upiName: process.env.STORE_UPI_NAME ?? "Designer Clothing",
   gstin: process.env.SELLER_GSTIN ?? "",
+  sellerName: process.env.SELLER_NAME ?? "Designer Clothing",
+  sellerAddress: process.env.SELLER_ADDRESS ?? "",
+  sellerState: process.env.SELLER_STATE ?? "Rajasthan",
   supportPhone: "8005900581",
   supportEmail: "Info.likshaclothing@gmail.com",
   whatsapp: "8005900581",
@@ -52,7 +59,10 @@ export function normalizeStoreSettings(input: unknown): StoreSettings {
     freeShipping: raw.freeShipping !== false,
     upiId: text(raw.upiId, base.upiId, 80),
     upiName: text(raw.upiName, base.upiName, 80),
-    gstin: typeof raw.gstin === "string" ? raw.gstin.trim().slice(0, 20) : base.gstin,
+    gstin: typeof raw.gstin === "string" ? raw.gstin.trim().toUpperCase().slice(0, 20) : base.gstin,
+    sellerName: text(raw.sellerName, base.sellerName, 120),
+    sellerAddress: typeof raw.sellerAddress === "string" ? raw.sellerAddress.trim().slice(0, 400) : base.sellerAddress,
+    sellerState: text(raw.sellerState, base.sellerState, 60),
     supportPhone: text(raw.supportPhone, base.supportPhone, 16),
     supportEmail: text(raw.supportEmail, base.supportEmail, 120),
     whatsapp: text(raw.whatsapp, base.whatsapp, 16),

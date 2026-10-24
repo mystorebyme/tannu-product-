@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AutoPrint } from "@/components/auto-print";
-import { getManualInvoice } from "@/lib/data";
+import { getManualInvoice, getSettings } from "@/lib/data";
 import { invoiceFromSlug, invoiceSlug } from "@/lib/invoice-slug";
 import { inr } from "@/lib/format";
 import {
@@ -22,7 +22,18 @@ export default async function ManualInvoicePage({ params }: { params: Promise<{ 
   const invoice = await getManualInvoice(invoiceFromSlug(number));
   if (!invoice) notFound();
 
-  const interState = invoice.state.trim().toLowerCase() !== SELLER_STATE.toLowerCase();
+  /** Seller block owner ki admin Settings se — koi hardcoded GSTIN/address nahi */
+  const settings = await getSettings();
+  const sellerState = settings.sellerState?.trim() || SELLER_STATE;
+  const seller = {
+    name: settings.sellerName?.trim() || "Designer Clothing",
+    address: settings.sellerAddress?.trim() || "",
+    gstin: settings.gstin?.trim() || "GSTIN pending",
+    email: settings.supportEmail,
+    phone: settings.supportPhone,
+  };
+
+  const interState = invoice.state.trim().toLowerCase() !== sellerState.toLowerCase();
   const lines = invoice.items.map((item) => {
     const gross = item.price * item.quantity;
     const tax = splitTax(gross, apparelGstRate(item.price), interState);
@@ -61,11 +72,24 @@ export default async function ManualInvoicePage({ params }: { params: Promise<{ 
             {/* same to same logo jo PDF/HTML invoice par hai */}
             <img src="/invoice-logo.png" alt="Designer Clothing" width={196} height={51} />
             <p className="invoice-muted" style={{ marginTop: 8 }}>
-              Designer Clothing · India
+              {seller.name}
+              {seller.address ? (
+                <>
+                  <br />
+                  {seller.address}
+                </>
+              ) : (
+                <>
+                  <br />
+                  <span style={{ color: "#b3261e" }}>
+                    Address missing — <Link href="/settings">Settings</Link> me daalein
+                  </span>
+                </>
+              )}
               <br />
-              GSTIN: 08AAACL1234K1Z5 · info.likshaclothing@gmail.com
+              GSTIN: <span className="mono">{seller.gstin}</span> · {seller.email}
               <br />
-              8005900581
+              {seller.phone}
             </p>
           </div>
           <div style={{ textAlign: "right" }}>
