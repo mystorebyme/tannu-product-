@@ -133,6 +133,8 @@ async function main() {
     }
   }
   // bundles me sirf 4 endpoints milte hain — baaki naam guess karke probe karte hain
+  for (const name of PROBE_NAMES) endpointNames.add(name);
+  diagnostics.endpointNames = [...endpointNames];
   const PROBE_NAMES = [
     "get_product_reviews",
     "get_reviews",
@@ -146,18 +148,32 @@ async function main() {
     "get_store_reviews",
     "reviews",
     "get_review",
+    "get_product_review",
+    "get_reviews_by_product",
   ];
   for (const name of PROBE_NAMES) endpointNames.add(name);
+  const PROBE_PREFIXES = ["reviews", "review"];
   diagnostics.endpointNames = [...endpointNames];
+
   const sampleProductId = String(productEntries[0]?.id ?? "");
   diagnostics.probes = [];
-  for (const name of [...endpointNames].slice(0, 20)) {
-    const url = `${proxy}/${name}?shop_id=${shopId}&product_id=${sampleProductId}&product_ids=${sampleProductId}&page=1&limit=20`;
+  const probeUrls = [];
+  for (const prefix of PROBE_PREFIXES) {
+    for (const name of [...endpointNames].slice(0, 24)) {
+      probeUrls.push(`${STORE}/apps/trustoo/api/v1/${prefix}/${name}`);
+    }
+  }
+  for (const name of [...endpointNames].slice(0, 24)) {
+    probeUrls.push(`${STORE}/apps/trustoo/api/v1/reviews/${name}`);
+  }
+  for (const base of probeUrls.slice(0, 40)) {
+    const url = `${base}?shop_id=${shopId}&product_id=${sampleProductId}&page=1&limit=20`;
     try {
       const payload = await fetchJson(url);
-      diagnostics.probes.push(`${name} → ${JSON.stringify(payload).slice(0, 260)}`);
+      const snippet = JSON.stringify(payload).slice(0, 220);
+      if (!/404|not found/i.test(snippet)) diagnostics.probes.push(`${base.replace(STORE, "")} → ${snippet}`);
     } catch (error) {
-      diagnostics.probes.push(`${name} → ${error.message.slice(0, 50)}`);
+      if (!error.message.startsWith("404")) diagnostics.probes.push(`${base.replace(STORE, "")} → ${error.message.slice(0, 50)}`);
     }
   }
   note("probed-endpoints", endpointNames.size);
@@ -201,6 +217,21 @@ async function main() {
     reviewedProducts += 1;
     total += reviews.length;
   }
+
+  const aggregates = {};
+  for (const entry of productEntries) {
+    const productId = String(entry.product_id ?? entry.productId ?? entry.id ?? "");
+    const handle = handles.get(productId);
+    if (!handle) continue;
+    const rating = Number(entry.rating ?? entry.avg_rating ?? entry.average_rating ?? entry.star ?? 0);
+    const count = Number(entry.review_count ?? entry.count ?? entry.total ?? entry.reviews_count ?? 0);
+    if (rating > 0 && count > 0) aggregates[handle] = { rating: Math.round(rating * 10) / 10, count };
+  }
+  fs.writeFileSync(
+    path.join(ROOT, "database/seeds/reviews/aggregates.json"),
+    `${JSON.stringify({ syncedAt: new Date().toISOString(), products: aggregates }, null, 1)}\n`,
+  );
+  note("aggregates", Object.keys(aggregates).length);
 
   const all = Object.values(products).flatMap((block) => block.reviews);
   fs.writeFileSync(
