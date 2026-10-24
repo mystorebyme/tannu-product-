@@ -116,10 +116,30 @@ test("collection counts match the live store snapshot", () => {
 
 test("every product carries the full live gallery", () => {
   const liveByHandle = new Map(liveProducts.map((product) => [product.handle, product]));
+  // ek image sirf ek product par dikhni chahiye — isliye jo photo kisi dusre product par
+  // pehle use ho chuki hai wo is product se hata di jaati hai.
+  const owner = new Map<string, string>();
+  for (const product of products) {
+    for (const image of product.images) owner.set(image, product.handle);
+  }
   for (const product of products) {
     const source: any = liveByHandle.get(product.sourceHandle);
     assert.ok(source, `${product.handle} missing from the live snapshot`);
-    assert.equal(product.images.length, (source.images ?? []).length, `${product.handle} gallery mismatch`);
+    // catalogue me image URL se `?v=` query hata di jaati hai — compare usi form me karo
+    const liveImages: string[] = [
+      ...new Set<string>((source.images ?? []).map((image: any) => String(image.src ?? image).split("?")[0])),
+    ];
+    assert.ok(product.images.length > 0, `${product.handle} has no images`);
+    assert.ok(product.images.length <= liveImages.length, `${product.handle} has more images than live`);
+    const sharedWithOthers = liveImages.filter((image) => {
+      const other = owner.get(image);
+      return other !== undefined && other !== product.handle;
+    });
+    assert.equal(
+      product.images.length,
+      liveImages.length - sharedWithOthers.length,
+      `${product.handle} gallery mismatch`,
+    );
     for (const image of product.images) assert.match(image, /^https:\/\/cdn\.shopify\.com\//);
   }
 });
