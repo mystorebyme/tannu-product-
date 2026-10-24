@@ -1,16 +1,71 @@
-export default function BannersPage() {
+import Link from "next/link";
+import { getSettings } from "@/lib/data";
+
+export const dynamic = "force-dynamic";
+
+/**
+ * Storefront ka top area: announcement bar + home hero banner.
+ * Announcement yahin se badla ja sakta hai (turant site par — store settings API).
+ * Hero image abhi catalogue/brand asset hai, isliye uski current state yahan dikhti hai.
+ */
+const HERO_IMAGE =
+  "https://www.likshaclothing.com/cdn/shop/files/Dussehra_Sale__Tradition_Meets_You.png?v=1792479831";
+const HERO_HREF = "/products/ruby-royale-red-anarkali-suit-set";
+
+export default async function BannersPage() {
+  const settings = await getSettings();
+  const storeUrl = process.env.NEXT_PUBLIC_STORE_URL ?? "http://localhost:3000";
+
   return (
     <>
       <div className="topbar">
         <div>
           <h1>Banners</h1>
-          <p>Homepage hero aur section banners</p>
+          <p>Announcement bar aur home hero — jo live site par dikh raha hai</p>
+        </div>
+        <div className="actions">
+          <Link className="btn" href="/settings">
+            Edit announcement
+          </Link>
+          <a className="btn" href={storeUrl} target="_blank" rel="noreferrer">
+            View site
+          </a>
         </div>
       </div>
-      <div className="panel" style={{ marginTop: 0 }}>
-        <div className="empty">
-          Hero banner abhi code se control hota hai (`apps/web/src/app/page.tsx`). CMS-driven banners
-          Phase 2 me aayenge taaki marketing team bina deploy badal sake.
+
+      <div className="panel">
+        <div className="panel-head">
+          <h2>Announcement bar</h2>
+          <span className={settings.announcement ? "badge badge-success" : "badge"}>
+            {settings.announcement ? "live" : "default copy"}
+          </span>
+        </div>
+        <div className="panel-body">
+          <p className="small">{settings.announcement ?? "Storefront apni default announcements dikha raha hai."}</p>
+          <p className="small muted">
+            Settings page se change kariye — save karte hi website ke header par wahi text dikhne lagta hai.
+          </p>
+        </div>
+      </div>
+
+      <div className="panel">
+        <div className="panel-head">
+          <h2>Home hero</h2>
+        </div>
+        <div className="panel-body">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={HERO_IMAGE}
+            alt="Current home hero"
+            style={{ width: "100%", maxWidth: 560, border: "1px solid #e5dbd0" }}
+          />
+          <p className="small" style={{ marginTop: 10 }}>
+            Hero link: <span className="mono">{HERO_HREF}</span>
+          </p>
+          <p className="small muted">
+            Hero image brand asset hai (marketing creative). Badalna ho to naya image URL dein — next deploy
+            par live ho jaayega. Seasonal sale creative ke liye WhatsApp/Instagram par bheja gaya asset use hota hai.
+          </p>
         </div>
       </div>
     </>
