@@ -14,6 +14,9 @@ on:
       - "database/seeds/reviews/**"
   workflow_dispatch:
 
+# NOTE: empty commits path filters ke saath workflow trigger nahi karte —
+# rebuild chahiye to koi file change karke push karein.
+
 permissions:
   contents: read
   pages: write
