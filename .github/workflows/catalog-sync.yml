@@ -1,0 +1,64 @@
+name: Catalog sync
+
+# Live store (likshaclothing.com) ka public Shopify JSON yahan pull hota hai aur repo me
+# commit ho jaata hai. Iske baad `npm run catalog:sync-live` local machine par bhi chal sakta hai.
+# Reason: kuch sandboxed dev environments se storefront reachable nahi hota.
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: "Fetch ke baad result commit karein?"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: catalog-sync-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    name: fetch live catalog
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Fetch products + collections
+        run: node scripts/catalog-sync/fetch-live.mjs
+
+      - name: Summary
+        run: |
+          node -e "
+            const p = require('./database/seeds/live/products.json').products;
+            const imgs = p.reduce((n, x) => n + (x.images?.length || 0), 0);
+            console.log('products', p.length, 'images', imgs);
+          " >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit raw snapshot
+        if: ${{ inputs.commit }}
+        run: |
+          git config user.name "catalog-sync[bot]"
+          git config user.email "catalog-sync@users.noreply.github.com"
+          git add database/seeds/live
+          if git diff --cached --quiet; then
+            echo "no changes"
+          else
+            git commit -m "chore(catalog): refresh live store snapshot"
+            git push
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: live-catalog
+          path: database/seeds/live/*.json
+          retention-days: 7
