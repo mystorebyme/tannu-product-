@@ -93,9 +93,9 @@ check("payment page renders separately", payPage.status === 200, String(payPage.
 check("payment page shows the order number", payHtml.includes(number));
 check("payment page shows the live payment state", payHtml.includes('data-testid="payment-state"'));
 check("payment page keeps the UPI block here (not checkout)", payHtml.includes('data-testid="upi-payment"'));
-check("payment page shows UPI app buttons (GPay/PhonePe/Paytm/any)", payHtml.includes('data-testid="upi-apps"'));
-// app deep links client bundle me hote hain; page par 'any UPI app' wala fallback href upi:// hi hai
+check("payment page has a single 'Open UPI app' button", payHtml.includes('data-testid="upi-open"'));
 check("payment page has a UPI deep link (mobile app chooser)", /upi:\/\/pay/.test(payHtml));
+check("payment page names no UPI app brand", !/Google Pay|PhonePe|Paytm|BHIM/i.test(payHtml));
 
 // ── 3b. tracking — order number se page khulta hai (lowercase bhi) ───────────
 const lower = await fetch(`${BASE}/orders/${number.toLowerCase()}`);

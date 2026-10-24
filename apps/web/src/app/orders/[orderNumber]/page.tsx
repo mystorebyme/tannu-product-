@@ -11,7 +11,30 @@ import { getStoreSettings } from "@/lib/store-settings";
 import { PaymentStatusWatcher } from "@/components/payment-status-watcher";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Order confirmed", robots: { index: false } };
+/**
+ * Title order ke asli haal ke hisaab se — pehle har page "Order confirmed" kehta tha,
+ * chahe order mila hi na ho ya payment pending ho (browser tab + share preview galat).
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ orderNumber: string }>;
+}): Promise<Metadata> {
+  const { orderNumber } = await params;
+  const order = await getOrder(orderNumber);
+  if (!order) return { title: "Order nahi mila", robots: { index: false } };
+  const title =
+    order.paymentStatus === "paid"
+      ? "Order confirmed"
+      : order.paymentStatus === "processing"
+        ? "Payment verify ho raha hai"
+        : order.paymentStatus === "failed"
+          ? "Payment failed"
+          : order.paymentStatus === "refunded"
+            ? "Refund ho gaya"
+            : "Payment pending";
+  return { title, robots: { index: false } };
+}
 
 export default async function OrderPage({ params }: { params: Promise<{ orderNumber: string }> }) {
   const { orderNumber } = await params;

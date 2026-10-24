@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { siteConfig } from "@/config/site";
 
 /**
@@ -8,6 +9,9 @@ import { siteConfig } from "@/config/site";
  * Har jagah se reachable: galat number, purana deleted number, ya (Render par)
  * database reset ke baad ka number.
  */
+/** Browser tab / share preview me bhi "Order nahi mila" — default site title nahi. */
+export const metadata: Metadata = { title: "Order nahi mila", robots: { index: false, follow: false } };
+
 export default function OrderNotFound() {
   const wa = siteConfig.whatsapp.replace(/\D/g, "").slice(-10);
   return (

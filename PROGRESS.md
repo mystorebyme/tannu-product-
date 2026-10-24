@@ -202,3 +202,17 @@ hone par), aur Pages preview ka API base purana dead Render URL tha.
 - **Tests:** unit 95/0 (checkout par UPI nahi, `?pay=1`, UPI app links), payments E2E 34/0
   (apps, tracking case-insensitive, order not-found, funnel API), responsive 43/0.
 - Docs: `docs/08-testing/round21-audit.md`.
+
+## Round 22 — payment page par ek "Open UPI app", contact details Sheet se, order title sach (2026-10-25)
+
+R21 ke live verification ke baad teen cheezein tight kee gayin (koi naya feature nahi):
+
+- **Payment page (step 3):** GPay/PhonePe/Paytm/BHIM ke alag buttons hata diye — ab ek hi
+  "Open UPI app to pay ₹499" (`upi://pay`), phone khud chooser dikhata hai. QR, Copy UPI ID,
+  "status check kariye", 5–6s auto detect (success/failed/pending) waisa hi hai.
+  `lib/upi.ts` se `upiAppLinks` bhi hataya (dead code + brand names).
+- **SEO / contact:** Organization JSON-LD me phone/email hard-coded the — ab
+  `StoreStructuredData` se owner ki settings (admin/Sheet) se aate hain, `@id` merge ke saath.
+- **Order page title:** pehle har order page "Order confirmed" kehta tha (pending payment par bhi);
+  ab payment status ke hisaab se title, aur galat number par HTTP 404 + "Order nahi mila".
+- Docs: `docs/08-testing/round22-audit.md` (verification matrix + local suites 95/40/9/35/87/43/37).

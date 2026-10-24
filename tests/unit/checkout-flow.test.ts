@@ -57,13 +57,13 @@ test("checkout me UPI ID / QR / 'pay here' bilkul nahi — wo sirf payment page 
   assert.match(payPage, /UpiPayment/);
 });
 
-test("payment page par saare UPI apps + auto status detection", () => {
-  assert.match(upiLib, /export function upiAppLinks/);
-  for (const scheme of ["tez://upi/pay", "phonepe://pay", "paytmmp://pay", "upi://pay"]) {
-    assert.ok(upiLib.includes(scheme), `${scheme} deep link missing`);
-  }
-  assert.match(upiPayment, /data-testid="upi-apps"/);
+test("payment page par ek hi 'Open UPI app' + auto status detection (koi app brand nahi)", () => {
+  assert.match(upiLib, /export function buildUpiUri/);
+  assert.match(upiPayment, /data-testid="upi-open"/);
   assert.match(upiPayment, /data-testid="upi-recheck"/);
+  // owner rule: GPay/PhonePe/Paytm ke naam kahin nahi
+  assert.ok(!/Google Pay|PhonePe|Paytm|BHIM/i.test(upiPayment), "payment page par app brand nahi");
+  assert.ok(!/tez:\/\/|phonepe:\/\/|paytmmp:\/\//.test(upiPayment), "app-specific schemes nahi");
   assert.match(payPage, /PaymentStatusWatcher/);
 });
 

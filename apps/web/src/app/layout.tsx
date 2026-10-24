@@ -8,6 +8,7 @@ import { FloatingHelp } from "@/components/floating-help";
 import { AnnouncementBar } from "@/components/announcement-bar";
 import { WishlistProvider } from "@/components/wishlist-provider";
 import { StoreSettingsProvider } from "@/components/store-settings-provider";
+import { StoreStructuredData } from "@/components/store-structured-data";
 import { brandAssets, logoMark, siteConfig } from "@/config/site";
 import { assetUrl } from "@/lib/format";
 
@@ -85,11 +86,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               {
                 "@context": "https://schema.org",
                 "@type": "Organization",
+                "@id": `${siteConfig.url}#org`,
                 name: siteConfig.name,
                 url: siteConfig.url,
                 logo: `${siteConfig.url}${brandAssets.mark}`,
-                email: siteConfig.email,
-                telephone: "+918005900581",
+                // email/telephone StoreStructuredData se aate hain (settings-driven)
                 sameAs: [siteConfig.socials.instagram],
               },
               {
@@ -123,6 +124,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           </WishlistProvider>
         </CartProvider>
         </StoreSettingsProvider>
+        <StoreStructuredData />
       </body>
     </html>
   );

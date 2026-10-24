@@ -1,0 +1,71 @@
+# Round 22 audit — payment page UX, settings-driven SEO, order page titles
+
+R21 ke baad jo cheezein production par verify karte waqt milee, unka fix + proof.
+Ye round naya feature nahi — **jo already bana tha usko owner ke rules par tight
+karna** hai.
+
+## 1. Payment page (step 3) — ab sirf ek "Open UPI app"
+
+| Pehle | Ab | Kyun |
+| --- | --- | --- |
+| GPay / PhonePe / Paytm / BHIM ke 4 alag buttons | **Ek** button: "Open UPI app to pay ₹499" (`upi://pay`) | Owner rule: koi app brand nahi, koi third-party gateway nahi. Phone khud chooser dikhata hai |
+| Har app ka apna deep link (`tez://`, `phonepe://`, `paytmmp://`) | Hata diye (`apps/web/src/lib/upi.ts` se `upiAppLinks` bhi gaya) | Wahi kaam, par 4 jagah maintenance + brand names UI me |
+| `data-testid="upi-apps"` grid | `data-testid="upi-open"` single block | Tests bhi update |
+
+Jo **nahi** badla: amount + order number pehle se bhare hue, QR, "Copy UPI ID",
+"Payment ho gaya? Status check kariye" (`upi-recheck`), 5s/6s auto status polling
+(`PaymentStatusWatcher`) — success/failed/pending khud detect hote hain.
+
+## 2. Contact details ab hard-code nahi (SEO bhi Sheet se)
+
+`layout.tsx` ke Organization JSON-LD me phone (`+918005900581`) aur email
+**hard-coded** the. Sheet/admin me number badalne par site par naya dikhta tha,
+par Google ko purana jaata tha.
+
+- Naya client component `apps/web/src/components/store-structured-data.tsx` —
+  `StoreSettingsProvider` se live settings padhta hai (30s + tab focus refresh).
+- Sirf `email`, `telephone`, `contactPoint` deta hai, `@id` same
+  (`<site>#org`) — static Organization node (naam/url/logo/sameAs) ke saath merge
+  ho jaata hai, isliye duplicate brand nahi banta.
+
+## 3. Order page ka title ab sach bolta hai
+
+| Case | Pehle | Ab |
+| --- | --- | --- |
+| Order mil gaya | "Order confirmed" (chahe payment pending ho) | paid → "Order confirmed", processing → "Payment verify ho raha hai", failed → "Payment failed", pending → "Payment pending" |
+| Number galat / order nahi | "Order confirmed" + default site title | HTTP **404** + title "Order nahi mila", `noindex` |
+
+`generateMetadata` + `orders/[orderNumber]/not-found.tsx` me metadata — dono
+jagah `robots: noindex`.
+
+## 4. Verification
+
+Local (`next start` on :3100, dev Postgres):
+
+| Suite | Result |
+| --- | --- |
+| unit | 95 passed / 0 failed |
+| integration | 40 / 0 |
+| db | 9 / 0 |
+| payments e2e | 35 / 0 |
+| smoke | 87 / 0 |
+| links | 40 pages / 0 |
+| responsive | 43 / 0 |
+| round16 | 37 / 0 |
+| breakpoints | 48 / 0 |
+
+Live (`https://liksha-clothing.vercel.app`, commit `ae13b08` → verify pass):
+
+- `/api/health` → `{"ok":true,"products":446,"db":true}`
+- `POST /api/checkout/events` → `202 {"ok":true}`
+- `POST /api/orders` → order number + `/orders/<num>/pay?pay=1`
+- `/orders/LK-DOESNOTEXIST` → **404** + "Order nahi mila" page (WhatsApp support)
+- production `[live-test]` workflow: public flow 21/0 (admin steps skip — token nahi)
+
+## 5. Khula hua / owner action
+
+- **Contact form ka email channel**: local sandbox me `formsubmit` call fail hoti
+  hai (network). Production par re-check chahiye — agar fail ho to WhatsApp
+  fallback hi dikhta hai (form message DB me save hota hai).
+- UPI app ka naam UI me kahin nahi aata — ye deliberate hai; future me koi
+  "GPay se pay kariye" copy add na ho.

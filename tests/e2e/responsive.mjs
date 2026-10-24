@@ -177,10 +177,10 @@ check("checkout shows a short prepaid note", checkoutSource.includes('data-testi
  * request: "phone ke saare app aa jayein") — GPay/PhonePe/Paytm/any UPI.
  * Checkout par ab bhi kuch nahi.
  */
-check("payment page shows every UPI app chip (GPay/PhonePe/Paytm/any)", paymentSource.includes('data-testid="upi-apps"'));
+check("payment page has one 'Open UPI app' button", paymentSource.includes('data-testid="upi-open"'));
 check(
-  "payment page links each UPI app but not on checkout",
-  /tez:\/\/upi\/pay/.test(upiLib) && !/GPay|PhonePe|Paytm/.test(checkoutSource),
+  "payment page names no UPI app brand",
+  !/Google Pay|PhonePe|Paytm|BHIM/i.test(paymentSource) && !/GPay|PhonePe|Paytm/.test(checkoutSource),
 );
 check("payment page keeps the QR + UPI ID", paymentSource.includes("UpiQr") && paymentSource.includes("upi-id"));
 check(

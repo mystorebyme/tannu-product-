@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { postJson } from "@/lib/http-json";
 import { API_AVAILABLE, apiUrl } from "@/lib/api-base";
 import { formatPrice } from "@/lib/format";
-import { buildUpiUri, upiAppLinks } from "@/lib/upi";
+import { buildUpiUri } from "@/lib/upi";
 import { UpiQr } from "@/components/upi-qr";
 
 /**
@@ -103,8 +103,6 @@ export function UpiPayment({
     [upiId, upiName, amount, orderNumber, callbackUrl],
   );
 
-  /** phone ke saare UPI apps — amount + order note pehle se bhara hua */
-  const appLinks = useMemo(() => upiAppLinks(upiUri), [upiUri]);
 
   async function copyUpiId() {
     try {
@@ -279,24 +277,23 @@ export function UpiPayment({
               </button>
             </div>
 
-            {/* phone ke saare UPI apps — ek tap me app khulti hai, amount + note bhara hua */}
-            <div className="mt-3" data-testid="upi-apps">
-              <p className="text-[10.5px] tracking-[.12em] text-[#8a6a1f] uppercase">Pay with any UPI app</p>
-              <div className="mt-1.5 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                {appLinks.map((app) => (
-                  <a
-                    key={app.id}
-                    href={app.href}
-                    data-testid={`upi-app-${app.id}`}
-                    className="inline-flex h-9 items-center justify-center border border-[#e0cf9f] bg-white px-2 text-center text-[10px] font-semibold tracking-[.04em] text-[#5c4a16] uppercase transition hover:border-[#8a6a1f] hover:bg-[#fffaf0]"
-                  >
-                    {app.label}
-                  </a>
-                ))}
-              </div>
+            {/*
+              Owner rule: koi app-brand list nahi — sirf ek generic UPI button.
+              Ek hi "Open UPI app" button — phone par chooser khud khulta hai, amount
+              aur order note pehle se bhare hue. Payment page place order ke turant
+              baad khud khulta hai (`?pay=1`).
+            */}
+            <div className="mt-3" data-testid="upi-open-block">
+              <a
+                href={upiUri}
+                data-testid="upi-open"
+                className="inline-flex h-10 w-full items-center justify-center bg-[#5c1010] px-4 text-[11px] font-semibold tracking-[.12em] text-white uppercase sm:w-auto"
+              >
+                Open UPI app to pay {formatPrice(amount)}
+              </a>
               <p className="mt-1.5 text-[10.5px] leading-relaxed text-[#8a7a5f]">
-                Mobile par tap kariye — app khud khulegi, amount aur order number already bhara hoga.
-                Laptop par neeche QR scan kariye.
+                Button dabane par phone apne aap UPI app khol dega (amount bhara hua). Na khule to
+                upar diya QR scan kariye ya UPI ID copy karke pay kariye.
               </p>
             </div>
 

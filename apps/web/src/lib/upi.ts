@@ -57,28 +57,3 @@ export function normaliseUpiReference(value: unknown): string | null {
   if (!/^[A-Z0-9]{6,30}$/.test(clean)) return null;
   return clean;
 }
-
-export type UpiAppLink = {
-  id: string;
-  label: string;
-  /** app-specific deep link (mobile par seedha usi app me khulta hai) */
-  href: string;
-};
-
-/**
- * Mobile par "kaunsa UPI app" — customer ko sochna na pade.
- *
- * Har app ka apna scheme hai (GPay `tez://`, PhonePe `phonepe://`, Paytm
- * `paytmmp://`); `upi://pay` par Android/iOS dono UPI app chooser dikhate hain.
- * Sab me wahi query (pa/pn/am/cu/tn/tr/url) jaati hai, isliye amount aur order
- * number app me pehle se bhare hote hain — customer sirf PIN daalta hai.
- */
-export function upiAppLinks(uri: string): UpiAppLink[] {
-  const query = uri.replace(/^upi:\/\/pay\?/, "");
-  return [
-    { id: "gpay", label: "Google Pay", href: `tez://upi/pay?${query}` },
-    { id: "phonepe", label: "PhonePe", href: `phonepe://pay?${query}` },
-    { id: "paytm", label: "Paytm", href: `paytmmp://pay?${query}` },
-    { id: "any", label: "Any UPI app", href: uri },
-  ];
-}
