@@ -11,6 +11,8 @@
  */
 const BASE = process.env.BASE_URL ?? "http://127.0.0.1:3000";
 const TOKEN = process.env.ADMIN_API_TOKEN ?? "dev-admin-token";
+/** admin token na ho (public/live run) to admin wale steps skip — baaki flow test hota hai */
+const CAN_ADMIN = TOKEN.length > 0;
 
 let passed = 0;
 const failures = [];
@@ -105,35 +107,46 @@ const status2 = await getJson(`/api/orders/${number}/payment`);
 check("status becomes processing (awaiting verification)", status2.body?.paymentStatus === "processing", status2.body?.paymentStatus);
 check("order still not confirmed while payment is processing", status2.body?.status === "placed", status2.body?.status);
 
-// ── 6. unpaid order dispatch nahi ho sakta ──────────────────────────────────
-const blocked = await adminPatch(`/api/admin/orders/${number}`, { action: "status", status: "packed" });
-const blockedBody = await blocked.json();
-check("unpaid order cannot be packed", blocked.status === 409 && blockedBody.code === "payment_pending", `${blocked.status} ${blockedBody.code ?? ""}`);
+// ── 6-8. admin wale steps (token chahiye) ───────────────────────────────────
+let paidOk = false;
+if (CAN_ADMIN) {
+  const blocked = await adminPatch(`/api/admin/orders/${number}`, { action: "status", status: "packed" });
+  const blockedBody = await blocked.json();
+  check(
+    "unpaid order cannot be packed",
+    blocked.status === 409 && blockedBody.code === "payment_pending",
+    `${blocked.status} ${blockedBody.code ?? ""}`,
+  );
 
-// ── 7. admin payment confirm → order confirmed ──────────────────────────────
-const paid = await adminPatch(`/api/admin/orders/${number}`, {
-  action: "payment",
-  reference: "123456789012",
-  amount: order.total,
-  note: "e2e",
-});
-const paidBody = await paid.json();
-check("admin can mark payment verified", paid.ok, String(paid.status));
-check("payment is paid in DB", paidBody.order?.paymentStatus === "paid", paidBody.order?.paymentStatus);
-check("order becomes confirmed only after payment", paidBody.order?.status === "confirmed", paidBody.order?.status);
-const status3 = await getJson(`/api/orders/${number}/payment`);
-check("status API reports paid + confirmed", status3.body?.paymentStatus === "paid" && status3.body?.status === "confirmed");
+  const paid = await adminPatch(`/api/admin/orders/${number}`, {
+    action: "payment",
+    reference: "123456789012",
+    amount: order.total,
+    note: "e2e",
+  });
+  const paidBody = await paid.json();
+  check("admin can mark payment verified", paid.ok, String(paid.status));
+  check("payment is paid in DB", paidBody.order?.paymentStatus === "paid", paidBody.order?.paymentStatus);
+  check("order becomes confirmed only after payment", paidBody.order?.status === "confirmed", paidBody.order?.status);
+  const status3 = await getJson(`/api/orders/${number}/payment`);
+  check("status API reports paid + confirmed", status3.body?.paymentStatus === "paid" && status3.body?.status === "confirmed");
+  paidOk = status3.body?.paymentStatus === "paid";
 
-// ── 8. paid order par payment page redirect ─────────────────────────────────
-const payAfter = await fetch(`${BASE}/orders/${number}/pay`, { redirect: "manual" });
-check("paid order skips the payment page", payAfter.status === 307 || payAfter.status === 308, String(payAfter.status));
+  const payAfter = await fetch(`${BASE}/orders/${number}/pay`, { redirect: "manual" });
+  check("paid order skips the payment page", payAfter.status === 307 || payAfter.status === 308, String(payAfter.status));
+} else {
+  console.log("  skip admin-only checks (no ADMIN_API_TOKEN)");
+}
 
 // ── 9. order page = tracking, same status ───────────────────────────────────
 const orderPage = await fetch(`${BASE}/orders/${number}`);
 const orderHtml = await orderPage.text();
 check("order page opens (tracking works)", orderPage.status === 200, String(orderPage.status));
 check("order page shows the order number", orderHtml.includes(number));
-check("order page shows payment confirmed", /Payment confirmed|payment-status/i.test(orderHtml));
+check(
+  paidOk ? "order page shows payment confirmed" : "order page shows the live payment state",
+  paidOk ? /Payment confirmed/.test(orderHtml) : orderHtml.includes('data-testid="payment-state"'),
+);
 check("order page has the tracking timeline", orderHtml.includes('data-testid="order-tracking"'));
 
 // ── 10. failed payment bhi DB me save hota hai ──────────────────────────────

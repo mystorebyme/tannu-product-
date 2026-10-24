@@ -1,0 +1,39 @@
+name: Live payment + tracking smoke
+
+# Production (Vercel) par asli flow test — order place → payment page → UTR →
+# processing → admin confirm → paid + confirmed → tracking page.
+#
+# Manual run: Actions → "Live payment + tracking smoke" → Run workflow
+# (Ye 2 test orders banata hai — isliye schedule nahi hai.)
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "Deployed storefront URL"
+        required: false
+        default: "https://liksha-clothing.vercel.app"
+
+jobs:
+  payments:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Health (DB reachable?)
+        run: |
+          echo "── ${{ inputs.base_url }}/api/health"
+          curl -fsS "${{ inputs.base_url }}/api/health" | tee health.json
+          node -e "const d=require('./health.json').data; if(d.db!=='up'){console.error('DB not up:',d.db,d.dbError);process.exit(1)}"
+
+      # Admin-only steps (payment confirm + "packed" block) secret token maangte hain;
+      # wo local/admin panel par verify hote hain. Yahan public flow chalta hai:
+      # order place → payment page → pending → UTR → processing → tracking page.
+      - name: Payment + tracking flow (public APIs)
+        env:
+          BASE_URL: ${{ inputs.base_url }}
+        run: node tests/e2e/payments.mjs
