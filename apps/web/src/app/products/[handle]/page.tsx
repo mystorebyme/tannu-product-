@@ -27,10 +27,19 @@ export async function generateMetadata({
   return {
     title: product.title,
     description: product.description,
+    alternates: { canonical: `/products/${product.handle}` },
     openGraph: {
+      title: `${product.title} | ${siteConfig.name}`,
+      description: product.description,
+      url: `/products/${product.handle}`,
+      type: "website",
+      images: product.images.slice(0, 2),
+    },
+    twitter: {
+      card: "summary_large_image",
       title: product.title,
       description: product.description,
-      images: product.images.slice(0, 2),
+      images: product.images.slice(0, 1),
     },
   };
 }
@@ -73,9 +82,31 @@ export default async function ProductPage({
       : {}),
   };
 
+  // breadcrumb schema — Google result me "Home › Anarkali Suit › Product" dikhta hai
+  const breadcrumbLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: `${siteConfig.url}/` },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: categoryLabel(product.category),
+        item: `${siteConfig.url}${categoryHref(product.category)}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: product.title,
+        item: `${siteConfig.url}/products/${product.handle}`,
+      },
+    ],
+  };
+
   return (
     <div className="container-liksha py-6 lg:py-9">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       <nav aria-label="Breadcrumb" className="mb-4">
         <ol className="flex flex-wrap items-center gap-1.5 text-[11px] text-[#9c8f82]">
           <li>
