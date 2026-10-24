@@ -7,6 +7,7 @@ import { reviewsFor } from "@/lib/reviews";
 import { ProductGrid } from "@/components/product-card";
 import { colourOptionsFor, getProduct, getRelatedProducts, products } from "@/lib/store";
 import { categoryHref, categoryLabel } from "@/lib/categories";
+import { siteConfig } from "@/config/site";
 
 // har product build time par static HTML ban jaata hai -> instant page loads
 export async function generateStaticParams() {
@@ -58,7 +59,7 @@ export default async function ProductPage({
       priceCurrency: "INR",
       price: (product.price / 100).toFixed(2),
       availability: product.inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-      url: `https://www.likshaclothing.com/products/${product.handle}`,
+      url: `${siteConfig.url}/products/${product.handle}`,
     },
     ...(reviewBlock.count > 0
       ? {

@@ -6,7 +6,7 @@ export const dynamic = "force-static";
 
 /**
  * PWA/installed app + tab identity: naam aur logo wahi jo site par hai.
- * Icon local brand mark hai (`/images/logo-mark.png`), isliye offline/Pages par bhi milta hai.
+ * Icon local brand mark hai (`/images/logo-mark-512.png`), isliye offline/Pages par bhi milta hai.
  */
 export default function manifest(): MetadataRoute.Manifest {
   const base = process.env.NEXT_PUBLIC_PAGES_BASE_PATH ?? "";
@@ -20,7 +20,7 @@ export default function manifest(): MetadataRoute.Manifest {
     background_color: "#000000",
     theme_color: "#862222",
     icons: [
-      { src: logoMark, sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: `${base}/images/logo-mark-192.png`, sizes: "192x192", type: "image/png", purpose: "any" },
       { src: logoMark, sizes: "512x512", type: "image/png", purpose: "any" },
     ],
   };

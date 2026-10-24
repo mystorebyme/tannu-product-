@@ -18,8 +18,10 @@
 
 - Naam: `Designer Clothing` (`apps/web/src/config/site.ts` → `siteConfig.name`).
 - Logo (owner ka final): gold crown + gown mark with `DESIGNER / CLOTHING` wordmark.
-  - `apps/web/public/images/logo-mark.png` — 512×512 mark (header badge, footer, favicon,
-    manifest, invoice PDF masthead, admin sidebar/login)
+  - `apps/web/public/images/logo-mark-512.png` — square mark (favicon, Apple touch icon,
+    PWA 512, invoice PDF masthead, admin sidebar/login)
+  - `apps/web/public/images/logo-mark-192.png` — footer + PWA 192
+  - `apps/web/public/images/logo-mark-128.png` — header badge / mobile menu (light DOM size)
   - `apps/web/public/images/logo.png` / `.webp` — poora lockup (share/invoice ke liye)
   - `apps/web/public/images/og-image.jpg` — social share card (1200×630)
   - Ek hi component: `apps/web/src/components/brand-lockup.tsx` (header, mobile menu, footer)
@@ -28,7 +30,69 @@
   `support_phone`, `whatsapp`).
 - UPI: `dhakadgourav@fam` (`upi_id`, `upi_name` sheet se).
 
-## 3. Sheet kabhi public nahi
+## 3. Domain se pehle: poora env checklist (ek jagah)
+
+Domain kharidne se pehle sirf **ek** value badalni chahiye — `NEXT_PUBLIC_SITE_URL`.
+Canonical, OG, sitemap, robots, product JSON-LD, WhatsApp message links, invoice/UPI
+callback — sab isi se bante hain (`apps/web/src/config/site.ts`).
+
+### 3.1 Render → storefront (`apps/web`)
+
+| Variable | Domain ke saath | Kya control karta hai |
+| --- | --- | --- |
+| `NEXT_PUBLIC_SITE_URL` | `https://designerclothes.in` | canonical + `metadataBase`, `sitemap.xml`, `robots.txt` host, product/offer JSON-LD URL, UPI callback URL, WhatsApp order link fallback |
+| `NEXT_PUBLIC_LIVE_STORE_URL` | `https://designerclothes.in` | "Buy on live store" type fallback links |
+| `ADMIN_PANEL_URL` | `https://admin.designerclothes.in` | admin button/link (sheet ki `admin_url` row isko override karti hai) |
+| `STORE_UPI_ID` / `STORE_UPI_NAME` | `dhakadgourav@fam` / `Designer Clothing` | UPI QR (sheet `upi_id`/`upi_name` override karte hain) |
+| `ADMIN_API_TOKEN` | 32+ char random | admin → storefront API auth |
+| `GOOGLE_SHEETS_WEBAPP_URL` / `GOOGLE_SHEETS_TOKEN` | Apps Script `/exec` | owner settings + order/payment log |
+| `CONTACT_EMAIL` | `Info.likshaclothing@gmail.com` | contact form delivery |
+
+### 3.2 GitHub → Settings → Variables (`STORE_API_URL`)
+
+| Variable | Value | Kyun |
+| --- | --- | --- |
+| `STORE_API_URL` | `https://designerclothes.in` | Pages preview ka checkout/payment/track-order seedha Render API par jaata hai (`pages.yml` ise `NEXT_PUBLIC_API_BASE_URL` banata hai) |
+
+Variable (secret nahi) rakhein — workflow `vars.STORE_API_URL` padhta hai. Set karne ya badalne par
+Pages workflow dobara chalao (Actions → Pages → Re-run) — static build me value inject hoti hai.
+
+### 3.3 Custom domain + SSL
+
+1. Render → storefront → **Settings → Custom Domains** → `designerclothes.in` + `www.designerclothes.in` add.
+2. DNS (registrar): apex `A` → Render ka IP; `www` `CNAME` → `<service>.onrender.com`.
+3. Render SSL auto (Let's Encrypt) — 10–30 min.
+4. `www` → apex **Redirect** (ya ulta) — dono par site khule, canonical ek hi ho.
+5. Admin alag subdomain par ho to `admin.designerclothes.in` bhi add karein (admin app alag service hai).
+
+### 3.4 Domain ke baad verify (copy-paste)
+
+```bash
+SITE=https://designerclothes.in
+
+# canonical + OG absolute URL
+curl -s $SITE | grep -o '<link rel="canonical"[^>]*>' | head -1
+curl -s $SITE | grep -o '<meta property="og:url"[^>]*>' | head -1
+
+# sitemap/robots apne domain par
+curl -s $SITE/robots.txt | grep -i sitemap
+curl -s $SITE/sitemap.xml | head -c 200
+
+# product JSON-LD offer url
+curl -s "$SITE/products/$(curl -s $SITE/sitemap.xml | grep -o 'products/[a-z0-9-]*' | head -1 | cut -d/ -f2)" \
+  | grep -o '"url":"[^"]*products[^"]*"' | head -2
+
+# settings live (sheet connected?)
+curl -s $SITE/api/settings | head -c 400
+```
+
+Sab URLs `designerclothes.in` ke hone chahiye — kahin `onrender.com` ya
+`likshaclothing.com` nahi dikhna chahiye. `www` + non-`www` dono test karein.
+
+> Note: `NEXT_PUBLIC_*` values **build time** par bake hoti hain. Render par env badalne ke
+> baad **Manual Deploy → Clear build cache & deploy** karein, warna purana URL HTML me reh jaata hai.
+
+## 4. Sheet kabhi public nahi
 
 - `GOOGLE_SHEETS_WEBAPP_URL` + `GOOGLE_SHEETS_TOKEN` sirf server env me hain.
 - `/api/settings` sirf public values deta hai (UPI, phone, email, announcement) — sheet ka URL/token nahi.

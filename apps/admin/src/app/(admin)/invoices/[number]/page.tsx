@@ -165,7 +165,7 @@ export default async function ManualInvoicePage({ params }: { params: Promise<{ 
         <footer className="invoice-foot">
           <p>{invoice.notes ?? "Tax inclusive invoice. Exchange within 7 days with original tags."}</p>
           <p>
-            This is a computer generated invoice · Designer Clothing · likshaclothing.com
+            This is a computer generated invoice · Designer Clothing
           </p>
         </footer>
       </article>

@@ -18,6 +18,35 @@ Database (Postgres / JSON) **primary** hai: order, payment verification, invoice
 sab wahin rehta hai. Sheet uski live copy + owner ke settings ka source hai. Sheet down ho
 jaye to site chalti rehti hai (sirf owner edits ruk jaate hain) — koi order fail nahi hota.
 
+## 0. Ready-made sheet (link — owner ke account me already shared)
+
+Sheet ban chuki hai, tabs + headers ready hain, aur **`info.likshaclothing@gmail.com`**
+ko **Editor** access de diya gaya hai (notification mail bhi gaya hai):
+
+| Cheez | Value |
+| --- | --- |
+| Sheet ka naam | `Designer Clothing — Store (Orders · Payments · Settings)` |
+| Link | https://docs.google.com/spreadsheets/d/1k8fsea04WpbrGjiyXuDrrS2Eewt9W7wx9X2lUQc5qMo/edit |
+| Tabs | `Settings` (10 keys bhare hue), `Orders` (25 columns), `Payments` (25 columns), `Messages` (7), `Newsletter` (2) |
+| Access | owner ka email = Editor · "Anyone with link" = **off** (customer data protect) |
+
+`Settings` tab me ye values pehle se hain: `support_phone` = 8005900581,
+`whatsapp` = 8005900581, `support_email` = Info.likshaclothing@gmail.com,
+`upi_id` = dhakadgourav@fam, `upi_name` = Designer Clothing, `announcement` = Diwali Sale,
+`free_shipping` = true, `shop_name` = Designer Clothing. `gstin` aur `admin_url` khaali hain —
+owner jise chahe bhar de (khaali = site apni default use karti hai).
+
+**Baaki 2 step owner ke account se** (ye developer nahi kar sakta, Google permission chahiye):
+
+1. Us sheet me **Extensions → Apps Script** → `scripts/google-apps-script/liksha-sheets.gs`
+   ka code paste → `TOKEN` set → **Run `setup`** (tabs already hain, sirf headers verify hote hain).
+2. **Deploy → New deployment → Web app** (`Execute as: Me`, `Who has access: Anyone`) →
+   `/exec` URL copy → Render env me `GOOGLE_SHEETS_WEBAPP_URL` + `GOOGLE_SHEETS_TOKEN` →
+   redeploy. Verify: `GET /api/settings` me `"source": "google-sheet"`.
+
+Sheet id/URL ya token **kabhi** frontend bundle ya docs-only public page me nahi jaata —
+sirf server env + admin panel ke `/sheet` screen me.
+
 ## 1. Sheet + Apps Script setup (ek baar, ~5 minute)
 
 1. [sheets.new](https://sheets.new) par nayi sheet banao, naam do `Liksha Store`.

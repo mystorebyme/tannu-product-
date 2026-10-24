@@ -3,7 +3,7 @@
  *
  * Local assets hain (`public/images/`), isliye GitHub Pages ke base path par bhi
  * chalte hain aur kisi doosri site par depend nahi karte:
- *   - `logo-mark.png`  → 512×512 square mark (header badge, favicon, invoice, manifest)
+ *   - `logo-mark-128/192/512.png` → square mark (header badge, favicon, invoice, manifest)
  *   - `logo.png/.webp` → poora lockup (crown + gown + DESIGNER CLOTHING wordmark)
  *   - `og-image.jpg`   → social share card
  */
@@ -12,10 +12,13 @@ const LOGO_BASE = process.env.NEXT_PUBLIC_PAGES_BASE_PATH ?? "";
 export const logoUrl = `${LOGO_BASE}/images/logo.png`;
 /** full lockup (wordmark ke saath) — invoice / share card / admin */
 export const logoLockupUrl = `${LOGO_BASE}/images/logo.png`;
+/** chhota mark (header badge / footer) */
+export const logoSmall = `${LOGO_BASE}/images/logo-mark-128.png`;
 /** footer bhi wahi mark */
-export const logoWhiteUrl = `${LOGO_BASE}/images/logo-mark.png`;
-export const logoFallback = `${LOGO_BASE}/images/logo-mark.png`;
-export const logoMark = `${LOGO_BASE}/images/logo-mark.png`;
+export const logoWhiteUrl = `${LOGO_BASE}/images/logo-mark-192.png`;
+export const logoFallback = `${LOGO_BASE}/images/logo-mark-192.png`;
+/** favicon / PWA icon */
+export const logoMark = `${LOGO_BASE}/images/logo-mark-512.png`;
 
 /**
  * Site ka apna URL — WhatsApp / invoice / canonical links isi se banate hain.

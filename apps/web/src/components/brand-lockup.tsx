@@ -1,9 +1,9 @@
-import { logoMark } from "@/config/site";
+import { logoSmall } from "@/config/site";
 
 /**
  * Brand lockup — owner ka final logo (gold crown + gown) + "DESIGNER CLOTHING" wordmark.
  *
- * Mark image (`/images/logo-mark.png`) ka background black hai, isliye usko
+ * Mark image (`/images/logo-mark-128.png`) ka background black hai, isliye usko
  * chhote black plate me dikhate hain — gold mark ka contrast bana rehta hai aur
  * header/footer dono par same dikhta hai. Wordmark HTML text hai (crisp on retina,
  * mobile par bhi padha jaata hai). Sab jagah ek hi component use hota hai.
@@ -24,7 +24,7 @@ export function BrandLockup({
       <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-black ring-1 ring-[#b8860b]/60 sm:h-11 sm:w-11">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={logoMark}
+          src={logoSmall}
           alt="Designer Clothing logo"
           width={44}
           height={44}

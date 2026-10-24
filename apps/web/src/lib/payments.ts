@@ -4,6 +4,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { dataFile } from "@/lib/data-dir";
+import { siteConfig } from "@/config/site";
 
 /**
  * Payments — sirf backend decide karta hai ki paisa aaya ya nahi.
@@ -257,7 +258,7 @@ export type PaymentInitiation =
 export async function createPaymentLink(
   order: { orderNumber: string; total: number; customerName: string; email: string; phone: string },
 ): Promise<PaymentInitiation> {
-  const callback = `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.likshaclothing.com"}/orders/${order.orderNumber}`;
+  const callback = `${siteConfig.url}/orders/${order.orderNumber}`;
   for (const account of orderedAccounts()) {
     try {
       const link = await razorpayRequest<{ short_url?: string }>(account, "/payment_links", {

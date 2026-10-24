@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { headers } from "next/headers";
 import { getOrder } from "@/lib/orders";
 import { formatDate, formatPrice, imageUrl } from "@/lib/format";
-import { ORDER_STATUS_COPY } from "@/config/site";
+import { ORDER_STATUS_COPY, siteConfig } from "@/config/site";
 import { SafeImage } from "@/components/safe-image";
 import { orderWhatsAppLink } from "@/lib/whatsapp";
 import { getStoreSettings } from "@/lib/store-settings";
@@ -18,7 +18,8 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
   const order = await getOrder(orderNumber);
   const settings = await getStoreSettings();
   const headerList = await headers();
-  const host = headerList.get("x-forwarded-host") ?? headerList.get("host") ?? "www.likshaclothing.com";
+  const fallbackHost = new URL(siteConfig.url).host;
+  const host = headerList.get("x-forwarded-host") ?? headerList.get("host") ?? fallbackHost;
   const proto = headerList.get("x-forwarded-proto") ?? "https";
   const siteUrl = `${proto}://${host}`;
   if (!order) notFound();

@@ -159,7 +159,7 @@ const pages: Record<string, PageContent> = {
   "terms-and-conditions": {
     title: "Terms and Conditions",
     eyebrow: "The fine print",
-    intro: "These terms apply to every purchase made on likshaclothing.com.",
+    intro: "These terms apply to every purchase made on our website.",
     sections: [
       {
         heading: "Pricing & availability",
