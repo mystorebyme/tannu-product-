@@ -2,154 +2,166 @@
 /**
  * Reviews sync — likshaclothing.com ka Trustoo reviews widget.
  *
- * Reviews client-side JS se load hote hain, isliye sandbox se nahi milte.
- * GitHub Actions (daily cron) me ye script chalta hai:
- *   1. live product page se shopId + Trustoo script nikalta hai,
- *   2. Trustoo ke public API endpoints try karta hai,
- *   3. jo mile use `database/seeds/reviews/reviews.json` me likh deta hai.
+ * Reviews client-side JS se load hote hain, isliye sandbox se direct nahi milte.
+ * GitHub Actions (roz 02:30 IST) me ye script chalta hai:
+ *   1. storefront se Trustoo app-proxy endpoint dhundhta hai,
+ *   2. `/apps/trustoo/api/v1/reviews/get_product_list` se review-wale products,
+ *   3. har product ke reviews,
+ *   4. Shopify product_id → hamare handle (live snapshot se) map karke
+ *      `database/seeds/reviews/reviews.json` likhta hai.
  *
- * Agar kuch na mile to file waisi hi rehti hai (koi dummy review nahi banate).
+ * Kuch na mile to purani file waisi hi rehti hai (koi dummy review nahi).
  */
 import fs from "node:fs";
 import path from "node:path";
 
 const ROOT = path.resolve(import.meta.dirname, "..", "..");
 const OUT = path.join(ROOT, "database/seeds/reviews/reviews.json");
+const LIVE = path.join(ROOT, "database/seeds/live/products.json");
 const STORE = "https://www.likshaclothing.com";
-const UA = "Mozilla/5.0 (compatible; LikshaCatalogSync/1.0)";
+const UA = "Mozilla/5.0 (compatible; LikshaReviewsSync/1.0)";
 
-const fetchText = async (url, init = {}) => {
-  const response = await fetch(url, { headers: { "user-agent": UA, accept: "*/*" }, ...init });
-  if (!response.ok) throw new Error(`${response.status} ${url}`);
-  return response.text();
-};
-
-const fetchJson = async (url) => JSON.parse(await fetchText(url));
-
-const diagnostics = { steps: [], endpoints: [], scriptUrls: [] };
+const diagnostics = { steps: [], probes: [], at: new Date().toISOString() };
 const note = (step, detail) => diagnostics.steps.push(`${step}: ${detail}`);
 
-async function discoverShop() {
-  const html = await fetchText(`${STORE}/collections/new-arrivals`);
-  note("page", `${html.length} bytes`);
-  const shopId =
-    html.match(/shop_id\s*=\s*"?(\d{5,})"?/)?.[1] ??
-    html.match(/shopId\\?":\s*\\?"(\d{5,})/)?.[1] ??
-    "73883451696";
-  const apiDomain = html.match(/api\.trustoo\.io|api2?\.trustoo\.io/)?.[0] ?? "api.trustoo.io";
-  const appProxy = [...new Set([...html.matchAll(/\/apps\/[a-z0-9/_-]+/gi)].map((m) => m[0]))].slice(0, 25);
-  diagnostics.appProxy = appProxy;
-  // widget script se endpoint patterns nikalo
-  const scriptUrls = [...new Set([...html.matchAll(/https:\/\/cdn\.shopify\.com\/extensions\/[^"'\s]*trustoo[^"'\s]*\.js/g)].map((m) => m[0]))];
-  diagnostics.scriptUrls = scriptUrls.slice(0, 6);
-  const scriptUrl = scriptUrls[0];
-  let endpoints = [];
-  if (scriptUrl) {
-    try {
-      const js = await fetchText(scriptUrl);
-      const collected = new Set();
-      for (const url of scriptUrls) {
-        let body = url === scriptUrl ? js : "";
-        if (!body) {
-          try {
-            body = await fetchText(url);
-          } catch {
-            continue;
-          }
-        }
-        const patterns = [
-          /["'`](\/apps\/[a-z0-9/_.?=&-]+)["'`]/gi,
-          /["'`](\/(?:api\/)?v?\d?\/?[a-z0-9/_-]*review[a-z0-9/_-]*)["'`]/gi,
-          /https?:\/\/(?:api2?\.)?trustoo\.io[^"'\s`]*/gi,
-        ];
-        for (const pattern of patterns) {
-          for (const match of body.matchAll(pattern)) collected.add(match[0].replace(/^["'`]|["'`]$/g, ""));
-        }
-        diagnostics.urlsFound = [...collected].slice(0, 60);
-      }
-      endpoints = [...collected].filter((value) => value.startsWith("/")).slice(0, 25);
-      diagnostics.endpoints = endpoints.slice(0, 40);
-      diagnostics.scriptBytes = js.length;
-      note("widget", `${scriptUrl.slice(-40)} → ${endpoints.length} endpoint hints`);
-    } catch (error) {
-      console.warn("widget script fetch failed:", error.message);
-      note("widget-error", error.message.slice(0, 120));
-    }
-  }
-  return { shopId, apiDomain, endpoints };
+async function fetchText(url) {
+  const response = await fetch(url, { headers: { "user-agent": UA, accept: "application/json,text/html" } });
+  if (!response.ok) throw new Error(`${response.status} ${url}`);
+  return response.text();
 }
 
-function normalise(review) {
+async function fetchJson(url) {
+  const body = await fetchText(url);
+  try {
+    return JSON.parse(body);
+  } catch {
+    throw new Error(`not json (${body.slice(0, 40)})`);
+  }
+}
+
+/** product_id → handle (live snapshot se) */
+function handleMap() {
+  if (!fs.existsSync(LIVE)) return new Map();
+  const live = JSON.parse(fs.readFileSync(LIVE, "utf8"));
+  const map = new Map();
+  for (const product of live.products ?? []) map.set(String(product.id), product.handle);
+  return map;
+}
+
+const asList = (payload) =>
+  payload?.data?.list ??
+  payload?.data?.reviews ??
+  payload?.data?.items ??
+  payload?.data ??
+  payload?.list ??
+  payload?.reviews ??
+  [];
+
+function normaliseReview(raw) {
+  const photos = (raw.photos ?? raw.images ?? raw.attachments ?? raw.review_images ?? [])
+    .map((photo) => (typeof photo === "string" ? photo : (photo?.src ?? photo?.url ?? "")))
+    .filter(Boolean)
+    .map((src) => (src.startsWith("//") ? `https:${src}` : src));
   return {
-    id: String(review.id ?? review._id ?? review.review_id ?? Math.random().toString(36).slice(2)),
-    author: review.author ?? review.reviewer_name ?? review.name ?? review.customer_name ?? "Verified buyer",
-    rating: Number(review.rating ?? review.score ?? review.star ?? review.review_rating ?? 5),
-    title: review.title ?? review.review_title ?? undefined,
-    body: String(review.body ?? review.content ?? review.review ?? review.message ?? "").trim(),
-    date: review.created_at ?? review.date ?? review.time ?? undefined,
-    verified: review.verified ?? review.is_verified ?? true,
-    photos: (review.photos ?? review.images ?? review.attachments ?? []).map((photo) =>
-      typeof photo === "string" ? photo : (photo?.src ?? photo?.url ?? ""),
-    ).filter(Boolean),
-    productHandle: review.product_handle ?? review.handle ?? review.productHandle ?? undefined,
+    id: String(raw.id ?? raw.review_id ?? raw._id ?? Math.random().toString(36).slice(2)),
+    author: raw.author ?? raw.reviewer_name ?? raw.customer_name ?? raw.name ?? "Verified buyer",
+    rating: Number(raw.rating ?? raw.score ?? raw.star ?? raw.review_rating ?? 5),
+    title: raw.title ?? raw.review_title ?? undefined,
+    body: String(raw.body ?? raw.content ?? raw.review ?? raw.message ?? raw.comment ?? "").trim(),
+    date: raw.created_at ?? raw.date ?? raw.time ?? raw.review_date ?? undefined,
+    verified: raw.verified ?? raw.is_verified ?? true,
+    photos,
   };
 }
 
 async function main() {
-  const { shopId, apiDomain, endpoints } = await discoverShop();
-  console.log({ shopId, apiDomain, endpoints: endpoints.slice(0, 8) });
+  const html = await fetchText(`${STORE}/collections/new-arrivals`);
+  const shopId =
+    html.match(/shop_id\s*=\s*"?(\d{5,})"?/)?.[1] ??
+    html.match(/shopId\\?":\s*\\?"(\d{5,})/)?.[1] ??
+    "73883451696";
+  const proxy = `${STORE}/apps/trustoo/api/v1/reviews`;
+  note("page", `${html.length} bytes, shop ${shopId}`);
 
-  const proxyCandidates = (diagnostics.appProxy ?? []).map(
-    (proxy) => `${STORE}${proxy}?shop=${shopId}&shop_id=${shopId}&page=1&limit=100`,
-  );
-  const candidates = [
-    ...proxyCandidates,
-    `${STORE}/apps/trustoo/api/v1/reviews/get_product_list?shop=${shopId}&shop_id=${shopId}&page=1&limit=100`,
-    `${STORE}/apps/trustoo/api/v1/reviews/get_product_list?shop_id=${shopId}&limit=100`,
-    `${STORE}/apps/trustoo/api/v1/reviews/list?shop_id=${shopId}&page=1&limit=100`,
-    `https://${apiDomain}/api/v1/reviews/get_product_list?shop_id=${shopId}&limit=100`,
-    `https://${apiDomain}/api/v1/reviews/collect?shop_id=${shopId}&limit=100`,
-    `https://${apiDomain}/api/v1/reviews?shop_id=${shopId}&page=1&limit=100`,
-    `https://${apiDomain}/api/reviews?shop_id=${shopId}&page=1&limit=100`,
-    `https://${apiDomain}/v1/reviews?shop_id=${shopId}&limit=100`,
-    `https://${apiDomain}/api/v1/review?shop_id=${shopId}`,
-    ...endpoints.map((endpoint) => `https://${apiDomain}${endpoint}${endpoint.includes("?") ? "&" : "?"}shop_id=${shopId}`),
-  ];
+  const handles = handleMap();
+  note("catalog", `${handles.size} product ids`);
 
-  let found = [];
-  for (const url of candidates) {
+  // 1) review-wale products
+  const productEntries = [];
+  for (let page = 1; page <= 6; page += 1) {
+    let payload;
     try {
-      const payload = await fetchJson(url);
-      const list = payload?.reviews ?? payload?.data?.reviews ?? payload?.data ?? payload?.list ?? [];
-      if (Array.isArray(list) && list.length) {
-        console.log("hit:", url, "→", list.length, "reviews");
-        found = list;
-        break;
-      }
-      diagnostics.probes = [
-        ...(diagnostics.probes ?? []),
-        `${url.slice(0, 110)} → 200 ${JSON.stringify(payload).slice(0, 220)}`,
-      ].slice(-12);
+      payload = await fetchJson(`${proxy}/get_product_list?shop_id=${shopId}&page=${page}&limit=50`);
     } catch (error) {
-      console.log("miss:", url, error.message.slice(0, 80));
-      diagnostics.probes = [...(diagnostics.probes ?? []), `${url.slice(0, 110)} → ${error.message.slice(0, 40)}`].slice(-12);
+      diagnostics.probes.push(`product_list p${page} → ${error.message.slice(0, 60)}`);
+      break;
     }
+    const list = asList(payload);
+    if (!list.length) {
+      if (page === 1) diagnostics.probes.push(`product_list shape ${JSON.stringify(payload).slice(0, 300)}`);
+      break;
+    }
+    productEntries.push(...list);
+    const totalPages = payload?.data?.page?.total_page ?? 1;
+    if (page >= totalPages) break;
   }
+  note("products-with-reviews", productEntries.length);
+  if (productEntries[0]) diagnostics.probes.push(`sample product ${JSON.stringify(productEntries[0]).slice(0, 300)}`);
 
+  // 2) har product ke reviews
   const products = {};
   let total = 0;
-  for (const item of found.map(normalise)) {
-    if (!item.body || !item.productHandle) continue;
-    const block = products[item.productHandle] ?? { rating: 0, count: 0, reviews: [] };
-    block.reviews.push(item);
-    block.count = block.reviews.length;
-    block.rating =
-      Math.round((block.reviews.reduce((sum, review) => sum + review.rating, 0) / block.count) * 10) / 10;
-    products[item.productHandle] = block;
-    total += 1;
+  let reviewedProducts = 0;
+  for (const entry of productEntries) {
+    const productId = String(entry.product_id ?? entry.productId ?? entry.id ?? "");
+    const handle = handles.get(productId);
+    if (!productId || !handle) continue;
+
+    let reviews = [];
+    for (const query of [
+      `product_id=${productId}&page=1&limit=50`,
+      `product_id=${productId}&page=1&limit=50&sort=newest`,
+    ]) {
+      try {
+        const payload = await fetchJson(`${proxy}/get_reviews?shop_id=${shopId}&${query}`);
+        reviews = asList(payload).map(normaliseReview).filter((review) => review.body);
+        if (reviews.length) break;
+      } catch (error) {
+        diagnostics.probes.push(`reviews ${handle} → ${error.message.slice(0, 50)}`);
+      }
+    }
+    if (!reviews.length) continue;
+
+    // ek hi product par duplicate reviews na aayein
+    const seen = new Set();
+    reviews = reviews.filter((review) => {
+      const key = `${review.author}-${review.body.slice(0, 60)}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    products[handle] = {
+      rating: Math.round((reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length) * 10) / 10,
+      count: reviews.length,
+      reviews,
+    };
+    reviewedProducts += 1;
+    total += reviews.length;
   }
 
   const all = Object.values(products).flatMap((block) => block.reviews);
+  fs.writeFileSync(
+    path.join(ROOT, "database/seeds/reviews/last-sync.json"),
+    `${JSON.stringify({ ...diagnostics, reviewedProducts, total }, null, 1)}\n`,
+  );
+
+  if (!total) {
+    console.warn("reviews nahi mile — purani file waisi hi rahegi");
+    console.log(diagnostics.probes.slice(-6));
+    return;
+  }
+
   const file = {
     meta: {
       source: "trustoo",
@@ -158,23 +170,13 @@ async function main() {
       note: "scripts/reviews-sync/fetch-reviews.mjs (GitHub Actions daily) is file ko likhta hai — haath se edit na karein.",
     },
     shop: {
-      rating: all.length ? Math.round((all.reduce((sum, review) => sum + review.rating, 0) / all.length) * 10) / 10 : 0,
+      rating: Math.round((all.reduce((sum, review) => sum + review.rating, 0) / all.length) * 10) / 10,
       count: all.length,
     },
     products,
   };
-
-  fs.writeFileSync(
-    path.join(ROOT, "database/seeds/reviews/last-sync.json"),
-    `${JSON.stringify({ ...diagnostics, found: found.length, saved: total, at: new Date().toISOString() }, null, 1)}\n`,
-  );
-
-  if (!total) {
-    console.warn("reviews nahi mile — purani file waisi hi rahegi");
-    return;
-  }
   fs.writeFileSync(OUT, `${JSON.stringify(file, null, 1)}\n`);
-  console.log(`saved ${total} reviews across ${Object.keys(products).length} products`);
+  console.log(`saved ${total} reviews across ${reviewedProducts} products`);
 }
 
 await main();
