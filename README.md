@@ -39,6 +39,33 @@ api       →  api.likshaclothing.com        (REST /api/v1 for partners, mobile,
 
 Detail: [`docs/10-deployment/render.md`](docs/10-deployment/render.md), [`docs/10-deployment/vercel.md`](docs/10-deployment/vercel.md).
 
+### Render static site "Not Found" aa raha ho
+
+Static site ke Settings me ye do field bharni padti hain (khaali chhod dene par Render build skip
+kar deta hai aur site blank milti hai):
+
+| Field | Value |
+| --- | --- |
+| Build Command | `npm ci && node scripts/pages/build-preview.mjs` |
+| Publish Directory | `dist` |
+
+Ya behtar: **New → Blueprint** se `render.yaml` apply karein — wahan `liksha-preview` (static) aur
+`liksha-storefront`/`liksha-admin` (full app) dono define hain.
+
+## Admin login (baat-baat par logout nahi)
+
+- Session **30 din** ki httpOnly cookie (`liksha_admin`), har request par sliding refresh (middleware).
+- Secret fallback: `ADMIN_SESSION_SECRET` → `ADMIN_API_TOKEN` → dev default. Render/Vercel par
+  dono me se ek set ho to redeploy par bhi login bana rehta hai.
+- Production me `ADMIN_PASSWORD` set nahi hai to login **fail-closed** (default password kabhi nahi chalta).
+- Login form par "Keep me signed in (30 days)" checkbox hai.
+
+## Firebase phone OTP (asli SMS)
+
+`NEXT_PUBLIC_FIREBASE_*` + `FIREBASE_API_KEY` set karte hi real SMS OTP chalu ho jaata hai;
+`OTP_DEV_MODE=off` karna mat bhooliye. Pura step-by-step:
+[`docs/09-devops/firebase-otp.md`](docs/09-devops/firebase-otp.md).
+
 ## Quickstart
 
 ```bash
@@ -200,7 +227,7 @@ Human walkthroughs: `agent-guides/`.
 - Product galleries, hover image swap, scroll animations, phone OTP, courier tracking and GST
   invoices are live — see `docs/07-security/phone-otp.md` and `docs/04-data/gst-invoicing.md`.
 - Firebase phone OTP needs the project keys; until then checkout runs in dev-OTP mode (code on screen)
-  and production must set `OTP_DEV_MODE=off` (`docs/07-security/phone-otp.md`).
+  and production must set `OTP_DEV_MODE=off` ([`docs/09-devops/firebase-otp.md`](docs/09-devops/firebase-otp.md)).
 - `SELLER_GSTIN` must be set before the first real GST invoice (`docs/04-data/gst-invoicing.md`).
 - Prepaid payments stay `pending` until live Razorpay keys + webhook secret are configured.
 - Delivery serviceability asli India Post data (19,486 pincodes / 36 states) + admin rules par chalti hai:

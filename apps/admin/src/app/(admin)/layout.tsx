@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { requireSession } from "@/lib/session";
 import { logoutAction } from "@/app/actions";
+import { secretIsDefault } from "@/lib/auth";
 import { AdminNav } from "@/components/admin-nav";
 import { getOrders } from "@/lib/data";
 
@@ -27,7 +28,16 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           </form>
         </div>
       </aside>
-      <main className="content">{children}</main>
+      <main className="content">
+        {secretIsDefault() && process.env.NODE_ENV === "production" ? (
+          <div className="notice" data-testid="session-secret-warning">
+            <strong>Session secret set nahi hai.</strong> Production me <span className="mono">ADMIN_SESSION_SECRET</span>{" "}
+            (ya <span className="mono">ADMIN_API_TOKEN</span>) set kariye — warna har deploy par admin ko dobara
+            login karna padega.
+          </div>
+        ) : null}
+        {children}
+      </main>
     </div>
   );
 }

@@ -46,3 +46,19 @@ test("credentials check is exact and case-insensitive on email", () => {
   assert.equal(checkCredentials("admin@likshaclothing.com", "wrong"), false);
   assert.equal(checkCredentials("someone@else.com", "liksha2026"), false);
 });
+
+test("session 30 din chalti hai (baar-baar login nahi)", () => {
+  const token = createSessionToken("admin@likshaclothing.com");
+  const session = verifySessionToken(token);
+  const days = ((session?.exp ?? 0) - Date.now()) / 86_400_000;
+  assert.ok(days > 29 && days <= 30.01, `expected ~30 days, got ${days.toFixed(2)}`);
+});
+
+test("cookie options persistent + httpOnly rehte hain", async () => {
+  const { sessionCookieOptions } = await import("../../apps/admin/src/lib/auth.ts");
+  const options = sessionCookieOptions();
+  assert.equal(options.httpOnly, true);
+  assert.equal(options.sameSite, "lax");
+  assert.equal(options.path, "/");
+  assert.ok((options.maxAge ?? 0) > 60 * 60 * 24 * 20);
+});

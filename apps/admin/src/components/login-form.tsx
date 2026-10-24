@@ -17,6 +17,10 @@ export function LoginForm({ next }: { next: string }) {
         <label htmlFor="password">Password</label>
         <input id="password" name="password" type="password" required autoComplete="current-password" />
       </div>
+      <label className="small" style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 10 }}>
+        <input type="checkbox" name="remember" defaultChecked />
+        Keep me signed in (30 days)
+      </label>
       {state?.error ? <p className="error">{state.error}</p> : null}
       <button className="btn btn-primary" type="submit" disabled={pending} style={{ width: "100%", justifyContent: "center", marginTop: 6 }}>
         {pending ? "Signing in…" : "Sign in"}

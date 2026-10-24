@@ -1,5 +1,7 @@
 # Phone OTP (Firebase) — checkout verification
 
+> Setup (Firebase project, env vars, SMS quota): [`docs/09-devops/firebase-otp.md`](../09-devops/firebase-otp.md).
+
 Har order se pehle customer ka mobile number verify hota hai. SMS Firebase
 Authentication (Phone provider) bhejta hai, verification server par hoti hai, aur
 order ek short-lived signed token ke saath hi banta hai.

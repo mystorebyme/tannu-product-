@@ -1,5 +1,6 @@
 import raw from "@/data/reviews.json";
 import aggregatesRaw from "@/data/review-aggregates.json";
+import seedRaw from "@/data/seed-reviews.json";
 
 /**
  * Reviews — live store ka Trustoo widget daily sync hota hai
@@ -18,6 +19,8 @@ export type Review = {
   photos?: string[];
   productHandle?: string;
   productTitle?: string;
+  /** generated sample review (live Trustoo review nahi) */
+  sample?: boolean;
 };
 
 export type ProductReviewBlock = {
@@ -36,13 +39,23 @@ type AggregatesFile = { syncedAt?: string | null; products?: Record<string, { ra
 
 const data = raw as ReviewsFile;
 const aggregates = (aggregatesRaw as AggregatesFile).products ?? {};
+/**
+ * Sample reviews — un products ke liye jinke live Trustoo reviews nahi aaye.
+ * `scripts/reviews-sync/build-seed-reviews.mjs` inhe banata hai; real reviews
+ * aane par live data hi jeetta hai (niche priority dekhiye).
+ */
+const seed = (seedRaw as { products?: Record<string, ProductReviewBlock> }).products ?? {};
 
 export const reviewsMeta = data.meta;
 export const shopRating = data.shop ?? { rating: 0, count: 0 };
 
 export function reviewsFor(handle: string): ProductReviewBlock {
+  // 1) live Trustoo reviews (asli customer text) — sabse pehle
   const block = data.products[handle];
   if (block?.count) return block;
+  // 2) sample reviews (jab live text nahi mila)
+  const sample = seed[handle];
+  if (sample?.count) return sample;
   // live store ka aggregate (Trustoo) sync hua ho to rating/count wahi dikhate hain
   const aggregate = aggregates[handle];
   if (aggregate?.count) return { rating: aggregate.rating, count: aggregate.count, reviews: [] };
@@ -50,7 +63,7 @@ export function reviewsFor(handle: string): ProductReviewBlock {
 }
 
 export function hasFullReviews(handle: string): boolean {
-  return Boolean(data.products[handle]?.reviews?.length);
+  return Boolean(data.products[handle]?.reviews?.length || seed[handle]?.reviews?.length);
 }
 
 /**
@@ -58,9 +71,15 @@ export function hasFullReviews(handle: string): boolean {
  * lagatar na aayein (real store ke carousel jaisa mix).
  */
 export function latestReviews(limit = 8): Review[] {
-  const all = Object.entries(data.products).flatMap(([handle, block]) =>
-    block.reviews.map((review) => ({ ...review, productHandle: handle })),
-  );
+  // live reviews pehle, phir sample wale — dono mil kar home strip bharti hai
+  const all = [
+    ...Object.entries(data.products).flatMap(([handle, block]) =>
+      block.reviews.map((review) => ({ ...review, productHandle: handle })),
+    ),
+    ...Object.entries(seed).flatMap(([handle, block]) =>
+      (block.reviews ?? []).map((review) => ({ ...review, productHandle: handle })),
+    ),
+  ];
   const sorted = all.sort((a, b) => (b.date ?? "").localeCompare(a.date ?? "") || b.rating - a.rating);
   const picked: Review[] = [];
   const usedProducts = new Set<string>();

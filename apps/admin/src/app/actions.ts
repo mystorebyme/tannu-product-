@@ -5,9 +5,9 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import {
   SESSION_COOKIE,
-  SESSION_MAX_AGE,
   checkCredentials,
   createSessionToken,
+  sessionCookieOptions,
 } from "@/lib/auth";
 import {
   appendAudit,
@@ -40,13 +40,10 @@ export async function loginAction(_prev: { error?: string } | undefined, formDat
 
   const token = createSessionToken(email);
   const store = await cookies();
-  store.set(SESSION_COOKIE, token, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: SESSION_MAX_AGE,
-  });
+  const options = sessionCookieOptions();
+  // "Keep me signed in" hata dein to browser band hone par session khatam (session cookie)
+  const remember = String(formData.get("remember") ?? "on") !== "off";
+  store.set(SESSION_COOKIE, token, remember ? options : { ...options, maxAge: undefined });
 
   appendAudit({ actor: email, action: "auth.login", target: "admin" });
   redirect(next.startsWith("/") ? next : "/");

@@ -78,6 +78,16 @@ async function main() {
       `${gallerySlides} slides for ${galleryProduct.handle} (${galleryProduct.images?.length ?? 0} images)`,
     );
     check("PDP shows the live description", /Product Details/i.test(pdp.text));
+    // badi image cut nahi honi chahiye — frame contain karta hai
+    check(
+      "PDP main image is contained (no crop)",
+      pdp.text.includes('data-testid="pdp-main-image-frame"') && /pdp-main-image-frame[^>]*/.test(pdp.text),
+    );
+    const containCount = (pdp.text.match(/object-contain/g) ?? []).length;
+    check("PDP gallery uses object-contain", containCount >= 1, `${containCount} matches`);
+    // har product par reviews (live Trustoo ya sample seed)
+    check("PDP has a review block", pdp.text.includes('data-testid="product-reviews"'));
+    check("PDP has aggregate rating in JSON-LD", /"aggregateRating"/.test(pdp.text));
   }
 
   // ── phone OTP + GST invoice + tracking ──

@@ -104,6 +104,7 @@ export function ProductGallery({
         <div
           ref={frameRef}
           className="relative mx-auto aspect-[4/5] max-h-[calc(100svh-150px)] w-full touch-pan-y overflow-hidden bg-[#f6f1ec] sm:aspect-[3/4] lg:max-h-[calc(100svh-140px)]"
+          data-testid="pdp-main-image-frame"
           onMouseEnter={() => setZoom(true)}
           onMouseLeave={() => {
             setZoom(false);
@@ -132,12 +133,13 @@ export function ProductGallery({
               }`}
               aria-hidden={imageIndex !== index}
             >
+              {/* object-contain: puri image dikhe — pehle cover se lambi images cut ho rahi thi */}
               <SafeImage
                 src={imageUrl(image, imageIndex === index ? 1200 : 600)}
                 alt={`${title} — image ${imageIndex + 1}`}
                 loading={imageIndex === 0 ? "eager" : "lazy"}
                 fetchPriority={imageIndex === 0 ? "high" : "auto"}
-                className="h-full w-full object-cover"
+                className="h-full w-full object-contain"
               />
             </div>
           ))}
