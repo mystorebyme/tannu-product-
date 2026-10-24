@@ -33,6 +33,7 @@ faisla hai — jo pehle hi fix tha, jo is round me fix hua, aur jo owner ke bina
 | 18 | **Best sellers sirf order history se** | ✅ Done | `lib/best-sellers.ts` paid orders se rank karta hai, 0 orders par curated fallback; home rail + `/api/best-sellers`. |
 | 19 | **Infinite scroll instant nahi** | ⚠️ Fix is round | `ProductGridWithMore` me `IntersectionObserver` (800px pehle se) auto-load + button fallback + duplicate-handle dedupe. |
 | 20 | **Images slow** | ✅ Mostly | Local WebP banners, `loading="lazy"` + `decoding="async"` har card par, hero `eager` + `fetchPriority="high"` + fixed aspect ratios (CLS 0), CDN images `?width=` variants. |
+| 20b | **Supplier-description titles** ("Presenting New Crunchy Silk Fabric … Dori and Zari Work Top with Dupatta Set Bell Bottom Pant Ready to Wear") | ⚠️ Fix is round | 10 aise titles the. Ab `TITLE_OVERRIDES` (build script me) se saaf title: "Crunchy Silk Embroidered Anarkali Suit Set" etc. Handle/URL same, 446/446 titles phir bhi unique. |
 | 21 | **SEO basics** | ⚠️ Gaps fixed | Har page par 1 `<h1>`; 446/446 unique titles; PDP me Product + BreadcrumbList JSON-LD. Is round: site-wide **Organization + WebSite (SearchAction)** JSON-LD, `/search` **noindex** + canonical, canonical fallback dead Render host se **www.likshaclothing.com**. |
 | 22 | **Accessibility / broken navigation** | ⚠️ Small gap | Skip-to-content link add hua (`#main-content`), mobile drawer me `aria-expanded`, "Skip to content" keyboard se chalta hai. `tel:` links zero (sirf WhatsApp). |
 | 23 | **Security: secrets frontend me nahi** | ✅ Verified | `ADMIN_API_TOKEN`, `DATABASE_URL`, sheet URL kabhi client bundle me nahi; UPI sirf payment page par (checkout par nahi); admin link public pages par nahi. |
@@ -48,6 +49,7 @@ faisla hai — jo pehle hi fix tha, jo is round me fix hua, aur jo owner ke bina
 | `apps/web/src/app/orders/page.tsx` | naya route → `/track-order` (307) |
 | `apps/web/src/app/layout.tsx` | Organization + WebSite JSON-LD, `#main-content` + skip link |
 | `apps/web/src/app/search/page.tsx` | `robots: noindex`, canonical `/search` |
+| `scripts/build-catalog.mjs` + `apps/web/src/data/catalog.json` | 10 supplier-description titles → saaf product titles (override map, sync-safe) |
 | `apps/web/src/config/site.ts` | canonical fallback `https://www.likshaclothing.com` (Render dead host hataya) |
 | `docs/10-deployment/live-vercel-supabase.md` | naya deploy guide (URLs, env, DB, payment flow) |
 | `docs/08-testing/round18-audit.md` | R18 payment-flow audit |
