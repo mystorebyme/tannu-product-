@@ -2,12 +2,12 @@
  "meta": {
   "source": "trustoo",
   "shopId": "73883451696",
-  "syncedAt": "2026-10-24T08:28:16.850Z",
+  "syncedAt": "2026-10-24T08:30:10.721Z",
   "note": "scripts/reviews-sync/fetch-reviews.mjs (GitHub Actions daily) is file ko likhta hai — haath se edit na karein."
  },
  "shop": {
   "rating": 4.8,
-  "count": 1328
+  "count": 1267
  },
  "products": {
   "rang-e-royale-blooming-lehenga-suit-set": {
@@ -581,84 +581,6 @@
      "rating": 4,
      "title": "",
      "body": "Product is good looks pretty",
-     "verified": true,
-     "photos": []
-    }
-   ]
-  },
-  "pink-flared-anarkali-suit-set": {
-   "rating": 4.3,
-   "count": 8,
-   "reviews": [
-    {
-     "id": "26157599",
-     "author": "geeta ",
-     "rating": 4,
-     "title": "",
-     "body": "Amazing perfect colour perfect suits",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "26157598",
-     "author": "chini ",
-     "rating": 3,
-     "title": "",
-     "body": "good quality👍",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "26157597",
-     "author": "sidhi ",
-     "rating": 5,
-     "title": "",
-     "body": "Excellent quality must buy suit definitely,Fabric is flowy and breathable.🤩",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "26157596",
-     "author": "yashi ",
-     "rating": 4,
-     "title": "",
-     "body": "The dress looks so good, the color is exactly as shown in the images. And the material is soo comfortable.",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "26157595",
-     "author": "vishva ",
-     "rating": 4,
-     "title": "",
-     "body": "Very beautiful ❤️true to size looks nice",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "26157594",
-     "author": "viddhi ",
-     "rating": 4,
-     "title": "",
-     "body": "festive look ❣",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "26157593",
-     "author": "riddhi ",
-     "rating": 5,
-     "title": "",
-     "body": "Very good quality and fitting. Lovely dress. Worth for money",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "26157592",
-     "author": "yashi ",
-     "rating": 5,
-     "title": "",
-     "body": "Perfect fit and the colour is just woww🫣🫣🫣",
      "verified": true,
      "photos": []
     }
@@ -1969,93 +1891,6 @@
     }
    ]
   },
-  "nusrat-noor-black-color-embroidered-work-anarkali-suit-set": {
-   "rating": 5,
-   "count": 9,
-   "reviews": [
-    {
-     "id": "26107764",
-     "author": "Teju ",
-     "rating": 5,
-     "title": "",
-     "body": "Wowww.. love this dress.... Just go for it girls ... It's too comfortable to wear... It's my all time favorite now....🥰",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "26107763",
-     "author": "Maya h. ",
-     "rating": 5,
-     "title": "",
-     "body": "Beutiful I recieved it as shown in the picture 🥰",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "26107762",
-     "author": "Rajvi p. ",
-     "rating": 5,
-     "title": "",
-     "body": "Love the quality i m so so so Happy 😍😍thank u so much Liksha Clothing To provide best best best collection",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "26107761",
-     "author": "ANUSHA G. ",
-     "rating": 5,
-     "title": "",
-     "body": "Like… oh my god, this kurta is just everything! 💁🏻‍♀️ Fabric? Super soft Fit? Matlab bilkul tailor-made wali feel de raha tha. Color? Picture se bhi zyada pretty lag raha tha real mein. Aur woh ghera? Uff full princess vibes! 👑",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "26107760",
-     "author": "Ishvar J. ",
-     "rating": 5,
-     "title": "",
-     "body": "Loved this simple yet elegant suit!!",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "26107759",
-     "author": "Shruti F. ",
-     "rating": 5,
-     "title": "",
-     "body": "This Black Anarkali kurta is absolutely beautiful!",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "26107758",
-     "author": "Radha B. ",
-     "rating": 5,
-     "title": "",
-     "body": "The fabric feels soft, the flare is amazing, and the  Embroidered gives perfect festive vibes ✨ Loved the fit and overall elegant look 😍”",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "26107757",
-     "author": "KRISHNA P. ",
-     "rating": 5,
-     "title": "",
-     "body": "​I am extremely happy with this purchase. The fabric is premium and feels very comfortable on the skin",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25922838",
-     "author": "Kavya ",
-     "rating": 5,
-     "title": "",
-     "body": "material was soft and comfortable wearing. this is so good. suit is so beautiful\n\nYou can trust me, this suit will blow your mind super cute and classy at the same time. I loved it",
-     "verified": true,
-     "photos": []
-    }
-   ]
-  },
   "siyas-royal-purple-elegant-golden-border-anarkali-suit-set": {
    "rating": 5,
    "count": 2,
@@ -2627,111 +2462,6 @@
      "rating": 5,
      "title": "",
      "body": "Bahut Acha Dress Hai Or Uska Colour Bhi Bahut Acha haii..",
-     "verified": true,
-     "photos": []
-    }
-   ]
-  },
-  "beautiful-pure-chinon-silk-fabric-straight-fit-kurta-dupatta-with-trouser-set": {
-   "rating": 5,
-   "count": 11,
-   "reviews": [
-    {
-     "id": "25892544",
-     "author": "Khushi m. ",
-     "rating": 5,
-     "title": "",
-     "body": "Great collection, design and quality are very good and as shown in the pictures above.. value for money product great..Thank You Liksha Team..",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25892542",
-     "author": "Priti J. ",
-     "rating": 5,
-     "title": "",
-     "body": "The dress fits very well🥰 Looks amazing and gives punjabi vibes❤️",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25892541",
-     "author": "tamanna b. ",
-     "rating": 5,
-     "title": "",
-     "body": "Suit is very beautiful.... material is fine...I loved it",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25892539",
-     "author": "Madhuri D. ",
-     "rating": 5,
-     "title": "",
-     "body": "Dress was so lightweight color is too good but cloth was too thin over all Best.",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25892537",
-     "author": "Chetna H. ",
-     "rating": 5,
-     "title": "",
-     "body": "I loved the dress its looks nice so different..Thank U Liksha ..",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25892535",
-     "author": "Teju D. ",
-     "rating": 5,
-     "title": "",
-     "body": "Fabric is too good!!!! Amazing kurta set for functions!!! Just go for it!! I got many compliments for this one!",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25892534",
-     "author": "Yashvi H. ",
-     "rating": 5,
-     "title": "",
-     "body": "Mujhe Bahut Hi Acha Laga Salwar Set..Or Uska Square Neack Bhi Bahut Hi Pyara Lag Raha Haii..Very Classy LOOK..",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25892533",
-     "author": "DISHA N. ",
-     "rating": 5,
-     "title": "",
-     "body": "The quality of stitching ,seams and structure is fantastic. This is classy and comfortable.this pattern looks great .",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25892531",
-     "author": "HARSHVI M. ",
-     "rating": 5,
-     "title": "",
-     "body": "Such pretty set , the salwar is so trendy . And looks so good . I got so many compliments. It looks really nice and beautiful..tHANK yOU lIKSHA ..",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25892530",
-     "author": "Renuka J. ",
-     "rating": 5,
-     "title": "",
-     "body": "Beautiful Kurta and Salwar, especially for Premium Look..",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25892529",
-     "author": "Diya H. ",
-     "rating": 5,
-     "title": "",
-     "body": "The product is exact shown in the pictures, the fabric is amazing comfy for All Occasion",
      "verified": true,
      "photos": []
     }
@@ -3877,171 +3607,6 @@
     }
    ]
   },
-  "ravisha-floral-anarkali-anarkali-suit-set": {
-   "rating": 4.8,
-   "count": 8,
-   "reviews": [
-    {
-     "id": "25857016",
-     "author": "mirali m. ",
-     "rating": 5,
-     "title": "",
-     "body": "Just looking like a waoo this anarkali set is so beautiful print is also beautiful 😍",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25857015",
-     "author": "KETKI. ",
-     "rating": 4,
-     "title": "",
-     "body": "Meterial is soo soft colour is so pretty 😍 thread work is amazing on this suit .",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25857014",
-     "author": "BRINJA S. ",
-     "rating": 5,
-     "title": "",
-     "body": "Love 💓 love 😘 love ❤️ Love ❤️😘😘😘❤️..... It's just love at first sight 😍....the fitting, the design, the comfort, the material, the colour, ....what not....The best purchase of my entire life I guess.....Thank you soooooo much liksha♥️..m in live with this Anarkali.",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25857012",
-     "author": "GANGA H. ",
-     "rating": 5,
-     "title": "",
-     "body": "For wedding nd festival Best purchase Look soo classy",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25857011",
-     "author": "PARTIKA V. ",
-     "rating": 4,
-     "title": "",
-     "body": "Honest review - This dress looks decent and elegant, fabric is good, not itchy. Bit pricy according to price but it's worth it. Perfect for functions and weddings. Loved the colour 🧡. Same as shown in the picture. Perfect fitting. The one thing I doesn't like is the gota Patti at the ends of dupatta. I removed it since it's easily removable.",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25857010",
-     "author": "MISHKHA N. ",
-     "rating": 5,
-     "title": "",
-     "body": "A proper beautiful dress. So comfortable and elegant. Just go for it.The quality is amazing. The work is perfect on the cloth it looks decent.",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25857000",
-     "author": "PUSHPA. ",
-     "rating": 5,
-     "title": "",
-     "body": "RED COLOUR IS VERY ELEGANT AND BEAUTIFUL LOOKING.It is an elegent suit best for traditional occasions the color is really unique yet beautiful Loved",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25856999",
-     "author": "V.P. ",
-     "rating": 5,
-     "title": "",
-     "body": "Just loved the product quality dress material is too good go for it 🤎.. Thank you",
-     "verified": true,
-     "photos": []
-    }
-   ]
-  },
-  "mastani-floral-anarkali-anarkali-suit-set": {
-   "rating": 4.3,
-   "count": 9,
-   "reviews": [
-    {
-     "id": "25856332",
-     "author": "HITU C. ",
-     "rating": 4,
-     "title": "",
-     "body": "Gorgeous dress with accurate fitting! Beauuutiful color..",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25856331",
-     "author": "SONAL K. ",
-     "rating": 3,
-     "title": "",
-     "body": "Nice dress with this price range perfect stitching and detailing..",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25856330",
-     "author": "VISHVA E. ",
-     "rating": 5,
-     "title": "",
-     "body": "Fabrics was very nice, amazing I love it.The dress is perfect for festival vibes.t's too goooood guys.",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25856329",
-     "author": "DRASHTI H. ",
-     "rating": 4,
-     "title": "",
-     "body": "I really like the product its up to mark , quality is so good and apperance royal look . In love with this suit..",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25856328",
-     "author": "SHRUTI H. ",
-     "rating": 5,
-     "title": "",
-     "body": "Beautiful Anarkali! Great fit, comfortable fabric, and the color looks exactly like the pictures. Worth buying 👍✨\nThank You For Liksha Team..",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25856327",
-     "author": "BANSI L. ",
-     "rating": 3,
-     "title": "",
-     "body": "The quality and fit is great Loved the colour..",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25856326",
-     "author": "DEVANGI V. ",
-     "rating": 5,
-     "title": "",
-     "body": "Fitting is perfect... Quality is good... Worth it. Brought the first product in this brand... Bottom wear is so comfortable.... I loved it alot...",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25856288",
-     "author": "ANKITA G. ",
-     "rating": 5,
-     "title": "",
-     "body": "Very nice dress, its exactly as shown in the image, the material is very soft and comfortable to wear. I would definitely recommend buying this one.\nVery nice material,good quality,😍😍",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25856239",
-     "author": "AVANI J. ",
-     "rating": 5,
-     "title": "",
-     "body": "Very good dress, the color is rich and elegant. Dupatta is beautiful with nice embroidery, and the design looks classy. Worth the price, totally satisfied with the purchase..",
-     "verified": true,
-     "photos": []
-    }
-   ]
-  },
   "amani-floral-anarkali-anarkali-suit-set": {
    "rating": 4.5,
    "count": 8,
@@ -4175,84 +3740,6 @@
      "rating": 5,
      "title": "",
      "body": "I recently buy this beautiful suit nd I love it .. fabric is so smooth it’s suitable for summer season nd vry lightweight outfit nd colour same as shown in picture.. I’m vry happy to get this outfit in vry reasonable price nd it’s look great..",
-     "verified": true,
-     "photos": []
-    }
-   ]
-  },
-  "lakhnavi-embroidered-work-anarkali-suit-set": {
-   "rating": 4.5,
-   "count": 8,
-   "reviews": [
-    {
-     "id": "25856155",
-     "author": "parth r. ",
-     "rating": 5,
-     "title": "",
-     "body": "Loving my kurti set from Liksha Team😍 The fabric is so comfy and breathable, perfect for daily wear. The design is super cute and the fit is just right 💁‍♀️.",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25856154",
-     "author": "JUSHIT N. ",
-     "rating": 4,
-     "title": "",
-     "body": "Fabric is good. The colour is bright. Dupatta length is good. Opt for occasional wear. Overall it is giving a grand look. Best for this price.",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25856153",
-     "author": "NIZA U. ",
-     "rating": 5,
-     "title": "",
-     "body": "Quality super.. don't miss it le'ts goo 🥰\n\nLakhnavi fabric with Embroidered and light weight cloth..\nToo good stuff I like this",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25856152",
-     "author": "ZISHA V. ",
-     "rating": 3,
-     "title": "",
-     "body": "bright colour suits for night occasions",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25856147",
-     "author": "PAYAL K. ",
-     "rating": 4,
-     "title": "",
-     "body": "According to price quality is good same as shown..\nVery beautiful...such a nice color...Perfect fit👌 LOVED IT 💖",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25856144",
-     "author": "MANSI J. ",
-     "rating": 5,
-     "title": "",
-     "body": "It’s classy & pretty kurta set, loved the dupatta Packed nicely & delivery guy was helpful too..\nColour is good.",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25856143",
-     "author": "KRISHA A. ",
-     "rating": 5,
-     "title": "",
-     "body": "ice and classy. Just be extra careful with size. I had to exchange it with a bigger size. Worth buying 👍",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25856142",
-     "author": "ANJALI V. ",
-     "rating": 5,
-     "title": "",
-     "body": "The kurta is pure Lakhnavi and very beautiful work on it. Duppata iss also very beautiful and the overall look is elegant. Happy to recieve the best product. Must buy yt 💗💗",
      "verified": true,
      "photos": []
     }
@@ -5483,147 +4970,6 @@
      "rating": 5,
      "title": "",
      "body": "I am in love with this set. Absolutely stunning piece, if you have come across this post then go for it. Worth the money. The colour is the same as shown in the picture. The material is very soft and Comfortable to wear.",
-     "verified": true,
-     "photos": []
-    }
-   ]
-  },
-  "premium-quality-heavy-traditional-crop-top-with-shrug-4": {
-   "rating": 4.7,
-   "count": 15,
-   "reviews": [
-    {
-     "id": "26190493",
-     "author": "Gurpreet K. ",
-     "rating": 4,
-     "title": "",
-     "body": "Good",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25989584",
-     "author": "Ragvender s. y. ",
-     "rating": 5,
-     "title": "",
-     "body": "Good",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25919667",
-     "author": "shankar S. ",
-     "rating": 4,
-     "title": "",
-     "body": "So nice 👍",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25854108",
-     "author": "Priya S. ",
-     "rating": 4,
-     "title": "",
-     "body": "I have ordered the dress butLoved it ❤️😍 Quality, Stuff and finishing All over superb and outstanding ❤️",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25829894",
-     "author": "Aasha M. ",
-     "rating": 5,
-     "title": "",
-     "body": "I just love this outfit 😍",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25829893",
-     "author": "Shalini S. ",
-     "rating": 5,
-     "title": "",
-     "body": "Ordered this beauty for my Haldi🎀❤️",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25829892",
-     "author": "Shweta R. ",
-     "rating": 5,
-     "title": "",
-     "body": "Beautiful lehnga. Quality of lehnga n dupatta is very good. Looking elegant. Same as the picture shown... loved it . ❤️",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25829890",
-     "author": "Priti ",
-     "rating": 5,
-     "title": "",
-     "body": "I just loved the product!",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25829889",
-     "author": "Darshana ",
-     "rating": 5,
-     "title": "",
-     "body": "his lengha is osum I loved the fit and febric was too good..tanx liksha team",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25829888",
-     "author": "Shankar ",
-     "rating": 4,
-     "title": "",
-     "body": "Good quality, perfect fitting.",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25829887",
-     "author": "Khushboo ",
-     "rating": 5,
-     "title": "",
-     "body": "The product is fabulous. Must go for it. The fitting is also good.",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25829886",
-     "author": "Goldy L. ",
-     "rating": 5,
-     "title": "",
-     "body": "Nice lehenga at this price ....I liked it 😊",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25829885",
-     "author": "Shivangi K. ",
-     "rating": 5,
-     "title": "",
-     "body": "Ordered for my sister, she loved it. Beautiful and trendy lehenga choli. The color is dark green, fabric is very nice and work on it is same as in picture. Lightweight and comfortable to wear, lining is good so it doesnot irritate the skin.",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25829884",
-     "author": "Ritika V. ",
-     "rating": 5,
-     "title": "",
-     "body": "Fitting is so good and perfect for mehandi event🥰😍",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25829883",
-     "author": "Mohini M. ",
-     "rating": 5,
-     "title": "",
-     "body": "t's so beautiful. The  lehenga is so spacious. The colour is beautiful. I also got a surprise gift and a lovely note on my purchase. Really Great experience. Buy your own size because it's true to size and fit. tnx for liksha clothing",
      "verified": true,
      "photos": []
     }
@@ -7818,7 +7164,7 @@
   },
   "aarushi-heavy-pure-cinon-silk-gown": {
    "rating": 4.8,
-   "count": 50,
+   "count": 52,
    "reviews": [
     {
      "id": "25830760",
@@ -8267,6 +7613,24 @@
      "rating": 5,
      "title": "",
      "body": "Worth the price 👌 everything was just perfect 🥰💞👌❤ Go for it you'll never regret I guarantee 💯 .",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25667453",
+     "author": "Alpana C. ",
+     "rating": 4,
+     "title": "",
+     "body": "Very nice material... Very beautiful design... I loved it",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25667452",
+     "author": "Karme R. ",
+     "rating": 5,
+     "title": "",
+     "body": "The quality of the cloth is really nice.............it's cream colour it's matches with my skin tone 🥰 very happy with the product",
      "verified": true,
      "photos": []
     }
@@ -8757,7 +8121,7 @@
   },
   "nehas-premium-anarkali-suit-set": {
    "rating": 4.7,
-   "count": 50,
+   "count": 55,
    "reviews": [
     {
      "id": "26190626",
@@ -9206,6 +8570,51 @@
      "rating": 5,
      "title": "",
      "body": "Awesome fabric and design I like the suit it's as same as in the picture... affordable price",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25618477",
+     "author": "Vaishali S. ",
+     "rating": 4,
+     "title": "",
+     "body": "I loved it! 🤩 Same as shown in picture. Great work amazing fabric so comfortable.",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25618476",
+     "author": "Sagun R. ",
+     "rating": 5,
+     "title": "",
+     "body": "I absolutely love this ethnic suit! The quality is amazing – the fabric feels premium and comfortable to wear. The color is stunning and exactly as shown in the pictures, making it perfect for any special occasion. The i detailing adds an elegant touch. Highly recommended!\"",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25618475",
+     "author": "Richie D. B. ",
+     "rating": 5,
+     "title": "",
+     "body": "No doubt the suit is very pretty and definitely will have head turns once .. but the stuff is not up to the level of the price duptta is nice So giving 5⭐ to appearance 4⭐ to material quality",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25618474",
+     "author": "Shilpi G. ",
+     "rating": 5,
+     "title": "",
+     "body": "Very awesome dress good quality embroidery is do pretty",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25618473",
+     "author": "Aradhya S. ",
+     "rating": 5,
+     "title": "",
+     "body": "Beautiful kurta set. Perfect colour. Embroidery is good. Elegant. I love indo Liksha clothing",
      "verified": true,
      "photos": []
     }

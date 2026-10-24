@@ -4,7 +4,7 @@
   "catalog: 288 product ids",
   "products-with-reviews: 300",
   "probed-endpoints: 18",
-  "aggregates: 0"
+  "aggregates: 122"
  ],
  "probes": [
   "/apps/trustoo/api/v1/reviews/collect → {\"code\":-1,\"message\":\"ClientId:required,EventCategory:required\"}",
@@ -17,7 +17,7 @@
   "/apps/trustoo/api/v1/reviews/add_review_via_shopify → 500 https://www.likshaclothing.com/apps/trustoo/ap",
   "/apps/trustoo/api/v1/reviews/collect_event → 500 https://www.likshaclothing.com/apps/trustoo/ap"
  ],
- "at": "2026-10-24T08:26:11.806Z",
+ "at": "2026-10-24T08:28:46.201Z",
  "endpointNames": [
   "collect",
   "get_product_list",
@@ -38,6 +38,28 @@
   "get_product_review",
   "get_reviews_by_product"
  ],
- "reviewedProducts": 129,
- "total": 1328
+ "reviewKeys": [
+  "id",
+  "star",
+  "author",
+  "author_country",
+  "title",
+  "content",
+  "commented_at",
+  "verified_badge",
+  "corresponding_product",
+  "reply_content",
+  "resources",
+  "likes_count",
+  "dislike_count",
+  "item_type",
+  "product_image_src",
+  "verified_by_shop",
+  "verification_methodology",
+  "review_attribute",
+  "instagram_media"
+ ],
+ "reviewedProducts": 122,
+ "total": 1267,
+ "aggregates": 122
 }
