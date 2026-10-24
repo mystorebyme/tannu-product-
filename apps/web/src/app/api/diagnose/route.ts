@@ -1,3 +1,5 @@
+import { headers } from "next/headers";
+import { siteConfig } from "@/config/site";
 import { getOrder } from "@/lib/orders";
 import { getStoreSettings } from "@/lib/store-settings";
 import { dbEnabled } from "@/lib/db";
@@ -30,6 +32,32 @@ export async function GET(request: Request) {
   } catch (error) {
     out.settingsError = (error as Error).message;
     out.settingsStack = (error as Error).stack?.split("\n").slice(0, 6);
+  }
+
+  try {
+    out.siteUrl = siteConfig.url;
+    out.parsedHost = new URL(siteConfig.url).host;
+  } catch (error) {
+    out.siteUrlError = (error as Error).message;
+  }
+
+  try {
+    const headerList = await headers();
+    out.host = headerList.get("x-forwarded-host") ?? headerList.get("host");
+  } catch (error) {
+    out.headersError = (error as Error).message;
+  }
+
+  try {
+    const order = await getOrder(number);
+    if (order) {
+      const { orderWhatsAppLink } = await import("@/lib/whatsapp");
+      out.whatsapp = orderWhatsAppLink(order, `https://${out.host ?? "x"}`).slice(0, 40);
+      out.statusCopy = order.status;
+    }
+  } catch (error) {
+    out.waError = (error as Error).message;
+    out.waStack = (error as Error).stack?.split("\n").slice(0, 5);
   }
 
   return Response.json(out, { headers: { "cache-control": "no-store" } });
