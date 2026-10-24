@@ -47,7 +47,7 @@ jobs:
           # seedha Render API par jaate hain. Khaali ho to WhatsApp order flow chalta hai.
           # Repo → Settings → Variables → Actions me `STORE_API_URL` set kariye.
           NEXT_PUBLIC_API_BASE_URL: ${{ vars.STORE_API_URL }}
-          NEXT_PUBLIC_LIVE_STORE_URL: ${{ vars.STORE_API_URL || 'https://likshaclothing.onrender.com' }}
+          NEXT_PUBLIC_LIVE_STORE_URL: ${{ vars.STORE_API_URL || 'https://liksha-clothing.vercel.app' }}
           # Canonical/OG isi deployment ke hain (preview ko live store ka duplicate na samjha jaye)
           NEXT_PUBLIC_SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
         run: node scripts/pages/build-preview.mjs

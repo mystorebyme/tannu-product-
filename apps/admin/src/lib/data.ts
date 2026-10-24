@@ -273,7 +273,7 @@ export type StoreSettings = {
 };
 
 const DEFAULT_SETTINGS: StoreSettings = {
-  announcement: "Diwali Sale — Flat 70% OFF · Final price ₹499 onwards",
+  announcement: "Diwali Sale — Up to 70% OFF · Final price ₹499 onwards",
   freeShipping: true,
   upiId: "dhakadgourav@fam",
   upiName: "Designer Clothing",

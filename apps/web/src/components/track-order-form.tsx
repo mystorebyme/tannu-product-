@@ -40,14 +40,22 @@ export function TrackOrderForm() {
       router.push(`/orders/${encodeURIComponent(orderNumber)}`);
       return;
     }
-    // static preview: /orders/* yahan exist nahi karta
+    /**
+     * Static preview: `/orders/*` yahan build hi nahi hota. Live store ka health
+     * check (2.5s) karke seedha live tracking par bhej dete hain — customer ko
+     * "link dabao" ka extra step nahi. Store down ho to WhatsApp fallback.
+     */
     setResolved(orderNumber);
     setLiveStatus("unknown");
-    // live store ka health check (2.5s) — down ho to link ki jagah WhatsApp batao
     const controller = new AbortController();
     const timer = window.setTimeout(() => controller.abort(), 2500);
+    const liveUrl = `${LIVE_STORE_URL}/orders/${encodeURIComponent(orderNumber)}`;
     fetch(`${LIVE_STORE_URL}/api/health`, { signal: controller.signal, cache: "no-store" })
-      .then((response) => setLiveStatus(response.ok ? "up" : "down"))
+      .then((response) => {
+        if (!response.ok) throw new Error("down");
+        setLiveStatus("up");
+        window.location.assign(liveUrl);
+      })
       .catch(() => setLiveStatus("down"))
       .finally(() => window.clearTimeout(timer));
   }
