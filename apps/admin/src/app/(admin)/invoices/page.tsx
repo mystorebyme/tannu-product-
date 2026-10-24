@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getManualInvoices } from "@/lib/data";
 import { createManualInvoiceAction } from "@/app/actions";
+import { invoiceSlug } from "@/lib/invoice-slug";
 import { getSession } from "@/lib/session";
 import { inr } from "@/lib/format";
 
@@ -119,7 +120,7 @@ export default async function InvoicesPage() {
               <ul style={{ paddingLeft: 0, listStyle: "none", margin: 0 }}>
                 {invoices.slice(0, 20).map((invoice) => (
                   <li key={invoice.number} style={{ paddingBottom: 10, borderBottom: "1px solid #eee" }}>
-                    <Link href={`/invoices/${encodeURIComponent(invoice.number)}`}>
+                    <Link href={`/invoices/${invoiceSlug(invoice.number)}`}>
                       <strong className="mono">{invoice.number}</strong>
                     </Link>
                     <p className="small muted" style={{ margin: "2px 0 0" }}>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AutoPrint } from "@/components/auto-print";
 import { getManualInvoice } from "@/lib/data";
+import { invoiceFromSlug, invoiceSlug } from "@/lib/invoice-slug";
 import { inr } from "@/lib/format";
 import {
   GST_HSN_APPAREL,
@@ -18,7 +19,7 @@ export const dynamic = "force-dynamic";
  */
 export default async function ManualInvoicePage({ params }: { params: Promise<{ number: string }> }) {
   const { number } = await params;
-  const invoice = await getManualInvoice(decodeURIComponent(number));
+  const invoice = await getManualInvoice(invoiceFromSlug(number));
   if (!invoice) notFound();
 
   const interState = invoice.state.trim().toLowerCase() !== SELLER_STATE.toLowerCase();
@@ -48,7 +49,7 @@ export default async function ManualInvoicePage({ params }: { params: Promise<{ 
           <a className="btn" href={`https://wa.me/91${invoice.phone.replace(/\D/g, "").slice(-10)}`} target="_blank" rel="noreferrer">
             WhatsApp customer
           </a>
-          <a className="btn btn-primary" href={`/invoices/${encodeURIComponent(invoice.number)}?print=1`} target="_blank" rel="noreferrer">
+          <a className="btn btn-primary" href={`/invoices/${invoiceSlug(invoice.number)}?print=1`} target="_blank" rel="noreferrer">
             Print / Save PDF
           </a>
         </div>
