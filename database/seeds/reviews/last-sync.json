@@ -1,6 +1,6 @@
 {
  "steps": [
-  "page: 348589 bytes",
+  "page: 347410 bytes",
   "widget: reviews-292/assets/swiper-reviews.min.js → 3 endpoint hints"
  ],
  "endpoints": [
@@ -25,7 +25,21 @@
   "https://api.trustoo.io/api/v1/reviews/collect_event"
  ],
  "scriptBytes": 58322,
+ "probes": [
+  "https://www.likshaclothing.com/apps/trustoo/api/v1/reviews/get_product_list?shop=73883451696&shop_id=738834516 → 200 {\"code\":0,\"message\":\"OK\",\"data\":{\"page\":{\"total_page\":4,\"cur_page\":1,\"limit\":100,\"count\":344},\"list\":[{\"id\":\"15347787137328\",\"image_src\":\"https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08059_JPG.jpg?v=17917272",
+  "https://www.likshaclothing.com/apps/trustoo/api/v1/reviews/get_product_list?shop_id=73883451696&limit=100 → 200 {\"code\":0,\"message\":\"OK\",\"data\":{\"page\":{\"total_page\":4,\"cur_page\":1,\"limit\":100,\"count\":344},\"list\":[{\"id\":\"15347787137328\",\"image_src\":\"https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08059_JPG.jpg?v=17917272",
+  "https://www.likshaclothing.com/apps/trustoo/api/v1/reviews/list?shop_id=73883451696&page=1&limit=100 → 404 https://www.likshaclothing.com/apps/",
+  "https://api.trustoo.io/api/v1/reviews/get_product_list?shop_id=73883451696&limit=100 → 200 {\"code\":-1,\"message\":\"invalid signature\",\"data\":null}",
+  "https://api.trustoo.io/api/v1/reviews/collect?shop_id=73883451696&limit=100 → 200 {\"code\":-1,\"message\":\"ClientId:required,EventCategory:required\"}",
+  "https://api.trustoo.io/api/v1/reviews?shop_id=73883451696&page=1&limit=100 → 404 https://api.trustoo.io/api/v1/review",
+  "https://api.trustoo.io/api/reviews?shop_id=73883451696&page=1&limit=100 → 404 https://api.trustoo.io/api/reviews?s",
+  "https://api.trustoo.io/v1/reviews?shop_id=73883451696&limit=100 → 404 https://api.trustoo.io/v1/reviews?sh",
+  "https://api.trustoo.io/api/v1/review?shop_id=73883451696 → 404 https://api.trustoo.io/api/v1/review",
+  "https://api.trustoo.io/apps/trustoo/api/v1/reviews/collect?&shop_id=73883451696 → 404 https://api.trustoo.io/apps/trustoo/",
+  "https://api.trustoo.io/apps/trustoo/api/v1/reviews/get_product_list?shop_id=73883451696 → 404 https://api.trustoo.io/apps/trustoo/",
+  "https://api.trustoo.io/apps/trustoo/api/v1/reviews/collect?shop_id=73883451696 → 404 https://api.trustoo.io/apps/trustoo/"
+ ],
  "found": 0,
  "saved": 0,
- "at": "2026-10-24T08:10:43.713Z"
+ "at": "2026-10-24T08:12:00.828Z"
 }
