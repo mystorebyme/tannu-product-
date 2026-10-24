@@ -138,8 +138,6 @@ async function main() {
     }
   }
   // bundles me sirf 4 endpoints milte hain — baaki naam guess karke probe karte hain
-  for (const name of PROBE_NAMES) endpointNames.add(name);
-  diagnostics.endpointNames = [...endpointNames];
   const PROBE_NAMES = [
     "get_product_reviews",
     "get_reviews",
