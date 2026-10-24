@@ -8,8 +8,7 @@ import { ORDER_STATUS_COPY, siteConfig } from "@/config/site";
 import { SafeImage } from "@/components/safe-image";
 import { orderWhatsAppLink } from "@/lib/whatsapp";
 import { getStoreSettings } from "@/lib/store-settings";
-import { UpiPayment } from "@/components/upi-payment";
-import { signUpiReturn } from "@/lib/upi-return";
+import { PaymentStatusWatcher } from "@/components/payment-status-watcher";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Order confirmed", robots: { index: false } };
@@ -48,7 +47,11 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
               ? "Your order is confirmed. Please pay the COD amount at delivery."
               : order.paymentStatus === "paid"
                 ? "Payment received — thank you! Your order is confirmed and being prepared for dispatch."
-                : "Your order is reserved. Pay via UPI below — returning from your UPI app confirms it instantly."}
+                : order.paymentStatus === "processing"
+                  ? "Payment reference received — our team is verifying it. Order confirm hote hi aapko update milega."
+                  : order.paymentStatus === "failed"
+                    ? "Payment fail hui thi. Neeche se dobara payment kar sakte hain."
+                    : "Order reserved hai. Payment complete karte hi order confirm ho jayega."}
           </p>
           <a
             href={orderWhatsAppLink(order, siteUrl)}
@@ -78,18 +81,25 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
           </div>
         </div>
 
+        {/* Payment alag page par hota hai — yahan sirf uska live status */}
         {order.paymentMethod !== "cod" ? (
-          <UpiPayment
-            orderNumber={order.orderNumber}
-            amount={order.total}
-            upiId={settings.upiId}
-            upiName={settings.upiName}
-            paymentStatus={order.paymentStatus}
-            reference={order.payment?.reference ?? null}
-            whatsapp={settings.whatsapp}
-            returnToken={signUpiReturn(order.orderNumber)}
-            siteUrl={siteUrl}
-          />
+          <div className="mt-4" data-testid="order-payment-block">
+            <PaymentStatusWatcher orderNumber={order.orderNumber} initialStatus={order.paymentStatus} />
+            {order.paymentStatus !== "paid" ? (
+              <div className="mt-3 flex flex-wrap items-center gap-3 border border-[#e9dfd4] bg-white px-4 py-3">
+                <Link
+                  href={`/orders/${order.orderNumber}/pay`}
+                  data-testid="complete-payment"
+                  className="bg-[#862222] px-5 py-2.5 text-[11px] font-semibold tracking-[.14em] text-white uppercase"
+                >
+                  {order.paymentStatus === "failed" ? "Retry payment" : "Complete payment"}
+                </Link>
+                <p className="text-[11.5px] text-[#6b6259]">
+                  {formatPrice(order.total)} · UPI ({settings.upiName}) — paisa milne par order confirm hoga.
+                </p>
+              </div>
+            ) : null}
+          </div>
         ) : null}
 
         <div className="mt-4 border border-[#eee6de] p-5" data-testid="order-tracking">

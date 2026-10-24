@@ -166,8 +166,8 @@ export function CheckoutForm() {
         return;
       }
       clear();
-      // payment page turant — order page khud UPI app kholta hai (mobile) / QR dikhata hai
-      router.push(`/orders/${result.data.orderNumber}?pay=1`);
+      // payment **alag page** par — wahan order number + amount + UPI + live status
+      router.push(`/orders/${result.data.orderNumber}/pay`);
     } catch (error) {
       console.warn("order submit failed", error);
       setError("Order server tak nahi pahuncha. Dobara try kariye, ya WhatsApp par order bhej dijiye — wahan hum turant confirm karte hain.");

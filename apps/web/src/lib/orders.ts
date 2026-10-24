@@ -262,6 +262,17 @@ export async function updateOrderStatus(
   const index = all.findIndex((order) => order.orderNumber === wanted);
   if (index === -1) throw new OrderError("Order nahi mila", 404, "order_not_found");
   const order = all[index]!;
+  /**
+   * Payment pehle, dispatch baad me (owner rule): paisa verify hone se pehle order
+   * packed/shipped/delivered nahi ho sakta. Cancel/return allowed rehte hain.
+   */
+  if (order.paymentStatus !== "paid" && !["cancelled", "returned", "placed"].includes(status)) {
+    throw new OrderError(
+      `Payment abhi ${order.paymentStatus} hai — pehle payment confirm kariye, phir order ${status} hoga.`,
+      409,
+      "payment_pending",
+    );
+  }
   if (!canTransition(order.status, status)) {
     throw new OrderError(
       `Order ${orderNumberValue} ka status ${order.status} se ${status} nahi ho sakta.`,
@@ -492,12 +503,14 @@ export async function submitPaymentReference(
   const alreadySame = order.payment?.reference === reference;
   const updated: Order = {
     ...order,
+    // customer ne UTR daal diya — paisa verify hona baaki hai (DB me 'processing')
+    paymentStatus: "processing",
     payment: {
       gateway: "manual-upi",
       reference,
       upiUri: order.payment?.upiUri ?? null,
       amount: order.payment?.amount ?? order.total,
-      status: "pending",
+      status: "processing",
       createdAt: order.payment?.createdAt ?? now,
       verifiedAt: null,
       verifiedBy: null,
@@ -740,6 +753,8 @@ export async function paymentStatusFor(orderNumber: string) {
     amount: order.payment?.amount ?? order.total,
     gateway: order.payment?.gateway ?? null,
     upiUri: order.paymentStatus === "paid" ? null : (order.payment?.upiUri ?? null),
+    reference: order.payment?.reference ?? null,
     verifiedAt: order.payment?.verifiedAt ?? null,
+    updatedAt: order.audit[0]?.at ?? order.createdAt,
   };
 }

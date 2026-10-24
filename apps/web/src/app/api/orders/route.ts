@@ -47,7 +47,13 @@ async function handlePost(request: Request) {
     const order = await createOrder(parsed.data);
     if (idempotencyKey) await rememberIdempotency(idempotencyKey, order.orderNumber);
     return Response.json(
-      { orderNumber: order.orderNumber, total: order.total, status: order.status },
+      {
+        orderNumber: order.orderNumber,
+        total: order.total,
+        status: order.status,
+        // payment page turant kholta hai; order tab tak "pending" rehta hai
+        paymentStatus: order.paymentStatus,
+      },
       { status: 201 },
     );
   } catch (error) {
