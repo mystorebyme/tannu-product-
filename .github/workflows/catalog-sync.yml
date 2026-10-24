@@ -1,19 +1,19 @@
-name: Catalog sync
+name: Extra catalogue sync
 
-# Live store (likshaclothing.com) ka public Shopify JSON yahan pull hota hai aur repo me
-# commit ho jaata hai. Iske baad `npm run catalog:sync-live` local machine par bhi chal sakta hai.
-# Reason: kuch sandboxed dev environments se storefront reachable nahi hota.
+# thestoreofbufani.com se extra collections/products roz pull hote hain
+# (user ne kaha: saree chhod ke baaki extra collections add karo).
+# Seed commit hone ke baad build-catalog unhe catalogue me merge karta hai.
 
 on:
-  # trigger file: `.catalog-sync-trigger` touch karke push karo (workflow_dispatch ke liye
-  # workflow default branch par hona chahiye, isliye push trigger bhi rakha hai)
   push:
     paths:
       - ".catalog-sync-trigger"
+  schedule:
+    - cron: "30 20 * * *" # 02:00 IST
   workflow_dispatch:
     inputs:
       commit:
-        description: "Fetch ke baad result commit karein?"
+        description: "Sync ke baad result commit karein?"
         type: boolean
         default: true
 
@@ -21,50 +21,46 @@ permissions:
   contents: write
 
 concurrency:
-  group: catalog-sync-${{ github.ref }}
+  group: catalog-sync
   cancel-in-progress: true
 
 jobs:
   sync:
-    name: fetch live catalog
+    name: fetch extra catalogue
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
 
       - uses: actions/setup-node@v4
         with:
           node-version: 22
 
-      - name: Fetch products + collections
-        run: node scripts/catalog-sync/fetch-live.mjs
+      - name: Fetch extra catalogue
+        run: node scripts/catalog-sync/fetch-extra.mjs
 
       - name: Summary
         run: |
           node -e "
-            const p = require('./database/seeds/live/products.json').products;
-            const imgs = p.reduce((n, x) => n + (x.images?.length || 0), 0);
-            console.log('products', p.length, 'images', imgs);
+            const fs = require('fs');
+            const p = 'database/seeds/extra/products.json';
+            if (!fs.existsSync(p)) { console.log('no products synced'); process.exit(0); }
+            const data = JSON.parse(fs.readFileSync(p, 'utf8'));
+            console.log('extra products:', data.products.length);
           " >> "$GITHUB_STEP_SUMMARY"
 
-      - name: Commit raw snapshot
-        # push trigger par `inputs` empty hota hai — tab bhi commit karo
+      - name: Rebuild catalogue
+        run: node scripts/build-catalog.mjs
+
+      - name: Commit
         if: ${{ github.event_name != 'workflow_dispatch' || inputs.commit }}
         run: |
           git config user.name "catalog-sync[bot]"
           git config user.email "catalog-sync@users.noreply.github.com"
-          git add database/seeds/live
+          git add database/seeds/extra database/seeds/catalog.json apps/web/src/data apps/admin/src/data
           if git diff --cached --quiet; then
             echo "no changes"
-          else
-            git commit -m "chore(catalog): refresh live store snapshot"
-            git push
+            exit 0
           fi
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: live-catalog
-          path: database/seeds/live/*.json
-          retention-days: 7
+          git commit -m "chore(catalog): daily extra collection sync"
+          git push

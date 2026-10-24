@@ -277,10 +277,28 @@ function reviewRatings() {
   return ratings;
 }
 
+/** extra (guest) catalogue — daily sync CI me chalta hai, seed yahan aata hai */
+const EXTRA = path.join(ROOT, "database/seeds/extra");
+const readExtra = (name, key) => {
+  const file = path.join(EXTRA, name);
+  if (!fs.existsSync(file)) return [];
+  try {
+    return readJson(file)[key] ?? [];
+  } catch {
+    return [];
+  }
+};
+
 (function main() {
   const liveProducts = readJson(path.join(LIVE, "products.json")).products;
   const liveCollections = readJson(path.join(LIVE, "collections.json")).collections;
   const membership = readJson(path.join(LIVE, "membership.json")).collections;
+
+  // extra store (thestoreofbufani) se aaye products/collections — optional seed
+  const extraProducts = readExtra("products.json", "products");
+  const extraCollections = readExtra("collections.json", "collections");
+  const extraMembership = readExtra("membership.json", "collections");
+  const extraHandles = new Set(extraProducts.map((product) => product.handle));
 
   // handle -> collections (live membership hi source of truth)
   const collectionOf = new Map();
@@ -290,6 +308,16 @@ function reviewRatings() {
       collectionOf.get(handle).add(collectionHandle);
     }
   }
+  for (const [collectionHandle, handles] of Object.entries(extraMembership)) {
+    for (const handle of handles) {
+      if (!extraHandles.has(handle)) continue; // extra store ka product hi
+      if (!collectionOf.has(handle)) collectionOf.set(handle, new Set());
+      collectionOf.get(handle).add(collectionHandle);
+    }
+  }
+  if (extraProducts.length) {
+    console.log(`extra catalogue: ${extraProducts.length} products, ${extraCollections.length} collections`);
+  }
 
   const ratings = reviewRatings();
   const usedHandles = new Set();
@@ -298,7 +326,7 @@ function reviewRatings() {
   /** poore catalogue me ek image sirf ek product par */
   const usedImages = new Set();
 
-  for (const source of liveProducts) {
+  for (const source of [...liveProducts, ...extraProducts]) {
     if (!source.handle || !source.title) continue;
     const rawImages = (source.images ?? []).map((image) => image.src.split("?")[0]).filter(Boolean);
     // ek hi photo do products par nahi — pehla product photo ka owner, baad wale skip karte hain
@@ -532,6 +560,28 @@ function reviewRatings() {
       productCount: listedProducts.filter((product) => product.collections.includes(live.handle)).length,
     });
   }
+  // extra store ki collections — jinka product hai aur jo live store me nahi hain
+  const takenCollectionHandles = new Set(collections.map((collection) => collection.handle));
+  let extraOrder = 100;
+  for (const live of extraCollections) {
+    if (takenCollectionHandles.has(live.handle)) continue;
+    const candidates = products.filter(
+      (product) => product.collections.includes(live.handle) && product.images.length && listedSet.has(product),
+    );
+    if (!candidates.length) continue; // khaali collection storefront par nahi
+    const uniquePick = candidates.find((product) => !usedCircleImages.has(product.images[0])) ?? candidates[0];
+    usedCircleImages.add(uniquePick.images[0]);
+    collections.push({
+      handle: live.handle,
+      title: live.title || live.handle,
+      subtitle: live.subtitle || live.description || "",
+      image: uniquePick.images[0],
+      sortOrder: extraOrder,
+      productCount: candidates.length,
+    });
+    extraOrder += 1;
+  }
+
   collections.sort((a, b) => a.sortOrder - b.sortOrder);
 
   const catalog = {
