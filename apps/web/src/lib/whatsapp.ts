@@ -39,13 +39,13 @@ export function orderWhatsAppMessage(order: Order, origin = siteConfig.url): str
   lines.push(`Name: ${order.customerName}`);
   lines.push(`Phone: ${order.phone}`);
   lines.push("");
-  lines.push("*Items*");
+  lines.push(`*Items (${order.items.length})*`);
   order.items.forEach((item, index) => {
     const link = `${origin}/products/${item.handle}`;
     lines.push(
       `${index + 1}. ${item.title}` +
         `\n   Size: ${item.size}` +
-        `\n   Qty: ${item.quantity} × ${money(item.price)}` +
+        `\n   Qty: ${item.quantity} × ${money(item.price)} = ${money(item.price * item.quantity)}` +
         `\n   Link: ${link}`,
     );
   });
@@ -81,7 +81,7 @@ export function cartWhatsAppMessage(
     parts.push(
       `${index + 1}. ${line.title}` +
         `\n   Size: ${line.size ?? "-"}${line.colour ? ` · Colour: ${line.colour}` : ""}` +
-        `\n   Qty: ${line.quantity} × ${money(line.price)}` +
+        `\n   Qty: ${line.quantity} × ${money(line.price)} = ${money(line.price * line.quantity)}` +
         `\n   Link: ${origin}/products/${line.handle}`,
     );
   });

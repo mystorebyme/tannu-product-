@@ -18,6 +18,8 @@ export function TrackOrderForm() {
   const [value, setValue] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [resolved, setResolved] = useState<string | null>(null);
+  /** live store reachable hai? — dead link dikhane se behtar honest message */
+  const [liveStatus, setLiveStatus] = useState<"unknown" | "up" | "down">("unknown");
   const router = useRouter();
   const wa = whatsapp.replace(/\D/g, "").slice(-10);
 
@@ -40,6 +42,14 @@ export function TrackOrderForm() {
     }
     // static preview: /orders/* yahan exist nahi karta
     setResolved(orderNumber);
+    setLiveStatus("unknown");
+    // live store ka health check (2.5s) — down ho to link ki jagah WhatsApp batao
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => controller.abort(), 2500);
+    fetch(`${LIVE_STORE_URL}/api/health`, { signal: controller.signal, cache: "no-store" })
+      .then((response) => setLiveStatus(response.ok ? "up" : "down"))
+      .catch(() => setLiveStatus("down"))
+      .finally(() => window.clearTimeout(timer));
   }
 
   return (
@@ -72,12 +82,20 @@ export function TrackOrderForm() {
             version par chalti hai. Neeche se kholiye ya WhatsApp par order number bhejiye:
           </p>
           <div className="mt-3 flex flex-wrap gap-2.5">
-            <a
-              href={`${LIVE_STORE_URL}/orders/${encodeURIComponent(resolved)}`}
-              className="inline-flex h-10 items-center bg-[#862222] px-4 text-[10.5px] font-semibold tracking-[.12em] text-white uppercase"
-            >
-              Open live tracking
-            </a>
+            {liveStatus === "down" ? (
+              <span className="inline-flex h-10 items-center bg-[#f1e6d8] px-4 text-[10.5px] font-semibold tracking-[.12em] text-[#7b5a2a] uppercase">
+                Live store abhi offline hai
+              </span>
+            ) : (
+              <a
+                href={`${LIVE_STORE_URL}/orders/${encodeURIComponent(resolved)}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-10 items-center bg-[#862222] px-4 text-[10.5px] font-semibold tracking-[.12em] text-white uppercase"
+              >
+                {liveStatus === "up" ? "Open live tracking" : "Open live tracking ↗"}
+              </a>
+            )}
             <a
               href={`https://wa.me/91${wa}?text=${encodeURIComponent(`Hi Designer Clothing, please share the status of order ${resolved}.`)}`}
               target="_blank"

@@ -414,6 +414,9 @@ export type ContactMessage = {
   handled: boolean;
   handledAt?: string | null;
   handledBy?: string | null;
+  replied: boolean;
+  repliedAt?: string | null;
+  repliedBy?: string | null;
 };
 
 /**
@@ -427,6 +430,29 @@ export async function getMessages(limit = 100): Promise<ContactMessage[]> {
     if (payload?.messages) return payload.messages;
   }
   return readRows<ContactMessage>("messages.json").slice(0, limit);
+}
+
+/** Admin ne jawab bheja / undo — storefront API par (dono mode me same behaviour) */
+export async function setMessageReplied(id: string, replied: boolean, actor: string): Promise<boolean> {
+  if (remoteMode()) {
+    const payload = await storeRequest<{ message: ContactMessage }>("/api/admin/messages", {
+      method: "PATCH",
+      body: JSON.stringify({ id, action: replied ? "replied" : "unreplied", actor }),
+    });
+    if (payload?.message) return true;
+  }
+  const rows = readRows<ContactMessage>("messages.json");
+  const index = rows.findIndex((row) => row.id === id);
+  if (index === -1) return false;
+  rows[index] = {
+    ...rows[index]!,
+    replied,
+    repliedAt: replied ? new Date().toISOString() : null,
+    repliedBy: replied ? actor : null,
+    handled: replied ? true : rows[index]!.handled,
+  };
+  writeRows("messages.json", rows);
+  return true;
 }
 
 export async function markMessageHandled(id: string, actor: string): Promise<boolean> {

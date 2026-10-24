@@ -26,7 +26,7 @@ const pages: Record<string, PageContent> = {
       {
         heading: "Crafted for your celebrations",
         body: [
-          "What began as a small studio in Surat has grown into a destination for hand-finished Anarkali suits, lehengas and printed suit sets loved across India. Every silhouette is developed in-house, from the first sketch to the final dori latkan.",
+          "What began as a small studio has grown into a destination for hand-finished Anarkali suits, lehengas and printed suit sets loved across India. Every silhouette is developed in-house, from the first sketch to the final dori latkan.",
           "We work closely with karigars who have spent generations perfecting zari, sequin and thread work. That is why each piece carries a weight, a drape and a finish you can feel the moment you open the box.",
         ],
       },
@@ -201,9 +201,25 @@ const pages: Record<string, PageContent> = {
   },
 };
 
+/**
+ * Purane URL jo kabhi share ho gaye — same content par resolve hote hain
+ * (redirect nahi, kyunki static export par redirect ka bharosa nahi; canonical
+ * hamesha sahi slug par jaata hai taaki duplicate page index na ho).
+ */
+const PAGE_ALIASES: Record<string, string> = {
+  "size-cheart": "size-guide",
+};
+
+function resolvePage(slug: string): { page: PageContent; canonicalSlug: string } | null {
+  if (pages[slug]) return { page: pages[slug], canonicalSlug: slug };
+  const canonical = PAGE_ALIASES[slug];
+  if (canonical && pages[canonical]) return { page: pages[canonical], canonicalSlug: canonical };
+  return null;
+}
+
 /** content pages build ke waqt prerender hote hain (fast + static export safe) */
 export function generateStaticParams() {
-  return Object.keys(pages).map((slug) => ({ slug }));
+  return [...Object.keys(pages), ...Object.keys(PAGE_ALIASES)].map((slug) => ({ slug }));
 }
 
 export const dynamicParams = false;
@@ -214,9 +230,13 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const page = pages[slug];
-  if (!page) return { title: "Page not found" };
-  return { title: page.title, description: page.intro };
+  const resolved = resolvePage(slug);
+  if (!resolved) return { title: "Page not found", robots: { index: false, follow: true } };
+  return {
+    title: resolved.page.title,
+    description: resolved.page.intro,
+    alternates: { canonical: `/pages/${resolved.canonicalSlug}` },
+  };
 }
 
 export default async function ContentPage({
@@ -225,8 +245,9 @@ export default async function ContentPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const page = pages[slug];
-  if (!page) notFound();
+  const resolved = resolvePage(slug);
+  if (!resolved) notFound();
+  const page = resolved.page;
 
   return (
     <div>

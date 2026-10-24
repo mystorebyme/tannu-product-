@@ -28,6 +28,10 @@ export interface ContactMessage {
   handled: boolean;
   handledAt?: string | null;
   handledBy?: string | null;
+  /** admin ne customer ko jawab/WhatsApp reply bhej diya */
+  replied: boolean;
+  repliedAt?: string | null;
+  repliedBy?: string | null;
 }
 
 export interface Subscriber {
@@ -47,6 +51,9 @@ type Row = {
   handled: boolean;
   handled_at: Date | string | null;
   handled_by: string | null;
+  is_replied: boolean;
+  replied_at: Date | string | null;
+  replied_by: string | null;
 };
 
 function iso(value: Date | string | null): string | null {
@@ -73,12 +80,15 @@ function writeJson<T>(name: string, rows: T[]) {
 }
 
 export async function saveMessage(
-  input: Omit<ContactMessage, "id" | "createdAt" | "handled">,
+  input: Omit<ContactMessage, "id" | "createdAt" | "handled" | "replied">,
 ): Promise<ContactMessage> {
   const message: ContactMessage = {
     id: randomUUID(),
     createdAt: new Date().toISOString(),
     handled: false,
+    replied: false,
+    repliedAt: null,
+    repliedBy: null,
     ...input,
   };
 
@@ -118,7 +128,7 @@ export async function mirrorMessageToSheet(message: ContactMessage): Promise<voi
         Phone: message.phone ?? "",
         Subject: message.subject ?? "",
         Message: message.message,
-        Status: message.handled ? "handled" : "new",
+        Status: message.replied ? "replied" : message.handled ? "handled" : "new",
       },
     },
   ]);
@@ -134,7 +144,8 @@ export async function listMessages(limit = 100): Promise<ContactMessage[]> {
   if (dbEnabled()) {
     const { query } = await import("@/lib/db");
     const rows = await query<Row>(
-      `select id, created_at, name, email, phone, subject, message, is_handled as handled, handled_at, handled_by
+      `select id, created_at, name, email, phone, subject, message, is_handled as handled, handled_at, handled_by,
+              is_replied, replied_at, replied_by
        from contact_messages order by created_at desc limit $1`,
       [Math.min(500, Math.max(1, limit))],
     );
@@ -149,34 +160,91 @@ export async function listMessages(limit = 100): Promise<ContactMessage[]> {
       handled: row.handled,
       handledAt: iso(row.handled_at),
       handledBy: row.handled_by,
+      replied: row.is_replied,
+      repliedAt: iso(row.replied_at),
+      repliedBy: row.replied_by,
     }));
   }
   return readJson<ContactMessage>("messages.json").slice(0, limit);
+}
+
+function toMessage(row: Row): ContactMessage {
+  return {
+    id: row.id,
+    createdAt: iso(row.created_at) ?? new Date().toISOString(),
+    name: row.name,
+    email: row.email,
+    phone: row.phone,
+    subject: row.subject,
+    message: row.message,
+    handled: row.handled,
+    handledAt: iso(row.handled_at),
+    handledBy: row.handled_by,
+    replied: row.is_replied,
+    repliedAt: iso(row.replied_at),
+    repliedBy: row.replied_by,
+  };
+}
+
+/**
+ * "Replied" toggle — admin message ka jawab de chuka hai ya nahi.
+ * Handled se alag hai: handled = inbox se nipta diya, replied = customer ko
+ * jawab chala gaya. Replied karne par handled bhi true ho jaata hai.
+ */
+export async function setMessageReplied(
+  id: string,
+  replied: boolean,
+  actor: string,
+): Promise<ContactMessage | null> {
+  if (dbEnabled()) {
+    const { query } = await import("@/lib/db");
+    const rows = await query<Row>(
+      `update contact_messages
+         set is_replied = $2,
+             replied_at = case when $2 then now() else null end,
+             replied_by = case when $2 then $3 else null end,
+             is_handled = case when $2 then true else is_handled end,
+             handled_at = case when $2 then coalesce(handled_at, now()) else handled_at end,
+             handled_by = case when $2 then coalesce(handled_by, $3) else handled_by end
+       where id = $1
+       returning id, created_at, name, email, phone, subject, message, is_handled as handled, handled_at, handled_by,
+                 is_replied, replied_at, replied_by`,
+      [id, replied, actor],
+    );
+    const row = rows[0];
+    return row ? toMessage(row) : null;
+  }
+
+  const rows = readJson<ContactMessage>("messages.json");
+  const index = rows.findIndex((row) => row.id === id);
+  if (index === -1) return null;
+  const now = new Date().toISOString();
+  rows[index] = {
+    ...rows[index]!,
+    replied,
+    repliedAt: replied ? now : null,
+    repliedBy: replied ? actor : null,
+    handled: replied ? true : rows[index]!.handled,
+    handledAt: replied ? (rows[index]!.handledAt ?? now) : rows[index]!.handledAt,
+    handledBy: replied ? (rows[index]!.handledBy ?? actor) : rows[index]!.handledBy,
+  };
+  writeJson("messages.json", rows);
+  return rows[index]!;
 }
 
 export async function markMessageHandled(id: string, actor: string): Promise<ContactMessage | null> {
   if (dbEnabled()) {
     const { query } = await import("@/lib/db");
     const rows = await query<Row>(
-      `update contact_messages set is_handled = true, handled_at = now(), handled_by = $2
+      `update contact_messages set is_handled = true, handled_at = coalesce(handled_at, now()), handled_by = coalesce(handled_by, $2)
        where id = $1
-       returning id, created_at, name, email, phone, subject, message, is_handled as handled, handled_at, handled_by`,
+       returning id, created_at, name, email, phone, subject, message, is_handled as handled, handled_at, handled_by,
+                 is_replied, replied_at, replied_by`,
       [id, actor],
     );
     const row = rows[0];
     if (!row) return null;
-    return {
-      id: row.id,
-      createdAt: iso(row.created_at) ?? new Date().toISOString(),
-      name: row.name,
-      email: row.email,
-      phone: row.phone,
-      subject: row.subject,
-      message: row.message,
-      handled: row.handled,
-      handledAt: iso(row.handled_at),
-      handledBy: row.handled_by,
-    };
+    return toMessage(row);
   }
 
   const rows = readJson<ContactMessage>("messages.json");

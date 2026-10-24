@@ -429,6 +429,9 @@ create table contact_messages (
   message         text not null,
   is_handled      boolean not null default false,
   handled_by      text,
+  is_replied      boolean not null default false,
+  replied_at      timestamptz,
+  replied_by      text,
   created_at      timestamptz not null default now()
 );
 

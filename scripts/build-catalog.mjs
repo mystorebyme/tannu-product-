@@ -732,7 +732,6 @@ const readExtra = (name, key) => {
   for (const [from, to] of [
     ["database/seeds/reviews/reviews.json", "apps/web/src/data/reviews.json"],
     ["database/seeds/reviews/aggregates.json", "apps/web/src/data/review-aggregates.json"],
-    ["database/seeds/reviews/seed-reviews.json", "apps/web/src/data/seed-reviews.json"],
   ]) {
     const source = path.join(ROOT, from);
     if (fs.existsSync(source)) write(to, fs.readFileSync(source, "utf8"));

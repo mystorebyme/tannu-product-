@@ -2,7 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { CollectionBrowser } from "@/components/collection-browser";
-import { getCollection, getCollections, getProductsByCollection } from "@/lib/store";
+import {
+  COLLECTION_ALIASES,
+  getCollection,
+  getCollections,
+  getProductsByCollection,
+} from "@/lib/store";
 
 /**
  * Collection page is fully static: `generateStaticParams` se 9 pages prerender hote hain.
@@ -11,7 +16,7 @@ import { getCollection, getCollections, getProductsByCollection } from "@/lib/st
  */
 export async function generateStaticParams() {
   const list = await getCollections();
-  return list.map((collection) => ({ handle: collection.handle }));
+  return [...list.map((collection) => ({ handle: collection.handle })), ...Object.keys(COLLECTION_ALIASES).map((handle) => ({ handle }))];
 }
 
 type Params = { handle: string };
@@ -19,8 +24,8 @@ type Params = { handle: string };
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { handle } = await params;
   const collection = await getCollection(handle);
-  if (!collection) return { title: "Collection not found" };
-  const products = await getProductsByCollection(handle);
+  if (!collection) return { title: "Collection not found", robots: { index: false, follow: true } };
+  const products = await getProductsByCollection(collection.handle);
   return {
     title: `${collection.title} — ${products.length} styles`,
     description: `${collection.title}: ${collection.subtitle}. ${products.length} designer pieces at Designer Clothing, free shipping across India and secure prepaid checkout.`,
@@ -32,11 +37,12 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 
 export default async function CollectionPage({ params }: { params: Promise<Params> }) {
   const { handle } = await params;
+  // alias URL (jaise /collections/wedding-collection) bhi yahi page dikhata hai
   const collection = await getCollection(handle);
   if (!collection) notFound();
 
   const allCollections = await getCollections();
-  const products = await getProductsByCollection(handle);
+  const products = await getProductsByCollection(collection.handle);
   const initial = products.slice(0, 24);
 
   const emptyState = (

@@ -4,8 +4,6 @@ import fs from "node:fs";
 import { randomUUID } from "node:crypto";
 import type { AuditEntry, InvoiceMeta, Order, OrderStatus, PaymentMethod, Tracking } from "@liksha/types";
 import {
-  COD_FEE,
-  COD_MAX_SUBTOTAL,
   IDEMPOTENCY_TTL_MS,
   canTransition,
   computeDiscount,
@@ -100,6 +98,14 @@ export interface CreateOrderPayload {
   skipPincodeCheck?: boolean;
 }
 
+/**
+ * Order numbers case-insensitive hain — WhatsApp/email me lowercase aaye to bhi
+ * wahi order khule. Space/dash ke aage-peeche ka junk trim ho jaata hai.
+ */
+export function normalizeOrderNumber(value: string): string {
+  return String(value ?? "").trim().toUpperCase();
+}
+
 export class OrderError extends Error {
   constructor(
     message: string,
@@ -126,6 +132,10 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
   const items = payload.items.map((line) => {
     const product = products.find((candidate) => candidate.handle === line.handle);
     if (!product) throw new OrderError(`Product nahi mila: ${line.handle}`, 400, "product_not_found");
+    // product-level stock — colour group ke sab sizes khatam ho to kuch bhi na bike
+    if (product.inStock === false) {
+      throw new OrderError(`${product.title} abhi sold out hai.`, 409, "product_unavailable");
+    }
     const quantity = Number(line.quantity);
     if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10) {
       throw new OrderError(`Quantity 1 se 10 ke beech honi chahiye (${product.title}).`, 400, "invalid_item");
@@ -144,6 +154,14 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
     if (sizePricing && sizePricing.available === false) {
       throw new OrderError(`${product.title} ka size ${size} abhi sold out hai.`, 400, "size_unavailable");
     }
+    // koi bhi size stock me na ho to product hi unavailable hai
+    const anySizeAvailable = product.sizes.some((option) => {
+      const pricing = product.sizePricing?.[option];
+      return pricing ? pricing.available !== false : true;
+    });
+    if (!anySizeAvailable) {
+      throw new OrderError(`${product.title} abhi sold out hai.`, 409, "product_unavailable");
+    }
     return {
       handle: product.handle,
       title: product.title,
@@ -157,11 +175,19 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const discount = computeDiscount(subtotal, payload.couponCode);
 
-  if (payload.paymentMethod === "cod" && subtotal > COD_MAX_SUBTOTAL) {
-    throw new OrderError("COD sirf Rs. 3,500 se kam orders par available hai.", 400, "cod_not_allowed");
+  /**
+   * Site **prepaid-only** hai (owner ka rule). Pehle API COD accept karta tha —
+   * koi bhi client `paymentMethod: "cod"` bhej kar bina payment order bana sakta tha.
+   * Ab server par hard block; purane COD orders padhne/invoice ke liye code safe hai.
+   */
+  if (payload.paymentMethod === "cod") {
+    throw new OrderError(
+      "Cash on Delivery available nahi hai — sirf prepaid (UPI) orders accept hote hain.",
+      400,
+      "cod_not_allowed",
+    );
   }
-  const codFee = payload.paymentMethod === "cod" ? COD_FEE : 0;
-  const total = Math.max(0, subtotal - discount + codFee);
+  const total = Math.max(0, subtotal - discount);
 
   const now = new Date().toISOString();
   const order: Order = {
@@ -183,20 +209,17 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
     total,
     couponCode: payload.couponCode ?? null,
     paymentMethod: payload.paymentMethod,
-    paymentStatus: payload.paymentMethod === "cod" ? "cod" : "pending",
-    payment:
-      payload.paymentMethod === "cod"
-        ? null
-        : {
-            gateway: "pending",
-            reference: null,
-            amount: total,
-            status: "pending",
-            createdAt: now,
-            verifiedAt: null,
-            verifiedBy: null,
-            failureReason: null,
-          },
+    paymentStatus: "pending",
+    payment: {
+      gateway: "pending",
+      reference: null,
+      amount: total,
+      status: "pending",
+      createdAt: now,
+      verifiedAt: null,
+      verifiedBy: null,
+      failureReason: null,
+    },
     status: "placed",
     audit: [
       {
@@ -224,7 +247,8 @@ export async function listOrders(): Promise<Order[]> {
 
 export async function getOrder(orderNumberValue: string): Promise<Order | undefined> {
   const orders = await readAll();
-  return orders.find((order) => order.orderNumber === orderNumberValue);
+  const wanted = normalizeOrderNumber(orderNumberValue);
+  return orders.find((order) => order.orderNumber === wanted);
 }
 
 export async function updateOrderStatus(
@@ -234,7 +258,8 @@ export async function updateOrderStatus(
   note?: string,
 ): Promise<Order> {
   const all = await readAll();
-  const index = all.findIndex((order) => order.orderNumber === orderNumberValue);
+  const wanted = normalizeOrderNumber(orderNumberValue);
+  const index = all.findIndex((order) => order.orderNumber === wanted);
   if (index === -1) throw new OrderError("Order nahi mila", 404, "order_not_found");
   const order = all[index]!;
   if (!canTransition(order.status, status)) {
@@ -275,7 +300,8 @@ export async function setStatusNote(
 ): Promise<Order> {
   const clean = String(text ?? "").trim().slice(0, 240);
   const all = await readAll();
-  const index = all.findIndex((order) => order.orderNumber === orderNumberValue);
+  const wanted = normalizeOrderNumber(orderNumberValue);
+  const index = all.findIndex((order) => order.orderNumber === wanted);
   if (index === -1) throw new OrderError("Order nahi mila", 404, "order_not_found");
   const order = all[index]!;
   const now = new Date().toISOString();
@@ -309,7 +335,8 @@ export async function setTracking(
   actor = "admin",
 ): Promise<Order> {
   const all = await readAll();
-  const index = all.findIndex((order) => order.orderNumber === orderNumberValue);
+  const wanted = normalizeOrderNumber(orderNumberValue);
+  const index = all.findIndex((order) => order.orderNumber === wanted);
   if (index === -1) throw new OrderError("Order nahi mila", 404, "order_not_found");
   const order = all[index]!;
   const now = new Date().toISOString();
@@ -379,7 +406,8 @@ async function nextInvoiceSerial(): Promise<number> {
 /** Invoice meta assign karta hai (idempotent — dobara call par wahi number). */
 export async function ensureInvoice(orderNumberValue: string): Promise<{ order: Order; invoice: InvoiceMeta }> {
   const all = await readAll();
-  const index = all.findIndex((order) => order.orderNumber === orderNumberValue);
+  const wanted = normalizeOrderNumber(orderNumberValue);
+  const index = all.findIndex((order) => order.orderNumber === wanted);
   if (index === -1) throw new OrderError("Order nahi mila", 404, "order_not_found");
   const order = all[index]!;
   if (order.invoice) return { order, invoice: order.invoice };
@@ -409,7 +437,8 @@ export async function ensureInvoice(orderNumberValue: string): Promise<{ order: 
 
 export async function markPaymentPaid(orderNumberValue: string, reference: string): Promise<Order | undefined> {
   const all = await readAll();
-  const index = all.findIndex((order) => order.orderNumber === orderNumberValue);
+  const wanted = normalizeOrderNumber(orderNumberValue);
+  const index = all.findIndex((order) => order.orderNumber === wanted);
   if (index === -1) return undefined;
   const order = all[index]!;
   const now = new Date().toISOString();
@@ -452,7 +481,8 @@ export async function submitPaymentReference(
   reference: string,
 ): Promise<Order> {
   const all = await readAll();
-  const index = all.findIndex((order) => order.orderNumber === orderNumberValue);
+  const wanted = normalizeOrderNumber(orderNumberValue);
+  const index = all.findIndex((order) => order.orderNumber === wanted);
   if (index === -1) throw new OrderError("Order not found.", 404, "order_not_found");
   const order = all[index]!;
   if (order.paymentStatus === "paid") {
@@ -549,7 +579,7 @@ export async function applyPaymentIntent(
   intent: { gateway: string; reference: string | null; upiUri: string | null; amount: number },
 ): Promise<Order | null> {
   const orders = await readAll();
-  const index = orders.findIndex((order) => order.orderNumber === orderNumber);
+  const index = orders.findIndex((order) => order.orderNumber === normalizeOrderNumber(orderNumber));
   if (index === -1) return null;
   const order = orders[index]!;
   if (order.paymentStatus === "paid") return order; // dobara intent banane ki zaroorat nahi
@@ -577,7 +607,7 @@ export async function confirmPayment(
   input: { gateway: string; reference: string | null; amount: number; actor: string; auto?: boolean },
 ): Promise<{ order: Order; alreadyPaid: boolean } | null> {
   const orders = await readAll();
-  const index = orders.findIndex((order) => order.orderNumber === orderNumber);
+  const index = orders.findIndex((order) => order.orderNumber === normalizeOrderNumber(orderNumber));
   if (index === -1) return null;
   const order = orders[index]!;
   if (order.paymentStatus === "paid") return { order, alreadyPaid: true };
@@ -628,7 +658,7 @@ export async function reversePayment(
   input: { actor: string; reason: string },
 ): Promise<Order | null> {
   const orders = await readAll();
-  const index = orders.findIndex((order) => order.orderNumber === orderNumber);
+  const index = orders.findIndex((order) => order.orderNumber === normalizeOrderNumber(orderNumber));
   if (index === -1) return null;
   const order = orders[index]!;
   if (order.paymentStatus !== "paid") return order;
@@ -669,7 +699,7 @@ export async function failPayment(
   input: { gateway: string; reference: string | null; reason: string },
 ): Promise<Order | null> {
   const orders = await readAll();
-  const index = orders.findIndex((order) => order.orderNumber === orderNumber);
+  const index = orders.findIndex((order) => order.orderNumber === normalizeOrderNumber(orderNumber));
   if (index === -1) return null;
   const order = orders[index]!;
   if (order.paymentStatus === "paid") return order;
@@ -700,7 +730,8 @@ export async function failPayment(
 
 /** Customer-facing status — payment ka internal detail nahi jaata */
 export async function paymentStatusFor(orderNumber: string) {
-  const order = (await readAll()).find((candidate) => candidate.orderNumber === orderNumber);
+  const wanted = normalizeOrderNumber(orderNumber);
+  const order = (await readAll()).find((candidate) => candidate.orderNumber === wanted);
   if (!order) return null;
   return {
     orderNumber: order.orderNumber,

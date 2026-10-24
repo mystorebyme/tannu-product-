@@ -89,6 +89,10 @@ try {
     category: product.category ?? "anarkali",
     collections: product.collections ?? [],
     description: product.description ?? "",
+    // listing ka sort/colour-group dedupe client par — server jaisa hi
+    featured: product.featured === true,
+    colourGroup: product.colourGroup ?? null,
+    colourName: product.colourName ?? null,
   }));
   fs.writeFileSync(path.join(APP, "public/catalog-lite.json"), JSON.stringify(lite));
 

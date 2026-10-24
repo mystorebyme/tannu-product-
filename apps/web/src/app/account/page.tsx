@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 const helpLinks = [
-  { label: "Size guide", href: "/pages/size-cheart" },
+  { label: "Size guide", href: "/pages/size-guide" },
   { label: "Shipping & delivery", href: "/policies/shipping-policy" },
   { label: "Returns & refunds", href: "/policies/refund-and-return-policy" },
   { label: "Contact us", href: "/pages/contact" },

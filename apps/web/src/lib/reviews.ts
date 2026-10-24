@@ -1,11 +1,19 @@
 import raw from "@/data/reviews.json";
 import aggregatesRaw from "@/data/review-aggregates.json";
-import seedRaw from "@/data/seed-reviews.json";
 
 /**
- * Reviews — live store ka Trustoo widget daily sync hota hai
+ * Reviews — sirf **asli** data.
+ *
+ * Source: live store ka Trustoo widget, daily sync
  * (`scripts/reviews-sync/fetch-reviews.mjs` → `database/seeds/reviews/reviews.json`).
- * Yahan koi dummy review nahi hai: jo sync hua wahi dikhta hai.
+ *
+ * Yahan koi generated/sample review nahi hai. Round 16 me sample seed (`seed-reviews.json`)
+ * poora hata diya gaya — public page par koi fake testimonial nahi jaata.
+ *
+ * Do tarah ka data:
+ *   1. `reviews.json` — asli customer text + photos (traceable: Trustoo review id).
+ *   2. `review-aggregates.json` — store ke rating totals; jahan customer text nahi hai
+ *      wahan sirf count/rating dikhta hai, koi banaya hua review nahi.
  */
 
 export type Review = {
@@ -15,12 +23,11 @@ export type Review = {
   title?: string;
   body: string;
   date?: string;
+  /** true sirf tab jab source data me verified purchase flag ho */
   verified?: boolean;
   photos?: string[];
   productHandle?: string;
   productTitle?: string;
-  /** generated sample review (live Trustoo review nahi) */
-  sample?: boolean;
 };
 
 export type ProductReviewBlock = {
@@ -35,35 +42,35 @@ type ReviewsFile = {
   products: Record<string, ProductReviewBlock>;
 };
 
-type AggregatesFile = { syncedAt?: string | null; products?: Record<string, { rating: number; count: number }> };
+type AggregatesFile = {
+  syncedAt?: string | null;
+  products?: Record<string, { rating: number; count: number }>;
+};
 
 const data = raw as ReviewsFile;
 const aggregates = (aggregatesRaw as AggregatesFile).products ?? {};
-/**
- * Sample reviews — un products ke liye jinke live Trustoo reviews nahi aaye.
- * `scripts/reviews-sync/build-seed-reviews.mjs` inhe banata hai; real reviews
- * aane par live data hi jeetta hai (niche priority dekhiye).
- */
-const seed = (seedRaw as { products?: Record<string, ProductReviewBlock> }).products ?? {};
 
 export const reviewsMeta = data.meta;
 export const shopRating = data.shop ?? { rating: 0, count: 0 };
 
 export function reviewsFor(handle: string): ProductReviewBlock {
-  // 1) live Trustoo reviews (asli customer text) — sabse pehle
+  // 1) asli customer reviews (text/photos) — sabse pehle
   const block = data.products[handle];
   if (block?.count) return block;
-  // 2) sample reviews (jab live text nahi mila)
-  const sample = seed[handle];
-  if (sample?.count) return sample;
-  // live store ka aggregate (Trustoo) sync hua ho to rating/count wahi dikhate hain
+  // 2) store ka aggregate (rating/count) — sirf tab jab rating pata ho
   const aggregate = aggregates[handle];
-  if (aggregate?.count) return { rating: aggregate.rating, count: aggregate.count, reviews: [] };
+  if (aggregate?.count) {
+    return {
+      rating: aggregate.rating > 0 ? aggregate.rating : 0,
+      count: aggregate.count,
+      reviews: [],
+    };
+  }
   return { rating: 0, count: 0, reviews: [] };
 }
 
 export function hasFullReviews(handle: string): boolean {
-  return Boolean(data.products[handle]?.reviews?.length || seed[handle]?.reviews?.length);
+  return Boolean(data.products[handle]?.reviews?.length);
 }
 
 /**
@@ -71,15 +78,14 @@ export function hasFullReviews(handle: string): boolean {
  * lagatar na aayein (real store ke carousel jaisa mix).
  */
 export function latestReviews(limit = 8): Review[] {
-  // live reviews pehle, phir sample wale — dono mil kar home strip bharti hai
-  const all = [
-    ...Object.entries(data.products).flatMap(([handle, block]) =>
-      block.reviews.map((review) => ({ ...review, productHandle: handle })),
-    ),
-    ...Object.entries(seed).flatMap(([handle, block]) =>
-      (block.reviews ?? []).map((review) => ({ ...review, productHandle: handle })),
-    ),
-  ];
+  const all = Object.entries(data.products).flatMap(([handle, block]) =>
+    block.reviews.map((review) => ({
+      ...review,
+      productHandle: handle,
+      // badge sirf verified flag par — source me na ho to badge nahi
+      verified: review.verified === true,
+    })),
+  );
   const sorted = all.sort((a, b) => (b.date ?? "").localeCompare(a.date ?? "") || b.rating - a.rating);
   const picked: Review[] = [];
   const usedProducts = new Set<string>();

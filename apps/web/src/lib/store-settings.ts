@@ -26,7 +26,7 @@ export type StoreSettings = {
 };
 
 export const DEFAULT_STORE_SETTINGS: StoreSettings = {
-  announcement: "Diwali Sale — Flat 70% OFF · Final price ₹499 onwards",
+  announcement: "Diwali Sale — Up to 70% OFF · Final price ₹499 onwards",
   freeShipping: true,
   upiId: process.env.STORE_UPI_ID ?? "dhakadgourav@fam",
   upiName: process.env.STORE_UPI_NAME ?? "Designer Clothing",

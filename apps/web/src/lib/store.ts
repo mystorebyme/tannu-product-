@@ -52,12 +52,26 @@ export async function getCollections(): Promise<Collection[]> {
   return [...collections].sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
+/**
+ * Purane/short URLs jo live store par circulate ho chuke — clean handle par
+ * resolve hote hain. Route dono par khulta hai, canonical sirf clean handle.
+ */
+export const COLLECTION_ALIASES: Record<string, string> = {
+  "wedding-collection": "weddin-collection",
+};
+
+export function resolveCollectionHandle(handle: string): string {
+  return COLLECTION_ALIASES[handle] ?? handle;
+}
+
 export async function getCollection(handle: string): Promise<Collection | undefined> {
-  return collections.find((collection) => collection.handle === handle);
+  const canonical = resolveCollectionHandle(handle);
+  return collections.find((collection) => collection.handle === canonical);
 }
 
 export async function getProductsByCollection(handle: string, limit?: number): Promise<Product[]> {
-  const list = listed(products.filter((product) => product.collections.includes(handle)));
+  const canonical = resolveCollectionHandle(handle);
+  const list = listed(products.filter((product) => product.collections.includes(canonical)));
   return typeof limit === "number" ? list.slice(0, limit) : list;
 }
 

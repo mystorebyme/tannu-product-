@@ -17,7 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/pages/about-us", priority: 0.5 },
     { path: "/pages/contact", priority: 0.5 },
     { path: "/track-order", priority: 0.5 },
-    { path: "/pages/size-cheart", priority: 0.4 },
+    { path: "/pages/size-guide", priority: 0.4 },
     { path: "/policies/privacy-policy", priority: 0.3 },
     { path: "/policies/terms-and-conditions", priority: 0.3 },
     { path: "/policies/refund-and-return-policy", priority: 0.3 },

@@ -58,8 +58,16 @@ export function ProductCard({
     node.style.removeProperty("--cursor-y");
   }
 
-  const defaultSize =
-    product.sizes.find((size) => product.sizePricing?.[size]?.available) ?? product.sizes[0] ?? "Free Size";
+  /**
+   * Sirf wahi size bik sakta hai jo stock me hai. `sizePricing` na ho to
+   * product-level `inStock` maano (purane catalog ke liye).
+   */
+  const availableSizes = product.sizes.filter((size) => {
+    const pricing = product.sizePricing?.[size];
+    return pricing ? pricing.available !== false : product.inStock;
+  });
+  const soldOut = !product.inStock || availableSizes.length === 0;
+  const defaultSize = availableSizes[0] ?? product.sizes[0] ?? "Free Size";
 
   return (
     <div className="group relative flex flex-col">
@@ -93,7 +101,7 @@ export function ProductCard({
             {off}% off
           </span>
         ) : null}
-        {!product.inStock ? (
+        {soldOut ? (
           <span className="absolute left-2 top-8 bg-[#222] px-1.5 py-0.5 text-[9px] font-semibold tracking-[.1em] text-white uppercase">
             Sold out
           </span>
@@ -136,8 +144,14 @@ export function ProductCard({
 
         <button
           type="button"
+          disabled={soldOut}
+          aria-disabled={soldOut}
+          data-testid={soldOut ? "sold-out-button" : "quick-add"}
+          title={soldOut ? "Sold out — next drop ke liye WhatsApp kariye" : undefined}
           onClick={() =>
-            addItem({
+            soldOut
+              ? undefined
+              : addItem({
               handle: product.handle,
               title: product.title,
               price: product.sizePricing?.[defaultSize]?.price ?? product.price,
@@ -147,9 +161,13 @@ export function ProductCard({
               colour: product.colourName ?? product.color,
             })
           }
-          className="absolute inset-x-0 bottom-0 translate-y-full bg-[#862222] py-2.5 text-[10.5px] font-semibold tracking-[.16em] text-white uppercase transition-transform duration-300 group-hover:translate-y-0 focus-visible:translate-y-0 max-sm:translate-y-0"
+          className={`absolute inset-x-0 bottom-0 py-2.5 text-[10.5px] font-semibold tracking-[.16em] uppercase transition-transform duration-300 group-hover:translate-y-0 focus-visible:translate-y-0 max-sm:translate-y-0 ${
+            soldOut
+              ? "cursor-not-allowed bg-[#4a423b] text-white/90"
+              : "bg-[#862222] text-white"
+          }`}
         >
-          Add to cart
+          {soldOut ? "Sold out" : "Add to cart"}
         </button>
       </div>
 

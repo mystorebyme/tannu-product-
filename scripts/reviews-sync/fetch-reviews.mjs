@@ -331,6 +331,12 @@ async function main() {
       const totalPages = Number(payload?.data?.page?.total_page ?? 1);
       if (!rawList.length || pageNo >= totalPages) break;
     }
+    // Trustoo ka total_rating kabhi 0 aata hai jab shop-level API na mile —
+    // tab asli reviews se average nikaal lo (koi banaya hua number nahi).
+    if (aggregate?.count && !aggregate.rating && reviews.length) {
+      aggregate.rating =
+        Math.round((reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length) * 10) / 10;
+    }
     if (aggregate?.count) aggregatesPreview[handle] = aggregate;
     if (!reviews.length) continue;
 

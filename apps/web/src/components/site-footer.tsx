@@ -5,11 +5,12 @@ import { useState } from "react";
 import { BrandLockup } from "@/components/brand-lockup";
 import { useStoreSettings } from "@/components/store-settings-provider";
 import { siteConfig } from "@/config/site";
+import { apiUrl } from "@/lib/api-base";
 
 /**
  * Footer — live store (likshaclothing.com) ka same structure:
  * dark maroon band (#8a000e), white wordmark, Contact Us / Follow Us /
- * CUSTMORE SUPPORT / Menu columns, phir copyright strip.
+ * CUSTOMER SUPPORT / Menu columns, phir copyright strip.
  */
 
 const supportLinks = [
@@ -32,7 +33,7 @@ const menuLinks = [
   { label: "CONTACT US", href: "/pages/contact" },
   { label: "SALE", href: "/collections/sale" },
   { label: "SHOP ALL", href: "/collections" },
-  { label: "WEDDING COLLECTION", href: "/collections/weddin-collection" },
+  { label: "WEDDING COLLECTION", href: "/collections/wedding-collection" },
 ];
 
 /**
@@ -52,7 +53,7 @@ export function SiteFooter() {
     if (!email.trim()) return;
     setStatus("loading");
     try {
-      const response = await fetch("/api/newsletter", {
+      const response = await fetch(apiUrl("/api/newsletter"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -144,7 +145,7 @@ export function SiteFooter() {
 
           {/* Customer support */}
           <div>
-            <h3 className="text-[15px] font-medium text-white">CUSTMORE SUPPORT</h3>
+            <h3 className="text-[15px] font-medium text-white">CUSTOMER SUPPORT</h3>
             <ul className="mt-4 space-y-2.5 text-[13.5px] text-[#ececec]">
               {supportLinks.map((link) => (
                 <li key={link.href}>
@@ -199,7 +200,20 @@ export function SiteFooter() {
                 <p className="mt-1.5 text-[11.5px] text-[#d9f0d9]">You&apos;re in! Sale alerts on the way.</p>
               ) : null}
               {status === "error" ? (
-                <p className="mt-1.5 text-[11.5px] text-[#ffd6cf]">Please try again.</p>
+                <p className="mt-1.5 text-[11.5px] text-[#ffd6cf]">
+                  Signup abhi save nahi hua.{" "}
+                  <a
+                    href={`https://wa.me/91${whatsapp.replace(/\D/g, "").slice(-10)}?text=${encodeURIComponent(
+                      `Hi Designer Clothing! Please add me to the sale list: ${email}`,
+                    )}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="underline"
+                  >
+                    WhatsApp par email bhejein
+                  </a>
+                  .
+                </p>
               ) : null}
             </form>
 

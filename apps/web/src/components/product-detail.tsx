@@ -89,7 +89,17 @@ export function ProductDetail({
     }
   }
 
+  const sizeSoldOut = Boolean(sizePricing && sizePricing.available === false);
+  const productSoldOut =
+    !active.inStock ||
+    active.sizes.every((option) => {
+      const pricing = active.sizePricing?.[option];
+      return pricing ? pricing.available === false : false;
+    });
+
   function add(quantityOverride?: number) {
+    // UI disabled hai, par keyboard/screen-reader se bhi guard — sold out kabhi cart me na jaye
+    if (sizeSoldOut || productSoldOut) return;
     addItem(
       {
         handle: active.handle,
@@ -168,8 +178,9 @@ export function ProductDetail({
       title: "Shipping & Delivery",
       content: (
         <p className="text-[12.5px] leading-relaxed text-[#5c534b]">
-          Ready to dispatch in 1-2 days. Free shipping across India. Prepaid orders are delivered in
-          4-7 business days, with express dispatch on prepaid payments.
+          Ready to dispatch in 1-2 days. Free shipping across India, prepaid orders only (UPI) —
+          4-7 business days delivery. Cash on Delivery available nahi hai, isliye order place karte hi
+          UPI se payment confirm kar lein.
         </p>
       ),
     },
@@ -329,7 +340,7 @@ export function ProductDetail({
                 )} zyada.`
               : "XL aur usse bade sizes par price thoda zyada hota hai."}
           </p>
-          {sizePricing && !sizePricing.available ? (
+          {sizeSoldOut ? (
             <p className="mt-1 text-[11.5px] text-[#b3261e]">
               {size} is out of stock — WhatsApp 8005900581 for the next drop.
             </p>
@@ -360,23 +371,25 @@ export function ProductDetail({
             type="button"
             onClick={() => add()}
             data-testid="add-to-cart"
-            disabled={Boolean(sizePricing && !sizePricing.available)}
+            disabled={sizeSoldOut || productSoldOut}
             className="flex-1 bg-[#862222] px-4 py-3 text-[11.5px] font-semibold tracking-[.16em] text-white uppercase transition hover:bg-[#6d1a1a] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {sizePricing && !sizePricing.available ? "Out of stock" : "Add to cart"}
+            {sizeSoldOut || productSoldOut ? "Out of stock" : "Add to cart"}
           </button>
         </div>
         <div className="mt-2 grid gap-2 sm:grid-cols-2">
           <button
             type="button"
             onClick={() => {
+              if (sizeSoldOut || productSoldOut) return;
               add(1);
               router.push("/checkout");
             }}
+            disabled={sizeSoldOut || productSoldOut}
             data-testid="buy-now"
-            className="w-full border border-[#862222] py-3 text-[11.5px] font-semibold tracking-[.16em] text-[#862222] uppercase transition hover:bg-[#faf1ef]"
+            className="w-full border border-[#862222] py-3 text-[11.5px] font-semibold tracking-[.16em] text-[#862222] uppercase transition hover:bg-[#faf1ef] disabled:cursor-not-allowed disabled:border-[#ddd2c6] disabled:text-[#a49a90] disabled:hover:bg-transparent"
           >
-            Buy it now
+            {sizeSoldOut || productSoldOut ? "Sold out" : "Buy it now"}
           </button>
           <a
             href={`https://wa.me/91${whatsapp.replace(/\D/g, "").slice(-10)}?text=${encodeURIComponent(

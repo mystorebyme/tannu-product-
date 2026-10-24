@@ -40,7 +40,7 @@ export function ProductReviews({
         <div>
           <h2 className="font-display text-[24px] font-medium sm:text-[28px]">Customer reviews</h2>
           <p className="mt-1 text-[11px] tracking-[.12em] text-[#9c8f82] uppercase">
-            {block.count > 0 ? `${block.count} verified reviews` : "Be the first to review this piece"}
+            {block.count > 0 ? `${block.count} customer reviews` : "Be the first to review this piece"}
           </p>
         </div>
         <button
@@ -72,12 +72,24 @@ export function ProductReviews({
         <>
           <div className="mt-5 grid gap-6 border border-[#eee6de] p-5 sm:grid-cols-[210px_1fr]">
             <div className="text-center sm:border-r sm:border-[#f1ebe5] sm:pr-5">
-              <p className="font-display text-[44px] leading-none text-[#862222]">{block.rating.toFixed(1)}</p>
-              <Stars value={block.rating} size={16} />
+              {block.rating > 0 ? (
+                <>
+                  <p className="font-display text-[44px] leading-none text-[#862222]">{block.rating.toFixed(1)}</p>
+                  <Stars value={block.rating} size={16} />
+                </>
+              ) : (
+                <p className="font-display text-[20px] leading-none text-[#862222]">{block.count} ratings</p>
+              )}
               <p className="mt-1.5 text-[11.5px] text-[#6b6259]">Based on {block.count} reviews</p>
             </div>
             <div className="space-y-1.5">
-              {breakdown.map((row) => (
+              {block.reviews.length === 0 ? (
+                <p className="text-[12px] leading-relaxed text-[#6b6259]">
+                  Is piece par {block.count} ratings hain. Customer-written reviews aate hi yahan dikhte hain —
+                  koi sample review publish nahi hota.
+                </p>
+              ) : null}
+              {block.reviews.length === 0 ? null : breakdown.map((row) => (
                 <button
                   key={row.stars}
                   type="button"
@@ -135,7 +147,7 @@ function ReviewCard({ review }: { review: Review }) {
     <li className="border border-[#eee6de] p-4">
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-[12.5px] font-medium">{review.author}</span>
-        {review.verified !== false ? (
+        {review.verified === true ? (
           <span className="bg-[#eaf5ec] px-1.5 py-0.5 text-[9px] font-semibold tracking-[.08em] text-[#2f7a3f] uppercase">
             Verified buyer
           </span>

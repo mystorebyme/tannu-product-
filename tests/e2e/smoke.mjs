@@ -90,9 +90,16 @@ async function main() {
     );
     const containCount = (pdp.text.match(/object-contain/g) ?? []).length;
     check("PDP gallery uses object-contain", containCount >= 1, `${containCount} matches`);
-    // har product par reviews (live Trustoo ya sample seed)
+    // reviews: sirf asli Trustoo data. Rating 0/na ho to JSON-LD me aggregateRating nahi hona chahiye
     check("PDP has a review block", pdp.text.includes('data-testid="product-reviews"'));
-    check("PDP has aggregate rating in JSON-LD", /"aggregateRating"/.test(pdp.text));
+    const liveReviews = Number(galleryProduct.reviewCount ?? 0);
+    check(
+      "PDP aggregateRating appears only with real reviews",
+      liveReviews > 0 ? /"aggregateRating"/.test(pdp.text) : !/"aggregateRating"/.test(pdp.text),
+      `${liveReviews} reviews for ${galleryProduct.handle}`,
+    );
+    // koi generated "verified" sample review public page par nahi
+    check("PDP shows no sample reviews", !/sample review|Verified buyer[\s\S]{0,40}sd-/.test(pdp.text));
     check("PDP has WhatsApp order beside Buy now", pdp.text.includes('data-testid="pdp-whatsapp-order"'));
   }
 

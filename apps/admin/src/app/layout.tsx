@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: { default: "Liksha Admin", template: "%s · Liksha Admin" },
+  title: { default: "Designer Clothing Admin", template: "%s · Designer Clothing Admin" },
   robots: { index: false, follow: false },
 };
 

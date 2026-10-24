@@ -38,7 +38,9 @@
     "assets:brand": "node scripts/brand/build-responsive-assets.mjs",
     "assets:proof": "node scripts/brand/render-proof.mjs",
     "test:unit": "tsx --test tests/unit/*.test.ts",
-    "typecheck": "npm run typecheck --workspaces --if-present"
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test:audit": "node tests/e2e/round16.mjs && node tests/e2e/links.mjs",
+    "test:links": "node tests/e2e/links.mjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.11",

@@ -8,6 +8,8 @@ import { Reveal } from "@/components/reveal";
 import { getProducts, getCollection } from "@/lib/store";
 import { RAILS, type RailKey, railPool } from "@/lib/rails";
 import { compactProduct, rotatePick, rotationBucket } from "@/lib/rotation";
+import { bestSellers } from "@/lib/best-sellers";
+import { BestSellersRail } from "@/components/best-sellers-rail";
 import { imageUrl } from "@/lib/format";
 import { heroBanners, siteConfig } from "@/config/site";
 import { SafeImage } from "@/components/safe-image";
@@ -23,7 +25,9 @@ export const metadata: Metadata = {
 };
 
 /**
- * Festive home banner — owner ke diye hue Diwali Sale posters (Flat 70% OFF).
+ * Festive home banner — owner ke diye hue Diwali Sale posters.
+ * Artwork par "FLAT 70% OFF" chhapa hai; catalogue me 60% aur 70% dono hain, isliye
+ * HTML copy/alt/announcement "Up to 70% OFF" bolti hai (misleading claim nahi).
  *
  * Device ke hisaab se alag file (ek hi download hoti hai):
  *   - <768px   → portrait poster  (mobile, poora composition)
@@ -58,6 +62,9 @@ export default async function HomePage() {
   const lehnga = rail("lehnga");
   const explore = rail("explore");
 
+  // best sellers — asli orders se ranked (orders empty ho to curated edit)
+  const bestSellerPicks = (await bestSellers(8)).map(({ product }) => compactProduct(product));
+
   const anarkaliCollection = await getCollection("party-wear-gown");
   const lehngaCollection = await getCollection("lehnga-choli");
   const printedCollection = await getCollection("printed-suit-set");
@@ -73,7 +80,7 @@ export default async function HomePage() {
     { href: "/collections/new-arrivals", title: "New Arrivals", image: newArrivalsCollection?.image, count: byCollection("new-arrivals").length },
     { href: "/collections/likshas-choice", title: "Liksha's Choice", image: choiceCollection?.image, count: byCollection("likshas-choice").length },
     { href: "/collections/sale", title: "Sale", image: saleCollection?.image, count: byCollection("sale").length },
-    { href: "/collections/weddin-collection", title: "Wedding", image: undefined, count: byCollection("weddin-collection").length },
+    { href: "/collections/wedding-collection", title: "Wedding", image: undefined, count: byCollection("weddin-collection").length },
   ];
 
   const jsonLd = {
@@ -98,7 +105,7 @@ export default async function HomePage() {
         <div className="mx-auto max-w-[1920px]">
           <Link
             href={HERO_HREF}
-            aria-label="Shop the Diwali sale — flat 70% off"
+            aria-label="Shop the Diwali sale — up to 70% off"
             className="hero-media group relative block aspect-[860/1290] w-full overflow-hidden bg-[#fbf1e2] md:aspect-[4/3] lg:aspect-[1779/594]"
           >
             <picture>
@@ -107,7 +114,7 @@ export default async function HomePage() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={heroBanners.mobile}
-                alt="Happy Diwali Sale — flat 70% off ethnic wear by Designer Clothing"
+                alt="Happy Diwali Sale — up to 70% off ethnic wear by Designer Clothing"
                 width={860}
                 height={1290}
                 loading="eager"
@@ -122,7 +129,7 @@ export default async function HomePage() {
           <div className="container-liksha flex flex-col items-center gap-3 border-b border-[#efe2cf] py-5 text-center sm:flex-row sm:justify-between sm:text-left">
             <div>
               <h1 className="font-display text-[20px] leading-tight font-medium text-[#5c1010] sm:text-[24px]">
-                Diwali Sale — Flat <span className="text-[#862222]">70%</span> Off
+                Diwali Sale — Up to <span className="text-[#862222]">70%</span> Off
               </h1>
               <p className="mt-1 text-[11px] text-[#7b6f64]">
                 Free shipping pan-India · Prepaid only · 4–7 day delivery
@@ -149,6 +156,8 @@ export default async function HomePage() {
       <CategoryCircles items={circleItems} />
 
       <ProductRail rail="trendy" products={trendy.initial} pool={trendy.pool} />
+
+      <BestSellersRail initial={bestSellerPicks} />
 
       <ProductRail rail="newArrivals" products={newArrivalsRail.initial} pool={newArrivalsRail.pool} />
 

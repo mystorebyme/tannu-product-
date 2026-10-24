@@ -157,3 +157,30 @@ Owner ka master prompt: har screen par professional logo/header/hero, device-spe
 - **Proof sheet:** `docs/assets/responsive-proof.png` (`npm run assets:proof`) — asli assets
   + asli CSS heights se 320 se 1920 tak ka header+hero.
 - Docs: `docs/05-design/responsive-assets.md`.
+
+## Round 16 — audit, trust fixes, DB replies aur speed (2026-10-24)
+
+Owner ka full-site audit prompt. Sabse pehle code/data inspect kiya, phir fix + test.
+
+- **Reviews (trust):** 1,273 generated sample reviews (`seed-reviews.json`) poore hata diye —
+  public page par sirf asli Trustoo reviews. "Verified buyer" badge sirf `verified === true`
+  par; rating 0 wale aggregates par stars/average hide, JSON-LD `aggregateRating` sirf real
+  rating par (schema valid). Sync script aggregate rating 0 ho to asli reviews se average
+  nikalta hai.
+- **Stock:** sold-out product/size ka add-to-cart + buy-now disabled (card + PDP), server
+  `createOrder` par bhi 409 — UI bypass karke bhi kharid nahi ho sakta.
+- **Prepaid only:** API `paymentMethod: "cod"` ab 400 deta hai (pehle server COD accept
+  karta tha jabki site prepaid-only thi).
+- **Routes:** `/pages/size-cheart` → 200 alias (canonical `size-guide`), naya
+  `/collections/wedding-collection` (canonical `weddin-collection`), saree nav me nahi,
+  unknown product/collection 404, order not-found ka apna page ("Order nahi mila" +
+  WhatsApp), order numbers case-insensitive.
+- **Batch/checkout detail:** contact messages me `replied` flag (migration 0006, API,
+  admin mark/undo, sheet status), best sellers ab asli orders ki quantity se rank hote hain.
+- **Speed:** collection me agla page prefetch (idle + 900px pehle), Pages preview par
+  `catalog-lite.json` se client-side pagination (pehle "load more" preview par fail tha).
+- **Copy:** "Up to 70% OFF" (60% + 70% dono hain), `CUSTOMER SUPPORT`, admin title
+  "Designer Clothing Admin", PDP shipping copy prepaid-only.
+- **Tests:** naya `tests/e2e/round16.mjs` (37 checks) + `tests/e2e/links.mjs` (45 pages
+  crawl) CI me; smoke 86/0, responsive 40/0, breakpoints 48/0, unit 89/0.
+- Docs: `docs/08-testing/round16-audit.md` (issues, decisions, verification matrix).

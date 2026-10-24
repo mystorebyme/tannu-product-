@@ -122,7 +122,8 @@ const headerPicture = home.text.includes("/images/brand/logo-desktop.png") && ho
 check("brand lockup uses <picture> with all three variants", headerPicture);
 
 /* 4. header/nav: no dead links, no overflowing fixed widths ---------------- */
-check("nav has SHOP link to /collections", /href="\/collections"[^>]*>SHOP/.test(home.text) || home.text.includes('href="/collections"'));
+// Pages export me base path + trailing slash aata hai — dono accept karo
+check("nav has SHOP link to /collections", /href="(?:\/tannu-product-)?\/collections\/?"[^>]*>SHOP/.test(home.text));
 check("no saree link in header/footer (0 products)", !home.text.includes("/collections/saree"));
 check("header grid keeps logo centred on phones", home.text.includes("grid-cols-[auto_1fr_auto]"));
 check("mobile menu is a 40px touch target", /aria-label="Open menu"[\s\S]{0,220}?h-10 w-10/.test(home.text));

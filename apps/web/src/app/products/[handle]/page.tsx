@@ -61,7 +61,8 @@ export default async function ProductPage({
       availability: product.inStock ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
       url: `${siteConfig.url}/products/${product.handle}`,
     },
-    ...(reviewBlock.count > 0
+    // rating 0 (sirf count, average nahi) par schema.org ka aggregateRating invalid hota hai
+    ...(reviewBlock.count > 0 && reviewBlock.rating > 0
       ? {
           aggregateRating: {
             "@type": "AggregateRating",

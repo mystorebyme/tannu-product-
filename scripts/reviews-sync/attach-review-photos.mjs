@@ -19,10 +19,8 @@ import path from "node:path";
 const ROOT = path.resolve(import.meta.dirname, "..", "..");
 const CATALOG = path.join(ROOT, "database/seeds/catalog.json");
 
-const files = [
-  path.join(ROOT, "database/seeds/reviews/reviews.json"),
-  path.join(ROOT, "database/seeds/reviews/seed-reviews.json"),
-];
+// Round 16: sample seed hata diya — sirf asli Trustoo reviews
+const files = [path.join(ROOT, "database/seeds/reviews/reviews.json")];
 
 const key = (src) => String(src).split("?")[0].replace(/\/+$/, "").toLowerCase();
 

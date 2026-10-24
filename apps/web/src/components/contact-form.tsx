@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { postJson } from "@/lib/http-json";
+import { apiUrl } from "@/lib/api-base";
 import { useStoreSettings } from "@/components/store-settings-provider";
 
 /** fallback — live value Google Sheet / admin settings se aati hai */
@@ -38,7 +39,8 @@ export function ContactForm() {
     setStatus("loading");
     setError(null);
     try {
-      const result = await postJson<{ error?: string; ok?: boolean }>("/api/contact", form);
+      // Pages preview par API live store par jaata hai (apiUrl base add karta hai)
+      const result = await postJson<{ error?: string; ok?: boolean }>(apiUrl("/api/contact"), form);
       if (result.error || !result.data) {
         setError(result.data?.error ?? result.error ?? "Could not send your message.");
         setStatus("error");
@@ -123,13 +125,28 @@ export function ContactForm() {
         />
       </div>
       {error ? (
-        <p className="mt-2 text-[11.5px] text-[#b3261e]" role="alert">
-          {error}{" "}
-          <a href={mailtoHref(form, SUPPORT_EMAIL)} className="underline">
-            Email us instead
-          </a>
-          .
-        </p>
+        <div className="mt-2 text-[11.5px] text-[#b3261e]" role="alert">
+          <p>{error}</p>
+          {/* honest fallback — static preview / server down par message kho na jaye */}
+          <p className="mt-1 text-[#5c534b]">
+            Aap seedha bhi bhej sakte hain:{" "}
+            <a href={mailtoHref(form, SUPPORT_EMAIL)} className="underline">
+              email
+            </a>{" "}
+            ya{" "}
+            <a
+              href={`https://wa.me/91${SUPPORT_WHATSAPP}?text=${encodeURIComponent(
+                `Hi Designer Clothing! ${form.subject}\nName: ${form.name}\n${form.message}`,
+              )}`}
+              target="_blank"
+              rel="noreferrer"
+              className="underline"
+            >
+              WhatsApp {SUPPORT_WHATSAPP}
+            </a>
+            .
+          </p>
+        </div>
       ) : null}
       <div className="mt-3 flex flex-wrap items-center gap-3">
         <button

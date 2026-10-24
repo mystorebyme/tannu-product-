@@ -16,6 +16,7 @@ import {
   getDelivery,
   saveDelivery,
   markMessageHandled,
+  setMessageReplied,
   saveSettings,
   setOrderNote,
   setOrderTracking,
@@ -66,6 +67,18 @@ export async function markMessageHandledAction(formData: FormData) {
   if (!id) return;
   const ok = await markMessageHandled(id, session.email);
   if (ok) appendAudit({ actor: session.email, action: "message.handled", target: id });
+  revalidatePath("/messages");
+  revalidatePath("/");
+}
+
+/** "Replied" toggle — admin inbox me jawab diya hua message mark/undo */
+export async function setMessageReplyAction(formData: FormData) {
+  const session = await requireSession();
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+  const replied = String(formData.get("replied") ?? "") === "true";
+  const ok = await setMessageReplied(id, replied, session.email);
+  if (ok) appendAudit({ actor: session.email, action: replied ? "message.replied" : "message.unreplied", target: id });
   revalidatePath("/messages");
   revalidatePath("/");
 }
