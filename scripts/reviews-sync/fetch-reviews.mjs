@@ -83,7 +83,12 @@ function normaliseReview(raw) {
 }
 
 async function main() {
-  const html = await fetchText(`${STORE}/collections/new-arrivals`);
+  let html = "";
+  try {
+    html = await fetchText(`${STORE}/collections/new-arrivals`);
+  } catch (error) {
+    note("page-blocked", error.message.slice(0, 80));
+  }
   const shopId =
     html.match(/shop_id\s*=\s*"?(\d{5,})"?/)?.[1] ??
     html.match(/shopId\\?":\s*\\?"(\d{5,})/)?.[1] ??
@@ -262,4 +267,17 @@ async function main() {
   console.log(`saved ${total} reviews across ${reviewedProducts} products`);
 }
 
-await main();
+try {
+  await main();
+} catch (error) {
+  console.warn("sync failed (non-fatal):", error.message);
+  try {
+    const { default: fsx } = await import("node:fs");
+    fsx.writeFileSync(
+      `${ROOT}/database/seeds/reviews/last-sync.json`,
+      `${JSON.stringify({ error: error.message, at: new Date().toISOString() }, null, 1)}\n`,
+    );
+  } catch {
+    /* ignore */
+  }
+}

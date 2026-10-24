@@ -480,9 +480,12 @@ const groupKeyOf = (base) => base.toLowerCase().replace(/[^a-z0-9]+/g, "-").repl
   write("apps/web/src/data/colour-index.json", `${JSON.stringify(colourIndex, null, 1)}\n`);
 
   // reviews (Trustoo sync) — web app ko build ke waqt copy
-  const reviewsSrc = path.join(ROOT, "database/seeds/reviews/reviews.json");
-  if (fs.existsSync(reviewsSrc)) {
-    write("apps/web/src/data/reviews.json", fs.readFileSync(reviewsSrc, "utf8"));
+  for (const [from, to] of [
+    ["database/seeds/reviews/reviews.json", "apps/web/src/data/reviews.json"],
+    ["database/seeds/reviews/aggregates.json", "apps/web/src/data/review-aggregates.json"],
+  ]) {
+    const source = path.join(ROOT, from);
+    if (fs.existsSync(source)) write(to, fs.readFileSync(source, "utf8"));
   }
 
   const json = JSON.stringify(catalog, null, 1);

@@ -1,4 +1,5 @@
 import raw from "@/data/reviews.json";
+import aggregatesRaw from "@/data/review-aggregates.json";
 
 /**
  * Reviews — live store ka Trustoo widget daily sync hota hai
@@ -31,13 +32,25 @@ type ReviewsFile = {
   products: Record<string, ProductReviewBlock>;
 };
 
+type AggregatesFile = { syncedAt?: string | null; products?: Record<string, { rating: number; count: number }> };
+
 const data = raw as ReviewsFile;
+const aggregates = (aggregatesRaw as AggregatesFile).products ?? {};
 
 export const reviewsMeta = data.meta;
 export const shopRating = data.shop ?? { rating: 0, count: 0 };
 
 export function reviewsFor(handle: string): ProductReviewBlock {
-  return data.products[handle] ?? { rating: 0, count: 0, reviews: [] };
+  const block = data.products[handle];
+  if (block?.count) return block;
+  // live store ka aggregate (Trustoo) sync hua ho to rating/count wahi dikhate hain
+  const aggregate = aggregates[handle];
+  if (aggregate?.count) return { rating: aggregate.rating, count: aggregate.count, reviews: [] };
+  return { rating: 0, count: 0, reviews: [] };
+}
+
+export function hasFullReviews(handle: string): boolean {
+  return Boolean(data.products[handle]?.reviews?.length);
 }
 
 /** Home / PDP cross-sell ke liye — sabse achhe reviews pehle. */
