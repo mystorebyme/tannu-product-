@@ -21,7 +21,7 @@ const pages: Record<string, PageContent> = {
     title: "About Us",
     eyebrow: "Our Story",
     intro:
-      "Designer Clothes is a celebration of Indian craftsmanship — designed for the woman who carries tradition with effortless modernity.",
+      "Designer Clothing is a celebration of Indian craftsmanship — designed for the woman who carries tradition with effortless modernity.",
     sections: [
       {
         heading: "Crafted for your celebrations",
@@ -176,7 +176,7 @@ const pages: Record<string, PageContent> = {
       {
         heading: "Intellectual property",
         body: [
-          "All photography, designs and content on this site belong to Designer Clothes and may not be reused without written permission.",
+          "All photography, designs and content on this site belong to Designer Clothing and may not be reused without written permission.",
         ],
       },
     ],

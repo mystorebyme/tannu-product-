@@ -15,7 +15,10 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     <div className="shell">
       <aside className="sidebar">
         <div className="brand">
-          LIKSHA
+          {/* wahi mark jo storefront header me hai */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/invoice-logo.png" alt="Designer Clothing" className="brand-mark" width={34} height={34} />
+          DESIGNER
           <small>CLOTHING · ADMIN</small>
         </div>
         <AdminNav pendingOrders={pending} />

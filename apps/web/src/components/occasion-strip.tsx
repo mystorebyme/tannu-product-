@@ -45,7 +45,7 @@ export function EditorialBand() {
         <div className="relative aspect-[4/3] overflow-hidden bg-[#f0e7dd]">
           <SafeImage
             src={imageUrl("https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_9512.webp", 900)}
-            alt="Designer Clothes signature craftsmanship"
+            alt="Designer Clothing signature craftsmanship"
             className="h-full w-full object-cover"
           />
         </div>
@@ -55,7 +55,7 @@ export function EditorialBand() {
             Heirloom embroidery, finished by hand
           </h2>
           <p className="mt-3 text-[13px] leading-relaxed text-[#5c534b]">
-            Every Designer Clothes anarkali, lehenga and suit set is cut from premium fabric and finished by
+            Every Designer Clothing anarkali, lehenga and suit set is cut from premium fabric and finished by
             karigars who have spent generations perfecting zari, sequin and thread work. Fully stitched,
             ready to wear and delivered free across India.
           </p>

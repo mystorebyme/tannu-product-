@@ -44,7 +44,7 @@ async function main() {
   const home = await get("/");
   check("home 200", home.status === 200, `status ${home.status}`);
   check("home lists products", /\/products\/[a-z0-9-]+/.test(home.text));
-  check("home has brand name", /Designer Clothes/i.test(home.text));
+  check("home has brand name", /Designer Clothing/i.test(home.text));
   check("home has support number", home.text.includes("8005900581"));
   check("home has the live announcement bar", /announcement-bar/.test(home.text));
   check(
@@ -53,11 +53,11 @@ async function main() {
   );
   check("home shows category counts from the live store", /ANARKALI SUIT/i.test(home.text) && /Products/i.test(home.text));
   check("home hero pricing paragraph removed (Round 12)", !/No hidden charges/i.test(home.text));
-  check("tab title carries the brand name", /<title>[^<]*Designer Clothes[^<]*<\/title>/i.test(home.text));
+  check("tab title carries the brand name", /<title>[^<]*Designer Clothing[^<]*<\/title>/i.test(home.text));
   check("tab icon points at the brand logo", /rel="icon"[^>]*likshaclothing/i.test(home.text));
 
   const manifest = await get("/manifest.webmanifest");
-  check("manifest served for installed app", manifest.status === 200 && /Designer Clothes/.test(manifest.text), `status ${manifest.status}`);
+  check("manifest served for installed app", manifest.status === 200 && /Designer Clothing/.test(manifest.text), `status ${manifest.status}`);
 
   const collection = await get("/collections/lehnga-choli");
   check("collection 200", collection.status === 200, `status ${collection.status}`);
@@ -345,7 +345,7 @@ async function main() {
   );
 
   // festive sale: hero poster + ₹499–₹699 final prices
-  check("home shows the new Diwali sale hero", home.text.includes("diwali-sale-70.webp"));
+  check("home shows the new Diwali sale hero", home.text.includes("diwali-sale-70-2026.webp"));
   const salePrices = [...home.text.matchAll(/Rs\. (499|549|599|649|699)\b/g)].map((match) => match[1]);
   check("home lists sale prices (499/549/599/649/699)", salePrices.length > 0, String(salePrices.length));
   check(

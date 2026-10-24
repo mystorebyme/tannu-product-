@@ -6,18 +6,18 @@ export const dynamic = "force-static";
 
 /**
  * PWA/installed app + tab identity: naam aur logo wahi jo site par hai.
- * `icon` remote brand logo hai (same-to-same), isliye alag asset nahi rakhte.
+ * Icon local brand mark hai (`/images/logo-mark.png`), isliye offline/Pages par bhi milta hai.
  */
 export default function manifest(): MetadataRoute.Manifest {
   const base = process.env.NEXT_PUBLIC_PAGES_BASE_PATH ?? "";
   return {
-    name: "Designer Clothes",
-    short_name: "Designer Clothes",
+    name: "Designer Clothing",
+    short_name: "Designer Clothing",
     description: siteConfig.description,
     start_url: `${base}/` || "/",
     scope: `${base}/` || "/",
     display: "standalone",
-    background_color: "#ffffff",
+    background_color: "#000000",
     theme_color: "#862222",
     icons: [
       { src: logoMark, sizes: "192x192", type: "image/png", purpose: "any" },

@@ -18,7 +18,7 @@ export async function sendEmail(job: EmailJob) {
     method: "POST",
     headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      from: process.env.EMAIL_FROM ?? "Designer Clothes <orders@likshaclothing.com>",
+      from: process.env.EMAIL_FROM ?? "Designer Clothing <orders@likshaclothing.com>",
       to: [job.to],
       subject,
       html,

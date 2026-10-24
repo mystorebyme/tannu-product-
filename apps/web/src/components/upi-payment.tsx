@@ -104,7 +104,7 @@ export function UpiPayment({
 
   const wa = whatsapp.replace(/\D/g, "").slice(-10);
   const waText = encodeURIComponent(
-    `Hi Designer Clothes, I have paid ${formatPrice(amount)} for order ${orderNumber} via UPI (${upiId}). UTR: `,
+    `Hi Designer Clothing, I have paid ${formatPrice(amount)} for order ${orderNumber} via UPI (${upiId}). UTR: `,
   );
   const paid = paymentStatus === "paid";
 

@@ -16,7 +16,7 @@
 
 ## 2. Brand
 
-- Naam: `Designer Clothes` (`apps/web/src/config/site.ts` → `siteConfig.name`).
+- Naam: `Designer Clothing` (`apps/web/src/config/site.ts` → `siteConfig.name`).
 - Logo: wahi live store ka asset (`logoUrl`, `logoMark`) — same to same, kabhi change nahi.
 - Phone / WhatsApp: `8005900581` (Settings sheet se override ho sakta hai:
   `support_phone`, `whatsapp`).

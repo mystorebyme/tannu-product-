@@ -56,7 +56,7 @@ function formatMessage(input: {
     "",
     input.message,
     "",
-    `— Designer Clothes website (${new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })} IST)`,
+    `— Designer Clothing website (${new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })} IST)`,
   ].join("\n");
 }
 
@@ -85,7 +85,7 @@ export async function notifyContactMessage(input: {
 
   const resendKey = process.env.RESEND_API_KEY;
   if (resendKey) {
-    const from = process.env.EMAIL_FROM ?? "Designer Clothes <onboarding@resend.dev>";
+    const from = process.env.EMAIL_FROM ?? "Designer Clothing <onboarding@resend.dev>";
     try {
       const result = await post(
         "https://api.resend.com/emails",

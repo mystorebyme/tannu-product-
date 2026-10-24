@@ -381,7 +381,7 @@ export function ProductDetail({
           <a
             href={`https://wa.me/91${whatsapp.replace(/\D/g, "").slice(-10)}?text=${encodeURIComponent(
               [
-                `Hi Designer Clothes, I want to order:`,
+                `Hi Designer Clothing, I want to order:`,
                 `${product.title}`,
                 `Colour: ${active.name}`,
                 `Size: ${size}`,

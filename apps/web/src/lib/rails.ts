@@ -36,7 +36,7 @@ export const RAILS: Record<
     count: 8,
   },
   explore: {
-    title: "More from Designer Clothes",
+    title: "More from Designer Clothing",
     subtitle: "Naye picks har 10 minute me — sab kuch browse kariye",
     href: "/collections/new-arrivals",
     collections: [],

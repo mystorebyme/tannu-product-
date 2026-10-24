@@ -276,7 +276,7 @@ const DEFAULT_SETTINGS: StoreSettings = {
   announcement: "Diwali Sale — Flat 70% OFF · Final price ₹499 onwards",
   freeShipping: true,
   upiId: "dhakadgourav@fam",
-  upiName: "Designer Clothes",
+  upiName: "Designer Clothing",
   gstin: "27AAAAA0000A1Z5",
   supportPhone: "8005900581",
   supportEmail: "Info.likshaclothing@gmail.com",

@@ -12,7 +12,11 @@ export default async function LoginPage({
   return (
     <div className="login-wrap">
       <div className="login-card">
-        <div className="brand">LIKSHA</div>
+        <div className="brand">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/invoice-logo.png" alt="Designer Clothing" width={64} height={64} style={{ display: "block", margin: "0 auto 6px", borderRadius: 999 }} />
+          DESIGNER CLOTHING
+        </div>
         <div className="sub">CLOTHING · ADMIN</div>
         <LoginForm next={next ?? "/"} />
         <p className="small muted" style={{ marginTop: 16, textAlign: "center" }}>

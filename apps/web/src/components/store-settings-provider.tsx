@@ -29,7 +29,7 @@ export type PublicSettings = {
 export const DEFAULT_PUBLIC_SETTINGS: PublicSettings = {
   announcement: "",
   upiId: "dhakadgourav@fam",
-  upiName: "Designer Clothes",
+  upiName: "Designer Clothing",
   supportPhone: "8005900581",
   supportEmail: "Info.likshaclothing@gmail.com",
   whatsapp: "8005900581",

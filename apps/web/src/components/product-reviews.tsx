@@ -31,7 +31,7 @@ export function ProductReviews({
   const visible = filter ? block.reviews.filter((review) => Math.round(review.rating) === filter) : block.reviews;
 
   const whatsappReview = `https://wa.me/918005900581?text=${encodeURIComponent(
-    `Hi Designer Clothes! I'd like to review "${productTitle}" (${productUrl(productHandle)}). My rating: `,
+    `Hi Designer Clothing! I'd like to review "${productTitle}" (${productUrl(productHandle)}). My rating: `,
   )}`;
 
   return (

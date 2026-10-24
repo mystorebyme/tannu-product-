@@ -12,7 +12,7 @@ import { useWishlist } from "@/components/wishlist-provider";
 import type { SearchHit } from "@/types/catalog";
 import { useStoreSettings } from "@/components/store-settings-provider";
 import { SafeImage } from "@/components/safe-image";
-import { logoUrl, logoFallback } from "@/config/site";
+import { BrandLockup } from "@/components/brand-lockup";
 
 const quickLinks = [
   { label: "HOME", href: "/" },
@@ -195,14 +195,8 @@ export function SiteHeader() {
             </svg>
           </button>
 
-          <Link href="/" className="flex shrink-0 items-center">
-            <SafeImage
-              src={logoUrl}
-              fallbackSrc={logoFallback}
-              alt="Designer Clothes"
-              loading="eager"
-              className="h-10 w-auto object-contain sm:h-12 lg:h-14"
-            />
+          <Link href="/" aria-label="Designer Clothing home" className="flex shrink-0 items-center">
+            <BrandLockup />
           </Link>
 
           <nav className="hidden flex-1 items-center justify-center gap-6 lg:flex xl:gap-8">
@@ -405,7 +399,9 @@ export function SiteHeader() {
           />
           <div className="absolute inset-y-0 left-0 flex w-[86%] max-w-[340px] flex-col bg-white shadow-xl">
             <div className="flex items-center justify-between border-b border-[#eee6de] px-4 py-3">
-              <SafeImage src={logoUrl} fallbackSrc={logoFallback} alt="Designer Clothes" className="h-10 w-auto" />
+              <Link href="/" onClick={() => setMobileOpen(false)} aria-label="Designer Clothing home">
+                <BrandLockup compact />
+              </Link>
               <button type="button" onClick={() => setMobileOpen(false)} aria-label="Close" className="p-2">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
                   <path d="M5 5l14 14M19 5 5 19" />

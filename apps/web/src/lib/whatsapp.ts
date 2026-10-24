@@ -33,7 +33,7 @@ export function whatsappLink(message: string, phone = WHATSAPP_NUMBER): string {
 
 export function orderWhatsAppMessage(order: Order, origin = siteConfig.url): string {
   const lines: string[] = [];
-  lines.push("*Designer Clothes — order confirmation*");
+  lines.push("*Designer Clothing — order confirmation*");
   lines.push("");
   lines.push(`Order number: *${order.orderNumber}*`);
   lines.push(`Name: ${order.customerName}`);
@@ -76,7 +76,7 @@ export function cartWhatsAppMessage(
   lines: { title: string; handle: string; size?: string; colour?: string; quantity: number; price: number }[],
   origin = siteConfig.url,
 ): string {
-  const parts = ["*Designer Clothes — order enquiry*", ""];
+  const parts = ["*Designer Clothing — order enquiry*", ""];
   lines.forEach((line, index) => {
     parts.push(
       `${index + 1}. ${line.title}` +

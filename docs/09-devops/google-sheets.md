@@ -52,7 +52,7 @@ jaye to site chalti rehti hai (sirf owner edits ruk jaate hain) — koi order fa
 | `whatsapp` | `8005900581` | WhatsApp buttons (91 lagakar) |
 | `support_email` | `Info.likshaclothing@gmail.com` | footer, contact page, mailto |
 | `upi_id` | `dhakadgourav@fam` | checkout + order page QR |
-| `upi_name` | `Designer Clothes` | UPI app me payee name |
+| `upi_name` | `Designer Clothing` | UPI app me payee name |
 | `announcement` | `Diwali Sale — Flat 70% OFF` | top announcement bar |
 | `gstin` | `27AAAAA0000A1Z5` | invoice |
 | `free_shipping` | `true` / `false` | shipping text |
@@ -128,7 +128,7 @@ sirf deployed Apps Script se baat karti hai. Isliye:
   `Who has access: Anyone`).
 - Sheet ko kisi CA/developer ke personal account me na rakhein; agar karna pade to
   **Share → Editor** se owner ka email add karein, warna owner ke paas access nahi rahega.
-- Sheet ka naam suggestion: `Designer Clothes — Store` (tab naam `Settings`, `Orders`,
+- Sheet ka naam suggestion: `Designer Clothing — Store` (tab naam `Settings`, `Orders`,
   `Payments`, `Messages`, `Newsletter` — script khud bana deta hai).
 - Sheet ka link **kabhi website par nahi dikhta**: `/api/settings` sirf public values
   (phone, WhatsApp, email, UPI ID, announcement) deta hai; sheet URL/token sirf server env me hai.

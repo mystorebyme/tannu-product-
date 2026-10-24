@@ -104,7 +104,7 @@ export function CheckoutForm() {
       .map((line) => `• ${line.title} — size ${line.size}${line.colour ? `, ${line.colour}` : ""} × ${line.quantity}`)
       .join("\n");
     const text = [
-      "Hi Designer Clothes, I want to place this order:",
+      "Hi Designer Clothing, I want to place this order:",
       "",
       itemLines,
       "",
@@ -286,7 +286,7 @@ export function CheckoutForm() {
                       vpa: upiId,
                       name: upiName,
                       amountPaise: total,
-                      note: "Designer Clothes order",
+                      note: "Designer Clothing order",
                     })}
                     upiId={upiId}
                     amountPaise={total}
@@ -357,7 +357,7 @@ export function CheckoutForm() {
                     vpa: upiId,
                     name: upiName,
                     amountPaise: total,
-                    note: "Designer Clothes order",
+                    note: "Designer Clothing order",
                   })}
                   alt={`UPI QR to pay ${formatPrice(total)}`}
                   className="h-auto w-full"
@@ -370,7 +370,7 @@ export function CheckoutForm() {
                     vpa: upiId,
                     name: upiName,
                     amountPaise: total,
-                    note: "Designer Clothes order",
+                    note: "Designer Clothing order",
                   })}
                   upiId={upiId}
                   amountPaise={total}

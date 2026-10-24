@@ -16,9 +16,9 @@ import { SafeImage } from "@/components/safe-image";
 export const revalidate = 600;
 
 export const metadata: Metadata = {
-  title: "Designer Clothes | Designer Anarkali Suits, Lehenga Choli & Suit Sets",
+  title: "Designer Clothing | Designer Anarkali Suits, Lehenga Choli & Suit Sets",
   description:
-    "Shop designer Anarkali suits, lehanga choli and printed suit sets at Designer Clothes. Hand-finished pieces, free shipping within India and express delivery on prepaid orders.",
+    "Shop designer Anarkali suits, lehanga choli and printed suit sets at Designer Clothing. Hand-finished pieces, free shipping within India and express delivery on prepaid orders.",
   alternates: { canonical: "/" },
 };
 
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
  * Festive home banner — owner ka diya hua Diwali Sale poster (Flat 70% OFF).
  * Local asset hai (public/images), isliye GitHub Pages ke base path ke saath aata hai.
  */
-const HERO_IMAGE = assetUrl("/images/diwali-sale-70.webp");
+const HERO_IMAGE = assetUrl("/images/diwali-sale-70-2026.webp");
 const HERO_HREF = "/collections/sale";
 
 export default async function HomePage() {
@@ -99,7 +99,7 @@ export default async function HomePage() {
             <div className="relative flex h-full items-center justify-center overflow-hidden">
               <SafeImage
                 src={HERO_IMAGE}
-                alt="Designer Clothes Diwali Sale — flat 70% off ethnic wear"
+                alt="Designer Clothing Diwali Sale — flat 70% off ethnic wear"
                 loading="eager"
                 fetchPriority="high"
                 className="mx-auto h-auto w-full max-w-[560px] object-contain transition duration-700 group-hover:scale-[1.01] lg:h-full lg:max-h-[78vh] lg:max-w-none"

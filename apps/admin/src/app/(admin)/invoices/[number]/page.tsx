@@ -59,9 +59,9 @@ export default async function ManualInvoicePage({ params }: { params: Promise<{ 
         <header className="invoice-head">
           <div>
             {/* same to same logo jo PDF/HTML invoice par hai */}
-            <img src="/invoice-logo.png" alt="Designer Clothes" width={176} height={51} />
+            <img src="/invoice-logo.png" alt="Designer Clothing" width={176} height={51} />
             <p className="invoice-muted" style={{ marginTop: 8 }}>
-              Designer Clothes · Jaipur, Rajasthan
+              Designer Clothing · Jaipur, Rajasthan
               <br />
               GSTIN: 08AAACL1234K1Z5 · info.likshaclothing@gmail.com
               <br />
@@ -165,7 +165,7 @@ export default async function ManualInvoicePage({ params }: { params: Promise<{ 
         <footer className="invoice-foot">
           <p>{invoice.notes ?? "Tax inclusive invoice. Exchange within 7 days with original tags."}</p>
           <p>
-            This is a computer generated invoice · Designer Clothes · likshaclothing.com
+            This is a computer generated invoice · Designer Clothing · likshaclothing.com
           </p>
         </footer>
       </article>

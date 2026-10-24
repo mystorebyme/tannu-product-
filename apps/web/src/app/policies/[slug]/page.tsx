@@ -10,15 +10,15 @@ const POLICY_DIR = path.join(process.cwd(), "src/content/policies");
 const policyMeta: Record<string, { title: string; description: string }> = {
   "privacy-policy": {
     title: "Privacy Policy",
-    description: "How Designer Clothes collects, uses and protects your personal data under the DPDP Act.",
+    description: "How Designer Clothing collects, uses and protects your personal data under the DPDP Act.",
   },
   "terms-and-conditions": {
     title: "Terms & Conditions",
-    description: "The terms that apply when you shop with Designer Clothes.",
+    description: "The terms that apply when you shop with Designer Clothing.",
   },
   "refund-and-return-policy": {
     title: "Refund & Return Policy",
-    description: "7 day returns, exchanges and refund timelines at Designer Clothes.",
+    description: "7 day returns, exchanges and refund timelines at Designer Clothing.",
   },
   "shipping-policy": {
     title: "Shipping Policy",

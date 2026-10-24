@@ -29,7 +29,7 @@ export const DEFAULT_STORE_SETTINGS: StoreSettings = {
   announcement: "Diwali Sale — Flat 70% OFF · Final price ₹499 onwards",
   freeShipping: true,
   upiId: process.env.STORE_UPI_ID ?? "dhakadgourav@fam",
-  upiName: process.env.STORE_UPI_NAME ?? "Designer Clothes",
+  upiName: process.env.STORE_UPI_NAME ?? "Designer Clothing",
   gstin: process.env.SELLER_GSTIN ?? "",
   supportPhone: "8005900581",
   supportEmail: "Info.likshaclothing@gmail.com",

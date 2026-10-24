@@ -1,31 +1,24 @@
+import path from "node:path";
+import { readFile } from "node:fs/promises";
+
 /**
- * Invoice masthead — live store ka hi logo (same asset jo header/footer me hai).
- * Fetch fail ho to `null` laut-ta hai: tab PDF text masthead chhapta hai,
- * kyunki purana/duplicate logo chhapna galat hai.
+ * Invoice masthead — wahi logo jo header/footer me hai (`public/images/logo-mark.png`).
+ * Local file hai, isliye network par depend nahi karta; file na mile to `null`
+ * laut-ta hai aur PDF text masthead chhapta hai (purana/duplicate logo kabhi nahi).
  */
 export const INVOICE_LOGO_WIDTH = 780;
 export const INVOICE_LOGO_HEIGHT = 228;
 
-/** live store ka asli logo (same to same) */
-export const LIVE_LOGO_URL =
-  "https://www.likshaclothing.com/cdn/shop/files/Pink_Abstract_Watercolor_Creative_Logo_3_copy_2.png?v=1734092749&width=600";
+let cachedLogo: Buffer | null | undefined;
 
-let cachedLiveLogo: Buffer | null | undefined;
-
-/**
- * Invoice masthead ke liye live store ka hi logo.
- * Ek baar fetch hota hai aur process me cache rehta hai; network fail ho to
- * embedded copy par chala jaata hai — invoice kabhi bina logo ka nahi.
- */
 export async function invoiceLogoImage(): Promise<Buffer | null> {
-  if (cachedLiveLogo !== undefined) return cachedLiveLogo;
+  if (cachedLogo !== undefined) return cachedLogo;
   try {
-    const response = await fetch(LIVE_LOGO_URL, { signal: AbortSignal.timeout(6000) });
-    if (!response.ok) throw new Error(String(response.status));
-    const buffer = Buffer.from(await response.arrayBuffer());
-    cachedLiveLogo = buffer.length > 1000 ? buffer : null;
+    const file = path.join(process.cwd(), "public", "images", "logo-mark.png");
+    const buffer = await readFile(file);
+    cachedLogo = buffer.length > 1000 ? buffer : null;
   } catch {
-    cachedLiveLogo = null;
+    cachedLogo = null;
   }
-  return cachedLiveLogo;
+  return cachedLogo;
 }

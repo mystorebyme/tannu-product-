@@ -2,7 +2,7 @@
 
 Last updated: 24 October 2026
 
-Designer Clothes ("we", "us") sells designer ethnic wear through likshaclothing.com. This policy explains what personal data we collect, why we collect it, and the choices you have. It is written to align with the Digital Personal Data Protection Act, 2023 (DPDP Act) and the Information Technology (Reasonable Security Practices) Rules, 2011.
+Designer Clothing ("we", "us") sells designer ethnic wear through likshaclothing.com. This policy explains what personal data we collect, why we collect it, and the choices you have. It is written to align with the Digital Personal Data Protection Act, 2023 (DPDP Act) and the Information Technology (Reasonable Security Practices) Rules, 2011.
 
 ## 1. Data we collect
 
@@ -53,5 +53,5 @@ We use essential cookies for the cart and checkout, and optional analytics cooki
 
 ## 10. Contact
 
-Designer Clothes, Jaipur, Rajasthan, India.
+Designer Clothing, Jaipur, Rajasthan, India.
 Email: Info.likshaclothing@gmail.com · WhatsApp: 8005900581

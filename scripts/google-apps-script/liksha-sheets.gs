@@ -54,7 +54,7 @@ var DEFAULT_SETTINGS = [
   ['whatsapp', '8005900581'],
   ['support_email', 'Info.likshaclothing@gmail.com'],
   ['upi_id', 'dhakadgourav@fam'],
-  ['upi_name', 'Designer Clothes'],
+  ['upi_name', 'Designer Clothing'],
   ['announcement', 'Diwali Sale — Flat 70% OFF · Final price ₹499 onwards'],
   ['gstin', ''],
   ['free_shipping', 'true'],

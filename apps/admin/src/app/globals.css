@@ -53,7 +53,8 @@ h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; }
   flex-direction: column;
   gap: 6px;
 }
-.sidebar .brand { font-family: Georgia, serif; letter-spacing: 6px; font-size: 18px; color: #f7e5cd; }
+.sidebar .brand { font-family: Georgia, serif; letter-spacing: 5px; font-size: 16px; color: #f7e5cd; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.sidebar .brand .brand-mark { width: 32px; height: 32px; border-radius: 999px; background: #000; object-fit: contain; padding: 2px; box-shadow: 0 0 0 1px rgba(212, 160, 23, 0.6); }
 .sidebar .brand small { display: block; letter-spacing: 4px; font-size: 8px; margin-top: 4px; color: #c9a86a; }
 .sidebar nav { display: flex; flex-direction: column; gap: 2px; margin-top: 18px; }
 .sidebar nav a {

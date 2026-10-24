@@ -61,7 +61,7 @@ export function ContactForm() {
         </p>
         <div className="mt-3 flex flex-wrap justify-center gap-2">
           <a
-            href={`https://wa.me/91${SUPPORT_WHATSAPP}?text=${encodeURIComponent("Hi Designer Clothes, I sent a message from the website.")}`}
+            href={`https://wa.me/91${SUPPORT_WHATSAPP}?text=${encodeURIComponent("Hi Designer Clothing, I sent a message from the website.")}`}
             target="_blank"
             rel="noreferrer"
             className="bg-[#25d366] px-4 py-2 text-[11px] font-semibold tracking-[.12em] text-white uppercase"

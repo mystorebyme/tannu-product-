@@ -7,7 +7,7 @@ type Product = {
   handle: string;          // "luxury-mustard-embroidered-georgette-anarkali-suit"
   title: string;           // exact store title
   description: string;     // HTML (h3 / p / ul-li)
-  vendor: string;          // "Designer Clothes"
+  vendor: string;          // "Designer Clothing"
   productType: string;     // "Anarkali suit", "Lehenga", ...
   price: number;           // paise, 349900 = Rs. 3,499
   compareAtPrice: number | null;  // paise, 799900

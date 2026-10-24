@@ -2,11 +2,11 @@
 
 Last updated: 24 October 2026
 
-These terms govern your use of likshaclothing.com and any order you place with Designer Clothes. By placing an order you accept these terms.
+These terms govern your use of likshaclothing.com and any order you place with Designer Clothing. By placing an order you accept these terms.
 
 ## 1. Who we are
 
-Designer Clothes is a designer ethnic wear label operating from Jaipur, Rajasthan. You can reach us on WhatsApp 8005900581 or at Info.likshaclothing@gmail.com.
+Designer Clothing is a designer ethnic wear label operating from Jaipur, Rajasthan. You can reach us on WhatsApp 8005900581 or at Info.likshaclothing@gmail.com.
 
 ## 2. Products and descriptions
 
@@ -40,7 +40,7 @@ Coupons cannot be combined, are valid only within their stated window and cannot
 
 ## 9. Intellectual property
 
-All photographs, designs and text on this site belong to Designer Clothes. Do not copy them for commercial use without written permission.
+All photographs, designs and text on this site belong to Designer Clothing. Do not copy them for commercial use without written permission.
 
 ## 10. Liability
 

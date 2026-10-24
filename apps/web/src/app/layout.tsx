@@ -13,21 +13,21 @@ import { assetUrl } from "@/lib/format";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
-  applicationName: "Designer Clothes",
-  // browser tab / home-screen icon — live store ka hi logo (same to same)
+  applicationName: "Designer Clothing",
+  // browser tab / home-screen icon — owner ka brand mark (local asset)
   icons: {
     icon: [{ url: logoMark, sizes: "192x192", type: "image/png" }],
     shortcut: [{ url: logoMark }],
     apple: [{ url: logoMark, sizes: "180x180" }],
   },
-  appleWebApp: { capable: true, title: "Designer Clothes", statusBarStyle: "default" },
+  appleWebApp: { capable: true, title: "Designer Clothing", statusBarStyle: "default" },
   manifest: assetUrl("/manifest.webmanifest"),
   title: {
-    default: "Designer Clothes | Designer Anarkali Suits, Lehenga Choli & Suit Sets",
-    template: "%s | Designer Clothes",
+    default: "Designer Clothing | Designer Anarkali Suits, Lehenga Choli & Suit Sets",
+    template: "%s | Designer Clothing",
   },
   description:
-    "Shop premium designer Anarkali suits, lehenga choli and printed suit sets at Designer Clothes. Free shipping across India, secure prepaid checkout and 7 days easy replacement.",
+    "Shop premium designer Anarkali suits, lehenga choli and printed suit sets at Designer Clothing. Free shipping across India, secure prepaid checkout and 7 days easy replacement.",
   keywords: [
     "designer anarkali suits",
     "lehenga choli online",
@@ -36,13 +36,13 @@ export const metadata: Metadata = {
     "liksha clothing",
   ],
   openGraph: {
-    title: "Designer Clothes | Designer Anarkali Suits",
+    title: "Designer Clothing | Designer Anarkali Suits",
     description:
       "Premium designer Anarkali suits, lehengas and printed suit sets crafted for every celebration.",
     type: "website",
     url: siteConfig.url,
-    siteName: "Designer Clothes",
-    images: [{ url: siteConfig.ogImage, width: 1200, height: 630, alt: "Designer Clothes" }],
+    siteName: "Designer Clothing",
+    images: [{ url: siteConfig.ogImage, width: 1200, height: 630, alt: "Designer Clothing" }],
   },
   twitter: { card: "summary_large_image" },
   alternates: { canonical: "/" },

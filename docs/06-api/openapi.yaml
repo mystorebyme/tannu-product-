@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Designer Clothes API
+  title: Designer Clothing API
   version: 1.0.0
   description: Products, orders, payments for likshaclothing.com
 servers:

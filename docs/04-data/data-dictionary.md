@@ -20,7 +20,7 @@
 
 | Key | Default | Effect |
 | --- | --- | --- |
-| `storeName` | Designer Clothes | header/footer text |
+| `storeName` | Designer Clothing | header/footer text |
 | `codLimit` | 350000 | checkout gating |
 | `codFee` | 5000 | order total |
 | `freeShipping` | true | shipping line |

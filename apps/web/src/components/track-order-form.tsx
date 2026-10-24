@@ -79,7 +79,7 @@ export function TrackOrderForm() {
               Open live tracking
             </a>
             <a
-              href={`https://wa.me/91${wa}?text=${encodeURIComponent(`Hi Designer Clothes, please share the status of order ${resolved}.`)}`}
+              href={`https://wa.me/91${wa}?text=${encodeURIComponent(`Hi Designer Clothing, please share the status of order ${resolved}.`)}`}
               target="_blank"
               rel="noreferrer"
               className="inline-flex h-10 items-center bg-[#25D366] px-4 text-[10.5px] font-semibold tracking-[.12em] text-white uppercase"

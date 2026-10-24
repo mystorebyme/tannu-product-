@@ -29,7 +29,7 @@ export async function createPaymentLink(order: Order): Promise<Initiation> {
       amount: order.total,
       currency: "INR",
       reference_id: order.orderNumber,
-      description: `Designer Clothes order ${order.orderNumber}`,
+      description: `Designer Clothing order ${order.orderNumber}`,
       customer: { name: order.customerName, email: order.email, contact: `+91${order.phone}` },
       notify: { sms: true, email: true },
     }),

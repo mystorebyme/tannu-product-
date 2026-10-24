@@ -59,7 +59,7 @@ test("UPI id validation", () => {
 test("UPI URI carries amount, payee and order note", () => {
   const uri = buildUpiUri({
     vpa: "dhakadgourav@fam",
-    name: "Designer Clothes",
+    name: "Designer Clothing",
     amountPaise: 49_900,
     note: "Order LK-ABC123",
   });

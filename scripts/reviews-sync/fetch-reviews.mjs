@@ -57,6 +57,27 @@ function asciiHandle(handle) {
     .toLowerCase();
 }
 
+/** title/marketing naam → catalogue handle (jo products live snapshot me nahi hain unke liye) */
+function titleMap() {
+  const byTitle = new Map();
+  for (const file of ["database/seeds/catalog.json", "apps/web/src/data/catalog.json"]) {
+    const full = path.join(ROOT, file);
+    if (!fs.existsSync(full)) continue;
+    try {
+      const catalog = JSON.parse(fs.readFileSync(full, "utf8"));
+      for (const product of catalog.products ?? []) {
+        if (!product.title || !product.handle) continue;
+        byTitle.set(String(product.title).trim().toLowerCase(), product.handle);
+        byTitle.set(asciiHandle(product.title), product.handle);
+      }
+    } catch {
+      /* ignore */
+    }
+    if (byTitle.size) break;
+  }
+  return byTitle;
+}
+
 /** product_id → hamare catalogue ka handle (catalogue `sourceHandle` se slug banata hai) */
 function handleMap() {
   const catalogueHandles = new Map();
@@ -136,11 +157,22 @@ async function main() {
   note("page", `${html.length} bytes, shop ${shopId}`);
 
   const handles = handleMap();
-  note("catalog", `${handles.size} product ids`);
+  const titles = titleMap();
+  note("catalog", `${handles.size} product ids, ${titles.size} titles`);
+
+  /** entry → catalogue handle (id map pehle, phir title, phir ascii title slug) */
+  const resolveHandle = (entry) => {
+    const productId = String(entry.product_id ?? entry.productId ?? entry.id ?? "");
+    const direct = handles.get(productId);
+    if (direct) return direct;
+    const title = String(entry.title ?? "").trim();
+    if (!title) return null;
+    return titles.get(title.toLowerCase()) ?? titles.get(asciiHandle(title)) ?? null;
+  };
 
   // 1) review-wale products
   const productEntries = [];
-  for (let page = 1; page <= 6; page += 1) {
+  for (let page = 1; page <= 15; page += 1) {
     let payload;
     try {
       payload = await fetchJson(`${proxy}/get_product_list?shop_id=${shopId}&page=${page}&limit=50`);
@@ -225,10 +257,15 @@ async function main() {
   const aggregatesPreview = {};
   let total = 0;
   let reviewedProducts = 0;
+  let skipped = 0;
+  let photoReviews = 0;
   for (const entry of productEntries) {
     const productId = String(entry.product_id ?? entry.productId ?? entry.id ?? "");
-    const handle = handles.get(productId);
-    if (!productId || !handle) continue;
+    const handle = resolveHandle(entry);
+    if (!productId || !handle) {
+      skipped += 1;
+      continue;
+    }
 
     let reviews = [];
     let aggregate = null;
@@ -275,7 +312,9 @@ async function main() {
     };
     reviewedProducts += 1;
     total += reviews.length;
+    photoReviews += reviews.filter((review) => review.photos?.length).length;
   }
+  note("photo-reviews", photoReviews);
 
   const aggregates = { ...aggregatesPreview };
   fs.writeFileSync(
@@ -311,6 +350,7 @@ async function main() {
   };
   fs.writeFileSync(OUT, `${JSON.stringify(file, null, 1)}\n`);
   console.log(`saved ${total} reviews across ${reviewedProducts} products`);
+  console.log(`photo reviews: ${photoReviews} · products without a catalogue match: ${skipped}`);
 }
 
 try {

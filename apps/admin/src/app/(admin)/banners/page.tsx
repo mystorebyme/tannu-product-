@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
  * Hero image abhi catalogue/brand asset hai, isliye uski current state yahan dikhti hai.
  */
 /** Storefront ka current Diwali/Dewali poster (owner-supplied creative) */
-const HERO_IMAGE = "/images/diwali-sale-70.webp";
+const HERO_IMAGE = "/images/diwali-sale-70-2026.webp";
 const HERO_HREF = "/collections/sale";
 
 export default async function BannersPage() {

@@ -1,6 +1,6 @@
-# Designer Clothes — storefront, admin & API
+# Designer Clothing — storefront, admin & API
 
-Production-grade ecommerce monorepo for **Designer Clothes** (designer anarkali suits, lehenga choli and
+Production-grade ecommerce monorepo for **Designer Clothing** (designer anarkali suits, lehenga choli and
 printed suit sets). The catalogue mirrors [likshaclothing.com](https://www.likshaclothing.com) exactly:
 same titles, same prices (in paise), same MRP, same sizes, same collections.
 
@@ -291,4 +291,4 @@ Human walkthroughs: `agent-guides/`.
 
 ---
 
-© Designer Clothes. Proprietary — not for redistribution. Built as a production system, not a template.
+© Designer Clothing. Proprietary — not for redistribution. Built as a production system, not a template.
