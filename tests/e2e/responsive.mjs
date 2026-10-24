@@ -162,17 +162,27 @@ const paymentSource = await fs.readFile(
   path.resolve(import.meta.dirname, "../../apps/web/src/components/upi-payment.tsx"),
   "utf8",
 );
+const upiLib = await fs.readFile(
+  path.resolve(import.meta.dirname, "../../apps/web/src/lib/upi.ts"),
+  "utf8",
+);
 check("checkout has no UPI app chips", !/UpiApps|upi-apps/.test(checkoutSource));
 check(
   "checkout names no UPI app brand",
   !/GPay|PhonePe|Paytm|BHIM|Amazon Pay/.test(checkoutSource),
 );
 check("checkout shows a short prepaid note", checkoutSource.includes('data-testid="prepaid-note"'));
+/**
+ * Payment page (step 3) par **saare phone UPI apps** dikhne chahiye (owner
+ * request: "phone ke saare app aa jayein") — GPay/PhonePe/Paytm/any UPI.
+ * Checkout par ab bhi kuch nahi.
+ */
+check("payment page shows every UPI app chip (GPay/PhonePe/Paytm/any)", paymentSource.includes('data-testid="upi-apps"'));
 check(
-  "order page payment has no UPI app chips either",
-  !/UpiApps|upi-apps/.test(paymentSource) && !/GPay|PhonePe|Paytm|BHIM|Amazon Pay/.test(paymentSource),
+  "payment page links each UPI app but not on checkout",
+  /tez:\/\/upi\/pay/.test(upiLib) && !/GPay|PhonePe|Paytm/.test(checkoutSource),
 );
-check("order page keeps the QR + UPI ID", paymentSource.includes("UpiQr") && paymentSource.includes("upi-id"));
+check("payment page keeps the QR + UPI ID", paymentSource.includes("UpiQr") && paymentSource.includes("upi-id"));
 check(
   "order page auto-opens the UPI app after placing the order",
   /get\("pay"\) !== "1"/.test(paymentSource) && /window\.location\.href = upiUri/.test(paymentSource),

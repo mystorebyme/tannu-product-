@@ -184,3 +184,21 @@ Owner ka full-site audit prompt. Sabse pehle code/data inspect kiya, phir fix + 
 - **Tests:** naya `tests/e2e/round16.mjs` (37 checks) + `tests/e2e/links.mjs` (45 pages
   crawl) CI me; smoke 86/0, responsive 40/0, breakpoints 48/0, unit 89/0.
 - Docs: `docs/08-testing/round16-audit.md` (issues, decisions, verification matrix).
+
+## Round 21 — checkout se UPI hataya, payment step 3 par apps, funnel DB + Sheet (2026-10-25)
+
+Owner ne dobara pakda: "address wale par place order karte hi UPI/QR code aa jata hai — wo sirf
+payment ke 3rd step par aana chahiye." Wo purana fallback block tha (order server par save na
+hone par), aur Pages preview ka API base purana dead Render URL tha.
+
+- **Checkout:** UPI QR/UPI ID/"Send order on WhatsApp" block **poora hata diya** (copy bhi), order
+  place hote hi `…/pay?pay=1` (step 3). Fail par sirf Try again + WhatsApp help (UPI ke bina);
+  static preview par live-store checkout link. `pages.yml` ka API base ab Vercel production.
+- **Payment page:** Google Pay / PhonePe / Paytm / Any UPI app deep links (amount + order note
+  bhara hua), QR, Copy UPI ID, Check status; status auto-detect 5–6s polling + focus/visibility.
+- **Funnel:** `checkout_events` table (migration 0007) + `POST /api/checkout/events`,
+  `GET /api/admin/checkout-events`; events — started / review / order.placed / order.failed.
+  Google Sheet me naya **Checkout** tab; admin Orders page par funnel card + last failures.
+- **Tests:** unit 95/0 (checkout par UPI nahi, `?pay=1`, UPI app links), payments E2E 34/0
+  (apps, tracking case-insensitive, order not-found, funnel API), responsive 43/0.
+- Docs: `docs/08-testing/round21-audit.md`.

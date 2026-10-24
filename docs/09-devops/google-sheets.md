@@ -10,6 +10,7 @@ Google Sheet se hote hain:
 | **Payments** | UTR submit + payment verified rows | payment reference submit aur verify par append |
 | **Messages** | contact form ke messages | message save hone par append |
 | **Newsletter** | email subscribers | subscribe hone par append |
+| **Checkout** | checkout funnel — started / review / order placed / order failed (+ reason, phone) | customer checkout ke har stage par append |
 
 Sheet **append-only log** hai — purani row kabhi overwrite nahi hoti, isliye owner ko
 poora timeline milta hai (kab order aaya, kab payment aaya, kab ship hua).
@@ -27,7 +28,7 @@ ko **Editor** access de diya gaya hai (notification mail bhi gaya hai):
 | --- | --- |
 | Sheet ka naam | `Designer Clothing — Store (Orders · Payments · Settings)` |
 | Link | https://docs.google.com/spreadsheets/d/1k8fsea04WpbrGjiyXuDrrS2Eewt9W7wx9X2lUQc5qMo/edit |
-| Tabs | `Settings` (10 keys bhare hue), `Orders` (25 columns), `Payments` (25 columns), `Messages` (7), `Newsletter` (2) |
+| Tabs | `Settings` (10 keys bhare hue), `Orders` (25 columns), `Payments` (25 columns), `Messages` (7), `Newsletter` (2), `Checkout` (8) |
 | Access | owner ka email = Editor · "Anyone with link" = **off** (customer data protect) |
 
 `Settings` tab me ye values pehle se hain: `support_phone` = 8005900581,
@@ -55,7 +56,7 @@ sirf server env + admin panel ke `/sheet` screen me.
 4. Sabse upar `var TOKEN = 'CHANGE-ME-liksha-token';` me apna lamba random token daalo
    (jaise `liksha-9f3k2m-2026`). Isi token ko website env me bhi daalna hai.
 5. **Save → Run → `setup`** — permission maange to *Review permissions → Allow*.
-   Isse `Settings`, `Orders`, `Payments`, `Messages`, `Newsletter` tabs + headers ban jaate hain.
+   Isse `Settings`, `Orders`, `Payments`, `Messages`, `Newsletter`, `Checkout` tabs + headers ban jaate hain.
 6. **Deploy → New deployment → Web app**
    - Description: `Liksha site`
    - Execute as: **Me**

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { postJson } from "@/lib/http-json";
 import { API_AVAILABLE, apiUrl } from "@/lib/api-base";
 import { formatPrice } from "@/lib/format";
-import { buildUpiUri } from "@/lib/upi";
+import { buildUpiUri, upiAppLinks } from "@/lib/upi";
 import { UpiQr } from "@/components/upi-qr";
 
 /**
@@ -49,6 +49,8 @@ export function UpiPayment({
   const [submitted, setSubmitted] = useState(false);
   const [failed, setFailed] = useState(false);
   const [autoChecked, setAutoChecked] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [statusNote, setStatusNote] = useState<string | null>(null);
   const router = useRouter();
   const autoRan = useRef(false);
   const appOpened = useRef(false);
@@ -100,6 +102,43 @@ export function UpiPayment({
       }),
     [upiId, upiName, amount, orderNumber, callbackUrl],
   );
+
+  /** phone ke saare UPI apps — amount + order note pehle se bhara hua */
+  const appLinks = useMemo(() => upiAppLinks(upiUri), [upiUri]);
+
+  async function copyUpiId() {
+    try {
+      await navigator.clipboard.writeText(upiId);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
+  }
+
+  /** status dobara check karo (UPI app se wapas aane par turant) */
+  async function recheckStatus() {
+    setStatusNote("Checking payment status…");
+    try {
+      const response = await fetch(apiUrl(`/api/orders/${encodeURIComponent(orderNumber)}/payment`), {
+        cache: "no-store",
+      });
+      const payload = (await response.json()) as { paymentStatus?: string };
+      const status = payload?.paymentStatus ?? "pending";
+      setStatusNote(
+        status === "paid"
+          ? "Payment confirmed — order confirm ho gaya."
+          : status === "processing"
+            ? "Reference mil gaya — team verify kar rahi hai."
+            : status === "failed"
+              ? "Payment failed dikh rahi hai — dobara try kariye."
+              : "Abhi tak payment pending hai.",
+      );
+      router.refresh();
+    } catch {
+      setStatusNote("Status check nahi ho paaya — thodi der baad try kariye.");
+    }
+  }
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -220,6 +259,52 @@ export function UpiPayment({
             <p className="mt-1 break-words text-[11.5px] text-[#6b6259]">
               {upiName} · Amount <strong>{formatPrice(amount)}</strong> (exact — no extra charges)
             </p>
+
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={copyUpiId}
+                className="inline-flex h-8 items-center border border-[#e0cf9f] bg-white px-2.5 text-[10px] font-semibold tracking-[.08em] text-[#6b5214] uppercase"
+                data-testid="upi-copy"
+              >
+                {copied ? "UPI ID copied" : "Copy UPI ID"}
+              </button>
+              <button
+                type="button"
+                onClick={recheckStatus}
+                className="inline-flex h-8 items-center border border-[#e0cf9f] bg-white px-2.5 text-[10px] font-semibold tracking-[.08em] text-[#6b5214] uppercase"
+                data-testid="upi-recheck"
+              >
+                Check status
+              </button>
+            </div>
+
+            {/* phone ke saare UPI apps — ek tap me app khulti hai, amount + note bhara hua */}
+            <div className="mt-3" data-testid="upi-apps">
+              <p className="text-[10.5px] tracking-[.12em] text-[#8a6a1f] uppercase">Pay with any UPI app</p>
+              <div className="mt-1.5 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {appLinks.map((app) => (
+                  <a
+                    key={app.id}
+                    href={app.href}
+                    data-testid={`upi-app-${app.id}`}
+                    className="inline-flex h-9 items-center justify-center border border-[#e0cf9f] bg-white px-2 text-center text-[10px] font-semibold tracking-[.04em] text-[#5c4a16] uppercase transition hover:border-[#8a6a1f] hover:bg-[#fffaf0]"
+                  >
+                    {app.label}
+                  </a>
+                ))}
+              </div>
+              <p className="mt-1.5 text-[10.5px] leading-relaxed text-[#8a7a5f]">
+                Mobile par tap kariye — app khud khulegi, amount aur order number already bhara hoga.
+                Laptop par neeche QR scan kariye.
+              </p>
+            </div>
+
+            {statusNote ? (
+              <p className="mt-2 border border-[#e6d3a8] bg-[#fbf3df] px-2.5 py-2 text-[11px] leading-relaxed text-[#7a5c14]">
+                {statusNote}
+              </p>
+            ) : null}
 
             {autoChecked && paymentStatus !== "paid" ? (
               <p className="mt-2 border border-[#e6d3a8] bg-[#fbf3df] px-2.5 py-2 text-[11px] leading-relaxed text-[#7a5c14]">

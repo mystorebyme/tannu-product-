@@ -7,6 +7,7 @@
  *                Website har 15 second me padh leti hai (redeploy ki zaroorat nahi).
  *   Orders     → har order + status change ki nayi row (append-only timeline).
  *   Payments   → payment reference submit / verified rows.
+ *   Checkout   → checkout funnel (started / review / order placed / failed).
  *   Messages   → contact form ("Send us a message") ke messages.
  *   Newsletter → email subscribers.
  *
@@ -45,6 +46,8 @@ var HEADERS = {
     'Tracking courier', 'AWB', 'Tracking URL', 'Notes',
   ],
   Messages: ['Timestamp', 'Name', 'Email', 'Phone', 'Subject', 'Message', 'Status'],
+  // checkout funnel — kaun checkout tak pahuncha / order kiya / fail hua
+  Checkout: ['Timestamp', 'Event', 'Step', 'Order number', 'Items', 'Subtotal', 'Reason', 'Phone'],
   Newsletter: ['Timestamp', 'Email'],
 };
 

@@ -70,7 +70,8 @@ export function PaymentStatusWatcher({
       } catch {
         /* offline — agle poll par try */
       }
-      if (!cancelled) timer = window.setTimeout(poll, 8_000);
+      // pending → 6s, processing (UTR mil gaya) → 5s: customer ko jaldi pata chale
+      if (!cancelled) timer = window.setTimeout(poll, statusRef.current === "processing" ? 5_000 : 6_000);
     };
 
     timer = window.setTimeout(poll, 4_000);
@@ -78,10 +79,13 @@ export function PaymentStatusWatcher({
       if (document.visibilityState === "visible") void poll();
     };
     document.addEventListener("visibilitychange", onVisible);
+    // UPI app se desktop par wapas aane par bhi turant check
+    window.addEventListener("focus", onVisible);
     return () => {
       cancelled = true;
       if (timer) window.clearTimeout(timer);
       document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onVisible);
     };
   }, [orderNumber, router, status]);
 

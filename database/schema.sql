@@ -465,3 +465,25 @@ left join order_items oi on oi.product_id = p.id
 left join orders o on o.id = oi.order_id and o.payment_status = 'paid'
 group by p.handle, p.title
 order by units_sold desc;
+
+-- ───────────────────── checkout funnel (R21) ─────────────────────
+-- Owner ko dikhna chahiye: kaun checkout tak pahuncha, kaun review tak aaya,
+-- kaun order kar paya aur kahan fail hua. Har row Google Sheet "Checkout" tab
+-- me bhi jaati hai (scripts/google-apps-script/liksha-sheets.gs).
+create table checkout_events (
+  id            uuid primary key default gen_random_uuid(),
+  created_at    timestamptz not null default now(),
+  event         text not null,                       -- checkout.started | checkout.review | order.placed | order.failed
+  step          text,
+  order_number  text,
+  items         jsonb not null default '[]'::jsonb,
+  items_count   int not null default 0,
+  subtotal      int not null default 0,              -- paise
+  reason        text,
+  session_id    text,
+  phone         text,
+  user_agent    text
+);
+create index on checkout_events (created_at desc);
+create index on checkout_events (event, created_at desc);
+create index on checkout_events (order_number);

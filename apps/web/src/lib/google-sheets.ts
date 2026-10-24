@@ -24,7 +24,7 @@ export type { SheetSettings };
  * (koi feature band nahi hota) — sirf owner edits sheet se nahi honge.
  */
 
-export type SheetName = "Orders" | "Payments" | "Messages" | "Newsletter" | "Audit";
+export type SheetName = "Orders" | "Payments" | "Messages" | "Newsletter" | "Checkout" | "Audit";
 
 export type SheetAppend = {
   sheet: SheetName;
@@ -131,7 +131,7 @@ export type SheetRecentRow = Record<string, string | number>;
 
 /** Sheet ki last N rows (admin panel me dikhane ke liye). */
 export async function readSheetRecent(
-  sheet: "Orders" | "Payments" | "Messages" | "Newsletter",
+  sheet: "Orders" | "Payments" | "Messages" | "Newsletter" | "Checkout",
   limit = 20,
 ): Promise<SheetRecentRow[] | null> {
   const config = googleSheetsConfig();

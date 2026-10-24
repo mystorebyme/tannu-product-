@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getOrders } from "@/lib/data";
+import { getCheckoutEvents, getOrders } from "@/lib/data";
 import { dateTime, inr } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -13,7 +13,7 @@ export default async function OrdersPage({
 }) {
   const { status = "all", q = "" } = await searchParams;
   const term = q.trim().toLowerCase();
-  const allOrders = await getOrders();
+  const [allOrders, checkout] = await Promise.all([getOrders(), getCheckoutEvents(50)]);
   const orders = allOrders
     .filter((order) => (status === "all" ? true : order.status === status))
     .filter((order) =>
@@ -41,6 +41,46 @@ export default async function OrdersPage({
             </button>
           </form>
         </div>
+      </div>
+
+      <div className="panel" style={{ marginBottom: 12 }} data-testid="checkout-funnel">
+        <div className="panel-head">
+          <h2 style={{ margin: 0, fontSize: 14 }}>Checkout funnel (last 50 events)</h2>
+          <span className="muted">checkout tak pahunche → review → order → fail</span>
+        </div>
+        <div className="actions" style={{ padding: 12, gap: 18 }}>
+          {[
+            ["Checkout started", checkout.funnel["checkout.started"] ?? 0],
+            ["Review tak", checkout.funnel["checkout.review"] ?? 0],
+            ["Order placed", checkout.funnel["order.placed"] ?? 0],
+            ["Order failed", checkout.funnel["order.failed"] ?? 0],
+          ].map(([label, value]) => (
+            <div key={String(label)}>
+              <div className="muted" style={{ fontSize: 11 }}>
+                {label}
+              </div>
+              <strong style={{ fontSize: 18 }}>{value}</strong>
+            </div>
+          ))}
+        </div>
+        {checkout.events.filter((event) => event.event === "order.failed").length > 0 ? (
+          <div style={{ padding: "0 12px 12px" }}>
+            <div className="muted" style={{ fontSize: 11, marginBottom: 4 }}>
+              Recent failures
+            </div>
+            <ul style={{ margin: 0, paddingLeft: 16, fontSize: 12 }}>
+              {checkout.events
+                .filter((event) => event.event === "order.failed")
+                .slice(0, 5)
+                .map((event) => (
+                  <li key={event.id}>
+                    {dateTime(event.createdAt)} — {event.reason ?? "unknown error"}
+                    {event.phone ? ` · ${event.phone}` : ""}
+                  </li>
+                ))}
+            </ul>
+          </div>
+        ) : null}
       </div>
 
       <div className="actions" style={{ marginBottom: 12 }}>

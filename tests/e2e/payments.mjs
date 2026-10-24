@@ -93,6 +93,53 @@ check("payment page renders separately", payPage.status === 200, String(payPage.
 check("payment page shows the order number", payHtml.includes(number));
 check("payment page shows the live payment state", payHtml.includes('data-testid="payment-state"'));
 check("payment page keeps the UPI block here (not checkout)", payHtml.includes('data-testid="upi-payment"'));
+check("payment page shows UPI app buttons (GPay/PhonePe/Paytm/any)", payHtml.includes('data-testid="upi-apps"'));
+// app deep links client bundle me hote hain; page par 'any UPI app' wala fallback href upi:// hi hai
+check("payment page has a UPI deep link (mobile app chooser)", /upi:\/\/pay/.test(payHtml));
+
+// ── 3b. tracking — order number se page khulta hai (lowercase bhi) ───────────
+const lower = await fetch(`${BASE}/orders/${number.toLowerCase()}`);
+const lowerHtml = await lower.text();
+check("tracking page opens for the order number (case-insensitive)", lower.status === 200 && lowerHtml.includes(number));
+const missingOrder = await fetch(`${BASE}/orders/LK-NOTFOUND`);
+const missingOrderHtml = await missingOrder.text();
+check(
+  "unknown order number shows a friendly not-found page",
+  missingOrder.status === 404 && /Order nahi mila/i.test(missingOrderHtml),
+  String(missingOrder.status),
+);
+
+// ── 3c. checkout funnel → DB + sheet ────────────────────────────────────────
+const eventPost = await fetch(`${BASE}/api/checkout/events`, {
+  method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({
+    event: "checkout.started",
+    step: "details",
+    items: [{ handle: candidate.handle, size, quantity: 2 }],
+    subtotal: 99800,
+    phone,
+  }),
+});
+check("checkout event accepted", eventPost.status === 202, String(eventPost.status));
+const rejected = await fetch(`${BASE}/api/checkout/events`, {
+  method: "POST",
+  headers: { "content-type": "application/json" },
+  body: JSON.stringify({ event: "hack.attempt" }),
+});
+check("unknown checkout event rejected", rejected.status === 400, String(rejected.status));
+if (CAN_ADMIN) {
+  const funnelResponse = await fetch(`${BASE}/api/admin/checkout-events?limit=50`, {
+    headers: { authorization: `Bearer ${TOKEN}`, "cache-control": "no-store" },
+  });
+  const funnel = { status: funnelResponse.status, body: await funnelResponse.json() };
+  const events = funnel.body?.events ?? [];
+  check(
+    "checkout funnel is stored (admin API)",
+    funnel.status === 200 && events.some((event) => event.event === "checkout.started"),
+    JSON.stringify(funnel.body).slice(0, 120),
+  );
+}
 
 // ── 4. status API (polling) ──────────────────────────────────────────────────
 const status1 = await getJson(`/api/orders/${number}/payment`);

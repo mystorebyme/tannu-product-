@@ -427,6 +427,39 @@ export type ContactMessage = {
   repliedBy?: string | null;
 };
 
+/** Checkout funnel — owner ko dikhta hai kaun checkout tak pahuncha / fail hua */
+export type CheckoutEventRow = {
+  id: string;
+  createdAt: string;
+  event: string;
+  step?: string | null;
+  orderNumber?: string | null;
+  itemsCount: number;
+  subtotal: number;
+  reason?: string | null;
+  phone?: string | null;
+};
+
+export type CheckoutFunnel = Record<string, number>;
+
+export async function getCheckoutEvents(
+  limit = 50,
+): Promise<{ events: CheckoutEventRow[]; funnel: CheckoutFunnel }> {
+  const empty: CheckoutFunnel = {
+    "checkout.started": 0,
+    "checkout.review": 0,
+    "order.placed": 0,
+    "order.failed": 0,
+  };
+  if (remoteMode()) {
+    const payload = await storeRequest<{ events: CheckoutEventRow[]; funnel: CheckoutFunnel }>(
+      `/api/admin/checkout-events?limit=${limit}`,
+    );
+    if (payload?.events) return { events: payload.events, funnel: payload.funnel ?? empty };
+  }
+  return { events: [], funnel: empty };
+}
+
 /**
  * Website ke contact-form messages.
  * Remote mode me storefront API (Postgres) se — pehle admin apni local file

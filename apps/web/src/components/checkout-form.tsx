@@ -2,14 +2,12 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/components/cart-provider";
 import { formatPrice, imageUrl } from "@/lib/format";
 import { SafeImage } from "@/components/safe-image";
 import { useStoreSettings } from "@/components/store-settings-provider";
-import { API_AVAILABLE, apiUrl } from "@/lib/api-base";
-import { buildUpiUri } from "@/lib/upi";
-import { UpiQr } from "@/components/upi-qr";
+import { API_AVAILABLE, LIVE_STORE_URL, apiUrl } from "@/lib/api-base";
 import { postJson, readJson } from "@/lib/http-json";
 import { checkPincodeOffline } from "@/lib/pincode-offline";
 
@@ -24,8 +22,14 @@ export function CheckoutForm() {
   const { lines, subtotal, count, clear, isOpen, closeCart, removeLine } = useCart();
   const router = useRouter();
   // festive sale me final price already 499–699 hai — koi extra coupon nahi
-  const { upiId, upiName, whatsapp } = useStoreSettings();
-  const [whatsappHref, setWhatsappHref] = useState<string | null>(null);
+  const { whatsapp } = useStoreSettings();
+  /**
+   * Sirf tab set hota hai jab order **server par save na ho** (static preview ya
+   * network/API fail). Checkout par UPI ID / QR / "pay here" **kabhi nahi** —
+   * payment sirf step 3 (payment page) par. Ye block sirf help ke liye hai.
+   */
+  const [fallbackHref, setFallbackHref] = useState<string | null>(null);
+  const [fallbackReason, setFallbackReason] = useState<string | null>(null);
   // sirf prepaid — COD option hata diya gaya hai
   const payment = "prepaid" as const;
   const [submitting, setSubmitting] = useState(false);
@@ -95,6 +99,15 @@ export function CheckoutForm() {
     };
   }, [form.pincode]);
 
+  /** customer checkout tak pahuncha — ek hi baar log hota hai */
+  const startedRef = useRef(false);
+  useEffect(() => {
+    if (startedRef.current || lines.length === 0) return;
+    startedRef.current = true;
+    trackCheckout("checkout.started");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lines.length]);
+
   const discount = 0;
   const total = Math.max(0, subtotal - discount);
 
@@ -124,11 +137,38 @@ export function CheckoutForm() {
     }
     setError(null);
     setStep("review");
+    trackCheckout("checkout.review");
     if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function update(field: keyof typeof form, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
+  }
+
+  /**
+   * Checkout funnel — har stage DB me (`checkout_events`) aur owner ki Google
+   * Sheet me (Checkout tab) jaata hai: checkout tak pahuncha, review tak aaya,
+   * order place hua, ya fail hua. Isse owner ko pata rahe kahan log ruk rahe hain.
+   */
+  function trackCheckout(event: string, extra: Record<string, unknown> = {}) {
+    if (!API_AVAILABLE) return;
+    void fetch(apiUrl("/api/checkout/events"), {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      keepalive: true,
+      body: JSON.stringify({
+        event,
+        step,
+        items: lines.map((line) => ({ handle: line.handle, size: line.size, quantity: line.quantity })),
+        subtotal,
+        ...extra,
+      }),
+    }).catch(() => {});
+  }
+
+  /** static preview par order save nahi hota — live store par bhejte hain */
+  function liveStoreCheckoutUrl() {
+    return `${LIVE_STORE_URL.replace(/\/+$/, "")}/checkout`;
   }
 
   /** static preview / server down — poora order WhatsApp par (owner usi se confirm karta hai) */
@@ -141,7 +181,7 @@ export function CheckoutForm() {
       "",
       itemLines,
       "",
-      `Total: ${formatPrice(total)} (prepaid, UPI: ${upiId})`,
+      `Total: ${formatPrice(total)} (prepaid)`,
       "",
       `Name: ${form.customerName}`,
       `Phone: ${form.phone}`,
@@ -168,11 +208,17 @@ export function CheckoutForm() {
       return;
     }
     setError(null);
-    setWhatsappHref(null);
+    setFallbackHref(null);
+    setFallbackReason(null);
 
-    // GitHub Pages par server nahi hai — order WhatsApp par jaata hai, 404/network error nahi
+    /**
+     * GitHub Pages (static preview) par koi server nahi hota — wahan order save
+     * nahi ho sakta. Customer ko clearly batate hain aur live store par bhejte
+     * hain (payment wahan step 3 par hi khulta hai).
+     */
     if (!API_AVAILABLE) {
-      setWhatsappHref(whatsappOrderLink());
+      setFallbackReason("preview");
+      setFallbackHref(liveStoreCheckoutUrl());
       return;
     }
 
@@ -194,18 +240,28 @@ export function CheckoutForm() {
       );
 
       if (!result.data?.orderNumber) {
-        setError(result.data?.error ?? result.error ?? "Order place nahi hua. Details check karke dobara try kariye.");
-        setWhatsappHref(whatsappOrderLink());
+        const message =
+          result.data?.error ?? result.error ?? "Order place nahi hua. Details check karke dobara try kariye.";
+        setError(message);
+        setFallbackReason("failed");
+        setFallbackHref(whatsappOrderLink());
+        trackCheckout("order.failed", { reason: message });
         setSubmitting(false);
         return;
       }
+      trackCheckout("order.placed", { orderNumber: result.data.orderNumber, total });
       clear();
-      // payment **alag page** par — wahan order number + amount + UPI + live status
-      router.push(`/orders/${result.data.orderNumber}/pay`);
+      /**
+       * Payment **step 3** = alag page. `?pay=1` se mobile par UPI app chooser
+       * khud khulta hai (QR/UPI ID wahan hai, checkout par kabhi nahi).
+       */
+      router.push(`/orders/${encodeURIComponent(result.data.orderNumber)}/pay?pay=1`);
     } catch (error) {
       console.warn("order submit failed", error);
       setError("Order server tak nahi pahuncha. Dobara try kariye, ya WhatsApp par order bhej dijiye — wahan hum turant confirm karte hain.");
-      setWhatsappHref(whatsappOrderLink());
+      setFallbackReason("failed");
+      setFallbackHref(whatsappOrderLink());
+      trackCheckout("order.failed", { reason: (error as Error)?.message ?? "network" });
       setSubmitting(false);
     }
   }
@@ -333,8 +389,8 @@ export function CheckoutForm() {
               <path d="M9 12l2 2 4-4" />
             </svg>
             <p className="text-[12.5px] leading-relaxed text-[#4a423b]" data-testid="prepaid-note">
-              Prepaid order. Order place karte hi payment page khulega — QR se ya UPI ID par pay karein.
-              Payment seedha store account me jaata hai, koi gateway charge nahi.
+              Prepaid order. Order place karte hi payment ka alag page khulega — payment wahan
+              karni hai. Payment seedha store account me jaata hai, koi gateway charge nahi.
             </p>
           </div>
         </section>
@@ -403,7 +459,7 @@ export function CheckoutForm() {
                 </svg>
                 <p className="text-[12.5px] leading-relaxed text-[#4a423b]" data-testid="prepaid-note">
                   Prepaid order. <strong>Place order</strong> dabate hi order number banega aur payment ka
-                  alag page khulega (UPI QR + UPI ID). Payment confirm hone par hi order confirm hoga.
+                  alag page khulega. Payment confirm hone par hi order confirm hoga.
                 </p>
               </div>
             </section>
@@ -456,39 +512,54 @@ export function CheckoutForm() {
 
         {error ? <p className="mt-3 text-[11.5px] text-[#b3261e]">{error}</p> : null}
 
-        {whatsappHref ? (
-          <div className="mt-3 border border-[#c9dcc9] bg-[#eef7ee] p-3" data-testid="checkout-whatsapp">
-            <p className="text-[11.5px] leading-relaxed text-[#2f6b3f]">
-              Your order is ready — send it on WhatsApp to confirm. Pay{" "}
-              <strong>{formatPrice(total)}</strong> to UPI <strong className="break-all">{upiId}</strong> and share
-              the screenshot there.
-            </p>
-            <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-start">
-              <div className="w-[128px] shrink-0 rounded-sm border border-[#c9dcc9] bg-white p-1">
-                <UpiQr
-                  uri={buildUpiUri({
-                    vpa: upiId,
-                    name: upiName,
-                    amountPaise: total,
-                    note: "Designer Clothing order",
-                  })}
-                  alt={`UPI QR to pay ${formatPrice(total)}`}
-                  className="h-auto w-full"
-                  size={240}
-                />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[11px] tracking-[.12em] text-[#2f6b3f] uppercase">UPI ID</p>
-                <p className="mt-0.5 break-all text-[13px] font-semibold text-[#1f5c32]">{upiId}</p>
+        {/*
+          Fallback only — customer ko checkout par UPI ID / QR / "pay here" kabhi
+          nahi dikhta (owner rule: payment sirf 3rd step par). Yahan sirf itna ki
+          order save nahi hua to kya karein.
+        */}
+        {fallbackHref ? (
+          <div
+            className="mt-3 border border-[#e7ddd2] bg-white p-3"
+            data-testid="checkout-fallback"
+          >
+            {fallbackReason === "preview" ? (
+              <p className="text-[11.5px] leading-relaxed text-[#6b6259]">
+                Ye static preview hai — yahan se order save nahi hota. Live store par order kariye;
+                payment ka page wahan agle step par khulega.
+              </p>
+            ) : (
+              <p className="text-[11.5px] leading-relaxed text-[#6b6259]">
+                Order server par save nahi hua. <strong>Dobara try</strong> kariye — ya WhatsApp par
+                order bhej dijiye, team turant confirm karegi.
+              </p>
+            )}
+            <div className="mt-2 flex flex-wrap gap-2">
+              {fallbackReason === "preview" ? (
                 <a
-                  href={whatsappHref}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-2.5 inline-flex h-10 items-center justify-center bg-[#25D366] px-4 text-[10.5px] font-semibold tracking-[.12em] text-white uppercase"
+                  href={fallbackHref}
+                  className="inline-flex h-9 items-center bg-[#862222] px-3 text-[10px] font-semibold tracking-[.12em] text-white uppercase"
                 >
-                  Send order on WhatsApp
+                  Live store par order kariye
                 </a>
-              </div>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setFallbackHref(null)}
+                    className="inline-flex h-9 items-center border border-[#862222] px-3 text-[10px] font-semibold tracking-[.12em] text-[#862222] uppercase"
+                  >
+                    Try again
+                  </button>
+                  <a
+                    href={fallbackHref}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex h-9 items-center bg-[#25D366] px-3 text-[10px] font-semibold tracking-[.12em] text-white uppercase"
+                  >
+                    WhatsApp par bhejein
+                  </a>
+                </>
+              )}
             </div>
           </div>
         ) : null}
