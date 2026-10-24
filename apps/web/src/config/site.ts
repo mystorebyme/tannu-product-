@@ -68,7 +68,9 @@ export const logoMark = brandAssets.mark;
 export const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
   process.env.NEXT_PUBLIC_SITE_ORIGIN?.replace(/\/$/, "") ??
-  "https://likshaclothing.onrender.com";
+  // Render service band ho gayi hai — fallback ab asli domain, dead host nahi.
+  // (Live Vercel deploy par NEXT_PUBLIC_SITE_URL isse override karta hai.)
+  "https://www.likshaclothing.com";
 
 export const siteConfig = {
   name: "Designer Clothing",

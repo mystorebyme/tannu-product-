@@ -76,12 +76,48 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <noscript>
           <style>{".reveal-init{opacity:1!important;transform:none!important}"}</style>
         </noscript>
+        {/* Site-wide structured data — Google ko brand, site aur search box ka pata chale */}
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify([
+              {
+                "@context": "https://schema.org",
+                "@type": "Organization",
+                name: siteConfig.name,
+                url: siteConfig.url,
+                logo: `${siteConfig.url}${brandAssets.mark}`,
+                email: siteConfig.email,
+                telephone: "+918005900581",
+                sameAs: [siteConfig.socials.instagram],
+              },
+              {
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                name: siteConfig.name,
+                url: siteConfig.url,
+                potentialAction: {
+                  "@type": "SearchAction",
+                  target: `${siteConfig.url}/search?q={search_term_string}`,
+                  "query-input": "required name=search_term_string",
+                },
+              },
+            ]),
+          }}
+        />
         <StoreSettingsProvider>
         <CartProvider>
           <WishlistProvider>
+            <a
+              href="#main-content"
+              className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:bg-[#862222] focus:px-4 focus:py-2 focus:text-[12px] focus:text-white"
+            >
+              Skip to content
+            </a>
             <AnnouncementBar />
             <SiteHeader />
-            <main className="min-h-[60vh]">{children}</main>
+            <main id="main-content" className="min-h-[60vh]">{children}</main>
             <SiteFooter />
             <FloatingHelp />
           </WishlistProvider>

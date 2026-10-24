@@ -2,7 +2,7 @@
 
 import { readJson } from "@/lib/http-json";
 
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ProductCard } from "@/components/product-card";
 import type { Product } from "@/types/catalog";
 
@@ -26,6 +26,10 @@ export function ProductGridWithMore({
   const [products, setProducts] = useState<Product[]>(initial);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const loadingRef = useRef(false);
+  const productsRef = useRef(initial);
+  productsRef.current = products;
 
   const gridClass =
     columns === 2
@@ -34,24 +38,53 @@ export function ProductGridWithMore({
         ? "grid-cols-2 sm:grid-cols-3"
         : "grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
 
-  async function loadMore() {
+  const loadMore = useCallback(async () => {
+    if (loadingRef.current) return;
+    const currentLength = productsRef.current.length;
+    if (currentLength >= total) return;
+    loadingRef.current = true;
     setLoading(true);
     setError(null);
     try {
       const params = new URLSearchParams(query);
-      params.set("offset", String(products.length));
+      params.set("offset", String(currentLength));
       params.set("limit", String(pageSize));
       const response = await fetch(`/api/products?${params.toString()}`);
       if (!response.ok) throw new Error("failed");
       const parsed = await readJson<{ data: Product[] }>(response);
       if (!parsed.data?.data) throw new Error("failed");
-      setProducts((current) => [...current, ...parsed.data!.data]);
+      // duplicate handles kabhi grid me na aayein (offset race)
+      setProducts((current) => {
+        const seen = new Set(current.map((item) => item.handle));
+        return [...current, ...parsed.data!.data.filter((item) => !seen.has(item.handle))];
+      });
     } catch {
       setError("Aur products load nahi hue. Internet check kar ke dobara try kariye.");
     } finally {
+      loadingRef.current = false;
       setLoading(false);
     }
-  }
+  }, [pageSize, query, total]);
+
+  /**
+   * Infinite scroll: sentinel screen ke paas aate hi agla page khud load ho jaata
+   * hai (800px pehle se — user ko rukna nahi padta). Button fallback ke taur par
+   * neeche maujood hai: observer support na ho, error aaye, ya JS slow ho to
+   * customer khud dabaa sakta hai.
+   */
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node || typeof IntersectionObserver === "undefined") return;
+    if (products.length >= total) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) void loadMore();
+      },
+      { rootMargin: "800px 0px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [loadMore, products.length, total]);
 
   return (
     <div>
@@ -63,6 +96,7 @@ export function ProductGridWithMore({
 
       {products.length < total ? (
         <div className="mt-8 flex flex-col items-center gap-2">
+          <div ref={sentinelRef} aria-hidden className="h-px w-full" />
           <button
             type="button"
             onClick={loadMore}

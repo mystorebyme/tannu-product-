@@ -4,7 +4,12 @@ import { ProductGridWithMore } from "@/components/product-grid-client";
 import { getProducts, recommendedProducts, searchSuggestions } from "@/lib/store";
 import { SearchBar } from "@/components/search-bar";
 
-export const metadata: Metadata = { title: "Search" };
+export const metadata: Metadata = {
+  title: "Search",
+  // search results ko Google me index karne ka koi faayda nahi (duplicate/thin)
+  robots: { index: false, follow: true },
+  alternates: { canonical: "/search" },
+};
 export const dynamic = "force-dynamic";
 
 const POPULAR_TAGS = ["Anarkali", "Lehenga", "Black", "Ivory", "Printed", "Georgette", "Maroon", "Silk"];
