@@ -33,9 +33,14 @@ jobs:
 
       - name: Health (DB reachable?)
         run: |
-          echo "── ${{ inputs.base_url }}/api/health"
-          curl -fsS "${{ inputs.base_url }}/api/health" | tee health.json
-          node -e "const d=require('./health.json').data; if(d.db!=='up'){console.error('DB not up:',d.db,d.dbError);process.exit(1)}"
+          URL="${{ inputs.base_url }}"
+          URL="${URL:-https://liksha-clothing.vercel.app}"
+          echo "── $URL/api/health"
+          code=$(curl -sS -o health.json -w "%{http_code}" --retry 3 --retry-all-errors --max-time 60 "$URL/api/health")
+          echo "http: $code"
+          head -c 600 health.json; echo
+          test "$code" = "200" || { echo "health returned $code (deployment protection?)"; exit 1; }
+          node -e "const d=require('./health.json').data; if(!d||d.db!=='up'){console.error('DB not up:',d&&d.db,d&&d.dbError);process.exit(1)}"
 
       # Admin-only steps (payment confirm + "packed" block) secret token maangte hain;
       # wo local/admin panel par verify hote hain. Yahan public flow chalta hai:
