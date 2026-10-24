@@ -297,8 +297,10 @@ export function SiteHeader() {
                 <path d="M6 7h12l1.2 13H4.8L6 7Z" />
                 <path d="M9 7a3 3 0 0 1 6 0" />
               </svg>
+              {/* count har size par (sm+), price sirf xl+ — 1024px par nav ke saath overlap na ho */}
               <span data-testid="cart-count" className="hidden text-[11px] font-medium tabular-nums sm:inline">
-                {count} / {formatPrice(subtotal)}
+                {count}
+                <span className="hidden xl:inline"> / {formatPrice(subtotal)}</span>
               </span>
               <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#862222] px-1 text-[9px] font-semibold text-white sm:hidden">
                 {count}

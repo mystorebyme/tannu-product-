@@ -126,6 +126,11 @@ check("nav has SHOP link to /collections", /href="\/collections"[^>]*>SHOP/.test
 check("no saree link in header/footer (0 products)", !home.text.includes("/collections/saree"));
 check("header grid keeps logo centred on phones", home.text.includes("grid-cols-[auto_1fr_auto]"));
 check("mobile menu is a 40px touch target", /aria-label="Open menu"[\s\S]{0,220}?h-10 w-10/.test(home.text));
+// 1024px par nav + 4 icons + logo ke saath overlap na ho: cart ka price sirf xl+ par
+check(
+  "cart shows only the count at laptop width (price from xl)",
+  /data-testid="cart-count"[^>]*sm:inline/.test(home.text) && /data-testid="cart-count"[\s\S]{0,160}?hidden xl:inline/.test(home.text),
+);
 
 /* 4b. footer logo: stacked fluid file (wide-but-short space) ---------------- */
 check("footer uses the stacked fluid logo", home.text.includes("/images/brand/logo-fluid.png"));
