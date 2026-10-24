@@ -36,4 +36,6 @@ jobs:
       - name: Payment + tracking flow (public APIs)
         env:
           BASE_URL: ${{ inputs.base_url }}
+          # khaali = admin steps skip (token public repo me nahi jaata)
+          ADMIN_API_TOKEN: ""
         run: node tests/e2e/payments.mjs
