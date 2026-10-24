@@ -163,6 +163,25 @@ async function main() {
   const missing = await get("/orders/LK-NOTREAL1");
   check("unknown order gives 404 page", missing.status === 404, `status ${missing.status}`);
 
+  // delivery / pincode serviceability — asli data par
+  const validPin = await get("/api/delivery/check?pincode=302001");
+  const validBody = JSON.parse(validPin.text);
+  check("valid pincode is serviceable", validBody.data?.serviceable === true, validPin.text.slice(0, 120));
+  check("valid pincode resolves state", validBody.data?.state === "Rajasthan");
+
+  const fakePin = await get("/api/delivery/check?pincode=999999");
+  const fakeBody = JSON.parse(fakePin.text);
+  check("fake pincode is rejected", fakeBody.data?.serviceable === false, fakePin.text.slice(0, 120));
+
+  const shortPin = await get("/api/delivery/check?pincode=0123");
+  check("invalid pincode returns 400", shortPin.status === 400, `status ${shortPin.status}`);
+
+  const settings = await get("/api/settings");
+  check("public settings 200", settings.status === 200, `status ${settings.status}`);
+
+  const privateDelivery = await get("/api/admin/delivery");
+  check("admin delivery API needs token", privateDelivery.status === 401, `status ${privateDelivery.status}`);
+
   const sitemap = await get("/sitemap.xml");
   check("sitemap 200", sitemap.status === 200, `status ${sitemap.status}`);
   check("sitemap has product urls", sitemap.text.includes("/products/"));

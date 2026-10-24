@@ -36,6 +36,18 @@ zaroorat nahi.
 Baad me real integrations: `FIREBASE_*` keys + `OTP_DEV_MODE=off`, `SELLER_GSTIN` (GST invoice),
 `WHATSAPP_NUMBER` (order confirmation / payment verify).
 
+## Admin panel se jo turant site par lagta hai
+
+| Admin page | Storefront par kahan |
+| --- | --- |
+| Orders → status / courier / AWB | `/orders/LK-XXXX` tracking timeline |
+| Payments → UTR verify | order `paid` + `confirmed` |
+| Delivery → states, blocked/allowed pincodes | PDP "Check delivery", checkout validation, order booking |
+| Settings → announcement | header announcement bar |
+
+Sab writes storefront API (`/api/admin/*`, Bearer `ADMIN_API_TOKEN`) se jaate hain, isliye two-service
+setup me bhi admin aur website ka data ek hi rehta hai (Postgres).
+
 ## Data flow
 
 ```

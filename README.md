@@ -164,7 +164,7 @@ Post-deploy health: `bash infra/monitoring/health.sh`.
 | `docs/01-requirements` | BRD, SRS, features, stories, use cases, NFRs, traceability |
 | `docs/02-planning` | roadmap, MVP scope, WBS, sprints, risks, estimates, roles |
 | `docs/03-architecture` | HLD/LLD, system, stack, sequences, payment flow, 10 ADRs |
-| `docs/04-data` | data model, catalogue/order schemas, dictionary, migrations, seeds |
+| `docs/04-data` | data model, catalogue/order schemas, dictionary, migrations, seeds, delivery rules |
 | `docs/05-design` | design system, tokens, components, page specs, a11y, UI copy |
 | `docs/06-api` | endpoints, auth, errors, versioning, examples, OpenAPI |
 | `docs/07-security` | threat model, authn/authz, secrets, PCI, headers, OWASP |
@@ -193,6 +193,8 @@ Human walkthroughs: `agent-guides/`.
   and production must set `OTP_DEV_MODE=off` (`docs/07-security/phone-otp.md`).
 - `SELLER_GSTIN` must be set before the first real GST invoice (`docs/04-data/gst-invoicing.md`).
 - Prepaid payments stay `pending` until live Razorpay keys + webhook secret are configured.
+- Delivery serviceability asli India Post data (19,486 pincodes / 36 states) + admin rules par chalti hai:
+  state-wise allow, pincode block/allow, aur server-side order reject — `docs/04-data/delivery-rules.md`.
 - Storefront images are hotlinked from the Shopify CDN; mirroring to object storage is a Phase 2 task.
 
 ---

@@ -22,8 +22,8 @@ const quickLinks = [
   { label: "SALE", href: "/collections/sale" },
 ];
 
-// Diwali 2026 (8 Nov) dispatch window — season ke baad update karein
-const announcements = [
+// Fallback copy — admin → Settings se announcement set ho to wahi dikhta hai
+const defaultAnnouncements = [
   "Diwali dispatch ✦ order by 4 Nov for delivery before the festival",
   "Free shipping across India — every order",
   "Same-day dispatch on prepaid orders",
@@ -38,8 +38,24 @@ export function SiteHeader() {
   const [query, setQuery] = useState("");
   const [scrolled, setScrolled] = useState(false);
   const [bannerIndex, setBannerIndex] = useState(0);
+  const [announcements, setAnnouncements] = useState(defaultAnnouncements);
   const pathname = usePathname();
   const router = useRouter();
+
+  // admin panel se announcement badalte hi site par wahi dikhna chahiye
+  useEffect(() => {
+    let active = true;
+    fetch("/api/settings", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((payload: { data?: { announcement?: string } } | null) => {
+        const text = payload?.data?.announcement?.trim();
+        if (active && text) setAnnouncements([text]);
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);

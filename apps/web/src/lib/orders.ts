@@ -14,6 +14,7 @@ import {
 } from "@liksha/validation";
 import { dataFile } from "./data-dir";
 import { dbEnabled } from "./db";
+import { checkPincode } from "./delivery";
 import { products } from "./store";
 
 type StoredOrder = Order;
@@ -109,6 +110,13 @@ export class OrderError extends Error {
 /** price server par recompute hota hai — client ke bheje hue amount par bharosa nahi */
 export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
   if (!payload.items.length) throw new OrderError("Cart khaali hai.", 400, "empty_cart");
+
+  // delivery serviceability — sirf admin-approved states/pincodes par order
+  // (India Post data me na ho, blocked ho ya state band ho to yahin ruk jaata hai)
+  const serviceability = await checkPincode(payload.pincode);
+  if (!serviceability.serviceable) {
+    throw new OrderError(serviceability.message, 400, "pincode_not_serviceable");
+  }
 
   const items = payload.items.map((line) => {
     const product = products.find((candidate) => candidate.handle === line.handle);

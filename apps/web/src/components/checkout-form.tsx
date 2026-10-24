@@ -42,6 +42,11 @@ export function CheckoutForm() {
       .catch(() => setOtpRequired(false));
   }, []);
   const [error, setError] = useState<string | null>(null);
+  // delivery check — admin ke rules + India Post data se
+  const [pinStatus, setPinStatus] = useState<
+    { ok: boolean; message: string; state: string | null; district: string | null } | null
+  >(null);
+  const [pinBusy, setPinBusy] = useState(false);
   const [form, setForm] = useState({
     customerName: "",
     email: "",
@@ -56,6 +61,38 @@ export function CheckoutForm() {
   useEffect(() => {
     if (isOpen) closeCart();
   }, [isOpen, closeCart]);
+
+  // 6 digit poore hone par apne aap check — galat/blocked pincode par aage nahi jaane dete
+  useEffect(() => {
+    const pin = form.pincode;
+    if (pin.length !== 6) {
+      setPinStatus(null);
+      return;
+    }
+    let active = true;
+    setPinBusy(true);
+    const timer = setTimeout(() => {
+      fetch(`/api/delivery/check?pincode=${encodeURIComponent(pin)}`, { cache: "no-store" })
+        .then((response) => response.json())
+        .then((payload: { data?: { serviceable: boolean; message: string; state: string | null; district: string | null } }) => {
+          if (!active) return;
+          const result = payload.data;
+          if (!result) return;
+          setPinStatus({ ok: result.serviceable, message: result.message, state: result.state, district: result.district });
+          // state auto-fill: admin ne jis state ko allow kiya hai wahi select rahe
+          if (result.serviceable && result.state) update("state", result.state);
+        })
+        .catch(() => undefined)
+        .finally(() => {
+          if (active) setPinBusy(false);
+        });
+    }, 350);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+      setPinBusy(false);
+    };
+  }, [form.pincode]);
 
   const discount = computeDiscount(subtotal, coupon);
   const total = Math.max(0, subtotal - discount);
@@ -80,6 +117,10 @@ export function CheckoutForm() {
     if (lines.length === 0) return;
     if (otpRequired && !phoneToken) {
       setError("Order place karne se pehle mobile number verify kariye (OTP).");
+      return;
+    }
+    if (pinStatus && !pinStatus.ok) {
+      setError(pinStatus.message);
       return;
     }
     setSubmitting(true);
@@ -185,13 +226,26 @@ export function CheckoutForm() {
                 ))}
               </select>
             </div>
-            <Field
-              label="Pincode"
-              required
-              inputMode="numeric"
-              value={form.pincode}
-              onChange={(v) => update("pincode", v.replace(/\D/g, "").slice(0, 6))}
-            />
+            <div>
+              <Field
+                label="Pincode"
+                required
+                inputMode="numeric"
+                value={form.pincode}
+                onChange={(v) => update("pincode", v.replace(/\D/g, "").slice(0, 6))}
+              />
+              {pinBusy ? <p className="mt-1 text-[11px] text-[#8a8078]">Delivery check ho raha hai…</p> : null}
+              {pinStatus ? (
+                <p
+                  className={`mt-1 text-[11px] leading-relaxed ${pinStatus.ok ? "text-[#2f7a3f]" : "text-[#a11d1d]"}`}
+                  data-testid="pincode-status"
+                >
+                  {pinStatus.ok
+                    ? `Deliverable${pinStatus.district ? ` — ${pinStatus.district}, ${pinStatus.state}` : ""}. Free shipping, 4-7 business days.`
+                    : pinStatus.message}
+                </p>
+              ) : null}
+            </div>
             <Field label="Order notes (optional)" value={form.notes} onChange={(v) => update("notes", v)} />
           </div>
         </section>

@@ -30,9 +30,10 @@ before(async () => {
     .replace(/create extension if not exists "[a-z]+";[^\n]*\n/g, "")
     .replace(/citext/g, "text");
   await db.exec(schema);
-  await db.exec(
-    fs.readFileSync(path.resolve(__dirname, "../../database/migrations/0001_orders_runtime.sql"), "utf8"),
-  );
+  const migrationsDir = path.resolve(__dirname, "../../database/migrations");
+  for (const file of fs.readdirSync(migrationsDir).filter((name) => name.endsWith(".sql")).sort()) {
+    await db.exec(fs.readFileSync(path.join(migrationsDir, file), "utf8"));
+  }
 
   const port = 54_000 + Math.floor(Math.random() * 900);
   server = new PGLiteSocketServer({ db, port, host: "127.0.0.1" });
@@ -58,10 +59,6 @@ before(async () => {
   };
 });
 
-after(async () => {
-  await server.stop();
-  await db.close();
-});
 
 test("order Postgres me likha jaata hai, JSON file nahi banti", async () => {
   const order = await orders.createOrder(payload);
@@ -123,4 +120,83 @@ test("payment verify hone par order confirmed hota hai", async () => {
 
   const status = await orders.paymentStatusFor(orderNumber);
   assert.equal(status?.paymentStatus, "paid");
+});
+
+test("blocked pincode par order place nahi hota", async () => {
+  const delivery = await import("../../apps/web/src/lib/delivery.ts");
+  await delivery.saveDeliverySettings(
+    {
+      allowAllStates: true,
+      states: {},
+      blockedPincodes: [{ pincode: "302003", at: new Date().toISOString() }],
+      allowedPincodes: [],
+      deliveryDays: "4-7 business days",
+      freeShipping: true,
+    },
+    "admin@likshaclothing.com",
+  );
+
+  const blocked = await orders
+    .createOrder({ ...payload, pincode: "302003" })
+    .then(() => null)
+    .catch((error: Error & { code?: string }) => error);
+  assert.ok(blocked, "blocked pincode par order ban gaya");
+  assert.equal(blocked!.code, "pincode_not_serviceable");
+
+  const fake = await orders
+    .createOrder({ ...payload, pincode: "999999" })
+    .then(() => null)
+    .catch((error: Error & { code?: string }) => error);
+  assert.equal(fake?.code, "pincode_not_serviceable");
+});
+
+test("delivery rules Postgres me persist hote hain aur pincode check par lagte hain", async () => {
+  const delivery = await import("../../apps/web/src/lib/delivery.ts");
+
+  // default: sab allowed, par faltu pincode phir bhi reject
+  assert.equal((await delivery.checkPincode("302001")).serviceable, true);
+  assert.equal((await delivery.checkPincode("999999")).serviceable, false);
+
+  // admin sirf Rajasthan allow kare + ek Jaipur pincode block kare
+  await delivery.saveDeliverySettings(
+    {
+      allowAllStates: false,
+      states: { Rajasthan: true },
+      blockedPincodes: [{ pincode: "302001", at: new Date().toISOString() }],
+      allowedPincodes: [{ pincode: "400001", at: new Date().toISOString() }],
+      deliveryDays: "3-5 business days",
+      freeShipping: true,
+    },
+    "admin@likshaclothing.com",
+  );
+
+  const saved = await delivery.getDeliverySettings({ fresh: true });
+  assert.equal(saved.allowAllStates, false);
+  assert.equal(saved.states.Rajasthan, true);
+  assert.equal(saved.blockedPincodes.length, 1);
+  assert.equal(saved.deliveryDays, "3-5 business days");
+
+  const blocked = await delivery.checkPincode("302001");
+  assert.equal(blocked.serviceable, false);
+  assert.equal(blocked.reason, "blocked");
+
+  const otherRajasthan = await delivery.checkPincode("302002");
+  assert.equal(otherRajasthan.serviceable, true);
+  assert.equal(otherRajasthan.deliveryDays, "3-5 business days");
+
+  const gujarat = await delivery.checkPincode("380001");
+  assert.equal(gujarat.serviceable, false);
+  assert.equal(gujarat.reason, "state_blocked");
+
+  // allowed override blocked state me bhi chalta hai
+  assert.equal((await delivery.checkPincode("400001")).serviceable, true);
+
+  // DB me row bani
+  const rows = await db.query<{ id: string }>("select id from delivery_settings");
+  assert.equal(rows.rows[0]?.id, "default");
+});
+
+after(async () => {
+  await server.stop();
+  await db.close();
 });

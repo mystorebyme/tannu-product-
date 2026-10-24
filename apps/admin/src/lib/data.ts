@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { Catalog, Order, Product } from "@liksha/types";
+import type { Catalog, DeliverySettings, Order, Product } from "@liksha/types";
 import { canTransition } from "@liksha/validation";
 import catalogJson from "../data/catalog.json";
 
@@ -194,6 +194,66 @@ export async function setOrderTracking(
   return rows[index]!;
 }
 
+/* ───────────────────── delivery (pincode) rules ─────────────────────
+ * Source of truth storefront hai: remote mode me API, warna local `.data/`. */
+
+export type DeliverySettingsPayload = DeliverySettings;
+export type DeliveryAdminData = {
+  settings: DeliverySettings;
+  states: { state: string; pincodes: number; districts: number }[];
+  totals: { pincodes: number; states: number };
+};
+
+const DELIVERY_FILE = "delivery.json";
+
+const DEFAULT_DELIVERY: DeliverySettings = {
+  updatedAt: new Date(0).toISOString(),
+  updatedBy: "system",
+  allowAllStates: true,
+  states: {},
+  blockedPincodes: [],
+  allowedPincodes: [],
+  deliveryDays: "4-7 business days",
+  freeShipping: true,
+};
+
+export async function getDelivery(): Promise<DeliveryAdminData> {
+  if (remoteMode()) {
+    const payload = await storeRequest<DeliveryAdminData>("/api/admin/delivery");
+    if (payload) return payload;
+  }
+  // local fallback: sirf tab jab admin akela chal raha ho
+  const file = dataFile(DELIVERY_FILE);
+  let settings = DEFAULT_DELIVERY;
+  if (fs.existsSync(file)) {
+    try {
+      settings = { ...DEFAULT_DELIVERY, ...(JSON.parse(fs.readFileSync(file, "utf8")) as DeliverySettings) };
+    } catch {
+      settings = DEFAULT_DELIVERY;
+    }
+  }
+  return {
+    settings,
+    states: [],
+    totals: { pincodes: 0, states: 0 },
+  };
+}
+
+export async function saveDelivery(settings: DeliverySettings, actor: string): Promise<DeliverySettings | null> {
+  if (remoteMode()) {
+    const payload = await storeRequest<{ data: DeliverySettings }>("/api/admin/delivery", {
+      method: "PUT",
+      body: JSON.stringify({ settings, actor }),
+    });
+    return payload?.data ?? null;
+  }
+  const next: DeliverySettings = { ...settings, updatedAt: new Date().toISOString(), updatedBy: actor };
+  const file = dataFile(DELIVERY_FILE);
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, JSON.stringify(next, null, 2));
+  return next;
+}
+
 export type StoreSettings = {
   announcement: string;
   freeShipping: boolean;
@@ -212,7 +272,11 @@ const DEFAULT_SETTINGS: StoreSettings = {
   supportEmail: "Info.likshaclothing@gmail.com",
 };
 
-export function getSettings(): StoreSettings {
+export async function getSettings(): Promise<StoreSettings> {
+  if (remoteMode()) {
+    const payload = await storeRequest<{ data: Partial<StoreSettings> }>("/api/admin/settings");
+    if (payload?.data) return { ...DEFAULT_SETTINGS, ...payload.data };
+  }
   const file = dataFile("settings.json");
   if (!fs.existsSync(file)) return DEFAULT_SETTINGS;
   try {
@@ -222,9 +286,21 @@ export function getSettings(): StoreSettings {
   }
 }
 
-export function saveSettings(settings: StoreSettings) {
+export async function saveSettings(settings: StoreSettings, actor = "admin"): Promise<StoreSettings> {
+  if (remoteMode()) {
+    const payload = await storeRequest<{ data: StoreSettings }>("/api/admin/settings", {
+      method: "PUT",
+      body: JSON.stringify({ settings, actor }),
+    });
+    if (payload?.data) return payload.data;
+  }
+  return saveSettingsLocal(settings);
+}
+
+function saveSettingsLocal(settings: StoreSettings): StoreSettings {
   const file = dataFile("settings.json");
   fs.writeFileSync(file, JSON.stringify(settings, null, 2));
+  return settings;
 }
 
 export type AuditRow = { at: string; actor: string; action: string; target: string; meta?: unknown };

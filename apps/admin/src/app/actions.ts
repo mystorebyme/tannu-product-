@@ -12,6 +12,8 @@ import {
 import {
   appendAudit,
   createManualInvoice,
+  getDelivery,
+  saveDelivery,
   saveOverride,
   saveSettings,
   setOrderTracking,
@@ -113,14 +115,14 @@ export async function updateOrderStatusAction(formData: FormData) {
 export async function saveSettingsAction(formData: FormData) {
   const session = await requireSession();
   const actor = session.email;
-  saveSettings({
+  await saveSettings({
     announcement: String(formData.get("announcement") ?? ""),
     freeShipping: formData.get("freeShipping") === "on",
     upiId: String(formData.get("upiId") ?? ""),
     gstin: String(formData.get("gstin") ?? ""),
     supportPhone: String(formData.get("supportPhone") ?? ""),
     supportEmail: String(formData.get("supportEmail") ?? ""),
-  });
+  }, actor);
   appendAudit({ actor, action: "settings.updated", target: "store" });
   revalidatePath("/settings");
 }
@@ -275,4 +277,103 @@ export async function verifyPaymentAction(formData: FormData) {
   revalidatePath("/payments");
   revalidatePath("/orders");
   revalidatePath(`/orders/${orderNumber}`);
+}
+
+/* ───────────────── delivery (pincode) rules ─────────────────────────────────
+ * Source of truth storefront hai. Remote mode me API se save hota hai, isliye
+ * admin ka block turant website ke pincode check par lagta hai. */
+
+function parsePinLines(value: string): { pincode: string; note?: string }[] {
+  return String(value ?? "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [pin, ...rest] = line.split(/[|\-–—,]/);
+      return { pincode: String(pin ?? "").replace(/\D/g, "").slice(0, 6), note: rest.join(" ").trim() || undefined };
+    })
+    .filter((row) => /^[1-9]\d{5}$/.test(row.pincode));
+}
+
+export async function saveDeliverySettingsAction(formData: FormData) {
+  const session = await requireSession();
+  const actor = session.email;
+
+  const current = await getDelivery();
+  const settings = current.settings;
+
+  const mode = String(formData.get("stateMode") ?? "all");
+  const states: Record<string, boolean> = {};
+  const selected = new Set(formData.getAll("states").map((value) => String(value)));
+  for (const state of Object.keys(settings.states)) {
+    states[state] = selected.has(state);
+  }
+  for (const state of selected) states[state] = true;
+
+  const blockedText = formData.get("blockedPincodes");
+  const allowedText = formData.get("allowedPincodes");
+
+  const next = {
+    ...settings,
+    allowAllStates: mode === "all",
+    states,
+    // textarea diya gaya ho tabhi list replace karenge, warna per-row buttons ne jo kiya wahi rahega
+    ...(blockedText === null
+      ? {}
+      : {
+          blockedPincodes: parsePinLines(String(blockedText)).map((row) => ({
+            ...row,
+            at: new Date().toISOString(),
+            by: actor,
+          })),
+        }),
+    ...(allowedText === null
+      ? {}
+      : {
+          allowedPincodes: parsePinLines(String(allowedText)).map((row) => ({
+            ...row,
+            at: new Date().toISOString(),
+            by: actor,
+          })),
+        }),
+    deliveryDays: String(formData.get("deliveryDays") ?? settings.deliveryDays).trim() || settings.deliveryDays,
+    freeShipping: formData.get("freeShipping") === "on",
+  };
+
+  await saveDelivery(next, actor);
+  appendAudit({
+    actor,
+    action: "delivery.settings_updated",
+    target: "serviceability",
+    meta: {
+      allowAllStates: next.allowAllStates,
+      blocked: next.blockedPincodes.length,
+      allowed: next.allowedPincodes.length,
+    },
+  });
+  revalidatePath("/delivery");
+}
+
+export async function togglePinRuleAction(formData: FormData) {
+  const session = await requireSession();
+  const actor = session.email;
+  const pincode = String(formData.get("pincode") ?? "").replace(/\D/g, "").slice(0, 6);
+  const list = String(formData.get("list") ?? "blocked"); // blocked | allowed
+  const op = String(formData.get("op") ?? "add"); // add | remove
+  const note = String(formData.get("note") ?? "").trim() || undefined;
+  if (!/^[1-9]\d{5}$/.test(pincode)) return;
+
+  const { settings } = await getDelivery();
+  const key = list === "allowed" ? "allowedPincodes" : "blockedPincodes";
+  const rows = settings[key].filter((row) => row.pincode !== pincode);
+  if (op === "add") rows.push({ pincode, note, at: new Date().toISOString(), by: actor });
+
+  await saveDelivery({ ...settings, [key]: rows }, actor);
+  appendAudit({
+    actor,
+    action: op === "add" ? `delivery.${list}_added` : `delivery.${list}_removed`,
+    target: pincode,
+    meta: note ? { note } : undefined,
+  });
+  revalidatePath("/delivery");
 }

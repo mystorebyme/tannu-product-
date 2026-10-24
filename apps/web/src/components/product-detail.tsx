@@ -58,6 +58,8 @@ export function ProductDetail({
   const [openAccordion, setOpenAccordion] = useState<string | null>("details");
   const [pincode, setPincode] = useState("");
   const [pinMessage, setPinMessage] = useState<string | null>(null);
+  const [pinOk, setPinOk] = useState<boolean | null>(null);
+  const [pinBusy, setPinBusy] = useState(false);
 
   const sizePricing = active.sizePricing?.[size];
   const price = sizePricing?.price ?? active.price;
@@ -96,12 +98,41 @@ export function ProductDetail({
     );
   }
 
-  function checkPin() {
-    if (!/^[1-9]\d{5}$/.test(pincode.trim())) {
+  async function checkPin() {
+    const pin = pincode.trim();
+    if (!/^[1-9]\d{5}$/.test(pin)) {
+      setPinOk(false);
       setPinMessage("Please enter a valid 6-digit pincode.");
       return;
     }
-    setPinMessage(`Delivering to ${pincode.trim()} — free shipping, 4-7 business days.`);
+    setPinBusy(true);
+    setPinMessage(null);
+    try {
+      // asli check: India Post data + admin ke state/pincode rules
+      const response = await fetch(`/api/delivery/check?pincode=${encodeURIComponent(pin)}`, {
+        cache: "no-store",
+      });
+      const payload = (await response.json()) as {
+        data?: { serviceable: boolean; message: string; deliveryDays: string | null; district: string | null; state: string | null };
+      };
+      const result = payload.data;
+      if (!result) {
+        setPinOk(false);
+        setPinMessage("Delivery check abhi available nahi hai. Please try again.");
+        return;
+      }
+      setPinOk(result.serviceable);
+      setPinMessage(
+        result.serviceable
+          ? `Delivering to ${pin}${result.district ? ` — ${result.district}, ${result.state}` : ""}. Free shipping, ${result.deliveryDays ?? "4-7 business days"}.`
+          : result.message,
+      );
+    } catch {
+      setPinOk(false);
+      setPinMessage("Delivery check fail ho gaya. Please try again.");
+    } finally {
+      setPinBusy(false);
+    }
   }
 
   const accordions = [
@@ -357,12 +388,20 @@ export function ProductDetail({
             <button
               type="button"
               onClick={checkPin}
-              className="shrink-0 bg-[#222] px-3.5 text-[10.5px] font-semibold tracking-[.12em] text-white uppercase"
+              disabled={pinBusy}
+              className="shrink-0 bg-[#222] px-3.5 text-[10.5px] font-semibold tracking-[.12em] text-white uppercase disabled:opacity-60"
             >
-              Check
+              {pinBusy ? "…" : "Check"}
             </button>
           </div>
-          {pinMessage ? <p className="mt-1.5 text-[11.5px] text-[#5c534b]">{pinMessage}</p> : null}
+          {pinMessage ? (
+            <p
+              className={`mt-1.5 text-[11.5px] leading-relaxed ${pinOk === false ? "text-[#a11d1d]" : "text-[#2f7a3f]"}`}
+              role="status"
+            >
+              {pinMessage}
+            </p>
+          ) : null}
         </div>
 
         <div className="mt-5 divide-y divide-[#eee6de] border-y border-[#eee6de]">

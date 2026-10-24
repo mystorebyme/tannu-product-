@@ -237,3 +237,49 @@ export interface Paginated<T> {
   total: number;
   totalPages: number;
 }
+
+/* ─────────────────────── delivery serviceability ───────────────────────
+ * Pincode check asli data par chalta hai (India Post 19,486 pincodes).
+ * Admin state-wise allow/block karta hai aur koi bhi specific pincode
+ * block (ya block state me bhi allow) kar sakta hai. */
+
+export type DeliveryPinRule = {
+  pincode: string;
+  note?: string;
+  at: string;
+  by?: string;
+};
+
+export type DeliverySettings = {
+  updatedAt: string;
+  updatedBy: string;
+  /** true = saare states allowed (jab tak admin kuch restrict na kare) */
+  allowAllStates: boolean;
+  /** state -> allowed (sirf tab matlab rakhta hai jab allowAllStates false ho) */
+  states: Record<string, boolean>;
+  /** ye pincodes kabhi deliver nahi honge (state allowed ho tab bhi) */
+  blockedPincodes: DeliveryPinRule[];
+  /** state blocked ho par ye specific pincodes allowed rahenge */
+  allowedPincodes: DeliveryPinRule[];
+  /** estimate copy jo customer ko dikhti hai */
+  deliveryDays: string;
+  freeShipping: boolean;
+};
+
+export type ServiceabilityReason =
+  | "ok"
+  | "invalid"
+  | "unknown"
+  | "blocked"
+  | "state_blocked"
+  | "state_not_allowed";
+
+export type Serviceability = {
+  serviceable: boolean;
+  pincode: string;
+  state: string | null;
+  district: string | null;
+  reason: ServiceabilityReason;
+  message: string;
+  deliveryDays: string | null;
+};
