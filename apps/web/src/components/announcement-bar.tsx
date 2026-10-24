@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 const MESSAGES = [
   { text: "Express ✈ Delivery on Prepaid Orders!", href: "/policies/shipping-policy" },
   { text: "Free Shipping within India", href: "/policies/shipping-policy" },
-  { text: "COD Available Under Rs. 3,500/-", href: "/policies/shipping-policy" },
+  { text: "Secure Prepaid Checkout — UPI, Cards & Netbanking", href: "/policies/payment-policy" },
 ];
 
 export function AnnouncementBar() {

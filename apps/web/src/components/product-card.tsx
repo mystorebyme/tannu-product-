@@ -5,6 +5,8 @@ import { useCart } from "@/components/cart-provider";
 import { discountPercent, formatPrice, imageUrl } from "@/lib/format";
 import type { Product } from "@/types/catalog";
 import { SafeImage } from "@/components/safe-image";
+import { colourSwatch } from "@/lib/colour";
+import { coloursFor } from "@/lib/colour-index";
 
 /**
  * Product card — live store jaisa hover behaviour:
@@ -12,8 +14,15 @@ import { SafeImage } from "@/components/safe-image";
  *  - "Add to cart" niche se slide-up
  *  - image par slow zoom
  */
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({
+  product,
+  colours,
+}: {
+  product: Product;
+  colours?: { name: string; handle: string }[];
+}) {
   const { addItem } = useCart();
+  const colourOptions = colours ?? coloursFor(product.handle);
   const off = discountPercent(product.price, product.compareAtPrice);
   const primary = product.images[0];
   const hoverImage = product.images[1] ?? null;
@@ -63,9 +72,10 @@ export function ProductCard({ product }: { product: Product }) {
               compareAtPrice: product.compareAtPrice,
               image: imageUrl(primary, 400),
               size: defaultSize,
+              colour: product.colourName ?? product.color,
             })
           }
-          className="absolute inset-x-0 bottom-0 translate-y-full bg-[#862222] py-2.5 text-[10.5px] font-semibold tracking-[.16em] text-white uppercase transition-transform duration-300 group-hover:translate-y-0 focus-visible:translate-y-0"
+          className="absolute inset-x-0 bottom-0 translate-y-full bg-[#862222] py-2.5 text-[10.5px] font-semibold tracking-[.16em] text-white uppercase transition-transform duration-300 group-hover:translate-y-0 focus-visible:translate-y-0 max-sm:translate-y-0"
         >
           Add to cart
         </button>
@@ -84,10 +94,22 @@ export function ProductCard({ product }: { product: Product }) {
           ) : null}
           <span className="font-semibold text-[#862222]">{formatPrice(product.price)}</span>
         </div>
-        {product.images.length > 1 ? (
-          <p className="mt-1 text-[10px] tracking-[.1em] text-[#a49a90] uppercase">
-            {product.images.length} photos
-          </p>
+        {colourOptions.length > 1 ? (
+          <div className="mt-1.5 flex items-center justify-center gap-1.5">
+            {colourOptions.slice(0, 6).map((colour) => (
+              <Link
+                key={colour.handle}
+                href={`/products/${colour.handle}`}
+                title={colour.name}
+                aria-label={`View ${colour.name}`}
+                className="h-3 w-3 rounded-full border border-black/10 transition hover:scale-110"
+                style={{ backgroundColor: colourSwatch(colour.name) }}
+              />
+            ))}
+            {colourOptions.length > 6 ? (
+              <span className="text-[9.5px] text-[#a49a90]">+{colourOptions.length - 6}</span>
+            ) : null}
+          </div>
         ) : null}
       </div>
     </div>
@@ -97,9 +119,12 @@ export function ProductCard({ product }: { product: Product }) {
 export function ProductGrid({
   products,
   columns = 4,
+  colourGroups = {},
 }: {
   products: Product[];
   columns?: 2 | 3 | 4;
+  /** product handle → uske colour options (card par swatch dots) */
+  colourGroups?: Record<string, { name: string; handle: string }[]>;
 }) {
   const gridClass =
     columns === 2
@@ -110,7 +135,7 @@ export function ProductGrid({
   return (
     <div className={`grid gap-x-2.5 gap-y-7 sm:gap-x-5 ${gridClass}`}>
       {products.map((product) => (
-        <ProductCard key={product.handle} product={product} />
+        <ProductCard key={product.handle} product={product} colours={colourGroups[product.handle]} />
       ))}
     </div>
   );

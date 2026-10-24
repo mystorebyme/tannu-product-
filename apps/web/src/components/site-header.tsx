@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { navigationCollections } from "@/lib/collections";
 import { formatPrice, imageUrl } from "@/lib/format";
 import { useCart } from "@/components/cart-provider";
@@ -25,8 +25,8 @@ const quickLinks = [
 const announcements = [
   "Diwali dispatch ✦ order by 4 Nov for delivery before the festival",
   "Free shipping across India — every order",
-  "COD available up to Rs. 3,500",
   "Same-day dispatch on prepaid orders",
+  "Secure prepaid checkout — UPI, cards & netbanking",
 ];
 
 export function SiteHeader() {
@@ -63,26 +63,38 @@ export function SiteHeader() {
   }, [mobileOpen]);
 
   const [results, setResults] = useState<SearchHit[]>([]);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [recommended, setRecommended] = useState<SearchHit[]>([]);
 
   // search server par hoti hai -> client bundle me 400KB ka catalog nahi jaata
   useEffect(() => {
+    if (!searchOpen) return;
     const term = query.trim();
-    if (term.length < 2) {
-      setResults([]);
-      return;
-    }
     const controller = new AbortController();
-    const timer = setTimeout(() => {
-      fetch(`/api/search?q=${encodeURIComponent(term)}`, { signal: controller.signal })
-        .then((response) => (response.ok ? response.json() : { results: [] }))
-        .then((payload: { results?: SearchHit[] }) => setResults(payload.results ?? []))
-        .catch(() => undefined);
-    }, 220);
+    const timer = setTimeout(
+      () => {
+        fetch(`/api/search?q=${encodeURIComponent(term)}`, { signal: controller.signal })
+          .then((response) => (response.ok ? response.json() : { results: [] }))
+          .then(
+            (payload: {
+              results?: SearchHit[];
+              suggestions?: string[];
+              recommended?: SearchHit[];
+            }) => {
+              setResults(payload.results ?? []);
+              setSuggestions(payload.suggestions ?? []);
+              setRecommended(payload.recommended ?? []);
+            },
+          )
+          .catch(() => undefined);
+      },
+      term.length < 2 ? 0 : 220,
+    );
     return () => {
       controller.abort();
       clearTimeout(timer);
     };
-  }, [query]);
+  }, [query, searchOpen]);
 
   const submitSearch = useCallback(
     (event: React.FormEvent) => {
@@ -230,8 +242,24 @@ export function SiteHeader() {
                   Search
                 </button>
               </div>
+              {suggestions.length > 0 ? (
+                <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                  <span className="text-[10px] tracking-[.14em] text-[#9c9289] uppercase">Suggestions</span>
+                  {suggestions.map((suggestion) => (
+                    <button
+                      key={suggestion}
+                      type="button"
+                      onClick={() => setQuery(suggestion)}
+                      className="border border-[#ece3d9] px-2.5 py-1 text-[11.5px] text-[#5c534b] transition hover:border-[#862222] hover:text-[#862222]"
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+
               {results.length > 0 ? (
-                <ul className="mt-3 divide-y divide-[#f0eae3] border border-[#f0eae3]">
+                <ul className="mt-2.5 divide-y divide-[#f0eae3] border border-[#f0eae3]" data-testid="search-suggestions">
                   {results.map((product) => (
                     <li key={product.handle}>
                       <Link
@@ -246,6 +274,46 @@ export function SiteHeader() {
                     </li>
                   ))}
                 </ul>
+              ) : null}
+
+              {results.length > 0 ? (
+                <Link
+                  href={`/search?q=${encodeURIComponent(query.trim())}`}
+                  onClick={() => setSearchOpen(false)}
+                  className="mt-2 block text-center text-[11px] font-semibold tracking-[.12em] text-[#862222] uppercase"
+                >
+                  View all results
+                </Link>
+              ) : null}
+
+              {query.trim().length >= 2 && results.length === 0 ? (
+                <p className="mt-3 text-[11.5px] text-[#8a8078]">
+                  &ldquo;{query.trim()}&rdquo; ke liye kuch nahi mila — inhe try kariye:
+                </p>
+              ) : null}
+
+              {recommended.length > 0 ? (
+                <div className="mt-3">
+                  <p className="text-[10px] tracking-[.14em] text-[#9c9289] uppercase">
+                    {query.trim().length < 2 ? "Recommended for you" : "You may also like"}
+                  </p>
+                  <ul className="mt-1.5 divide-y divide-[#f0eae3] border border-[#f0eae3]">
+                    {recommended.map((product) => (
+                      <li key={product.handle}>
+                        <Link
+                          href={`/products/${product.handle}`}
+                          onClick={() => setSearchOpen(false)}
+                          className="flex items-center gap-3 p-2 hover:bg-[#faf7f3]"
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <SafeImage src={imageUrl(product.images[0], 160)} alt={product.title} className="h-14 w-12 object-cover" />
+                          <span className="flex-1 text-xs font-medium">{product.title}</span>
+                          <span className="text-xs text-[#862222]">{formatPrice(product.price)}</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ) : null}
             </form>
           </div>
@@ -331,7 +399,14 @@ function CartDrawer({
   removeLine: (key: string) => void;
   setQuantity: (key: string, quantity: number) => void;
 }) {
-  const { isOpen, closeCart } = useCart();
+  const { isOpen, closeCart, lastAdded } = useCart();
+  const listRef = useRef<HTMLDivElement>(null);
+
+  // naya item list ke sabse upar aata hai — drawer bhi top par scroll ho jaye
+  useEffect(() => {
+    listRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  }, [lastAdded?.key, lastAdded?.quantity]);
+
   if (!isOpen) return null;
 
   return (
@@ -359,9 +434,15 @@ function CartDrawer({
           </div>
         ) : (
           <>
-            <div className="flex-1 overflow-y-auto px-5">
+            <div ref={listRef} className="flex-1 overflow-y-auto px-5">
               {lines.map((line) => (
-                <div key={line.key} className="flex gap-3 border-b border-[#f1ebe5] py-4">
+                <div
+                  key={line.key}
+                  data-testid={line.key === lastAdded?.key ? "cart-just-added" : undefined}
+                  className={`flex gap-3 border-b border-[#f1ebe5] py-4 ${
+                    line.key === lastAdded?.key ? "bg-[#fdf7f5]" : ""
+                  }`}
+                >
                   <Link href={`/products/${line.handle}`} onClick={closeCart} className="shrink-0">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <SafeImage src={line.image} alt={line.title} className="h-24 w-20 object-cover" />
@@ -374,7 +455,15 @@ function CartDrawer({
                     >
                       {line.title}
                     </Link>
-                    <p className="mt-0.5 text-[11px] text-[#8a8078]">Size: {line.size}</p>
+                    {line.key === lastAdded?.key ? (
+                      <span className="mt-1 w-max bg-[#eaf5ec] px-1.5 py-0.5 text-[9.5px] font-semibold tracking-[.08em] text-[#2f7a3f] uppercase">
+                        Just added
+                      </span>
+                    ) : null}
+                    <p className="mt-0.5 text-[11px] text-[#8a8078]">
+                      Size: {line.size}
+                      {line.colour ? ` · ${line.colour}` : ""}
+                    </p>
                     <p className="mt-1 text-[12.5px] font-semibold text-[#862222]">{formatPrice(line.price)}</p>
                     <div className="mt-2 flex items-center justify-between">
                       <div className="flex items-center border border-[#e2d8cd]">
@@ -414,9 +503,7 @@ function CartDrawer({
                 <span className="font-semibold text-[#862222]">{formatPrice(subtotal)}</span>
               </div>
               <p className="mt-1 text-[11px] text-[#8a8078]">
-                {subtotal >= 350000
-                  ? "Free shipping & COD eligible 🎉"
-                  : `COD available under Rs. 3,500 — advance payment required above it.`}
+                Free shipping across India · prepaid orders dispatch same day
               </p>
               <Link
                 href="/cart"

@@ -33,9 +33,9 @@ Return shipping is free when the fault is ours. For a size exchange requested by
 
 ## 5. Refunds
 
-- **Prepaid orders:** refunded to the original payment method within 5–7 working days after we receive and inspect the item.
-- **COD orders:** refunded by UPI or bank transfer to an account in your name; we need your account details to process it.
-- **Cancellations before dispatch:** full refund including COD handling fee, processed within 48 hours.
+- **All orders:** refunded to the original payment method within 5–7 working days after we receive and inspect the item.
+- **If the original method is unavailable:** refunded by UPI or bank transfer to an account in your name.
+- **Cancellations before dispatch:** full refund processed within 48 hours.
 
 ## 6. Exchanges
 
@@ -43,7 +43,7 @@ If your size is in stock we ship the replacement within 2 working days of receiv
 
 ## 7. Non-refundable charges
 
-The Rs. 50 COD handling fee is not refunded for a change of mind. Courier charges are not refunded when the return is not due to a defect.
+Courier charges are not refunded when the return is not due to a defect.
 
 ## 8. Late or missing refunds
 

@@ -5,12 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useCart } from "@/components/cart-provider";
 import { formatPrice, imageUrl } from "@/lib/format";
-import {
-  COUPONS as COUPON_RULES,
-  COD_FEE,
-  COD_MAX_SUBTOTAL,
-  computeDiscount,
-} from "@liksha/validation";
+import { COUPONS as COUPON_RULES, computeDiscount } from "@liksha/validation";
 import { SafeImage } from "@/components/safe-image";
 import { PhoneOtp } from "@/components/phone-otp";
 
@@ -24,7 +19,7 @@ const indianStates = [
 ];
 
 export function CheckoutForm() {
-  const { lines, subtotal, count, clear, isOpen, closeCart } = useCart();
+  const { lines, subtotal, count, clear, isOpen, closeCart, removeLine } = useCart();
   const router = useRouter();
   const searchParams = useSearchParams();
   const couponFromUrl = searchParams.get("coupon")?.toUpperCase() ?? null;
@@ -33,7 +28,8 @@ export function CheckoutForm() {
   );
   const [couponInput, setCouponInput] = useState("");
   const [couponMessage, setCouponMessage] = useState<string | null>(null);
-  const [payment, setPayment] = useState<"prepaid" | "cod">("prepaid");
+  // sirf prepaid — COD option hata diya gaya hai
+  const payment = "prepaid" as const;
   const [submitting, setSubmitting] = useState(false);
   const [phoneToken, setPhoneToken] = useState<string | null>(null);
   const [otpRequired, setOtpRequired] = useState(false);
@@ -62,9 +58,7 @@ export function CheckoutForm() {
   }, [isOpen, closeCart]);
 
   const discount = computeDiscount(subtotal, coupon);
-  const codFee = payment === "cod" ? COD_FEE : 0;
-  const total = Math.max(0, subtotal - discount + codFee);
-  const codBlocked = subtotal > COD_MAX_SUBTOTAL;
+  const total = Math.max(0, subtotal - discount);
 
   function update(field: keyof typeof form, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -204,48 +198,20 @@ export function CheckoutForm() {
 
         <section>
           <h2 className="text-[11px] font-semibold tracking-[.16em] text-[#862222] uppercase">Payment</h2>
-          <div className="mt-3 space-y-2">
-            <label
-              className={`flex cursor-pointer items-start gap-3 border p-3 ${
-                payment === "prepaid" ? "border-[#862222] bg-[#fdf8f7]" : "border-[#e5dbd0]"
-              }`}
-            >
-              <input
-                type="radio"
-                name="payment"
-                checked={payment === "prepaid"}
-                onChange={() => setPayment("prepaid")}
-                className="mt-0.5 accent-[#862222]"
-              />
-              <span>
-                <span className="block text-[12.5px] font-medium">Prepaid — UPI / Card / Netbanking</span>
-                <span className="mt-0.5 block text-[11.5px] text-[#8a8078]">
-                  Express delivery, priority dispatch and free shipping.
-                </span>
-              </span>
-            </label>
-            <label
-              className={`flex cursor-pointer items-start gap-3 border p-3 ${
-                payment === "cod" ? "border-[#862222] bg-[#fdf8f7]" : "border-[#e5dbd0]"
-              } ${codBlocked ? "opacity-60" : ""}`}
-            >
-              <input
-                type="radio"
-                name="payment"
-                disabled={codBlocked}
-                checked={payment === "cod"}
-                onChange={() => setPayment("cod")}
-                className="mt-0.5 accent-[#862222]"
-              />
-              <span>
-                <span className="block text-[12.5px] font-medium">Cash on delivery (+ Rs. 50 fee)</span>
-                <span className="mt-0.5 block text-[11.5px] text-[#8a8078]">
-                  {codBlocked
-                    ? "COD is available only on orders under Rs. 3,500."
-                    : "Available on orders under Rs. 3,500 across India."}
-                </span>
-              </span>
-            </label>
+          <div className="mt-3 border border-[#e5dbd0] bg-[#fdf8f7] p-3.5">
+            <div className="flex items-start gap-3">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#862222" strokeWidth="1.7" className="mt-0.5 shrink-0" aria-hidden>
+                <path d="M12 3l7 3v6c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6l7-3z" />
+                <path d="M9 12l2 2 4-4" />
+              </svg>
+              <div>
+                <p className="text-[12.5px] font-medium">Prepaid order — UPI / Card / Netbanking</p>
+                <p className="mt-0.5 text-[11.5px] leading-relaxed text-[#8a8078]">
+                  Payment link WhatsApp par turant bheja jata hai. Express delivery, priority dispatch
+                  aur free shipping — sab orders par.
+                </p>
+              </div>
+            </div>
           </div>
         </section>
       </div>
@@ -260,8 +226,18 @@ export function CheckoutForm() {
               <div className="flex-1">
                 <p className="line-clamp-2 text-[11.5px] leading-snug">{line.title}</p>
                 <p className="mt-0.5 text-[10.5px] text-[#8a8078]">
-                  {line.size} · Qty {line.quantity}
+                  {line.size}
+                  {line.colour ? ` · ${line.colour}` : ""} · Qty {line.quantity}
                 </p>
+                <button
+                  type="button"
+                  onClick={() => removeLine(line.key)}
+                  data-testid="summary-remove"
+                  aria-label={`Remove ${line.title} from order`}
+                  className="mt-1 text-[10px] tracking-[.06em] text-[#9a8f85] uppercase underline transition hover:text-[#862222]"
+                >
+                  Remove
+                </button>
               </div>
               <span className="text-[11.5px] font-medium">{formatPrice(line.price * line.quantity)}</span>
             </li>
@@ -300,12 +276,6 @@ export function CheckoutForm() {
             <div className="flex justify-between text-[#2f7a3f]">
               <span>Coupon ({coupon})</span>
               <span>− {formatPrice(discount)}</span>
-            </div>
-          ) : null}
-          {codFee > 0 ? (
-            <div className="flex justify-between">
-              <span className="text-[#6b6259]">COD fee</span>
-              <span>{formatPrice(codFee)}</span>
             </div>
           ) : null}
           <div className="flex items-center justify-between border-t border-[#e7ddd2] pt-2.5 text-[14.5px] font-semibold">

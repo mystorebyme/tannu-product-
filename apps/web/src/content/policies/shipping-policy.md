@@ -8,8 +8,8 @@ We ship across India. If your pincode is not serviceable by our courier partners
 
 ## 2. Charges
 
-- **Prepaid orders:** free shipping anywhere in India.
-- **Cash on delivery:** Rs. 50 handling fee on orders up to Rs. 3,500. COD is not available above Rs. 3,500 — we ask for advance payment instead.
+- **All orders:** free shipping anywhere in India.
+- **Prepaid only:** we accept UPI, cards and net banking. A secure payment link is shared on WhatsApp right after you place the order.
 
 ## 3. Dispatch time
 

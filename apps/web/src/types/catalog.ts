@@ -1,6 +1,6 @@
-import type { Collection, Product } from "@liksha/types";
+import type { Collection, ColourGroup, ColourOption, Product } from "@liksha/types";
 
-export type { Collection, Product };
+export type { Collection, ColourGroup, ColourOption, Product };
 
 export type CatalogProduct = Product;
 export type CatalogCollection = Collection;

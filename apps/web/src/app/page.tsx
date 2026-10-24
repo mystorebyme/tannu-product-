@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { ProductGrid } from "@/components/product-card";
 import { EditorialBand, OccasionStrip } from "@/components/occasion-strip";
 import { Reveal } from "@/components/reveal";
-import { getProducts, getCollection, products as allProducts } from "@/lib/store";
+import { getProducts, getCollection } from "@/lib/store";
 import { imageUrl } from "@/lib/format";
 import { siteConfig } from "@/config/site";
 import { SafeImage } from "@/components/safe-image";
@@ -11,7 +11,7 @@ import { SafeImage } from "@/components/safe-image";
 export const metadata: Metadata = {
   title: "Liksha Clothing | Designer Anarkali Suits, Lehenga Choli & Suit Sets",
   description:
-    "Shop designer Anarkali suits, lehanga choli and printed suit sets at Liksha Clothing. Free shipping within India, COD under Rs. 3,500, express delivery on prepaid orders.",
+    "Shop designer Anarkali suits, lehanga choli and printed suit sets at Liksha Clothing. Hand-finished pieces, free shipping within India and express delivery on prepaid orders.",
   alternates: { canonical: "/" },
 };
 
@@ -104,24 +104,6 @@ export default async function HomePage() {
       <OccasionStrip />
       <EditorialBand />
 
-      <section className="container-liksha pb-14">
-        <Reveal className="bg-[#862222] px-6 py-10 text-center text-[#f8ebdc] sm:px-10">
-          <p className="text-[10.5px] tracking-[.28em] uppercase">Liksha Clothing</p>
-          <h2 className="mt-2 font-display text-[26px] leading-tight font-medium text-white sm:text-[34px]">
-            {allProducts.length} styles, one wardrobe
-          </h2>
-          <p className="mx-auto mt-2 max-w-[560px] text-[12.5px] leading-relaxed">
-            Hand-finished Anarkali suits, lehengas and suit sets. Free shipping within India, express
-            delivery on prepaid orders and COD under Rs. 3,500.
-          </p>
-          <Link
-            href="/collections/new-arrivals"
-            className="mt-5 inline-block bg-[#f8ebdc] px-8 py-3 text-[11px] font-semibold tracking-[.18em] text-[#862222] uppercase transition hover:bg-white"
-          >
-            Shop new arrivals
-          </Link>
-        </Reveal>
-      </section>
     </div>
   );
 }

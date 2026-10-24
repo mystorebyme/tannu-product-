@@ -83,7 +83,10 @@ export default function CartPage() {
                       >
                         {line.title}
                       </Link>
-                      <p className="mt-1 text-[11px] text-[#8a8078]">Size: {line.size}</p>
+                      <p className="mt-1 text-[11px] text-[#8a8078]">
+                        Size: {line.size}
+                        {line.colour ? ` · Colour: ${line.colour}` : ""}
+                      </p>
                       <p className="mt-1 text-[12px] font-semibold text-[#862222]">{formatPrice(line.price)}</p>
                     </div>
                   </div>
@@ -114,8 +117,13 @@ export default function CartPage() {
                   <button
                     type="button"
                     onClick={() => removeLine(line.key)}
-                    className="justify-self-start text-[10.5px] tracking-[.08em] text-[#9a8f85] uppercase underline sm:justify-self-center"
+                    data-testid="cart-remove"
+                    aria-label={`Remove ${line.title} from cart`}
+                    className="inline-flex items-center gap-1.5 justify-self-start border border-[#e2d8cd] px-2.5 py-1.5 text-[10px] font-medium tracking-[.08em] text-[#8a8078] uppercase transition hover:border-[#862222] hover:text-[#862222] sm:justify-self-center"
                   >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+                      <path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6" />
+                    </svg>
                     Remove
                   </button>
                 </li>
@@ -172,7 +180,7 @@ export default function CartPage() {
               Proceed to checkout
             </Link>
             <p className="mt-2.5 text-center text-[10.5px] text-[#8a8078]">
-              100% secure payment · COD under Rs. 3,500
+              100% secure prepaid payment · UPI, cards & netbanking
             </p>
           </aside>
         </div>

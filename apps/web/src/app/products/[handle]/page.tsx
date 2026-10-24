@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ProductDetail } from "@/components/product-detail";
 import { ProductGrid } from "@/components/product-card";
-import { getProduct, getRelatedProducts, products } from "@/lib/store";
+import { colourOptionsFor, getProduct, getRelatedProducts, products } from "@/lib/store";
 import { categoryHref, categoryLabel } from "@/lib/categories";
 
 // har product build time par static HTML ban jaata hai -> instant page loads
@@ -60,7 +60,7 @@ export default async function ProductPage({
         </ol>
       </nav>
 
-      <ProductDetail product={product} />
+      <ProductDetail product={product} colours={colourOptionsFor(product)} />
 
       <section className="mt-14 border-t border-[#eee6de] pt-9">
         <div className="text-center">

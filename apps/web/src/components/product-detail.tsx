@@ -5,36 +5,78 @@ import { useMemo, useState } from "react";
 import { useCart } from "@/components/cart-provider";
 import { discountPercent, formatPrice } from "@/lib/format";
 import { categoryHref, categoryLabel } from "@/lib/categories";
-import type { Product } from "@/types/catalog";
+import { colourSwatch } from "@/lib/colour";
+import type { ColourOption, Product } from "@/types/catalog";
 import { ProductGallery } from "@/components/product-gallery";
 
-export function ProductDetail({ product }: { product: Product }) {
+/** catalogue me hai lekin type import ke liye alias */
+type Variant = ColourOption;
+
+export function ProductDetail({ product, colours = [] }: { product: Product; colours?: Variant[] }) {
   const { addItem } = useCart();
+
+  // ek hi design ke saare colours yahin switch hote hain — page reload nahi
+  const variants = useMemo<Variant[]>(() => {
+    if (colours.length) return colours;
+    return [
+      {
+        name: product.colourName ?? product.color,
+        handle: product.handle,
+        price: product.price,
+        compareAtPrice: product.compareAtPrice,
+        image: product.images[0] ?? "",
+        images: product.images,
+        sizes: product.sizes,
+        sizePricing: product.sizePricing,
+        inStock: product.inStock,
+        colourCode: product.color,
+      },
+    ];
+  }, [colours, product]);
+
+  const [activeHandle, setActiveHandle] = useState(product.handle);
+  const active = variants.find((variant) => variant.handle === activeHandle) ?? variants[0]!;
+
   const firstAvailable =
-    product.sizes.find((size) => product.sizePricing?.[size]?.available) ??
-    product.sizes[0] ??
-    "Free Size";
+    active.sizes.find((size) => active.sizePricing?.[size]?.available) ?? active.sizes[0] ?? "Free Size";
   const [size, setSize] = useState(firstAvailable);
   const [quantity, setQuantity] = useState(1);
   const [openAccordion, setOpenAccordion] = useState<string | null>("details");
   const [pincode, setPincode] = useState("");
   const [pinMessage, setPinMessage] = useState<string | null>(null);
 
-  const sizePricing = product.sizePricing?.[size];
-  const price = sizePricing?.price ?? product.price;
-  const compareAt = sizePricing?.compareAtPrice ?? product.compareAtPrice;
+  const sizePricing = active.sizePricing?.[size];
+  const price = sizePricing?.price ?? active.price;
+  const compareAt = sizePricing?.compareAtPrice ?? active.compareAtPrice;
   const off = discountPercent(price, compareAt);
   const savings = useMemo(() => (compareAt ? compareAt - price : 0), [compareAt, price]);
+  const bigSizeSurcharge = Boolean(sizePricing && sizePricing.price > active.price);
+
+  function changeColour(handle: string) {
+    if (handle === activeHandle) return;
+    const next = variants.find((variant) => variant.handle === handle);
+    if (!next) return;
+    setActiveHandle(handle);
+    const nextSize =
+      next.sizes.find((option) => next.sizePricing?.[option]?.available) ?? next.sizes[0] ?? "Free Size";
+    setSize(nextSize);
+    setQuantity(1);
+    // URL bhi usi colour ka — share/copy karne par wahi khulta hai
+    if (typeof window !== "undefined") {
+      window.history.replaceState(null, "", `/products/${handle}`);
+    }
+  }
 
   function add(quantityOverride?: number) {
     addItem(
       {
-        handle: product.handle,
-        title: product.title,
+        handle: active.handle,
+        title: active.title ?? product.title,
         price,
         compareAtPrice: compareAt ?? null,
-        image: product.images[0],
+        image: active.images[0],
         size,
+        colour: active.name,
       },
       quantityOverride ?? quantity,
     );
@@ -45,7 +87,7 @@ export function ProductDetail({ product }: { product: Product }) {
       setPinMessage("Please enter a valid 6-digit pincode.");
       return;
     }
-    setPinMessage(`Delivering to ${pincode.trim()} — free shipping, 4-7 business days. COD under Rs. 3,500.`);
+    setPinMessage(`Delivering to ${pincode.trim()} — free shipping, 4-7 business days.`);
   }
 
   const accordions = [
@@ -55,7 +97,7 @@ export function ProductDetail({ product }: { product: Product }) {
       content: product.descriptionHtml ? (
         <div
           className="product-rich text-[12.5px] leading-relaxed text-[#5c534b] [&_br]:block [&_li]:ml-4 [&_li]:list-disc [&_p]:mb-2 [&_strong]:font-semibold"
-          // live store ka body_html — build script me sanitize hota hai (script/iframe/img strip)
+          // live store ka body_html — build script me sanitize hota hai (script/iframe/img/emoji/NOTE strip)
           dangerouslySetInnerHTML={{ __html: product.descriptionHtml }}
         />
       ) : (
@@ -75,8 +117,7 @@ export function ProductDetail({ product }: { product: Product }) {
       content: (
         <p className="text-[12.5px] leading-relaxed text-[#5c534b]">
           Ready to dispatch in 1-2 days. Free shipping across India. Prepaid orders are delivered in
-          4-7 business days; COD is available on orders under Rs. 3,500. For multiple items, an
-          advance payment is required.
+          4-7 business days, with express dispatch on prepaid payments.
         </p>
       ),
     },
@@ -103,9 +144,10 @@ export function ProductDetail({ product }: { product: Product }) {
   ];
 
   return (
-    <div className="group grid gap-8 lg:grid-cols-2 lg:gap-12">
+    <div className="group grid gap-8 md:grid-cols-2 md:gap-8 lg:grid-cols-[1.05fr_1fr] lg:gap-12">
       <ProductGallery
-        images={product.images}
+        key={active.handle}
+        images={active.images}
         title={product.title}
         badge={off > 0 ? `Save ${off}%` : null}
       />
@@ -117,7 +159,7 @@ export function ProductDetail({ product }: { product: Product }) {
           </Link>
           {product.productType ? <span className="text-[#c9bdb1]"> · {product.productType}</span> : null}
         </p>
-        <h1 className="mt-1.5 font-display text-[24px] leading-snug font-medium text-[#2f2a25] sm:text-[30px]">
+        <h1 className="mt-1.5 font-display text-[22px] leading-snug font-medium text-[#2f2a25] sm:text-[26px] lg:text-[30px]">
           {product.title}
         </h1>
 
@@ -139,12 +181,47 @@ export function ProductDetail({ product }: { product: Product }) {
         ) : null}
         <p className="mt-1 text-[11.5px] text-[#8a8078]">Inclusive of all taxes</p>
 
-        <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-1.5 border-y border-[#eee6de] py-3 text-[11.5px] text-[#6b6259]">
+        {/* ── colour selector: ek hi product, colour badalne par sab kuch badalta hai ── */}
+        {variants.length > 1 ? (
+          <div className="mt-4" data-testid="colour-options">
+            <p className="text-[11px] font-semibold tracking-[.14em] uppercase">
+              Colour: <span className="text-[#862222]">{active.name}</span>{" "}
+              <span className="font-normal text-[#9c8f82]">({variants.length} available)</span>
+            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              {variants.map((variant) => {
+                const selected = variant.handle === active.handle;
+                return (
+                  <button
+                    key={variant.handle}
+                    type="button"
+                    onClick={() => changeColour(variant.handle)}
+                    aria-pressed={selected}
+                    aria-label={`Colour ${variant.name}`}
+                    title={variant.name}
+                    className={`flex items-center gap-2 border px-2.5 py-1.5 text-[11.5px] transition ${
+                      selected
+                        ? "border-[#862222] bg-[#fdf6f4] text-[#862222]"
+                        : "border-[#e2d8cd] text-[#4a423b] hover:border-[#862222]"
+                    }`}
+                  >
+                    <span
+                      className="h-4 w-4 rounded-full border border-black/10"
+                      style={{ backgroundColor: colourSwatch(variant.name) }}
+                    />
+                    {variant.name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
+
+        <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5 border-y border-[#eee6de] py-3 text-[11.5px] text-[#6b6259]">
           <span className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-[#3ba55d]" /> Colour: {product.color}
+            <span className="h-2 w-2 rounded-full bg-[#3ba55d]" /> Colour: {active.name}
           </span>
           <span>Fabric: {product.fabric}</span>
-          <span>{product.images.length} photos</span>
         </div>
 
         <div className="mt-4">
@@ -157,8 +234,8 @@ export function ProductDetail({ product }: { product: Product }) {
             </Link>
           </div>
           <div className="mt-2 flex flex-wrap gap-2">
-            {product.sizes.map((option) => {
-              const optionPricing = product.sizePricing?.[option];
+            {active.sizes.map((option) => {
+              const optionPricing = active.sizePricing?.[option];
               const soldOut = optionPricing ? !optionPricing.available : false;
               return (
                 <button
@@ -180,8 +257,15 @@ export function ProductDetail({ product }: { product: Product }) {
               );
             })}
           </div>
+          <p className="mt-2 text-[11px] text-[#8a8078]">
+            {bigSizeSurcharge
+              ? `Bade size (${size.split(" ")[0]}) me extra fabric lagta hai — price Rs. ${Math.round(
+                  (sizePricing!.price - active.price) / 100,
+                )} zyada.`
+              : "XL aur usse bade sizes par price thoda zyada hota hai."}
+          </p>
           {sizePricing && !sizePricing.available ? (
-            <p className="mt-2 text-[11.5px] text-[#b3261e]">
+            <p className="mt-1 text-[11.5px] text-[#b3261e]">
               {size} is out of stock — WhatsApp 9909790455 for the next drop.
             </p>
           ) : null}
@@ -192,16 +276,16 @@ export function ProductDetail({ product }: { product: Product }) {
             <button
               type="button"
               onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-              className="h-11 w-10 text-base"
+              className="h-11 w-9 text-base"
               aria-label="Decrease quantity"
             >
               −
             </button>
-            <span className="w-9 text-center text-[13px]">{quantity}</span>
+            <span className="w-8 text-center text-[13px]">{quantity}</span>
             <button
               type="button"
               onClick={() => setQuantity((q) => Math.min(10, q + 1))}
-              className="h-11 w-10 text-base"
+              className="h-11 w-9 text-base"
               aria-label="Increase quantity"
             >
               +
@@ -226,7 +310,7 @@ export function ProductDetail({ product }: { product: Product }) {
         </button>
 
         <p className="mt-3 text-[11px] tracking-[.06em] text-[#8a8078]">
-          Free shipping across India · COD under Rs. 3,500 · 7 days replacement
+          Free shipping across India · 7 days replacement · prepaid only
         </p>
 
         <div className="mt-4 border border-[#eee6de] bg-[#faf8f5] p-3">
@@ -271,7 +355,7 @@ export function ProductDetail({ product }: { product: Product }) {
 
         <a
           href={`https://wa.me/919909790455?text=${encodeURIComponent(
-            `Hi Liksha Clothing, I want to order: ${product.title} (${size})`,
+            `Hi Liksha Clothing, I want to order: ${product.title} (${active.name}, ${size})`,
           )}`}
           target="_blank"
           rel="noreferrer"

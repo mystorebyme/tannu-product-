@@ -197,12 +197,8 @@ export function SiteFooter() {
       <div className="border-t border-[#e9dfd4]">
         <div className="mx-auto flex max-w-[1400px] flex-col items-center justify-between gap-2 px-4 py-4 text-[11px] text-[#8a8078] sm:flex-row lg:px-6">
           <p>© {new Date().getFullYear()}, Liksha Clothing. All rights reserved.</p>
-          <p className="flex items-center gap-3">
-            <span>Visa</span>
-            <span>Mastercard</span>
-            <span>UPI</span>
-            <span>Rupay</span>
-            <span>Cash on Delivery</span>
+          <p className="text-[10.5px] tracking-[.1em] text-[#a49a90] uppercase">
+            Secure prepaid payments
           </p>
         </div>
       </div>

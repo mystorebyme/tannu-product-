@@ -64,6 +64,35 @@ const COLORS = [
 
 const titleCase = (value) => value.replace(/\b\w/g, (c) => c.toUpperCase());
 
+/** Emoji/dingbats hata do — owner ne kaha copy me emoji nahi chahiye. */
+const EMOJI =
+  /[\p{Extended_Pictographic}\u{1F3FB}-\u{1F3FF}\u{1F1E6}-\u{1F1FF}\u2700-\u27BF\u2B00-\u2BFF\uFE0E\uFE0F\u200D\u20E3]/gu;
+function stripEmoji(value) {
+  return String(value ?? "")
+    .replace(EMOJI, " ")
+    .replace(/[ \t]{2,}/g, " ")
+    .trim();
+}
+
+/**
+ * Bade size par price zyada — cutting/stitching zyada fabric leta hai.
+ * Base price (XS–L) live store ka hi rehta hai, sirf XL se upar surcharge lagta hai.
+ */
+export const SIZE_SURCHARGE = {
+  "XL [42]": 10_000,
+  "2XL [44]": 20_000,
+  "3XL [46]": 30_000,
+  "4XL [48]": 40_000,
+  "5XL [50]": 50_000,
+};
+
+/** live store ke description me chhapa hua copyright NOTE — storefront par nahi chahiye */
+const NOTE_PATTERNS = [
+  /our all design(?:ed)? is registered copyright[^.]*\.?/gi,
+  /copying our content[^.]*?owner[^.]*\.?/gi,
+  /all rights reserved by owner[^.]*\.?/gi,
+];
+
 function detectFabric(product) {
   const haystack = `${product.title} ${product.body_html ?? ""} ${(product.tags ?? []).join(" ")}`.toLowerCase();
   for (const fabric of FABRICS) if (haystack.includes(fabric)) return titleCase(fabric);
@@ -113,6 +142,28 @@ function sanitizeHtml(html) {
   out = out.replace(/\son[a-z]+\s*=\s*"[^"]*"/gi, "");
   out = out.replace(/\son[a-z]+\s*=\s*'[^']*'/gi, "");
   out = out.replace(/\s(href|src)\s*=\s*"(?!https?:|\/)[^"]*"/gi, "");
+  // copyright NOTE (live description ka tail) hatao
+  out = stripEmoji(out);
+  // live store ke *bold* markers ko asli bold me badlo (asterisk copy gandi lagti hai)
+  out = out.replace(/\*\s*([^*<>\n]{1,60}?)\s*:\s*-\s*\*/g, "<strong>$1:</strong> ");
+  out = out.replace(/\*\s*([^*<>\n]{1,60}?)\s*\*\s*:?\s*-?\s*/g, "<strong>$1</strong> ");
+  out = out.replace(/<strong>\s*<\/strong>/g, "");
+  // bache hue decorative asterisks / bullet markers hatao
+  out = out.replace(/<span>\s*\*\s*<\/span>/gi, "");
+  out = out.replace(/\s*\*\s*/g, " ");
+  for (let pass = 0; pass < 2; pass += 1) {
+    out = out.replace(/<span>(?:\s|&nbsp;)*<\/span>/gi, "");
+    out = out.replace(/<p>(?:\s|&nbsp;|<br\s*\/?>)*<\/p>/gi, "");
+  }
+  out = out.replace(/(?:<br\s*\/?>\s*){3,}/gi, "<br><br>");
+  out = out.replace(/  +/g, " ");
+  out = out.replace(/\s*:\s*-\s*/g, ": ");
+  out = out.replace(/<strong>([^<]{1,60}?)<\/strong>\s*:/g, "<strong>$1:</strong>");
+  out = out.replace(/(?:<br\s*\/?>|<p[^>]*>)\s*(?:<span[^>]*>)?\s*(?:<\/span>)?\s*(?=<br|$)/gi, "");
+  for (const pattern of NOTE_PATTERNS) out = out.replace(pattern, "");
+  out = out.replace(/\bNOTE\b\s*[:\-]?/gi, "");
+  out = out.replace(/(<br\s*\/?>\s*){2,}/gi, "<br>");
+  out = out.replace(/<p>\s*(<br\s*\/?>)?\s*<\/p>/gi, "");
   const allowed = new Set(["p", "br", "b", "strong", "i", "em", "u", "ul", "ol", "li", "span", "h3", "h4", "h5", "div", "table", "tbody", "tr", "td", "th"]);
   out = out.replace(/<\/?([a-zA-Z0-9-]+)([^>]*)>/g, (match, tag, attrs) => {
     const name = tag.toLowerCase();
@@ -151,6 +202,41 @@ function variantImage(variant, images) {
   return images[0] ?? null;
 }
 
+
+/**
+ * Ek hi design ke alag-alag colour live store par alag products hote hain
+ * ("Rani Pink Trendy Anarkali Suit Set" vs "Maroon Trendy Anarkali Suit Set").
+ * Storefront par ek hi product dikhna chahiye jisme colour swatch se sab kuch badle.
+ */
+function splitColour(title) {
+  const lower = title.toLowerCase();
+  let best = null;
+  for (const colour of COLORS) {
+    let from = 0;
+    while (true) {
+      const index = lower.indexOf(colour, from);
+      if (index === -1) break;
+      from = index + 1;
+      const before = lower[index - 1];
+      const after = lower[index + colour.length];
+      if (before && /[a-z0-9]/.test(before)) continue;
+      if (after && /[a-z0-9]/.test(after)) continue;
+      if (!best || colour.length > best.colour.length) best = { colour, index };
+      break;
+    }
+  }
+  if (!best) return null;
+  const base = `${title.slice(0, best.index)} ${title.slice(best.index + best.colour.length)}`
+    .replace(/\s{2,}/g, " ")
+    .replace(/^[\s\-–—,]+|[\s\-–—,]+$/g, "")
+    .trim();
+  if (base.length < 14) return null;
+  return { colour: titleCase(best.colour), base };
+}
+
+/** group key: colour ke bina title ka slug */
+const groupKeyOf = (base) => base.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
 (function main() {
   const liveProducts = readJson(path.join(LIVE, "products.json")).products;
   const liveCollections = readJson(path.join(LIVE, "collections.json")).collections;
@@ -186,17 +272,29 @@ function variantImage(variant, images) {
       image: variantImage(variant, images),
     }));
 
-    const prices = variants.map((v) => v.price).filter((n) => n > 0);
-    const price = prices.length ? Math.min(...prices) : 0;
-    const compareAts = variants.map((v) => v.compareAtPrice).filter((n) => n && n > price);
-    const compareAtPrice = compareAts.length ? Math.max(...compareAts) : null;
-
     // per-size map: same size ke duplicate variants (colour options) me sabse kam price jeetta hai
     const bySize = new Map();
     for (const variant of variants) {
       const existing = bySize.get(variant.size);
       if (!existing || variant.price < existing.price) bySize.set(variant.size, variant);
     }
+
+    // size-wise price: bade size par surcharge (XL se upar), MRP sirf tab jab price se bada ho
+    const sizePricing = Object.fromEntries(
+      [...bySize.entries()].map(([size, variant]) => {
+        const surcharge = SIZE_SURCHARGE[size] ?? 0;
+        const sizePrice = variant.price + surcharge;
+        const sizeCompareAt =
+          variant.compareAtPrice && variant.compareAtPrice > sizePrice ? variant.compareAtPrice : null;
+        return [size, { price: sizePrice, compareAtPrice: sizeCompareAt, available: variant.available }];
+      }),
+    );
+    const sizePrices = Object.values(sizePricing).map((entry) => entry.price).filter((n) => n > 0);
+    const price = sizePrices.length ? Math.min(...sizePrices) : 0;
+    const compareAts = Object.values(sizePricing)
+      .map((entry) => entry.compareAtPrice)
+      .filter((n) => n && n > price);
+    const compareAtPrice = compareAts.length ? Math.max(...compareAts) : null;
 
     const sizes = normalizeSizes([...bySize.keys()]);
     for (const size of sizes) stats.sizes.add(size);
@@ -205,7 +303,8 @@ function variantImage(variant, images) {
     if (usedHandles.has(handle)) handle = `${handle}-${source.id}`;
     usedHandles.add(handle);
 
-    const descriptionHtml = sanitizeHtml(source.body_html) || `<p>${source.title.trim()}</p>`;
+    const cleanTitle = stripEmoji(source.title.trim()).replace(/\s{2,}/g, " ");
+    const descriptionHtml = sanitizeHtml(source.body_html) || `<p>${cleanTitle}</p>`;
     const details = htmlToLines(descriptionHtml).slice(0, 14);
     // `frontpage` live store ka home-page grouping hai (nav collection nahi) — featured flag me jaata hai
     const collections = [...liveCollectionsForProduct].filter((handle) => handle !== "frontpage").sort();
@@ -213,7 +312,7 @@ function variantImage(variant, images) {
     products.push({
       handle,
       sourceHandle: source.handle,
-      title: source.title.trim(),
+      title: stripEmoji(source.title.trim()).replace(/\s{2,}/g, " "),
       price,
       compareAtPrice,
       images,
@@ -223,14 +322,9 @@ function variantImage(variant, images) {
       fabric: detectFabric(source),
       color: detectColor(source),
       sizes,
-      sizePricing: Object.fromEntries(
-        [...bySize.entries()].map(([size, variant]) => [
-          size,
-          { price: variant.price, compareAtPrice: variant.compareAtPrice, available: variant.available },
-        ]),
-      ),
+      sizePricing,
       details,
-      description: (details.join(" ").trim() || source.title.trim()).slice(0, 400),
+      description: stripEmoji(details.join(" ").trim() || cleanTitle).slice(0, 400),
       descriptionHtml,
       rating: 0,
       reviewCount: 0,
@@ -240,6 +334,72 @@ function variantImage(variant, images) {
     });
     stats.images += images.length;
   }
+
+  /* ---------- colour grouping: same design, different colours -> one product ---------- */
+  const groupMap = new Map();
+  for (const product of products) {
+    const split = splitColour(product.title);
+    if (!split) continue;
+    if (split.base.toLowerCase() === product.title.toLowerCase()) continue;
+    const key = groupKeyOf(split.base);
+    if (!key) continue;
+    if (!groupMap.has(key)) groupMap.set(key, { key, title: split.base, category: product.category, members: [] });
+    groupMap.get(key).members.push({ product, colour: split.colour });
+  }
+
+  const colourGroups = {};
+  for (const group of groupMap.values()) {
+    if (group.members.length < 2) continue;
+    // ek hi colour do baar ho ya category mix ho to group skip (galat merge se bachao)
+    const colours = new Set(group.members.map((member) => member.colour.toLowerCase()));
+    if (colours.size !== group.members.length) continue;
+    if (new Set(group.members.map((member) => member.product.category)).size !== 1) continue;
+
+    const members = [...group.members].sort(
+      (a, b) => a.product.price - b.product.price || b.product.images.length - a.product.images.length,
+    );
+    // representative: sabse zyada photos (tie -> sabse purana publish)
+    const representative = [...members].sort((a, b) => {
+      const images = b.product.images.length - a.product.images.length;
+      if (images !== 0) return images;
+      return String(a.product.publishedAt ?? "").localeCompare(String(b.product.publishedAt ?? ""));
+    })[0];
+
+    for (const member of members) {
+      member.product.colourGroup = group.key;
+      member.product.colourName = member.colour;
+    }
+
+    colourGroups[group.key] = {
+      key: group.key,
+      title: group.title,
+      handle: representative.product.handle,
+      colours: members.map((member) => ({
+        name: member.colour,
+        handle: member.product.handle,
+        title: member.product.title,
+        price: member.product.price,
+        compareAtPrice: member.product.compareAtPrice,
+        image: member.product.images[0] ?? "",
+        images: member.product.images,
+        sizes: member.product.sizes,
+        sizePricing: member.product.sizePricing,
+        inStock: member.product.inStock,
+        colourCode: member.product.color,
+      })),
+    };
+  }
+
+  const groupedCount = Object.values(colourGroups).reduce((sum, group) => sum + group.colours.length, 0);
+  if (groupedCount) {
+    console.log(`colour groups: ${Object.keys(colourGroups).length} designs / ${groupedCount} colourways`);
+  }
+
+  /** listed products: ek group ka sirf representative (cards duplicate na dikhein) */
+  const listedProducts = products.filter(
+    (product) => !product.colourGroup || colourGroups[product.colourGroup]?.handle === product.handle,
+  );
+  const listedSet = new Set(listedProducts);
 
   // live collections order + titles, jaisa store me hai
   const COLLECTION_COPY = {
@@ -258,14 +418,16 @@ function variantImage(variant, images) {
   for (const live of liveCollections) {
     const copy = COLLECTION_COPY[live.handle];
     if (!copy) continue; // frontpage = home ka internal collection, nav me nahi
-    const firstProduct = products.find((product) => product.collections.includes(live.handle) && product.images.length);
+    const firstProduct = products.find(
+      (product) => product.collections.includes(live.handle) && product.images.length && listedSet.has(product),
+    );
     collections.push({
       handle: live.handle,
       title: copy.title,
       subtitle: copy.subtitle,
       image: firstProduct?.images[0] ?? products[0]?.images[0] ?? "",
       sortOrder: copy.sortOrder,
-      productCount: products.filter((product) => product.collections.includes(live.handle)).length,
+      productCount: listedProducts.filter((product) => product.collections.includes(live.handle)).length,
     });
   }
   collections.sort((a, b) => a.sortOrder - b.sortOrder);
@@ -280,18 +442,37 @@ function variantImage(variant, images) {
       builtAt: new Date().toISOString(),
       snapshotAt: readJson(path.join(LIVE, "products.json")).fetchedAt ?? null,
       productCount: products.length,
+      listedProductCount: listedProducts.length,
+      colourGroupCount: Object.keys(colourGroups).length,
       imageCount: stats.images,
     },
     collections,
+    colourGroups,
     products,
   };
+
+  // client cards ke liye chhota index (poora catalog browser me nahi bhejte)
+  const colourIndex = Object.values(colourGroups).reduce(
+    (acc, group) => {
+      acc.groups[group.key] = {
+        handle: group.handle,
+        colours: group.colours.map((colour) => ({ name: colour.name, handle: colour.handle })),
+      };
+      for (const colour of group.colours) acc.byHandle[colour.handle] = group.key;
+      return acc;
+    },
+    { groups: {}, byHandle: {} },
+  );
+  write("apps/web/src/data/colour-index.json", `${JSON.stringify(colourIndex, null, 1)}\n`);
 
   const json = JSON.stringify(catalog, null, 1);
   write("database/seeds/catalog.json", json);
   write("apps/web/src/data/catalog.json", json);
   write("apps/admin/src/data/catalog.json", json);
 
-  console.log(`catalog built: ${products.length} products, ${collections.length} collections, ${stats.images} images`);
+  console.log(
+    `catalog built: ${products.length} products (${listedProducts.length} listings), ${Object.keys(colourGroups).length} colour groups, ${collections.length} collections, ${stats.images} images`,
+  );
   console.log(`sizes: ${[...stats.sizes].sort().join(" · ")}`);
   for (const collection of collections) {
     console.log(`  ${collection.handle.padEnd(18)} ${String(collection.productCount).padStart(3)}`);

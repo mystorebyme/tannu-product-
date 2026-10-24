@@ -73,6 +73,32 @@ Runtime smoke (dev):
 - New: 73 tests, smoke suite, Playwright spec, CI + deploy workflows, infra scripts,
   15 skills, 6 agent guides, root README/STRUCTURE/AGENTS/CLAUDE, docs 04–11.
 
+## Round 2 — owner feedback (2026-10-24)
+
+- **Colour merge:** same design ke different colours ab ek PDP me (10 designs / 20 colourways).
+  Listing par sirf representative card (287 products → 277 cards), PDP par swatch switcher +
+  `history.replaceState` (share karne par wahi colour khulta hai). Card par colour dots.
+- **Size-wise pricing:** XL +Rs 100, 2XL +200, 3XL +300, 4XL +400, 5XL +500 (MRP se upar nahi jaata).
+  PDP par live price + savings, cart/checkout/invoice usi price par.
+- **Add to cart:** naya line cart me sabse **upar** (pehle niche add hota tha), "Just added" chip,
+  drawer top par scroll, header par count.
+- **Copy cleanup:** home ka "287 styles, one wardrobe" band + "Shop new arrivals" CTA hataya;
+  payment badges (Visa/Mastercard/UPI/Rupay/COD) hataye; **prepaid only** — COD radio, COD fee,
+  "COD under Rs. 3,500" ke saare strings (header, drawer, cart, policies, meta) hataye.
+- **Remove controls:** cart page (icon button), checkout summary, order summary — teeno jagah item
+  delete. Cart line par size + colour.
+- **GST invoice:** PDF Amazon-style — maroon masthead + ORIGINAL FOR RECIPIENT, sold-by/GSTIN,
+  invoice meta, billing + shipping boxes, HSN/qty/rate/taxable/GST%/CGST-SGST table, rate-wise tax
+  summary, invoice total band, amount in words, declaration + authorised signatory, page x of y.
+  HTML invoice bhi same layout me.
+- **Descriptions:** emoji (🏻 skin tones samet) + copyright NOTE + `*markers*` strip — bullet copy
+  saaf, `*FABRIC*` → **bold**.
+- **Search:** typeahead suggestions (curated + live colours/fabrics), "Recommended for you" jab
+  query khaali, "You may also like" jab result zero, search page par related searches + fallback grid.
+- **Responsive:** 16px inputs on phones (iOS zoom fix), hover-only card CTA mobile par visible,
+  touch devices par hover transform off, `overflow-x: clip`, tablet container padding.
+- Docs/policies updated: shipping, terms, refund — COD ki jagah prepaid.
+
 ## Next up
 
 1. `npm run catalog:sync-live` (internet) → full galleries + store descriptions → `catalog:verify` → deploy.

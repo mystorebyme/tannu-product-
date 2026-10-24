@@ -194,3 +194,39 @@ body {
 .gallery-slide {
   transition: opacity 0.45s ease;
 }
+
+/* ---------- responsive polish: mobile / tablet / laptop ---------- */
+
+/* page kabhi side me scroll na kare (sticky header bhi kaam karta rahe) */
+body {
+  overflow-x: clip;
+}
+
+/* iOS: chhote inputs par tap karte hi page zoom ho jata hai — 16px se rukta hai */
+@media (max-width: 640px) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* touch devices par hover-only affordances kaam nahi karte */
+@media (hover: none) {
+  .group:hover .card-media .card-media-primary {
+    opacity: 1;
+  }
+  .group:hover .card-media .card-media-alt {
+    opacity: 0;
+  }
+  .group:hover .card-media img {
+    transform: none;
+  }
+}
+
+/* tablet range: PDP ka gallery text thoda bada, buttons full-width friendly */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .container-liksha {
+    padding-inline: 1.25rem;
+  }
+}

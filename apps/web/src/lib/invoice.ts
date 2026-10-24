@@ -61,7 +61,7 @@ export function sellerDetails() {
  * - Prices inclusive hain, isliye har line ka tax reverse-calculate hota hai.
  * - Coupon discount line-wise proportionally allocate hota hai (GST rules: discount
  *   invoice par dikhna chahiye, warna taxable value galat aati hai).
- * - COD fee service hai -> 18%.
+ * - Shipping/handling service hai -> 18%.
  * - Same state (Rajasthan) = CGST+SGST, warna IGST.
  */
 export function buildInvoice(order: Order, number: string, issuedAt: string): InvoiceView {
@@ -94,7 +94,7 @@ export function buildInvoice(order: Order, number: string, issuedAt: string): In
   if (order.shipping > 0) {
     const split = splitTax(order.shipping, GST_SERVICE_RATE, interState);
     shippingLine = {
-      title: "Cash on delivery charge",
+      title: "Shipping & handling",
       size: "—",
       hsn: "9968",
       quantity: 1,

@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     template: "%s | Liksha Clothing",
   },
   description:
-    "Shop premium designer Anarkali suits, lehenga choli, printed suit sets and sarees at Liksha Clothing. Free shipping across India, COD available and 7 days easy replacement.",
+    "Shop premium designer Anarkali suits, lehenga choli and printed suit sets at Liksha Clothing. Free shipping across India, secure prepaid checkout and 7 days easy replacement.",
   keywords: [
     "designer anarkali suits",
     "lehenga choli online",

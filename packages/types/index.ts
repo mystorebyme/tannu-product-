@@ -46,6 +46,10 @@ export interface Product {
   featured: boolean;
   /** live store ka publish timestamp — "New Arrivals" sort ke liye */
   publishedAt?: string | null;
+  /** same design ke doosre colours (live store par alag products) ka group key */
+  colourGroup?: string | null;
+  /** is product ka colour naam, jaise "Maroon" */
+  colourName?: string | null;
 }
 
 export interface Collection {
@@ -56,6 +60,29 @@ export interface Collection {
   sortOrder: number;
   /** live store ke collection page par dikhne wala count */
   productCount?: number;
+}
+
+export interface ColourOption {
+  name: string;
+  handle: string;
+  /** us colourway ka apna product title (cart/order me wahi dikhe) */
+  title?: string;
+  price: number;
+  compareAtPrice: number | null;
+  image: string;
+  images: string[];
+  sizes: string[];
+  sizePricing?: Record<string, SizePricing>;
+  inStock: boolean;
+  colourCode?: string;
+}
+
+export interface ColourGroup {
+  key: string;
+  title: string;
+  /** group ka representative product (jiski URL canonical hai) */
+  handle: string;
+  colours: ColourOption[];
 }
 
 export interface Catalog {
@@ -69,9 +96,13 @@ export interface Catalog {
     /** jis live snapshot se build hua */
     snapshotAt?: string | null;
     productCount: number;
+    /** colour groups ke baad kitne cards list hote hain */
+    listedProductCount?: number;
+    colourGroupCount?: number;
     imageCount?: number;
   };
   collections: Collection[];
+  colourGroups?: Record<string, ColourGroup>;
   products: Product[];
 }
 

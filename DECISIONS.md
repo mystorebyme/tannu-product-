@@ -26,6 +26,12 @@ decisions rakhti hai — jo cheezein code me dikhti hain par reasoning kahin lik
 | D15 | Coupons `LIKSHA10`, `WELCOME15` | Live store advertises BOB20 as a popup coupon; ours are deliberate launch offers | 2026-10-24 |
 | D16 | Status changes require an allowed transition | Prevents `placed → delivered` mistakes that corrupt revenue reporting | 2026-10-24 |
 
+| D17 | COD hata diya — **prepaid only** | Owner: "only prepaid available", payment badges + COD ke saare strings hatane ko kaha. Backend ka COD branch legacy orders ke liye pada hai, UI se pahunch nahi hai | 2026-10-24 |
+| D18 | Same design ke colours ek PDP me merge (10 designs / 20 colourways) | Owner: "jo ek jaise item hai but colour alag hai to ek me he rkho". Merge sirf tab jab colour different ho, category same ho — warna handle alag rehta hai | 2026-10-24 |
+| D19 | Size surcharge: XL +Rs 100 se 5XL +Rs 500 | Owner: "size ke hisab se price increase honi chahiye"; MRP se upar nahi jaata, isliye discount kabhi negative nahi dikhta | 2026-10-24 |
+| D20 | GST invoice Amazon/Flipkart layout me (PDF + HTML dono) | Owner: "official jaisa hona chahiye proper jise Amazon"; HSN, rate-wise CGST/SGST, amount in words, reverse-charge declaration shaamil | 2026-10-24 |
+| D21 | Search suggestions server-side (`/api/search`) | 287 products ka catalog client bundle me nahi jaata; typeahead 220ms debounce + recommendations | 2026-10-24 |
+
 ## Open questions
 
 1. Which GST scheme (composition vs regular)? Needs the CA — affects invoice format.

@@ -36,7 +36,7 @@ const pages: Record<string, PageContent> = {
       {
         heading: "Here when you need us",
         body: [
-          "Our team is available on WhatsApp 24/7 for sizing help, fabric close-ups and order tracking. Free shipping across India, COD under Rs. 3,500 and 7 days replacement on every order.",
+          "Our team is available on WhatsApp 24/7 for sizing help, fabric close-ups and order tracking. Free shipping across India on every prepaid order, with 7 days replacement.",
         ],
       },
     ],
@@ -62,7 +62,7 @@ const pages: Record<string, PageContent> = {
   "shipping-policy": {
     title: "Shipping Policy",
     eyebrow: "Delivery",
-    intro: "Free shipping across India on every prepaid order, dispatched within 1-2 business days.",
+    intro: "Free shipping across India on every order — all orders are prepaid and dispatched within 1-2 business days.",
     sections: [
       {
         heading: "Dispatch timelines",
@@ -72,9 +72,9 @@ const pages: Record<string, PageContent> = {
         ],
       },
       {
-        heading: "Cash on delivery",
+        heading: "Payment",
         body: [
-          "COD is available on orders under Rs. 3,500 with a nominal handling fee of Rs. 50. For multiple items or orders above Rs. 3,500, an advance payment is required to confirm the order.",
+          "We accept prepaid orders only — UPI, credit/debit cards and netbanking. A secure payment link is shared on WhatsApp as soon as the order is placed, and dispatch begins the same day.",
         ],
       },
       {
@@ -106,7 +106,7 @@ const pages: Record<string, PageContent> = {
       {
         heading: "Refunds",
         body: [
-          "Approved refunds are processed to the original payment method within 5-7 business days. COD orders are refunded via UPI or bank transfer.",
+          "Approved refunds are processed to the original payment method within 5-7 business days. If the original method is unavailable, we refund via UPI or bank transfer.",
         ],
       },
     ],

@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   const products = await getProductsByCollection(handle);
   return {
     title: `${collection.title} — ${products.length} styles`,
-    description: `${collection.title}: ${collection.subtitle}. ${products.length} designer pieces at Liksha Clothing, free shipping across India, COD under Rs. 3,500.`,
+    description: `${collection.title}: ${collection.subtitle}. ${products.length} designer pieces at Liksha Clothing, free shipping across India and secure prepaid checkout.`,
     alternates: { canonical: `/collections/${collection.handle}` },
     // khaali collection par thin content — index mat karo (par page accessible rahe)
     robots: products.length === 0 ? { index: false, follow: true } : undefined,

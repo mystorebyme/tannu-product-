@@ -20,11 +20,11 @@ All prices are in Indian Rupees and include GST. The price shown at checkout is 
 
 An order is accepted when you receive a confirmation with an order number. We may cancel an order if the item is out of stock, if the address is incomplete, if the pincode is not serviceable, or if we suspect fraud — in that case any amount paid is refunded in full.
 
-For multiple items, we may ask for advance payment even if the order value is under Rs. 3,500.
+Every order is prepaid — we do not offer cash on delivery.
 
 ## 5. Payment
 
-We accept UPI, cards, net banking and wallets through our payment provider, and cash on delivery (COD) on orders up to Rs. 3,500 with a Rs. 50 handling fee. Your payment provider's terms also apply to your transaction.
+We accept UPI, cards, net banking and wallets through our payment provider. Orders are confirmed once the payment link has been paid; your payment provider's terms also apply to your transaction.
 
 ## 6. Delivery
 

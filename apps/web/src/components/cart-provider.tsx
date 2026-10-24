@@ -17,6 +17,7 @@ export type MiniProduct = {
   compareAtPrice: number | null;
   image: string;
   size?: string;
+  colour?: string;
 };
 
 export type MiniCartLine = MiniProduct & { key: string; quantity: number };
@@ -73,19 +74,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addItem = useCallback((product: MiniProduct, quantity = 1) => {
     const size = product.size ?? "Free Size";
+    const colour = product.colour?.trim() || undefined;
     const key = `${product.handle}::${size}`;
+    const line: MiniCartLine = { ...product, size, colour, key, quantity };
     setLines((current) => {
-      const existing = current.find((line) => line.key === key);
+      const existing = current.find((item) => item.key === key);
+      // naya item hamesha list ke UPAR — customer ko turant dikhe
+      const rest = current.filter((item) => item.key !== key);
       if (existing) {
-        return current.map((line) =>
-          line.key === key
-            ? { ...line, quantity: Math.min(line.quantity + quantity, 10) }
-            : line,
-        );
+        return [{ ...existing, quantity: Math.min(existing.quantity + quantity, 10) }, ...rest];
       }
-      return [...current, { ...product, size, key, quantity }];
+      return [line, ...rest];
     });
-    setLastAdded({ ...product, size, key, quantity });
+    setLastAdded(line);
     setIsOpen(true);
   }, []);
 

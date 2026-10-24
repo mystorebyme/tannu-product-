@@ -16,7 +16,7 @@ Priority: **P0** = launch blocker · **P1** = first week after launch · **P2** 
 - [ ] **Domain + DNS** — apex → web, `admin.` → admin app, `api.` → Render (`docs/10-deployment/dns.md`).
 - [ ] **Uptime monitor** on `/api/health` + `/api/v1/health` (`infra/monitoring/uptime.sh` or a hosted one).
 - [ ] **Backup cron** — `database/scripts/backup.sh` daily + weekly off-server copy.
-- [ ] **Mobile pass on a real phone** — home → PLP → PDP → cart → COD order.
+- [ ] **Mobile pass on a real phone** — home → PLP → PDP → cart → prepaid order.
 - [ ] **Policies reviewed** by the owner (returns window, refund timeline, grievance officer).
 - [ ] **Firebase project** — enable Phone provider, add authorized domains, paste the 6 Firebase envs
       (`docs/07-security/phone-otp.md`). Until then checkout uses dev OTP (code on screen).
@@ -25,7 +25,7 @@ Priority: **P0** = launch blocker · **P1** = first week after launch · **P2** 
 ## P1 — week one
 
 - [ ] Diwali/November 2026 hero + occasion strip copy.
-- [ ] WhatsApp order-confirmation template (COD confirmation reduces fake orders).
+- [ ] WhatsApp payment-link + order-confirmation template (prepaid link goes out within minutes).
 - [ ] Replace hotlinked CDN images with mirrored storage (R2/S3) + `srcset` sizes.
 - [ ] Shiprocket AWB automation (currently manual AWB in the order note).
 - [ ] Invoice PDF (GSTIN, HSN, CGST/SGST) attached to the order email.
@@ -44,12 +44,25 @@ Priority: **P0** = launch blocker · **P1** = first week after launch · **P2** 
 ## P3 — nice to have
 
 - [ ] Hindi/Hinglish locale toggle.
-- [ ] Pincode-wise delivery estimate + COD availability check.
+- [ ] Pincode-wise delivery estimate + serviceability check.
 - [ ] Abandoned-cart WhatsApp nudge.
 - [ ] Referral codes and loyalty points.
 - [ ] Blog/editorial CMS (`docs/00-overview/reference-sites-analysis.md` has the sitemap for it).
 
-## Done (is round me)
+## Done (round 2 — owner feedback)
+
+- [x] Colour merge: same design ke colours ek PDP me (10 designs / 20 colourways, 277 listing cards).
+- [x] Size-wise pricing (XL +Rs 100 … 5XL +Rs 500) PDP/cart/checkout/invoice par.
+- [x] Add-to-cart item list ke **upar** + "Just added" + drawer scroll-to-top.
+- [x] Home ka "287 styles, one wardrobe" band + "Shop new arrivals" CTA hataya.
+- [x] Payment badges hataye; **prepaid only** (COD radio/fee/copy sab hataye, policies bhi).
+- [x] Cart, checkout summary aur order review me item remove control.
+- [x] Amazon-style GST invoice (PDF + HTML): HSN, rate-wise CGST/SGST, amount in words, signatory.
+- [x] Emoji + NOTE/copyright + `*markers*` descriptions se hataye (bold me convert).
+- [x] Search suggestions + recommendations (typeahead, idle grid, zero-result fallback).
+- [x] Responsive pass: mobile/tablet/laptop (16px inputs, touch CTA, overflow guard).
+
+## Done (round 1)
 
 - [x] Live home page clone: announcement bar, poster hero, category tiles with live counts,
       "Trendy Anarkali Sets" + "New Arrivals" rails, brand logo from the store.
