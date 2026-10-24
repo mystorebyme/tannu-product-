@@ -10,7 +10,10 @@
  * Chalao:          BASE_URL=http://127.0.0.1:3100 ADMIN_API_TOKEN=dev-admin-token node tests/e2e/payments.mjs
  */
 const BASE = (process.env.BASE_URL || "http://127.0.0.1:3000").replace(/\/+$/, "");
-const TOKEN = process.env.ADMIN_API_TOKEN ?? "dev-admin-token";
+/** local run par default dev token; live (Vercel) par token na ho to admin steps skip */
+const TOKEN =
+  process.env.ADMIN_API_TOKEN ??
+  (/^(https?:\/\/)?(localhost|127\.0\.0\.1)/.test(BASE) ? "dev-admin-token" : "");
 /** admin token na ho (public/live run) to admin wale steps skip — baaki flow test hota hai */
 const CAN_ADMIN = TOKEN.length > 0;
 
