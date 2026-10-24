@@ -15,7 +15,7 @@ faisla hai — jo pehle hi fix tha, jo is round me fix hua, aur jo owner ke bina
 | --- | --- | --- | --- |
 | 1 | Empty **Saree** collection / dead links | ✅ Already fixed | `getCollections()` `saree` ko filter karta hai; `/collections` sirf `count > 0` cards dikhata hai; header/footer me saree link nahi. `links.mjs` 40/40 |
 | 2 | **404 / broken routes** | ⚠️ Ek gap tha → fix | Saare internal links green (40/40). Naya gap: `/orders` (bina number) 404 deta tha → ab `307` → `/track-order`. |
-| 3 | **Order tracking page "nahi khul raha"** | ⚠️ Real cause mila | (a) `/orders` route hi nahi tha → 404. (b) static preview par `/orders/*` nahi banta. Fix: `/orders` redirect + `/track-order` static-safe link + production par live tracking. |
+| 3 | **Order tracking page "nahi khul raha"** | ✅ Root cause fix | (a) `/orders` (bina number) 404 deta tha → ab `307` → `/track-order`. (b) **Pages preview ka "Open live tracking" purane marhoom Render host par jaata tha** (`NEXT_PUBLIC_LIVE_STORE_URL` default) → ab `https://liksha-clothing.vercel.app`. (c) Preview par form ab health check ke baad **khud** live tracking kholta hai. Production par `/orders/LK-…` seedha khulta hai (live verify). |
 | 4 | **Reviews: fake/generated reviews strip karo, "verified" badge misuse** | ✅ Already clean | `src/data/reviews.json` sirf Trustoo se sync (151 products, 1690 reviews, real photos). `lib/reviews.ts` me koi seed/sample nahi. Badge `review.verified === true` par hi. |
 | 5 | **Out-of-stock product "Add to cart"** | ✅ Already guarded | `product-card.tsx` (disabled + "Sold out" + `data-testid="sold-out-button"`), `product-detail.tsx` (size-level + product-level guard), server `createOrder()` stock check. |
 | 6 | **`/pages/size-cheart` 404** | ✅ Already aliased | `pages/[slug]` me `size-cheart → size-guide` alias, canonical `/pages/size-guide`. PDP "Size guide" link live par 200. |
@@ -50,6 +50,9 @@ faisla hai — jo pehle hi fix tha, jo is round me fix hua, aur jo owner ke bina
 | `apps/web/src/app/layout.tsx` | Organization + WebSite JSON-LD, `#main-content` + skip link |
 | `apps/web/src/app/search/page.tsx` | `robots: noindex`, canonical `/search` |
 | `scripts/build-catalog.mjs` + `apps/web/src/data/catalog.json` | 10 supplier-description titles → saaf product titles (override map, sync-safe) |
+| `apps/web/src/lib/api-base.ts` + `.github/workflows/pages.yml` | preview ka live-store URL Render → Vercel |
+| `apps/web/src/components/track-order-form.tsx` | preview par submit → live tracking auto-open (down ho to WhatsApp fallback) |
+| `apps/admin/src/lib/data.ts` | fallback announcement "Flat 70% OFF" → "Up to 70% OFF" |
 | `apps/web/src/config/site.ts` | canonical fallback `https://www.likshaclothing.com` (Render dead host hataya) |
 | `docs/10-deployment/live-vercel-supabase.md` | naya deploy guide (URLs, env, DB, payment flow) |
 | `docs/08-testing/round18-audit.md` | R18 payment-flow audit |
