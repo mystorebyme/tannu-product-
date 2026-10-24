@@ -67,6 +67,9 @@ jobs:
         run: npm run start --workspace @liksha/web &
         env:
           PORT: 3000
+          # smoke suite admin parity (note/payment/invoice) bhi check karti hai
+          ADMIN_API_TOKEN: dev-admin-token
+          OTP_DEV_MODE: "on"
 
       - name: Wait for server
         run: npx wait-on http://localhost:3000/api/health --timeout 120000
@@ -75,6 +78,7 @@ jobs:
         run: npm run test:smoke
         env:
           BASE_URL: http://localhost:3000
+          ADMIN_API_TOKEN: dev-admin-token
 
   e2e:
     name: playwright (optional)
