@@ -292,7 +292,7 @@ create table payments (
   verified_at     timestamptz,
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now(),
-  unique (provider, gateway_payment_id)
+  unique (order_id, provider, gateway_payment_id)
 );
 create index on payments (order_id);
 create index on payments (status, created_at desc);

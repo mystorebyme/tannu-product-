@@ -499,6 +499,18 @@ export async function submitPaymentReference(
   if (order.paymentStatus === "paid") {
     throw new OrderError("This order is already paid.", 409, "already_paid");
   }
+  // Ek UTR = ek payment. Dusre order par wahi reference = duplicate claim.
+  // Pehle DB ka unique index isko 500 bana deta tha (customer ko laga save hi nahi hua).
+  const clash = all.find(
+    (other) => other.orderNumber !== wanted && other.payment?.reference === reference,
+  );
+  if (clash) {
+    throw new OrderError(
+      "Ye UPI reference pehle se doosre order par use ho chuka hai. Payment app se sahi UTR daaliye, ya WhatsApp par sampark kariye.",
+      409,
+      "reference_in_use",
+    );
+  }
   const now = new Date().toISOString();
   const alreadySame = order.payment?.reference === reference;
   const updated: Order = {

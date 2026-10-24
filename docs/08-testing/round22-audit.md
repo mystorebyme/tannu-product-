@@ -62,7 +62,23 @@ Live (`https://liksha-clothing.vercel.app`, commit `ae13b08` → verify pass):
 - `/orders/LK-DOESNOTEXIST` → **404** + "Order nahi mila" page (WhatsApp support)
 - production `[live-test]` workflow: public flow 21/0 (admin steps skip — token nahi)
 
-## 5. Khula hua / owner action
+## 5. Payment reference (UTR) 500 — asli root cause
+
+Live smoke test lagataar 3 baar fail ho raha tha: UTR submit par
+`Could not save the payment reference` (500) aur order `pending` hi rehta tha.
+
+- **Root cause:** `payments` par `unique (provider, gateway_payment_id)` tha — ek UTR
+  doosre order par daalte hi Postgres `23505 duplicate key` deta tha, jo API me
+  generic 500 ban jaata tha. (Pehla run successful tha, isliye har agla run fail.)
+- **Fix:** migration `0008_payments_reference_per_order.sql` — unique ab
+  `(order_id, provider, gateway_payment_id)`. Ek hi UTR apne order par dobara
+  (retry) chalega, doosre order par **409** with saaf message
+  (`reference_in_use`) — koi 500 nahi, koi silent fail nahi.
+- Production DB par migration apply ho chuki (index `payments_order_reference_uniq`).
+- Test: `tests/unit/payment-reference.test.ts` (schema + guard), e2e ab har run par
+  naya 12-digit UTR use karta hai.
+
+## 6. Khula hua / owner action
 
 - **Contact form ka email channel**: local sandbox me `formsubmit` call fail hoti
   hai (network). Production par re-check chahiye — agar fail ho to WhatsApp

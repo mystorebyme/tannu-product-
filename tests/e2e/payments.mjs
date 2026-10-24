@@ -146,10 +146,12 @@ const status1 = await getJson(`/api/orders/${number}/payment`);
 check("payment status API returns pending first", status1.body?.paymentStatus === "pending", status1.body?.paymentStatus);
 
 // ── 5. reference submit → processing ────────────────────────────────────────
+// UTR har run par naya — purana fixed number pichle run ke order se takra jaata tha.
+const utr = String(Date.now()).slice(-12);
 const manual = await fetch(`${BASE}/api/payments/manual`, {
   method: "POST",
   headers: { "content-type": "application/json" },
-  body: JSON.stringify({ orderNumber: number, reference: "123456789012", phoneLast4: phone.slice(-4) }),
+  body: JSON.stringify({ orderNumber: number, reference: utr, phoneLast4: phone.slice(-4) }),
 });
 const manualBody = await manual.json();
 check("UTR submit is accepted", manual.ok && manualBody.ok === true, JSON.stringify(manualBody).slice(0, 120));
@@ -170,7 +172,7 @@ if (CAN_ADMIN) {
 
   const paid = await adminPatch(`/api/admin/orders/${number}`, {
     action: "payment",
-    reference: "123456789012",
+    reference: utr,
     amount: order.total,
     note: "e2e",
   });
