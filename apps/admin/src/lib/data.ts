@@ -1,6 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { Catalog, DeliverySettings, Order, Product } from "@liksha/types";
+import type {
+  Catalog,
+  DeliverySettings,
+  ManualInvoice as ManualInvoiceType,
+  ManualInvoiceItem as ManualInvoiceItemType,
+  Order,
+  Product,
+} from "@liksha/types";
 import { canTransition } from "@liksha/validation";
 import catalogJson from "../data/catalog.json";
 
@@ -155,6 +162,34 @@ export async function updateOrderStatus(
 }
 
 /** courier + AWB admin panel se set hote hain; customer track page yahi dikhata hai */
+/** Admin ka "abhi kahan atka hai" note — customer tracking page par dikhta hai. */
+export async function setOrderNote(orderNumber: string, text: string, actor: string): Promise<Order | null> {
+  if (remoteMode()) {
+    const payload = await storeRequest<{ order: Order }>(`/api/admin/orders/${encodeURIComponent(orderNumber)}`, {
+      method: "PATCH",
+      body: JSON.stringify({ action: "note", text, actor }),
+    });
+    return payload?.order ?? null;
+  }
+
+  const rows = readRows<Order>("orders.json");
+  const index = rows.findIndex((order) => order.orderNumber === orderNumber);
+  if (index === -1) return null;
+  const current = rows[index]!;
+  const now = new Date().toISOString();
+  const clean = String(text ?? "").trim().slice(0, 240);
+  rows[index] = {
+    ...current,
+    statusNote: clean ? { text: clean, at: now, by: actor, status: current.status } : null,
+    audit: [
+      { at: now, actor, action: clean ? "order.note_updated" : "order.note_cleared", meta: clean ? { text: clean } : undefined },
+      ...current.audit,
+    ],
+  };
+  writeRows("orders.json", rows);
+  return rows[index]!;
+}
+
 export async function setOrderTracking(
   orderNumber: string,
   input: { courier?: string; awb?: string; url?: string },
@@ -343,50 +378,54 @@ export function getMessages() {
  * (kisi aur ke naam/address par bhi). Ye invoice series alag rehti hai taaki
  * real orders ki GST numbering se clash na ho. */
 
-export type ManualInvoiceItem = { title: string; size?: string; quantity: number; price: number };
+export type ManualInvoiceItem = ManualInvoiceItemType;
 
-export type ManualInvoice = {
-  number: string;
-  createdAt: string;
-  createdBy: string;
-  customerName: string;
-  phone: string;
-  email?: string;
-  address: string;
-  city: string;
-  state: string;
-  pincode: string;
-  items: ManualInvoiceItem[];
-  subtotal: number;
-  total: number;
-  notes?: string;
-  orderRef?: string;
-};
+export type ManualInvoice = ManualInvoiceType;
 
-export function getManualInvoices(): ManualInvoice[] {
+/** Admin ke manual invoices — storefront API (Postgres) par, warna local JSON. */
+export async function getManualInvoices(): Promise<ManualInvoice[]> {
+  if (remoteMode()) {
+    const payload = await storeRequest<{ invoices: ManualInvoice[] }>("/api/admin/invoices");
+    if (payload?.invoices) return payload.invoices;
+  }
   return readRows<ManualInvoice>("manual-invoices.json");
 }
 
-export function getManualInvoice(number: string): ManualInvoice | undefined {
-  return getManualInvoices().find((invoice) => invoice.number === number);
+export async function getManualInvoice(number: string): Promise<ManualInvoice | undefined> {
+  if (remoteMode()) {
+    const payload = await storeRequest<{ invoice: ManualInvoice }>(`/api/admin/invoices/${encodeURIComponent(number)}`);
+    if (payload?.invoice) return payload.invoice;
+  }
+  return (await getManualInvoices()).find((invoice) => invoice.number === number);
 }
 
-export function createManualInvoice(
+export async function createManualInvoice(
   input: Omit<ManualInvoice, "number" | "createdAt" | "subtotal" | "total">,
-): ManualInvoice {
-  const rows = getManualInvoices();
-  const sequence = rows.length + 1;
+): Promise<ManualInvoice> {
+  if (remoteMode()) {
+    const payload = await storeRequest<{ invoice: ManualInvoice }>("/api/admin/invoices", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+    if (payload?.invoice) return payload.invoice;
+  }
+  const rows = await getManualInvoices();
+  const sequence = rows.reduce((max, row) => {
+    const value = Number(row.number.split("/").pop());
+    return Number.isFinite(value) ? Math.max(max, value) : max;
+  }, 0);
   const createdAt = new Date().toISOString();
   const subtotal = input.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const invoice: ManualInvoice = {
     ...input,
-    number: `LK/MANUAL/${String(sequence).padStart(4, "0")}`,
+    number: `LK/MANUAL/${String(sequence + 1).padStart(4, "0")}`,
     createdAt,
     subtotal,
     total: subtotal,
   };
-  rows.unshift(invoice);
-  writeRows("manual-invoices.json", rows);
+  const local = readRows<ManualInvoice>("manual-invoices.json");
+  local.unshift(invoice);
+  writeRows("manual-invoices.json", local);
   return invoice;
 }
 

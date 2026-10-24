@@ -10,7 +10,7 @@ export default async function DashboardPage() {
   const orders = await getOrders();
   const products = getProducts();
   const messages = getMessages();
-  const invoices = getManualInvoices();
+  const invoices = await getManualInvoices();
   const catalogState = overrideStats();
   const pendingPayments = orders.filter((order) => order.paymentStatus === "pending" || order.paymentStatus === "processing");
 

@@ -23,7 +23,7 @@ export async function POST(request: Request) {
   const orderNumber = String(body.orderNumber ?? "").trim();
   if (!orderNumber) return Response.json({ error: "orderNumber chahiye." }, { status: 400 });
 
-  const order = getOrderForPayment(orderNumber);
+  const order = await getOrderForPayment(orderNumber);
   if (!order) return Response.json({ error: "Order nahi mila." }, { status: 404 });
 
   // order ka phone verify karke hi payment banega — koi bhi order number se QR na bana le
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "Order verify nahi hua. OTP dobara kariye." }, { status: 401 });
   }
   if (order.paymentStatus === "paid") {
-    return Response.json({ error: "Ye order already paid hai.", status: paymentStatusFor(orderNumber) }, { status: 409 });
+    return Response.json({ error: "Ye order already paid hai.", status: await paymentStatusFor(orderNumber) }, { status: 409 });
   }
 
   ensurePaymentsDir();
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
     email: order.email,
     phone: order.phone,
   });
-  applyPaymentIntent(orderNumber, {
+  await applyPaymentIntent(orderNumber, {
     gateway: intent.gateway,
     reference: intent.reference,
     upiUri: intent.upiUri,

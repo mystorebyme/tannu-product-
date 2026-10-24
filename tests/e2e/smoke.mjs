@@ -160,6 +160,75 @@ async function main() {
     check("invoice PDF has content", pdfBytes.length > 1500, `${pdfBytes.length} bytes`);
   }
 
+  // admin → customer parity: status note aur payment verification
+  const adminToken =
+    process.env.ADMIN_API_TOKEN ?? (/localhost|127\.0\.0\.1/.test(BASE) ? "dev-admin-token" : "");
+  if (orderBody.orderNumber && adminToken) {
+    const adminPatch = (body) =>
+      fetch(`${BASE}/api/admin/orders/${orderBody.orderNumber}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json", authorization: `Bearer ${adminToken}` },
+        body: JSON.stringify(body),
+      });
+
+    const noteResponse = await adminPatch({ action: "note", text: "Delhivery pickup kal subah", actor: "smoke@admin" });
+    check("admin can save an order note", noteResponse.status === 200, `status ${noteResponse.status}`);
+
+    const noted = await get(`/orders/${orderBody.orderNumber}`);
+    check("customer page shows the admin note", noted.text.includes('data-testid="order-note"'));
+    check("customer page renders the note text", noted.text.includes("Delhivery pickup kal subah"));
+
+    const paidResponse = await adminPatch({
+      action: "payment",
+      reference: "UPI-SMOKE-1",
+      amount: Math.round((orderBody.order?.total ?? orderBody.total ?? 0) || 0),
+      actor: "smoke@admin",
+    });
+    const paidBody = await paidResponse.json().catch(() => ({}));
+    check("admin can verify a manual payment", paidResponse.status === 200, `status ${paidResponse.status}`);
+    check(
+      "verified payment marks the order paid",
+      paidBody.order?.paymentStatus === "paid",
+      JSON.stringify(paidBody).slice(0, 140),
+    );
+
+    const paidPage = await get(`/orders/${orderBody.orderNumber}`);
+    check("customer page shows verified payment", paidPage.text.includes('data-testid="payment-status"'));
+    check("customer page shows the UTR reference", paidPage.text.includes("UPI-SMOKE-1"));
+
+    const invoices = await fetch(`${BASE}/api/admin/invoices`, {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: `Bearer ${adminToken}` },
+      body: JSON.stringify({
+        createdBy: "smoke@admin",
+        customerName: "Smoke Invoice Customer",
+        phone: "9876543210",
+        address: "12 MI Road",
+        city: "Jaipur",
+        state: "Rajasthan",
+        pincode: "302001",
+        items: [{ title: "Chikankari Kurta", size: "M", quantity: 1, price: 199900 }],
+      }),
+    });
+    const invoiceBody = await invoices.json().catch(() => ({}));
+    check("admin can create a manual invoice", invoices.status === 201, `status ${invoices.status}`);
+    check("manual invoice gets a series number", /^LK\/MANUAL\/\d+$/.test(invoiceBody.invoice?.number ?? ""));
+
+    const invoiceList = await fetch(`${BASE}/api/admin/invoices`, {
+      headers: { authorization: `Bearer ${adminToken}` },
+    });
+    const invoiceListBody = await invoiceList.json().catch(() => ({}));
+    check(
+      "manual invoices are listed back",
+      invoiceList.status === 200 &&
+        (invoiceListBody.invoices ?? []).some((row) => row.number === invoiceBody.invoice?.number),
+      `status ${invoiceList.status}`,
+    );
+
+    const noToken = await fetch(`${BASE}/api/admin/invoices`);
+    check("invoices API needs a token", noToken.status === 401, `status ${noToken.status}`);
+  }
+
   const missing = await get("/orders/LK-NOTREAL1");
   check("unknown order gives 404 page", missing.status === 404, `status ${missing.status}`);
 

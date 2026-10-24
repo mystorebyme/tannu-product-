@@ -1,17 +1,13 @@
 import "server-only";
 
-import fs from "node:fs";
 import type { Order } from "@liksha/types";
-import { dataFile } from "@/lib/data-dir";
+import { getOrder } from "./orders";
 
-/** Payments routes ke liye read-only access — orders.ts ka poora API expose karne ki zaroorat nahi. */
-export function getOrderForPayment(orderNumber: string): Order | null {
-  const file = dataFile("orders.json");
-  if (!fs.existsSync(file)) return null;
-  try {
-    const orders = JSON.parse(fs.readFileSync(file, "utf8")) as Order[];
-    return orders.find((order) => order.orderNumber === orderNumber) ?? null;
-  } catch {
-    return null;
-  }
+/**
+ * Payments routes ke liye read access.
+ * Orders JSON ya Postgres — dono me (orders.ts backend chunta hai), isliye
+ * payment intent/status/webhook DB orders par bhi kaam karte hain.
+ */
+export async function getOrderForPayment(orderNumber: string): Promise<Order | null> {
+  return (await getOrder(orderNumber)) ?? null;
 }

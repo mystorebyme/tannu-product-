@@ -46,7 +46,7 @@ export async function POST(request: Request, context: { params: Promise<{ gatewa
   if (!verified) return Response.json({ error: "Gateway se verify nahi hua." }, { status: 502 });
 
   const orderNumber = String(entity?.notes?.orderNumber ?? "");
-  const order = orderNumber ? getOrderForPayment(orderNumber) : null;
+  const order = orderNumber ? await getOrderForPayment(orderNumber) : null;
   if (!order) return Response.json({ received: true, ignored: "order not found" });
 
   if (verified.status === "captured" || verified.status === "authorized") {

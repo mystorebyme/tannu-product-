@@ -23,7 +23,7 @@ api       →  api.likshaclothing.com        (REST /api/v1 for partners, mobile,
 | Admin | Next.js 16 (server components + server actions, plain CSS) |
 | API | Node 22 + Express 5 + TypeScript (tsx in dev) |
 | Validation | zod — shared by web, admin and api (`@liksha/validation`) |
-| Data | catalogue JSON (build artifact) + `.data/*.json` (orders, settings, audit) |
+| Data | catalogue JSON (build artifact) + Postgres (`DATABASE_URL`: orders, notes, delivery rules, settings, manual invoices) — bina DB ke `.data/*.json` fallback |
 | Payments | Razorpay payment links + HMAC-verified webhooks |
 | Tests | `node:test` (unit + integration) and a zero-dependency smoke suite |
 

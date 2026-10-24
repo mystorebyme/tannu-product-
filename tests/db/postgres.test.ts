@@ -122,6 +122,62 @@ test("payment verify hone par order confirmed hota hai", async () => {
   assert.equal(status?.paymentStatus, "paid");
 });
 
+test("admin ka status note Postgres me persist hota hai aur customer page par milta hai", async () => {
+  const { orderNumber } = await orders.createOrder(payload);
+  const saved = await orders.setStatusNote(orderNumber, "  Delhivery pickup kal subah  ", "admin@likshaclothing.com");
+  assert.equal(saved?.statusNote?.text, "Delhivery pickup kal subah");
+
+  const reread = await orders.getOrder(orderNumber);
+  assert.equal(reread?.statusNote?.text, "Delhivery pickup kal subah");
+  assert.equal(reread?.statusNote?.by, "admin@likshaclothing.com");
+  assert.equal(reread?.statusNote?.status, "placed");
+
+  const column = await db.query<{ status_note: { text: string } | null }>(
+    "select status_note from orders where order_number = $1",
+    [orderNumber],
+  );
+  assert.equal(column.rows[0]?.status_note?.text, "Delhivery pickup kal subah");
+
+  // khaali text = note clear
+  const cleared = await orders.setStatusNote(orderNumber, "", "admin@likshaclothing.com");
+  assert.equal(cleared?.statusNote ?? null, null);
+  assert.equal((await orders.getOrder(orderNumber))?.statusNote ?? null, null);
+});
+
+test("manual invoice Postgres me save hota hai (redeploy par nahi khota)", async () => {
+  const invoices = await import("../../apps/web/src/lib/manual-invoices.ts");
+  const first = await invoices.createManualInvoice({
+    createdBy: "admin@likshaclothing.com",
+    customerName: "Walk-in Customer",
+    phone: "9876500001",
+    address: "1 Johari Bazaar",
+    city: "Jaipur",
+    state: "Rajasthan",
+    pincode: "302003",
+    items: [{ title: "Chikankari Kurta", size: "M", quantity: 2, price: 100_000 }],
+  });
+  assert.match(first.number, /^LK\/MANUAL\/\d{4}$/);
+  assert.equal(first.total, 200_000);
+
+  const second = await invoices.createManualInvoice({
+    createdBy: "admin@likshaclothing.com",
+    customerName: "Another Customer",
+    phone: "9876500002",
+    address: "2 MI Road",
+    city: "Jaipur",
+    state: "Rajasthan",
+    pincode: "302001",
+    items: [{ title: "Silk Dupatta", quantity: 1, price: 50_000 }],
+  });
+  assert.notEqual(second.number, first.number, "series repeat nahi honi chahiye");
+
+  const list = await invoices.listManualInvoices();
+  assert.ok(list.some((invoice) => invoice.number === first.number));
+  const fetched = await invoices.getManualInvoice(first.number);
+  assert.equal(fetched?.customerName, "Walk-in Customer");
+  assert.equal(fetched?.items[0]?.quantity, 2);
+});
+
 test("blocked pincode par order place nahi hota", async () => {
   const delivery = await import("../../apps/web/src/lib/delivery.ts");
   await delivery.saveDeliverySettings(

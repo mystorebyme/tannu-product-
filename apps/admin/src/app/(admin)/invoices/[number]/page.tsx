@@ -18,7 +18,7 @@ export const dynamic = "force-dynamic";
  */
 export default async function ManualInvoicePage({ params }: { params: Promise<{ number: string }> }) {
   const { number } = await params;
-  const invoice = getManualInvoice(decodeURIComponent(number));
+  const invoice = await getManualInvoice(decodeURIComponent(number));
   if (!invoice) notFound();
 
   const interState = invoice.state.trim().toLowerCase() !== SELLER_STATE.toLowerCase();

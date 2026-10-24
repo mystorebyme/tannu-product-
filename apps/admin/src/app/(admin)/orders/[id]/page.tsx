@@ -2,7 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getOrder } from "@/lib/data";
 import { dateTime, inr } from "@/lib/format";
-import { updateOrderStatusAction, updateTrackingAction } from "@/app/actions";
+import {
+  setOrderNoteAction,
+  updateOrderStatusAction,
+  updateTrackingAction,
+  verifyPaymentAction,
+} from "@/app/actions";
 import { getSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -157,6 +162,82 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
               <p className="small muted" style={{ marginBottom: 0 }}>
                 Payment: <strong>{order.paymentMethod === "cod" ? "COD" : order.paymentStatus}</strong>
               </p>
+            </div>
+          </div>
+
+          <div className="panel">
+            <div className="panel-head">
+              <h2>Customer ko dikhne wala update</h2>
+            </div>
+            <div className="panel-body">
+              <form action={setOrderNoteAction}>
+                <input type="hidden" name="orderNumber" value={order.orderNumber} />
+                <div className="field">
+                  <label htmlFor="statusNote">Abhi kahan atka hai / latest update</label>
+                  <textarea
+                    id="statusNote"
+                    name="text"
+                    rows={3}
+                    maxLength={240}
+                    defaultValue={order.statusNote?.text ?? ""}
+                    placeholder="e.g. Delhivery pickup kal subah, AWB shaam tak mil jayega"
+                  />
+                  <p className="small muted" style={{ marginBottom: 0 }}>
+                    Customer ke order page par ye note status ke saath dikhta hai. Khaali chhod kar save karne par note hat
+                    jaata hai.
+                  </p>
+                </div>
+                <button className="btn btn-primary" type="submit">
+                  Update note
+                </button>
+              </form>
+              {order.statusNote?.at ? (
+                <p className="small muted" style={{ marginBottom: 0 }}>
+                  Last note {dateTime(order.statusNote.at)} by {order.statusNote.by}
+                </p>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="panel">
+            <div className="panel-head">
+              <h2>Payment verification</h2>
+            </div>
+            <div className="panel-body">
+              {order.paymentStatus === "paid" ? (
+                <p className="small" style={{ marginBottom: 0 }}>
+                  Payment <strong>paid</strong>
+                  {order.payment?.verifiedAt ? ` — verified ${dateTime(order.payment.verifiedAt)}` : ""}
+                  {order.payment?.reference ? ` (ref ${order.payment.reference})` : ""}. Customer ke order page par
+                  bhi yahi dikhta hai.
+                </p>
+              ) : (
+                <form action={verifyPaymentAction}>
+                  <input type="hidden" name="orderNumber" value={order.orderNumber} />
+                  <div className="row">
+                    <div className="field">
+                      <label htmlFor="reference">UPI / bank reference (UTR)</label>
+                      <input id="reference" name="reference" placeholder="e.g. 416123456789" required />
+                    </div>
+                    <div className="field">
+                      <label htmlFor="amount">Amount received (₹)</label>
+                      <input
+                        id="amount"
+                        name="amount"
+                        inputMode="decimal"
+                        defaultValue={(order.total / 100).toFixed(2)}
+                      />
+                    </div>
+                  </div>
+                  <div className="field">
+                    <label htmlFor="paymentNote">Note (optional)</label>
+                    <input id="paymentNote" name="note" placeholder="e.g. GPay screenshot verified" />
+                  </div>
+                  <button className="btn btn-primary" type="submit">
+                    Mark payment verified
+                  </button>
+                </form>
+              )}
             </div>
           </div>
 

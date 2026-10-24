@@ -117,6 +117,18 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
             })}
           </ol>
 
+          {order.statusNote?.text ? (
+            <div className="mt-4 border-l-2 border-[#862222] bg-[#faf6f2] px-4 py-3" data-testid="order-note">
+              <p className="text-[10.5px] font-semibold tracking-[.14em] text-[#862222] uppercase">
+                Update from our team
+              </p>
+              <p className="mt-1 text-[12.5px] leading-relaxed text-[#4a423b]">{order.statusNote.text}</p>
+              <p className="mt-1 text-[10.5px] text-[#9c8f82]">
+                {formatDate(order.statusNote.at)} · {ORDER_STATUS_COPY[order.statusNote.status] ?? order.statusNote.status}
+              </p>
+            </div>
+          ) : null}
+
           {order.tracking?.awb ? (
             <div className="mt-4 border-t border-[#f1ebe5] pt-3 text-[12.5px] text-[#5c534b]">
               <p>
@@ -185,7 +197,19 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
             <p className="mt-2 text-[12.5px] text-[#5c534b]">
               Method: <strong>{order.paymentMethod === "cod" ? "Cash on delivery" : "Prepaid (UPI / card)"}</strong>
               <br />
-              Status: <strong>{order.paymentStatus}</strong>
+              Status: <strong data-testid="payment-status">{order.paymentStatus}</strong>
+              {order.paymentStatus === "paid" && order.payment?.verifiedAt ? (
+                <>
+                  <br />
+                  Verified by our team: <strong>{formatDate(order.payment.verifiedAt)}</strong>
+                  {order.payment.reference ? (
+                    <>
+                      <br />
+                      Reference: <strong>{order.payment.reference}</strong>
+                    </>
+                  ) : null}
+                </>
+              ) : null}
               <br />
               Items: <strong>{order.items.reduce((sum, item) => sum + item.quantity, 0)}</strong>
             </p>

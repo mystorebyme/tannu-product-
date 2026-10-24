@@ -185,12 +185,22 @@ export interface Order {
   /** payment attempt ki poori detail — verified hone tak order confirm nahi hota */
   payment?: PaymentRecord | null;
   status: OrderStatus;
+  /** admin ka live note — "abhi kahan atka hai", customer ko tracking page par dikhta hai */
+  statusNote?: OrderStatusNote | null;
   /** courier + AWB — admin panel se bhara jaata hai, customer track page par dikhta hai */
   tracking?: Tracking | null;
   /** GST invoice meta — invoice generate hote hi lock ho jaata hai */
   invoice?: InvoiceMeta | null;
   /** har mutation ka record — kisne kya badla */
   audit: AuditEntry[];
+}
+
+export interface OrderStatusNote {
+  text: string;
+  at: string;
+  by: string;
+  /** note ke waqt ka status, taaki history me saaf rahe */
+  status: OrderStatus;
 }
 
 export interface Tracking {
@@ -282,4 +292,26 @@ export type Serviceability = {
   reason: ServiceabilityReason;
   message: string;
   deliveryDays: string | null;
+};
+
+/* ─────────────────────── manual (admin) invoice ─────────────────────── */
+
+export type ManualInvoiceItem = { title: string; size?: string; quantity: number; price: number };
+
+export type ManualInvoice = {
+  number: string;
+  createdAt: string;
+  createdBy: string;
+  customerName: string;
+  phone: string;
+  email?: string;
+  address: string;
+  city: string;
+  state: string;
+  pincode: string;
+  items: ManualInvoiceItem[];
+  subtotal: number;
+  total: number;
+  notes?: string;
+  orderRef?: string;
 };

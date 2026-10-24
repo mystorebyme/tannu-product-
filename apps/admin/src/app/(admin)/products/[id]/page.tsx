@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { getCollections, getProducts } from "@/lib/data";
 import { inr } from "@/lib/format";
 import { publishCatalogAction, saveProductEditAction, toggleProductVisibilityAction } from "@/app/actions";
-import { mergedProduct, overrideStats } from "@/lib/catalog-admin";
+import { catalogWritable, mergedProduct, overrideStats } from "@/lib/catalog-admin";
 import { getSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -45,6 +45,16 @@ export default async function ProductEditPage({ params }: { params: Promise<{ id
           </a>
         </div>
       </div>
+
+      {!catalogWritable() ? (
+        <div className="panel" data-testid="catalog-readonly">
+          <div className="panel-body small">
+            <strong>Read-only mode.</strong> Catalogue edits (title, price, photos, publish) repo checkout par
+            chalte hain — deployed panel me filesystem read-only hota hai. Yahan se orders, payments, notes,
+            tracking, delivery rules aur invoices manage karein; product edits GitHub push ke baad live honge.
+          </div>
+        </div>
+      ) : null}
 
       {stats.lastPublishedAt ? (
         <p className="small muted">

@@ -254,6 +254,42 @@ export async function updateOrderStatus(
 }
 
 /* ------------------------------------------------------------------ *
+ * Live note — admin likhta hai "abhi kahan atka hai", customer ko wahi
+ * tracking page par dikhta hai (status ke saath).
+ * ------------------------------------------------------------------ */
+
+export async function setStatusNote(
+  orderNumberValue: string,
+  text: string,
+  actor = "admin",
+): Promise<Order> {
+  const clean = String(text ?? "").trim().slice(0, 240);
+  const all = await readAll();
+  const index = all.findIndex((order) => order.orderNumber === orderNumberValue);
+  if (index === -1) throw new OrderError("Order nahi mila", 404, "order_not_found");
+  const order = all[index]!;
+  const now = new Date().toISOString();
+
+  const updated: Order = {
+    ...order,
+    // khaali text = note hata do
+    statusNote: clean ? { text: clean, at: now, by: actor, status: order.status } : null,
+    audit: [
+      {
+        at: now,
+        actor,
+        action: clean ? "order.note_updated" : "order.note_cleared",
+        meta: clean ? { text: clean } : undefined,
+      },
+      ...order.audit,
+    ],
+  };
+  all[index] = updated;
+  await writeAll(all);
+  return updated;
+}
+
+/* ------------------------------------------------------------------ *
  * Tracking — admin courier/AWB daalta hai, customer track page dikhata hai.
  * ------------------------------------------------------------------ */
 

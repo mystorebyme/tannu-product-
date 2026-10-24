@@ -51,11 +51,32 @@ export function readOverrides(): OverridesFile {
   }
 }
 
-function writeOverrides(next: OverridesFile) {
-  const file = overridesFile();
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(`${file}.tmp`, `${JSON.stringify(next, null, 2)}\n`);
-  fs.renameSync(`${file}.tmp`, file);
+/**
+ * Catalogue edits repo ke andar jaate hain (source of truth GitHub) aur publish
+ * par catalogue rebuild hota hai. Deployed container me filesystem read-only hota
+ * hai — wahan crash karne ke bajaye saaf message dikhate hain.
+ */
+export function catalogWritable(): boolean {
+  try {
+    const root = repoRoot();
+    fs.accessSync(root, fs.constants.W_OK);
+    return fs.existsSync(path.join(root, "scripts/build-catalog.mjs"));
+  } catch {
+    return false;
+  }
+}
+
+function writeOverrides(next: OverridesFile): boolean {
+  if (!catalogWritable()) return false;
+  try {
+    const file = overridesFile();
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.writeFileSync(`${file}.tmp`, `${JSON.stringify(next, null, 2)}\n`);
+    fs.renameSync(`${file}.tmp`, file);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /** admin list/edit ke liye catalogue + overrides merged */
@@ -90,7 +111,7 @@ export function mergedProduct(handle: string): AdminProduct | null {
   return (mergedProducts() as AdminProduct[]).find((product) => product.handle === handle) ?? null;
 }
 
-export function saveProductOverride(handle: string, patch: ProductOverride, actor: string) {
+export function saveProductOverride(handle: string, patch: ProductOverride, actor: string): boolean {
   const overrides = readOverrides();
   overrides.products[handle] = {
     ...overrides.products[handle],
@@ -98,10 +119,10 @@ export function saveProductOverride(handle: string, patch: ProductOverride, acto
     updatedAt: new Date().toISOString(),
     updatedBy: actor,
   };
-  writeOverrides(overrides);
+  return writeOverrides(overrides);
 }
 
-export function setProductHidden(handle: string, hidden: boolean, actor: string) {
+export function setProductHidden(handle: string, hidden: boolean, actor: string): boolean {
   const overrides = readOverrides();
   const set = new Set(overrides.hidden);
   if (hidden) set.add(handle);
@@ -112,13 +133,16 @@ export function setProductHidden(handle: string, hidden: boolean, actor: string)
     updatedAt: new Date().toISOString(),
     updatedBy: actor,
   };
-  writeOverrides(overrides);
+  return writeOverrides(overrides);
 }
 
-export function saveCollectionOverride(handle: string, patch: { title?: string; subtitle?: string }) {
+export function saveCollectionOverride(
+  handle: string,
+  patch: { title?: string; subtitle?: string },
+): boolean {
   const overrides = readOverrides();
   overrides.collections[handle] = { ...overrides.collections[handle], ...patch };
-  writeOverrides(overrides);
+  return writeOverrides(overrides);
 }
 
 /**
@@ -127,6 +151,12 @@ export function saveCollectionOverride(handle: string, patch: { title?: string; 
  */
 export async function publishCatalog(): Promise<{ ok: boolean; log: string }> {
   const root = repoRoot();
+  if (!catalogWritable()) {
+    return {
+      ok: false,
+      log: "Catalogue publish sirf repo checkout par chalta hai (deployed panel read-only hai). Edits local se push karein.",
+    };
+  }
   try {
     const { stdout, stderr } = await run("node", ["scripts/build-catalog.mjs"], {
       cwd: root,

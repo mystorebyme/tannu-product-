@@ -1,5 +1,5 @@
 import type { OrderStatus } from "@liksha/types";
-import { getOrder, OrderError, setTracking, updateOrderStatus } from "@/lib/orders";
+import { getOrder, OrderError, setStatusNote, setTracking, updateOrderStatus } from "@/lib/orders";
 import { confirmPayment, failPayment } from "@/lib/orders";
 
 export const dynamic = "force-dynamic";
@@ -46,12 +46,12 @@ export async function PATCH(request: Request, context: { params: Promise<{ order
   try {
     if (action === "status") {
       const status = String(body.status ?? "") as OrderStatus;
-      const order = updateOrderStatus(orderNumber, status, actor, body.note ? String(body.note) : undefined);
+      const order = await updateOrderStatus(orderNumber, status, actor, body.note ? String(body.note) : undefined);
       return Response.json({ order });
     }
 
     if (action === "tracking") {
-      const order = setTracking(
+      const order = await setTracking(
         orderNumber,
         {
           courier: body.courier ? String(body.courier) : null,
@@ -60,6 +60,11 @@ export async function PATCH(request: Request, context: { params: Promise<{ order
         },
         actor,
       );
+      return Response.json({ order });
+    }
+
+    if (action === "note") {
+      const order = await setStatusNote(orderNumber, String(body.text ?? body.note ?? ""), actor);
       return Response.json({ order });
     }
 

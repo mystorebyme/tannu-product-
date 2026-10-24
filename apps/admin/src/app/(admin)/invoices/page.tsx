@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
  * rehta hai taaki real orders ki invoice numbering se clash na ho.
  */
 export default async function InvoicesPage() {
-  const invoices = getManualInvoices();
+  const invoices = await getManualInvoices();
   const session = await getSession();
 
   return (

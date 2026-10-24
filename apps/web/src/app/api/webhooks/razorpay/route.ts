@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     };
     const link = payload.payload?.payment_link?.entity;
     if (payload.event === "payment_link.paid" && link?.reference_id) {
-      markPaymentPaid(link.reference_id, eventId || "razorpay");
+      await markPaymentPaid(link.reference_id, eventId || "razorpay");
     }
   } catch (error) {
     console.error("razorpay webhook parse failed", error);

@@ -15,7 +15,7 @@ export async function GET(request: Request) {
   const orderNumber = (url.searchParams.get("order") ?? "").trim();
   if (!orderNumber) return Response.json({ error: "order chahiye." }, { status: 400 });
 
-  const order = getOrderForPayment(orderNumber);
+  const order = await getOrderForPayment(orderNumber);
   if (!order) return Response.json({ error: "Order nahi mila." }, { status: 404 });
 
   const token = readPhoneToken(url.searchParams.get("phoneToken") ?? undefined);
@@ -23,5 +23,5 @@ export async function GET(request: Request) {
     return Response.json({ error: "Order verify nahi hua." }, { status: 401 });
   }
 
-  return Response.json(paymentStatusFor(orderNumber), { headers: { "cache-control": "no-store" } });
+  return Response.json(await paymentStatusFor(orderNumber), { headers: { "cache-control": "no-store" } });
 }

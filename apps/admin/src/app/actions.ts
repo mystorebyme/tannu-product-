@@ -16,6 +16,7 @@ import {
   saveDelivery,
   saveOverride,
   saveSettings,
+  setOrderNote,
   setOrderTracking,
   updateOrderStatus,
   verifyOrderPayment,
@@ -91,6 +92,20 @@ export async function updateTrackingAction(formData: FormData) {
   const updated = await setOrderTracking(orderNumber, { courier, awb, url }, actor);
   if (updated) {
     appendAudit({ actor, action: "order.tracking_updated", target: orderNumber, meta: { courier, awb } });
+  }
+  revalidatePath("/orders");
+  revalidatePath(`/orders/${orderNumber}`);
+}
+
+/** "Abhi kahan atka hai" — customer ko tracking page par ye note dikhta hai. */
+export async function setOrderNoteAction(formData: FormData) {
+  const session = await requireSession();
+  const orderNumber = String(formData.get("orderNumber") ?? "");
+  const text = String(formData.get("text") ?? "");
+  const actor = session.email;
+  const updated = await setOrderNote(orderNumber, text, actor);
+  if (updated) {
+    appendAudit({ actor, action: "order.note_updated", target: orderNumber, meta: { text } });
   }
   revalidatePath("/orders");
   revalidatePath(`/orders/${orderNumber}`);
@@ -239,7 +254,7 @@ export async function createManualInvoiceAction(formData: FormData) {
 
   if (!items.length) return;
 
-  const invoice = createManualInvoice({
+  const invoice = await createManualInvoice({
     createdBy: session.email,
     customerName: text("customerName") || "Customer",
     phone: text("phone"),

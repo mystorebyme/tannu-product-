@@ -31,6 +31,7 @@ type Row = {
   payment_method: string;
   payment_status: string;
   status: string;
+  status_note: Order["statusNote"] | null;
   audit: AuditEntry[] | null;
   items: OrderItem[] | null;
   shipment: (Omit<Tracking, "deliveredAt"> & { deliveredAt: string | null }) | null;
@@ -63,7 +64,7 @@ const ORDER_SELECT = `
          o.shipping_address, o.notes, o.subtotal, o.discount, o.shipping, o.total,
          o.coupon_code, o.payment_method::text as payment_method,
          o.payment_status::text as payment_status, o.status::text as status,
-         coalesce(o.audit, '[]'::jsonb) as audit,
+         o.status_note, coalesce(o.audit, '[]'::jsonb) as audit,
          coalesce((
            select json_agg(json_build_object(
              'handle', i.handle, 'title', i.title, 'image', coalesce(i.image_url, ''),
@@ -119,6 +120,7 @@ function toOrder(row: Row): Order {
         } as PaymentRecord)
       : null,
     status: row.status as Order["status"],
+    statusNote: row.status_note ?? null,
     tracking: row.shipment
       ? {
           courier: row.shipment.courier ?? null,
@@ -166,9 +168,9 @@ async function upsertOrder(client: import("pg").PoolClient, order: WritableOrder
   await client.query(
     `insert into orders (id, order_number, customer_name, email, phone, shipping_address, notes,
                          subtotal, discount, shipping, total, coupon_code, payment_method,
-                         payment_status, status, audit, idempotency_key, created_at, updated_at)
+                         payment_status, status, audit, idempotency_key, created_at, updated_at, status_note)
      values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13::payment_method,$14::payment_status,
-             $15::order_status,$16::jsonb,$17,$18,now())
+             $15::order_status,$16::jsonb,$17,$18,now(),$19::jsonb)
      on conflict (order_number) do update set
        customer_name = excluded.customer_name,
        email = excluded.email,
@@ -184,6 +186,7 @@ async function upsertOrder(client: import("pg").PoolClient, order: WritableOrder
        payment_status = excluded.payment_status,
        status = excluded.status,
        audit = excluded.audit,
+       status_note = excluded.status_note,
        idempotency_key = coalesce(excluded.idempotency_key, orders.idempotency_key),
        updated_at = now()`,
     [
@@ -205,6 +208,7 @@ async function upsertOrder(client: import("pg").PoolClient, order: WritableOrder
       JSON.stringify(order.audit ?? []),
       order.idempotencyKey ?? null,
       order.createdAt,
+      order.statusNote ? JSON.stringify(order.statusNote) : null,
     ],
   );
 
