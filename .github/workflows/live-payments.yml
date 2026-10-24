@@ -5,6 +5,9 @@ name: Live payment + tracking smoke
 #
 # Manual run: Actions → "Live payment + tracking smoke" → Run workflow
 # (Ye 2 test orders banata hai — isliye schedule nahi hai.)
+permissions:
+  contents: write
+
 on:
   workflow_dispatch:
     inputs:
@@ -59,10 +62,16 @@ jobs:
           done
           exit $code
 
-      - name: Upload flow log
+      # log dekhne ke liye ek chhoti `live-logs` branch par commit (temporary)
+      - name: Publish flow log
         if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: live-flow-log
-          path: flow.log
-          if-no-files-found: warn
+        run: |
+          if [ ! -f flow.log ]; then echo "no log"; exit 0; fi
+          git config user.email "ci@liksha.local"
+          git config user.name "live-smoke"
+          mkdir -p .live-logs
+          cp flow.log .live-logs/flow.log
+          date -u > .live-logs/updated.txt
+          git add -f .live-logs
+          git commit -m "live smoke log" || true
+          git push origin HEAD:live-logs --force
