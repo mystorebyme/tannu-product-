@@ -41,3 +41,18 @@ Selectors badle to ye doc bhi update karna hai.
 
 - Koi `waitForTimeout` nahi — `expect(...).toBeVisible()` auto-wait use karo.
 - Network idle par depend nahi (images CDN se aati hain) — element-based waits.
+
+
+## Naye test ids (OTP, tracking, invoice, gallery)
+
+| testid | Kahan | Kya assert karte hain |
+| --- | --- | --- |
+| `announcement-bar` | har page (header ke upar) | live store jaisa rotating announcement |
+| `phone-otp` | checkout | Send OTP → Verify step, verified hone par "Verified" badge |
+| `product-price` | PDP | selected size ka price |
+| `order-tracking` | order page | status timeline + courier/AWB block |
+| `download-invoice` | order page | GST invoice link (phone ke last 4 digit maangta hai) |
+
+Playwright spec (`tests/e2e/storefront.spec.ts`) me gallery swipe, hover image swap aur
+OTP dev flow cover hote hain; smoke suite (`tests/e2e/smoke.mjs`) invoice PDF aur
+unverified-order block ko HTTP level par check karta hai.

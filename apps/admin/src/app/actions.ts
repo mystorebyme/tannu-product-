@@ -9,7 +9,7 @@ import {
   checkCredentials,
   createSessionToken,
 } from "@/lib/auth";
-import { appendAudit, saveOverride, saveSettings, updateOrderStatus } from "@/lib/data";
+import { appendAudit, saveOverride, saveSettings, setOrderTracking, updateOrderStatus } from "@/lib/data";
 import { requireSession } from "@/lib/session";
 import type { OrderStatus } from "@liksha/types";
 
@@ -63,6 +63,21 @@ export async function updatePriceAction(formData: FormData) {
   saveOverride(handle, { price: Math.round(rupees * 100) });
   appendAudit({ actor, action: "product.price_updated", target: handle, meta: { rupees } });
   revalidatePath("/products");
+}
+
+export async function updateTrackingAction(formData: FormData) {
+  const session = await requireSession();
+  const orderNumber = String(formData.get("orderNumber") ?? "");
+  const courier = String(formData.get("courier") ?? "");
+  const awb = String(formData.get("awb") ?? "");
+  const url = String(formData.get("url") ?? "");
+  const actor = session.email;
+  const updated = setOrderTracking(orderNumber, { courier, awb, url }, actor);
+  if (updated) {
+    appendAudit({ actor, action: "order.tracking_updated", target: orderNumber, meta: { courier, awb } });
+  }
+  revalidatePath("/orders");
+  revalidatePath(`/orders/${orderNumber}`);
 }
 
 export async function updateOrderStatusAction(formData: FormData) {

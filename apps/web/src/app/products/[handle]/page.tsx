@@ -4,8 +4,9 @@ import type { Metadata } from "next";
 import { ProductDetail } from "@/components/product-detail";
 import { ProductGrid } from "@/components/product-card";
 import { getProduct, getRelatedProducts, products } from "@/lib/store";
+import { categoryHref, categoryLabel } from "@/lib/categories";
 
-// 287 products build time par static HTML ban jaate hain -> instant page loads
+// har product build time par static HTML ban jaata hai -> instant page loads
 export async function generateStaticParams() {
   return products.map((product) => ({ handle: product.handle }));
 }
@@ -50,11 +51,8 @@ export default async function ProductPage({
           </li>
           <li>/</li>
           <li>
-            <Link
-              href={product.category === "lehnga" ? "/collections/lehnga-choli" : "/collections/party-wear-gown"}
-              className="hover:text-[#862222]"
-            >
-              {product.category === "lehnga" ? "Lehenga Choli" : "Anarkali Suit"}
+            <Link href={categoryHref(product.category)} className="hover:text-[#862222]">
+              {categoryLabel(product.category)}
             </Link>
           </li>
           <li>/</li>

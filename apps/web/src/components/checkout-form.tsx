@@ -12,6 +12,7 @@ import {
   computeDiscount,
 } from "@liksha/validation";
 import { SafeImage } from "@/components/safe-image";
+import { PhoneOtp } from "@/components/phone-otp";
 
 const COUPONS: Record<string, number> = COUPON_RULES;
 
@@ -34,6 +35,16 @@ export function CheckoutForm() {
   const [couponMessage, setCouponMessage] = useState<string | null>(null);
   const [payment, setPayment] = useState<"prepaid" | "cod">("prepaid");
   const [submitting, setSubmitting] = useState(false);
+  const [phoneToken, setPhoneToken] = useState<string | null>(null);
+  const [otpRequired, setOtpRequired] = useState(false);
+
+  useEffect(() => {
+    // server batata hai OTP zaroori hai ya nahi (Firebase configured / env flag)
+    fetch("/api/otp/status")
+      .then((response) => response.json())
+      .then((payload: { required?: boolean }) => setOtpRequired(Boolean(payload.required)))
+      .catch(() => setOtpRequired(false));
+  }, []);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
     customerName: "",
@@ -73,6 +84,10 @@ export function CheckoutForm() {
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     if (lines.length === 0) return;
+    if (otpRequired && !phoneToken) {
+      setError("Order place karne se pehle mobile number verify kariye (OTP).");
+      return;
+    }
     setSubmitting(true);
     setError(null);
     try {
@@ -86,6 +101,7 @@ export function CheckoutForm() {
         headers: { "Content-Type": "application/json", "Idempotency-Key": idempotencyKey },
         body: JSON.stringify({
           ...form,
+          phoneToken: phoneToken ?? undefined,
           couponCode: coupon,
           paymentMethod: payment,
           items: lines.map((line) => ({
@@ -130,7 +146,15 @@ export function CheckoutForm() {
           <h2 className="text-[11px] font-semibold tracking-[.16em] text-[#862222] uppercase">Contact</h2>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <Field label="Full name" required value={form.customerName} onChange={(v) => update("customerName", v)} />
-            <Field label="Phone (WhatsApp)" required type="tel" value={form.phone} onChange={(v) => update("phone", v)} />
+            <PhoneOtp
+              phone={form.phone}
+              onPhoneChange={(value) => {
+                update("phone", value);
+                setPhoneToken(null);
+              }}
+              verified={Boolean(phoneToken)}
+              onVerified={(payload) => setPhoneToken(payload?.phoneToken ?? null)}
+            />
             <Field
               label="Email"
               required

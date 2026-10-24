@@ -136,3 +136,65 @@ export function generateOrderNumber(now: number = Date.now()): string {
 }
 
 export const ORDER_NUMBER_PATTERN = /^LK-[A-Z0-9]{6,12}$/;
+
+/* ────────────────────────── GST invoice (shared) ──────────────────────────
+ * Apparel GST (22 Sep 2025 ke baad): per-piece value Rs. 2,500 tak 5%, usse
+ * zyada par 18%. Prices site par inclusive hain, isliye tax ko total se
+ * reverse-calculate karte hain — customer se extra kuch nahi liya jaata.
+ * Web (invoice page/PDF) aur admin (order view) dono yahi functions use karte hain.
+ */
+
+export const GST_APPAREL_THRESHOLD = 250_000; // paise — Rs. 2,500 per piece
+export const GST_APPAREL_RATE = 5;
+export const GST_APPAREL_RATE_HIGH = 18;
+export const GST_SERVICE_RATE = 18; // COD / shipping charges
+export const GST_HSN_APPAREL = "6204";
+
+export type TaxSplit = {
+  rate: number;
+  /** taxable value = total / (1 + rate) */
+  taxable: number;
+  cgst: number;
+  sgst: number;
+  igst: number;
+  tax: number;
+};
+
+/** GST rate jo ek piece ki selling price par lagta hai */
+export function apparelGstRate(unitPricePaise: number): number {
+  return unitPricePaise <= GST_APPAREL_THRESHOLD ? GST_APPAREL_RATE : GST_APPAREL_RATE_HIGH;
+}
+
+/**
+ * Tax-inclusive amount ko taxable + GST me todo.
+ * @param grossPaise customer ne jo diya (tax included)
+ * @param ratePercent 5 | 18
+ * @param interState  true -> IGST, false -> CGST + SGST (half-half)
+ */
+export function splitTax(grossPaise: number, ratePercent: number, interState = false): TaxSplit {
+  const gross = Math.max(0, Math.round(grossPaise));
+  const taxable = Math.round((gross * 100) / (100 + ratePercent));
+  const tax = gross - taxable; // rounding delta tax me daal diya -> taxable + tax === gross
+  if (interState) {
+    return { rate: ratePercent, taxable, cgst: 0, sgst: 0, igst: tax, tax };
+  }
+  const cgst = Math.floor(tax / 2);
+  return { rate: ratePercent, taxable, cgst, sgst: tax - cgst, igst: 0, tax };
+}
+
+/** Financial year label: Apr-Mar -> "2026-27" */
+export function financialYear(date: Date = new Date()): string {
+  const year = date.getFullYear();
+  const start = date.getMonth() + 1 >= 4 ? year : year - 1;
+  return `${start}-${String((start + 1) % 100).padStart(2, "0")}`;
+}
+
+/** Invoice serial: LK/2026-27/0001 (ek baar issue hone par badalta nahi) */
+export function invoiceNumber(sequence: number, date: Date = new Date()): string {
+  return `LK/${financialYear(date)}/${String(sequence).padStart(4, "0")}`;
+}
+
+export const INVOICE_NUMBER_PATTERN = /^LK\/\d{4}-\d{2}\/\d{4}$/;
+
+/** Indian state list — place-of-supply / CGST-SGST vs IGST decide karne ke liye */
+export const SELLER_STATE = "Rajasthan";

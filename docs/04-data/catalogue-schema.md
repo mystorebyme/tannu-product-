@@ -42,3 +42,14 @@ type Collection = {
 - Count 287, zero duplicate handles, zero `price <= 0`.
 - Price range 149900–499900 paise.
 - 9 collections; `saree`/`trending` are tag-based (no explicit product list on store).
+
+
+## Live snapshot se aane wale extra fields
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `images` | `string[]` | poori live gallery (avg 6.8 images/product), `?v=` strip karke |
+| `descriptionHtml` | `string` | live `body_html`, sanitized (script/iframe/img/on* hataye) |
+| `sizePricing` | `Record<size, {price, compareAtPrice, available}>` | per-size price/MRP/stock |
+| `productType` | `string \| null` | Shopify product_type (reference only) |
+| `publishedAt` | ISO string | "New Arrivals" ordering ke liye |

@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import type { Catalog, Order, Product } from "@liksha/types";
 import { canTransition } from "@liksha/validation";
-import catalogJson from "@/data/catalog.json";
+import catalogJson from "../data/catalog.json";
 
 export function repoRoot(): string {
   let dir = process.cwd();
@@ -94,6 +94,38 @@ export function updateOrderStatus(orderNumber: string, status: Order["status"], 
     status,
     audit: [
       { at: new Date().toISOString(), actor, action: `order.status.${status}`, meta: note ? { note } : undefined },
+      ...current.audit,
+    ],
+  };
+  writeRows("orders.json", rows);
+  return rows[index]!;
+}
+
+/** courier + AWB admin panel se set hote hain; customer track page yahi dikhata hai */
+export function setOrderTracking(
+  orderNumber: string,
+  input: { courier?: string; awb?: string; url?: string },
+  actor: string,
+) {
+  const rows = readRows<Order>("orders.json");
+  const index = rows.findIndex((order) => order.orderNumber === orderNumber);
+  if (index === -1) return null;
+  const current = rows[index]!;
+  const now = new Date().toISOString();
+  const tracking = {
+    courier: input.courier?.trim() || null,
+    awb: input.awb?.trim() || null,
+    url: input.url?.trim() || null,
+    shippedAt: current.tracking?.shippedAt ?? (input.courier || input.awb ? now : null),
+    deliveredAt: current.tracking?.deliveredAt ?? (current.status === "delivered" ? now : null),
+    updatedAt: now,
+    updatedBy: actor,
+  };
+  rows[index] = {
+    ...current,
+    tracking,
+    audit: [
+      { at: now, actor, action: "order.tracking_updated", meta: { courier: tracking.courier, awb: tracking.awb } },
       ...current.audit,
     ],
   };

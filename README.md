@@ -88,7 +88,7 @@ Docker alternative: `docker compose up --build` (web 3000, admin 3001, api 4000,
 | `npm run test:e2e` | Playwright suites (needs `npx playwright install`) |
 | `npm run catalog:build` | regenerate catalogue JSON from source data |
 | `npm run catalog:verify` | sanity gate: 287 products, paise prices, sizes, collections |
-| `npm run catalog:sync-live` | pull exact descriptions + full image galleries from the live store |
+| `npm run catalog:sync` | live store se snapshot pull + rebuild (galleries, descriptions, prices, sizes) |
 | `npm run setup` | first-run bootstrap |
 
 ---
@@ -164,8 +164,14 @@ Human walkthroughs: `agent-guides/`.
 
 - Orders/settings persist in `.data/*.json` — single instance only; Postgres path is documented
   (`database/prisma/schema.prisma`, `docs/04-data/migrations.md`).
-- Product galleries currently use the primary image only; run `npm run catalog:sync-live` on a machine
-  with internet to pull every image and the store's exact `body_html` descriptions.
+- Catalogue is built from `database/seeds/live/` (real Shopify snapshot: 1,971 images, store's own
+  descriptions). Refresh with `npm run catalog:sync`; in sandboxes without outbound network run the
+  *Catalog sync* GitHub Action instead. `catalog:sync-live` is an alias of `catalog:sync`.
+- Product galleries, hover image swap, scroll animations, phone OTP, courier tracking and GST
+  invoices are live — see `docs/07-security/phone-otp.md` and `docs/04-data/gst-invoicing.md`.
+- Firebase phone OTP needs the project keys; until then checkout runs in dev-OTP mode (code on screen)
+  and production must set `OTP_DEV_MODE=off` (`docs/07-security/phone-otp.md`).
+- `SELLER_GSTIN` must be set before the first real GST invoice (`docs/04-data/gst-invoicing.md`).
 - Prepaid payments stay `pending` until live Razorpay keys + webhook secret are configured.
 - Storefront images are hotlinked from the Shopify CDN; mirroring to object storage is a Phase 2 task.
 

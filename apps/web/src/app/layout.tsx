@@ -5,6 +5,7 @@ import { CartProvider } from "@/components/cart-provider";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { FloatingHelp } from "@/components/floating-help";
+import { AnnouncementBar } from "@/components/announcement-bar";
 import { siteConfig } from "@/config/site";
 
 export const metadata: Metadata = {
@@ -55,7 +56,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         />
       </head>
       <body className="text-[#2f2a25]">
+        {/* JS band ho to scroll-reveal content chhupna nahi chahiye */}
+        <noscript>
+          <style>{".reveal-init{opacity:1!important;transform:none!important}"}</style>
+        </noscript>
         <CartProvider>
+          <AnnouncementBar />
           <SiteHeader />
           <main className="min-h-[60vh]">{children}</main>
           <SiteFooter />

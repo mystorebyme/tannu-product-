@@ -1,4 +1,5 @@
 import { createOrderSchema } from "@liksha/validation";
+import { otpRequired, readPhoneToken } from "@/lib/otp";
 import {
   createOrder,
   findIdempotentOrder,
@@ -27,6 +28,28 @@ export async function POST(request: Request) {
     body = await request.json();
   } catch {
     return Response.json({ error: "Invalid JSON body." }, { status: 400 });
+  }
+
+  // OTP gating: token ho to verify, na ho to sirf tab allow jab OTP optional ho
+  const phoneTokenValue = typeof (body as { phoneToken?: unknown })?.phoneToken === "string"
+    ? ((body as { phoneToken: string }).phoneToken)
+    : undefined;
+  delete (body as { phoneToken?: unknown }).phoneToken;
+  const tokenPhone = readPhoneToken(phoneTokenValue);
+  if (otpRequired()) {
+    if (!tokenPhone) {
+      return Response.json(
+        { error: "Mobile number verify kariye (OTP) — phir order place hoga.", code: "phone_verification_required" },
+        { status: 400 },
+      );
+    }
+    const bodyPhone = String((body as { phone?: unknown })?.phone ?? "").replace(/\D/g, "").slice(-10);
+    if (tokenPhone.phone !== bodyPhone) {
+      return Response.json(
+        { error: "Verified number aur order ka number same hona chahiye.", code: "phone_mismatch" },
+        { status: 400 },
+      );
+    }
   }
 
   const parsed = createOrderSchema.safeParse(body);

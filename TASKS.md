@@ -6,10 +6,11 @@ Priority: **P0** = launch blocker · **P1** = first week after launch · **P2** 
 
 - [ ] **Live Razorpay keys** in Vercel + Render (`RAZORPAY_KEY_ID`, `_KEY_SECRET`, `_WEBHOOK_SECRET`)
       and register `https://api.likshaclothing.com/api/v1/webhooks/razorpay`.
-- [ ] **Full catalogue media** — run `npm run catalog:sync-live` on a machine with internet, then
-      `npm run catalog:verify && npm run build:web`. Needs: complete image galleries and the store's own
-      `body_html` descriptions per product.
+- [x] **Full catalogue media** — live snapshot committed (`database/seeds/live/`): 287 products,
+      1,971 images (avg 6.8/product), real `body_html` descriptions, size-wise pricing. Refresh anytime
+      with `npm run catalog:sync` (or GitHub Actions → *Catalog sync*).
 - [ ] **Price parity spot-check** — 10 random products vs likshaclothing.com (title, price, MRP, sizes).
+      (`npm run catalog:verify` already checks snapshot parity; manual check is for eyes-on confidence.)
 - [ ] **Production secrets** — rotate `ADMIN_PASSWORD`, `ADMIN_SESSION_SECRET`, `ADMIN_API_TOKEN`
       (dev defaults exist in the repo on purpose; prod boot check should fail on them).
 - [ ] **Domain + DNS** — apex → web, `admin.` → admin app, `api.` → Render (`docs/10-deployment/dns.md`).
@@ -17,6 +18,9 @@ Priority: **P0** = launch blocker · **P1** = first week after launch · **P2** 
 - [ ] **Backup cron** — `database/scripts/backup.sh` daily + weekly off-server copy.
 - [ ] **Mobile pass on a real phone** — home → PLP → PDP → cart → COD order.
 - [ ] **Policies reviewed** by the owner (returns window, refund timeline, grievance officer).
+- [ ] **Firebase project** — enable Phone provider, add authorized domains, paste the 6 Firebase envs
+      (`docs/07-security/phone-otp.md`). Until then checkout uses dev OTP (code on screen).
+- [ ] **`SELLER_GSTIN`** — set before the first real invoice; without it the PDF prints "GSTIN pending".
 
 ## P1 — week one
 
@@ -45,9 +49,20 @@ Priority: **P0** = launch blocker · **P1** = first week after launch · **P2** 
 - [ ] Referral codes and loyalty points.
 - [ ] Blog/editorial CMS (`docs/00-overview/reference-sites-analysis.md` has the sitemap for it).
 
+## Done (is round me)
+
+- [x] Live home page clone: announcement bar, poster hero, category tiles with live counts,
+      "Trendy Anarkali Sets" + "New Arrivals" rails, brand logo from the store.
+- [x] Product galleries (thumbs, cross-fade, hover zoom, swipe, keyboard), hover image swap on cards,
+      scroll-reveal animations.
+- [x] Service-tile strip ("FREE SHIPPING / SUPPORT 24/7 / 7 DAYS REPLACEMENT / 100% SECURE PAYMENT")
+      removed from every page, as requested.
+- [x] Firebase phone OTP at checkout + `phoneToken` enforcement on order creation.
+- [x] Courier/AWB tracking (admin → storefront timeline) and GST invoice (HTML + PDF, phone-gated).
+
 ## Housekeeping
 
 - [ ] Monthly `npm audit` + dependency bumps (Dependabot PRs).
 - [ ] Monthly restore rehearsal from backup.
-- [ ] Delete `clone-liksha-clothing-website/` once `catalog:sync-live` has run end-to-end
-      (it is only the bootstrap data source for `build-catalog.mjs`).
+- [x] Removed `clone-liksha-clothing-website/`, `scripts/sync-live-products.mjs`, `scripts/data/*`
+      (bootstrap-only inputs) — catalogue ab seedha live snapshot se banta hai.

@@ -2,7 +2,7 @@ import "server-only";
 
 import fs from "node:fs";
 import { randomUUID } from "node:crypto";
-import type { AuditEntry, Order, OrderStatus, PaymentMethod } from "@liksha/types";
+import type { AuditEntry, InvoiceMeta, Order, OrderStatus, PaymentMethod, Tracking } from "@liksha/types";
 import {
   COD_FEE,
   COD_MAX_SUBTOTAL,
@@ -10,6 +10,7 @@ import {
   canTransition,
   computeDiscount,
   generateOrderNumber,
+  invoiceNumber,
 } from "@liksha/validation";
 import { dataFile } from "@/lib/data-dir";
 import { products } from "@/lib/store";
@@ -175,6 +176,105 @@ export function updateOrderStatus(
   all[index] = updated;
   writeAll(all);
   return updated;
+}
+
+/* ------------------------------------------------------------------ *
+ * Tracking — admin courier/AWB daalta hai, customer track page dikhata hai.
+ * ------------------------------------------------------------------ */
+
+export function setTracking(
+  orderNumberValue: string,
+  input: { courier?: string | null; awb?: string | null; url?: string | null },
+  actor = "admin",
+): Order {
+  const all = readAll();
+  const index = all.findIndex((order) => order.orderNumber === orderNumberValue);
+  if (index === -1) throw new OrderError("Order nahi mila", 404, "order_not_found");
+  const order = all[index]!;
+  const now = new Date().toISOString();
+  const courier = input.courier?.trim() || null;
+  const awb = input.awb?.trim() || null;
+  const url = input.url?.trim() || null;
+
+  const tracking: Tracking = {
+    courier,
+    awb,
+    url,
+    shippedAt: order.tracking?.shippedAt ?? (courier || awb ? now : null),
+    deliveredAt: order.tracking?.deliveredAt ?? (order.status === "delivered" ? now : null),
+    updatedAt: now,
+    updatedBy: actor,
+  };
+
+  const updated: Order = {
+    ...order,
+    tracking,
+    audit: [
+      {
+        at: now,
+        actor,
+        action: "order.tracking_updated",
+        meta: { courier, awb, url },
+      },
+      ...order.audit,
+    ],
+  };
+  all[index] = updated;
+  writeAll(all);
+  return updated;
+}
+
+/* ------------------------------------------------------------------ *
+ * GST invoice — serial ek baar issue hone par lock.
+ * ------------------------------------------------------------------ */
+
+type InvoiceSequence = { next: number };
+
+function nextInvoiceSerial(): number {
+  const file = dataFile("invoice-seq.json");
+  let state: InvoiceSequence = { next: 1 };
+  if (fs.existsSync(file)) {
+    try {
+      state = JSON.parse(fs.readFileSync(file, "utf8")) as InvoiceSequence;
+    } catch {
+      state = { next: 1 };
+    }
+  }
+  const serial = Math.max(1, Number(state.next) || 1);
+  fs.writeFileSync(`${file}.${process.pid}.tmp`, JSON.stringify({ next: serial + 1 }, null, 2));
+  fs.renameSync(`${file}.${process.pid}.tmp`, file);
+  return serial;
+}
+
+/** Invoice meta assign karta hai (idempotent — dobara call par wahi number). */
+export function ensureInvoice(orderNumberValue: string): { order: Order; invoice: InvoiceMeta } {
+  const all = readAll();
+  const index = all.findIndex((order) => order.orderNumber === orderNumberValue);
+  if (index === -1) throw new OrderError("Order nahi mila", 404, "order_not_found");
+  const order = all[index]!;
+  if (order.invoice) return { order, invoice: order.invoice };
+
+  const issuedAt = new Date().toISOString();
+  const serial = nextInvoiceSerial();
+  const invoice: InvoiceMeta = {
+    number: invoiceNumber(serial, new Date(issuedAt)),
+    issuedAt,
+    taxableValue: 0,
+    cgst: 0,
+    sgst: 0,
+    igst: 0,
+    gstRate: 0,
+    hsn: process.env.GST_HSN ?? "6204",
+    placeOfSupply: order.state || "Rajasthan",
+  };
+  const updated: Order = {
+    ...order,
+    invoice,
+    audit: [{ at: issuedAt, actor: "system", action: "invoice.issued", meta: { number: invoice.number } }, ...order.audit],
+  };
+  all[index] = updated;
+  writeAll(all);
+  return { order: updated, invoice };
 }
 
 export function markPaymentPaid(orderNumberValue: string, reference: string): Order | undefined {

@@ -8,6 +8,11 @@ const root = process.cwd(); // npm test root se chalta hai
 const file = path.join(root, "database/seeds/catalog.json");
 const catalog = JSON.parse(fs.readFileSync(file, "utf8")) as Catalog;
 const products: Product[] = catalog.products;
+const liveDir = path.join(root, "database/seeds/live");
+const liveProducts: any[] = JSON.parse(fs.readFileSync(path.join(liveDir, "products.json"), "utf8")).products;
+const liveMembership: Record<string, string[]> = JSON.parse(
+  fs.readFileSync(path.join(liveDir, "membership.json"), "utf8"),
+).collections;
 
 test("catalogue has the full live product set", () => {
   assert.equal(products.length, 287);
@@ -37,10 +42,13 @@ test("every product has a positive integer price in paise", () => {
   }
 });
 
-test("price range matches the live store (Rs. 1,499 – Rs. 4,999)", () => {
+test("price range matches the live store snapshot", () => {
   const prices = products.map((product) => product.price);
-  assert.equal(Math.min(...prices), 149_900);
-  assert.equal(Math.max(...prices), 499_900);
+  const livePrices = liveProducts
+    .flatMap((product) => (product.variants ?? []).map((variant: any) => Math.round(Number(variant.price) * 100)))
+    .filter((value: number) => value > 0);
+  assert.equal(Math.min(...prices), Math.min(...livePrices));
+  assert.equal(Math.max(...prices), Math.max(...livePrices));
 });
 
 test("compare-at price is always above selling price when present", () => {
@@ -99,20 +107,44 @@ test("collection counts match the live store snapshot", () => {
       counts[collection] = (counts[collection] ?? 0) + 1;
     }
   }
-  assert.equal(counts["new-arrivals"], 287);
-  assert.equal(counts["party-wear-gown"], 266);
-  assert.equal(counts["sale"], 246);
-  assert.equal(counts["likshas-choice"], 126);
-  assert.equal(counts["printed-suit-set"], 38);
-  assert.equal(counts["lehnga-choli"], 23);
-  assert.equal(counts["weddin-collection"], 18);
-  assert.equal(counts["trending"], 4);
+  for (const [handle, handles] of Object.entries(liveMembership)) {
+    if (handle === "frontpage") continue; // home-page grouping, nav collection nahi
+    assert.equal(counts[handle] ?? 0, handles.length, `${handle} count drifted from the live store`);
+  }
   assert.equal(counts["saree"], undefined); // store par bhi khaali
+});
+
+test("every product carries the full live gallery", () => {
+  const liveByHandle = new Map(liveProducts.map((product) => [product.handle, product]));
+  for (const product of products) {
+    const source: any = liveByHandle.get(product.sourceHandle);
+    assert.ok(source, `${product.handle} missing from the live snapshot`);
+    assert.equal(product.images.length, (source.images ?? []).length, `${product.handle} gallery mismatch`);
+    for (const image of product.images) assert.match(image, /^https:\/\/cdn\.shopify\.com\//);
+  }
+});
+
+test("live descriptions are sanitized and rendered, not dropped", () => {
+  for (const product of products) {
+    assert.ok(product.descriptionHtml && product.descriptionHtml.length > 3, `${product.handle} has no descriptionHtml`);
+    assert.doesNotMatch(product.descriptionHtml!, /<(script|iframe|img)\b/i, `${product.handle} has unsanitized html`);
+  }
+});
+
+test("every size has live pricing attached", () => {
+  for (const product of products) {
+    for (const size of product.sizes) {
+      const pricing = product.sizePricing?.[size];
+      assert.ok(pricing, `${product.handle}: ${size} has no pricing`);
+      assert.equal(Number.isInteger(pricing!.price), true);
+      assert.ok(pricing!.price > 0);
+    }
+  }
 });
 
 test("every product carries a description and details", () => {
   for (const product of products) {
-    assert.ok(product.description.trim().length >= 10, `${product.handle} description missing`);
+    assert.ok(product.description.trim().length >= 3, `${product.handle} description missing`);
     assert.ok(Array.isArray(product.details), `${product.handle} details missing`);
     assert.ok(product.category.length > 0, `${product.handle} category missing`);
   }

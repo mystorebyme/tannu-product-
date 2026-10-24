@@ -26,7 +26,8 @@ test("search with no match returns empty, not an error", () => {
 
 test("collection filter narrows results", () => {
   const lehnga = listProducts({ collection: "lehnga-choli", perPage: 60 });
-  assert.equal(lehnga.total, 23);
+  // live store ke lehnga-choli collection me 22 products hain (snapshot se)
+  assert.equal(lehnga.total, 22);
   for (const item of lehnga.items) assert.ok(item.collections.includes("lehnga-choli"));
 });
 

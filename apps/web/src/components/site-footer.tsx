@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { SafeImage } from "@/components/safe-image";
+import { logoUrl, logoFallback } from "@/config/site";
 
 const supportLinks = [
   { label: "Search", href: "/search" },
@@ -86,54 +88,15 @@ export function SiteFooter() {
 
   return (
     <footer className="mt-16 border-t border-[#e9dfd4] bg-[#faf6f1] text-[#3f3830]">
-      <div className="border-b border-[#e9dfd4]">
-        <div className="mx-auto grid max-w-[1400px] grid-cols-2 gap-y-6 px-4 py-7 sm:grid-cols-4 lg:px-6">
-          {[
-            { title: "FREE SHIPPING", text: "Free shipping on all order across India", icon: "shipping" },
-            { title: "SUPPORT 24/7", text: "Contact us 24 hours a day, 7 days a week", icon: "support" },
-            { title: "7 DAYS REPLACEMENT", text: "Simply return it within 7 days for an exchange.", icon: "replacement" },
-            { title: "100% SECURE PAYMENT", text: "We ensure secure payment", icon: "secure" },
-          ].map((item) => (
-            <div key={item.title} className="flex items-start gap-3 px-1">
-              <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[#d9c6b4] text-[#862222]">
-                {item.icon === "shipping" ? (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M2 7h11v9H2zM13 10h5l3 3v3h-8" />
-                    <circle cx="6" cy="18" r="1.6" />
-                    <circle cx="17" cy="18" r="1.6" />
-                  </svg>
-                ) : item.icon === "support" ? (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M4 13a8 8 0 0 1 16 0v4a3 3 0 0 1-3 3h-2" />
-                    <rect x="2" y="12" width="4" height="6" rx="1.5" />
-                    <rect x="18" y="12" width="4" height="6" rx="1.5" />
-                  </svg>
-                ) : item.icon === "replacement" ? (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5" />
-                    <path d="M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5" />
-                  </svg>
-                ) : (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M12 3l8 3v6c0 4.4-3.4 7.9-8 9-4.6-1.1-8-4.6-8-9V6l8-3Z" />
-                    <path d="m9 12 2 2 4-4" />
-                  </svg>
-                )}
-              </span>
-              <div>
-                <h3 className="text-[10.5px] font-semibold tracking-[.12em] text-[#862222] uppercase">{item.title}</h3>
-                <p className="mt-1 text-[11.5px] leading-relaxed text-[#6b6259]">{item.text}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
       <div className="mx-auto grid max-w-[1400px] gap-10 px-4 py-11 sm:grid-cols-2 lg:grid-cols-4 lg:px-6">
         <div>
           <Link href="/">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/site/logo.svg" alt="Liksha Clothing" className="h-16 w-auto" />
+            <SafeImage
+              src={logoUrl}
+              fallbackSrc={logoFallback}
+              alt="Liksha Clothing"
+              className="h-16 w-auto object-contain"
+            />
           </Link>
           <p className="mt-3 max-w-[280px] text-[12px] leading-relaxed text-[#6b6259]">
             Liksha Clothing brings you hand-finished designer Anarkali suits, lehengas and suit sets —

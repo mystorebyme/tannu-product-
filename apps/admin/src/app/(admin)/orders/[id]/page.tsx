@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getOrder } from "@/lib/data";
 import { dateTime, inr } from "@/lib/format";
-import { updateOrderStatusAction } from "@/app/actions";
+import { updateOrderStatusAction, updateTrackingAction } from "@/app/actions";
 import { getSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
@@ -156,6 +156,59 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
               )}
               <p className="small muted" style={{ marginBottom: 0 }}>
                 Payment: <strong>{order.paymentMethod === "cod" ? "COD" : order.paymentStatus}</strong>
+              </p>
+            </div>
+          </div>
+
+          <div className="panel">
+            <div className="panel-head">
+              <h2>Courier &amp; tracking</h2>
+            </div>
+            <div className="panel-body">
+              <form action={updateTrackingAction}>
+                <input type="hidden" name="orderNumber" value={order.orderNumber} />
+                <div className="field">
+                  <label htmlFor="courier">Courier</label>
+                  <input
+                    id="courier"
+                    name="courier"
+                    defaultValue={order.tracking?.courier ?? ""}
+                    placeholder="Delhivery / Bluedart / India Post"
+                  />
+                </div>
+                <div className="field">
+                  <label htmlFor="awb">AWB / tracking number</label>
+                  <input id="awb" name="awb" defaultValue={order.tracking?.awb ?? ""} placeholder="e.g. 1234567890" />
+                </div>
+                <div className="field">
+                  <label htmlFor="url">Tracking link (optional)</label>
+                  <input
+                    id="url"
+                    name="url"
+                    defaultValue={order.tracking?.url ?? ""}
+                    placeholder="https://www.delhivery.com/track/package/…"
+                  />
+                </div>
+                <button className="btn btn-primary" type="submit">
+                  Save tracking
+                </button>
+              </form>
+              {order.tracking?.updatedAt ? (
+                <p className="small muted" style={{ marginBottom: 0 }}>
+                  Last updated {dateTime(order.tracking.updatedAt)} by {order.tracking.updatedBy}
+                </p>
+              ) : null}
+              <p className="small" style={{ marginBottom: 0 }}>
+                <a
+                  className="btn btn-sm"
+                  href={`${process.env.NEXT_PUBLIC_STOREFRONT_URL ?? "http://localhost:3000"}/api/orders/${
+                    order.orderNumber
+                  }/invoice?phone=${order.phone}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Download GST invoice (PDF)
+                </a>
               </p>
             </div>
           </div>

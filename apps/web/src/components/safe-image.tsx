@@ -16,6 +16,7 @@ export function SafeImage({
   loading = "lazy",
   fetchPriority,
   sizes,
+  fallbackSrc = FALLBACK,
 }: {
   src: string;
   alt: string;
@@ -23,13 +24,15 @@ export function SafeImage({
   loading?: "lazy" | "eager";
   fetchPriority?: "high" | "low" | "auto";
   sizes?: string;
+  /** CDN fail hone par kya dikhe — default brand placeholder */
+  fallbackSrc?: string;
 }) {
   const [failed, setFailed] = useState(false);
 
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src={failed || !src ? FALLBACK : src}
+      src={failed || !src ? fallbackSrc : src}
       alt={alt}
       className={className}
       loading={loading}

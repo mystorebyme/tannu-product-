@@ -13,7 +13,11 @@ decisions rakhti hai — jo cheezein code me dikhti hain par reasoning kahin lik
 | D6 | `saree` collection stays empty | The live store's saree collection is empty today (verified). Fake fills would break parity | 2026-10-24 |
 | D7 | `trending` = the 4 products on the live store | Verified from the live collection page; recorded in `scripts/data/collection-membership.json` | 2026-10-24 |
 | D8 | Emoji product handle sanitised to ASCII (`✨-ruby…` → `ruby…`) | Emoji URLs break sitemaps/social previews; `sourceHandle` keeps traceability | 2026-10-24 |
-| D9 | One image per product until `catalog:sync-live` runs | Sandbox has no outbound network; primary image is still the exact real image | 2026-10-24 |
+| D9 | ~~One image per product~~ → **full live galleries** | GitHub Actions se Shopify JSON pull karke repo me commit kiya (sandbox me outbound block hai); ab 1,971 images + real descriptions | 2026-10-24 |
+| D10 | Catalogue source = `database/seeds/live/products.json` (Shopify JSON) | `clone-liksha-clothing-website/` hataya; snapshot hi single input hai, isliye build reproducible aur verify-able hai | 2026-10-24 |
+| D11 | Firebase Phone Auth for OTP, own signed `phoneToken` for order gating | SMS/DLT infra khud maintain karne ki zaroorat nahi; order API ko sirf HMAC verify karna padta hai | 2026-10-24 |
+| D12 | GST 5% up to Rs. 2,500 per piece, 18% above (22 Sep 2025 rates) | Apparel rate slab; COD fee service 18%; prices tax-inclusive, `splitTax` reverse-calculates | 2026-10-24 |
+| D13 | Service-tile strip removed everywhere | Owner ne explicitly kaha "remove this from all pages" (live store par hai, hum par nahi) | 2026-10-24 |
 | D10 | Inventory starts at 10 per size, manual in Phase 1 | Prevents unfulfillable orders while stock data is not integrated | 2026-10-24 |
 | D11 | Admin stays a separate app on a subdomain | Customer bundle stays clean; independent deploy/rollback; easy `noindex` | 2026-10-24 |
 | D12 | Orders in JSON files for Phase 1 | 5–30 orders/day; zero infra; the swap to Postgres touches one module | 2026-10-24 |

@@ -6,7 +6,14 @@
 
 export type Currency = "INR";
 
-export type ProductCategory = "anarkali" | "lehnga" | "printed" | "saree";
+export type ProductCategory = "anarkali" | "lehnga" | "printed" | "saree" | "gown" | "sharara" | "other";
+
+/** size-wise live variant: store me kuch sizes ka price/MRP alag hota hai */
+export interface SizePricing {
+  price: number;
+  compareAtPrice: number | null;
+  available: boolean;
+}
 
 export interface Product {
   /** URL-safe ASCII slug (emoji/space strip karke) */
@@ -18,8 +25,14 @@ export interface Product {
   price: number;
   /** MRP in paise (null = no strike-through) */
   compareAtPrice: number | null;
-  /** CDN image urls, first one is the primary */
+  /** poori gallery — CDN urls, pehli image primary (live store se exact) */
   images: string[];
+  /** live body_html se sanitized description (paragraphs, bullets) */
+  descriptionHtml?: string;
+  /** live Shopify product_type (sirf reference) */
+  productType?: string | null;
+  /** per-size price/availablity, size string se keyed */
+  sizePricing?: Record<string, SizePricing>;
   collections: string[];
   category: ProductCategory;
   fabric: string;
@@ -31,6 +44,8 @@ export interface Product {
   reviewCount: number;
   inStock: boolean;
   featured: boolean;
+  /** live store ka publish timestamp — "New Arrivals" sort ke liye */
+  publishedAt?: string | null;
 }
 
 export interface Collection {
@@ -39,6 +54,8 @@ export interface Collection {
   subtitle: string;
   image: string;
   sortOrder: number;
+  /** live store ke collection page par dikhne wala count */
+  productCount?: number;
 }
 
 export interface Catalog {
@@ -49,7 +66,10 @@ export interface Catalog {
     currency: Currency;
     moneyUnit: "paise";
     builtAt: string;
+    /** jis live snapshot se build hua */
+    snapshotAt?: string | null;
     productCount: number;
+    imageCount?: number;
   };
   collections: Collection[];
   products: Product[];
@@ -115,8 +135,36 @@ export interface Order {
   paymentMethod: PaymentMethod;
   paymentStatus: PaymentStatus;
   status: OrderStatus;
+  /** courier + AWB — admin panel se bhara jaata hai, customer track page par dikhta hai */
+  tracking?: Tracking | null;
+  /** GST invoice meta — invoice generate hote hi lock ho jaata hai */
+  invoice?: InvoiceMeta | null;
   /** har mutation ka record — kisne kya badla */
   audit: AuditEntry[];
+}
+
+export interface Tracking {
+  courier: string | null;
+  awb: string | null;
+  url: string | null;
+  shippedAt: string | null;
+  deliveredAt: string | null;
+  updatedAt: string;
+  updatedBy: string;
+}
+
+export interface InvoiceMeta {
+  /** LK/2627/0001 jaisa serial — ek baar assign hone par badalta nahi */
+  number: string;
+  issuedAt: string;
+  /** taxable value + tax split, paise me */
+  taxableValue: number;
+  cgst: number;
+  sgst: number;
+  igst: number;
+  gstRate: number;
+  hsn: string;
+  placeOfSupply: string;
 }
 
 export interface AuditEntry {

@@ -8,6 +8,7 @@ import { formatPrice, imageUrl } from "@/lib/format";
 import { useCart } from "@/components/cart-provider";
 import type { SearchHit } from "@/types/catalog";
 import { SafeImage } from "@/components/safe-image";
+import { logoUrl, logoFallback } from "@/config/site";
 
 const quickLinks = [
   { label: "HOME", href: "/" },
@@ -16,9 +17,8 @@ const quickLinks = [
   { label: "NEW ARRIVALS", href: "/collections/new-arrivals" },
   { label: "LEHNGA CHOLI", href: "/collections/lehnga-choli" },
   { label: "PRINTED SUIT SET", href: "/collections/printed-suit-set" },
-  { label: "TRENDING", href: "/collections/trending" },
+  { label: "SAREES", href: "/collections/saree" },
   { label: "SALE", href: "/collections/sale" },
-  { label: "WEDDING COLLECTION", href: "/collections/weddin-collection" },
 ];
 
 // Diwali 2026 (8 Nov) dispatch window — season ke baad update karein
@@ -134,10 +134,11 @@ export function SiteHeader() {
           </button>
 
           <Link href="/" className="flex shrink-0 items-center">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/images/site/logo.svg"
+            <SafeImage
+              src={logoUrl}
+              fallbackSrc={logoFallback}
               alt="Liksha Clothing"
+              loading="eager"
               className="h-10 w-auto object-contain sm:h-12 lg:h-14"
             />
           </Link>
@@ -261,8 +262,7 @@ export function SiteHeader() {
           />
           <div className="absolute inset-y-0 left-0 flex w-[86%] max-w-[340px] flex-col bg-white shadow-xl">
             <div className="flex items-center justify-between border-b border-[#eee6de] px-4 py-3">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/images/site/logo.svg" alt="Liksha Clothing" className="h-10 w-auto" />
+              <SafeImage src={logoUrl} fallbackSrc={logoFallback} alt="Liksha Clothing" className="h-10 w-auto" />
               <button type="button" onClick={() => setMobileOpen(false)} aria-label="Close" className="p-2">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
                   <path d="M5 5l14 14M19 5 5 19" />

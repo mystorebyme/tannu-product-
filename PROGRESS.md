@@ -1,28 +1,32 @@
 # Progress
 
-**Last updated:** 2026-10-24 (Phase 1 build)
+**Last updated:** 2026-10-24 (live-parity pass: galleries, OTP, tracking, GST invoice)
 
 ## Status snapshot
 
 | Area | State | Evidence |
 | --- | --- | --- |
-| Catalogue (287 products, 9 collections) | ✅ done | `npm run catalog:verify` → `catalog ok` |
-| Storefront (home, 9 static PLPs, 287 static PDPs, cart, checkout, tracking, policies) | ✅ done | `npm run build:web` → 309 routes, PLPs now SSG |
+| Catalogue (287 products, 9 collections, 1,971 images, live descriptions) | ✅ done | `npm run catalog:verify` → `catalog ok` (snapshot parity) |
+| Storefront (live-clone home, 9 static PLPs, 287 static PDPs, gallery, cart, checkout + OTP, tracking, invoices, policies) | ✅ done | `npm run build:web` → 309 routes |
 | Admin (login + 15 routes, server actions, audit) | ✅ done | `cd apps/admin && npx next build` → 16 routes |
 | API (products, orders, payments, webhook, health) | ✅ done | `tsc` clean, `npm run test:integration` → 36 pass |
 | Order lifecycle (pricing, coupons, COD, idempotency, transitions) | ✅ done | integration tests + HTTP tests |
-| Tests | ✅ 37 unit + 36 integration + 20 smoke checks | `npm run test:all`, `npm run test:smoke` |
+| Phone OTP (Firebase) at checkout | ✅ code ready, keys pending | `docs/07-security/phone-otp.md` |
+| GST invoice (HTML + PDF, phone-gated) | ✅ done | order page → Download invoice |
+| Courier/AWB tracking (admin → customer) | ✅ done | admin order → Courier & tracking |
+| Tests | ✅ 47 unit + 38 integration + 35 smoke checks | `npm run test:all`, `npm run test:smoke` |
 | Docs 00–11 | ✅ 87 files | `docs/` |
 | Skills (15), agent guides (6), infra, CI/CD | ✅ done | `.claude/skills`, `agent-guides`, `infra`, `.github` |
 | Live Razorpay keys + webhook registration | ⛔ blocked on business KYC | env `RAZORPAY_*` empty |
-| Full image galleries + exact `body_html` descriptions | ⏳ needs internet | `npm run catalog:sync-live` |
+| Full image galleries + exact `body_html` descriptions | ✅ done (live snapshot) | `database/seeds/live/`, `npm run catalog:sync` |
+| Firebase project + authorized domains | ⏳ owner action | `docs/07-security/phone-otp.md` |
 | Postgres migration | ⏳ Phase 2 | `database/prisma/schema.prisma` ready |
 
 ## Verified commands (this build)
 
 ```
 npm run typecheck                       → 0 errors (web, admin, api)
-npm test                                → 37 pass
+npm test                                → 47 pass
 npm run test:integration                → 36 pass
 npm run catalog:verify                  → 287 products, 9 collections, catalog ok
 npm run build --workspace @liksha/web   → compiled, 309 routes (287 PDP prerendered)

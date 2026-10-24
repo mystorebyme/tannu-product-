@@ -30,7 +30,8 @@
     "test:e2e": "playwright test",
     "test:all": "npm run test:unit && npm run test:integration",
     "catalog:verify": "node scripts/verify-catalog.mjs",
-    "catalog:sync-live": "node scripts/sync-live-products.mjs"
+    "catalog:sync-live": "npm run catalog:sync",
+    "catalog:sync": "node scripts/catalog-sync/fetch-live.mjs && npm run catalog:build"
   },
   "devDependencies": {
     "tsx": "4.21.0",

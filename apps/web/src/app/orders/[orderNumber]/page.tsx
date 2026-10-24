@@ -64,11 +64,17 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
           </div>
         ) : null}
 
-        <div className="mt-4 border border-[#eee6de] p-5">
-          <h2 className="text-[11px] font-semibold tracking-[.16em] uppercase">Order tracking</h2>
+        <div className="mt-4 border border-[#eee6de] p-5" data-testid="order-tracking">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-[11px] font-semibold tracking-[.16em] uppercase">Order tracking</h2>
+            <span className="text-[11px] text-[#8a8078]">
+              Status: <strong className="text-[#862222]">{ORDER_STATUS_COPY[order.status] ?? order.status}</strong>
+            </span>
+          </div>
           <ol className="mt-4 grid grid-cols-5 gap-1.5 text-center">
             {timeline.map((step, index) => {
               const done = currentStep >= index && currentStep !== -1;
+              const eventFor = [...order.audit].reverse().find((entry) => entry.action === `order.status.${step}`);
               return (
                 <li key={step} className="flex flex-col items-center gap-1.5">
                   <span
@@ -81,10 +87,60 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
                   <span className="text-[10px] tracking-[.08em] uppercase text-[#6b6259]">
                     {ORDER_STATUS_COPY[step]}
                   </span>
+                  {eventFor ? (
+                    <span className="text-[9.5px] text-[#a49a90]">{formatDate(eventFor.at)}</span>
+                  ) : null}
                 </li>
               );
             })}
           </ol>
+
+          {order.tracking?.awb ? (
+            <div className="mt-4 border-t border-[#f1ebe5] pt-3 text-[12.5px] text-[#5c534b]">
+              <p>
+                Courier: <strong>{order.tracking.courier ?? "—"}</strong>
+                <br />
+                AWB / Tracking no: <strong>{order.tracking.awb}</strong>
+                {order.tracking.shippedAt ? (
+                  <>
+                    <br />
+                    Shipped: {formatDate(order.tracking.shippedAt)}
+                  </>
+                ) : null}
+              </p>
+              {order.tracking.url ? (
+                <a
+                  href={order.tracking.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-2 inline-block border border-[#862222] px-4 py-2 text-[10.5px] font-semibold tracking-[.14em] text-[#862222] uppercase"
+                >
+                  Track with courier
+                </a>
+              ) : null}
+            </div>
+          ) : (
+            <p className="mt-3 border-t border-[#f1ebe5] pt-3 text-[11.5px] text-[#8a8078]">
+              AWB number dispatch hone par yahin aur WhatsApp par mil jaayega.
+            </p>
+          )}
+        </div>
+
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border border-[#eee6de] p-5">
+          <div>
+            <h2 className="text-[11px] font-semibold tracking-[.16em] uppercase">GST invoice</h2>
+            <p className="mt-1 text-[11.5px] text-[#6b6259]">
+              Tax invoice (GST 5% / 18%, product value ke hisaab se) download kariye — order ke phone ke
+              aakhri 4 digit maange jaate hain.
+            </p>
+          </div>
+          <Link
+            href={`/orders/${order.orderNumber}/invoice`}
+            data-testid="download-invoice"
+            className="border border-[#862222] px-5 py-2.5 text-[10.5px] font-semibold tracking-[.14em] text-[#862222] uppercase"
+          >
+            Download invoice
+          </Link>
         </div>
 
         <div className="mt-4 grid gap-4 sm:grid-cols-2">

@@ -3,56 +3,62 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useCart } from "@/components/cart-provider";
-import { discountPercent, formatPrice, imageUrl } from "@/lib/format";
+import { discountPercent, formatPrice } from "@/lib/format";
+import { categoryHref, categoryLabel } from "@/lib/categories";
 import type { Product } from "@/types/catalog";
-import { SafeImage } from "@/components/safe-image";
+import { ProductGallery } from "@/components/product-gallery";
 
 export function ProductDetail({ product }: { product: Product }) {
   const { addItem } = useCart();
-  const [activeImage, setActiveImage] = useState(0);
-  const [size, setSize] = useState(product.sizes[1] ?? product.sizes[0] ?? "Free Size");
+  const firstAvailable =
+    product.sizes.find((size) => product.sizePricing?.[size]?.available) ??
+    product.sizes[0] ??
+    "Free Size";
+  const [size, setSize] = useState(firstAvailable);
   const [quantity, setQuantity] = useState(1);
   const [openAccordion, setOpenAccordion] = useState<string | null>("details");
   const [pincode, setPincode] = useState("");
   const [pinMessage, setPinMessage] = useState<string | null>(null);
 
-  const off = discountPercent(product.price, product.compareAtPrice);
-  const savings = useMemo(
-    () => (product.compareAtPrice ? product.compareAtPrice - product.price : 0),
-    [product],
-  );
+  const sizePricing = product.sizePricing?.[size];
+  const price = sizePricing?.price ?? product.price;
+  const compareAt = sizePricing?.compareAtPrice ?? product.compareAtPrice;
+  const off = discountPercent(price, compareAt);
+  const savings = useMemo(() => (compareAt ? compareAt - price : 0), [compareAt, price]);
 
-  function buyNow() {
+  function add(quantityOverride?: number) {
     addItem(
       {
         handle: product.handle,
         title: product.title,
-        price: product.price,
-        compareAtPrice: product.compareAtPrice,
+        price,
+        compareAtPrice: compareAt ?? null,
         image: product.images[0],
         size,
       },
-      quantity,
+      quantityOverride ?? quantity,
     );
   }
 
   function checkPin() {
-    if (!/^\d{6}$/.test(pincode.trim())) {
+    if (!/^[1-9]\d{5}$/.test(pincode.trim())) {
       setPinMessage("Please enter a valid 6-digit pincode.");
       return;
     }
-    setPinMessage(
-      /^[1-9]/.test(pincode.trim())
-        ? `Delivering to ${pincode.trim()} — free shipping, 4-7 business days.`
-        : "Please enter a valid 6-digit pincode.",
-    );
+    setPinMessage(`Delivering to ${pincode.trim()} — free shipping, 4-7 business days. COD under Rs. 3,500.`);
   }
 
   const accordions = [
     {
       key: "details",
       title: "Product Details",
-      content: (
+      content: product.descriptionHtml ? (
+        <div
+          className="product-rich text-[12.5px] leading-relaxed text-[#5c534b] [&_br]:block [&_li]:ml-4 [&_li]:list-disc [&_p]:mb-2 [&_strong]:font-semibold"
+          // live store ka body_html — build script me sanitize hota hai (script/iframe/img strip)
+          dangerouslySetInnerHTML={{ __html: product.descriptionHtml }}
+        />
+      ) : (
         <ul className="space-y-1.5">
           {product.details.map((detail) => (
             <li key={detail} className="flex gap-2 text-[12.5px] leading-relaxed text-[#5c534b]">
@@ -97,88 +103,31 @@ export function ProductDetail({ product }: { product: Product }) {
   ];
 
   return (
-    <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
-      <div className="flex flex-col-reverse gap-2.5 sm:flex-row">
-        {product.images.length > 1 ? (
-          <div className="no-scrollbar flex gap-2 overflow-x-auto sm:flex-col sm:overflow-y-auto">
-          {product.images.map((image, index) => (
-            <button
-              key={image}
-              type="button"
-              onClick={() => setActiveImage(index)}
-              className={`relative h-20 w-16 shrink-0 overflow-hidden border transition sm:h-24 sm:w-[74px] ${
-                activeImage === index ? "border-[#862222]" : "border-transparent hover:border-[#d9c6b4]"
-              }`}
-              aria-label={`View image ${index + 1}`}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <SafeImage src={imageUrl(image, 200)} alt="" className="h-full w-full object-cover" />
-            </button>
-          ))}
-          </div>
-        ) : null}
-        <div className="relative flex-1 overflow-hidden bg-[#f6f1ec]">
-          <div className="relative aspect-[3/4] w-full">
-            <SafeImage
-              src={imageUrl(product.images[activeImage], 1200)}
-              alt={product.title}
-              loading="eager"
-              fetchPriority="high"
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-          </div>
-          {off > 0 ? (
-            <span className="absolute left-3 top-3 bg-[#862222] px-2 py-1 text-[10px] font-semibold tracking-[.1em] text-white uppercase">
-              Save {off}%
-            </span>
-          ) : null}
-          {product.images.length > 1 ? (
-            <div className="absolute inset-x-0 bottom-3 flex justify-center gap-1.5">
-              {product.images.map((image, index) => (
-                <button
-                  key={`${image}-dot`}
-                  type="button"
-                  onClick={() => setActiveImage(index)}
-                  aria-label={`Image ${index + 1}`}
-                  className={`h-1.5 w-1.5 rounded-full ${activeImage === index ? "bg-[#862222]" : "bg-white/80 ring-1 ring-[#c9b9a8]"}`}
-                />
-              ))}
-            </div>
-          ) : null}
-        </div>
-      </div>
+    <div className="group grid gap-8 lg:grid-cols-2 lg:gap-12">
+      <ProductGallery
+        images={product.images}
+        title={product.title}
+        badge={off > 0 ? `Save ${off}%` : null}
+      />
 
       <div className="lg:sticky lg:top-[92px] lg:self-start">
         <p className="text-[10.5px] tracking-[.16em] text-[#9c8f82] uppercase">
-          {product.category === "lehnga"
-            ? "Lehenga Choli"
-            : product.category === "printed"
-              ? "Printed Suit Set"
-              : product.category === "saree"
-                ? "Saree"
-                : "Anarkali Suit"}
+          <Link href={categoryHref(product.category)} className="hover:text-[#862222]">
+            {categoryLabel(product.category)}
+          </Link>
+          {product.productType ? <span className="text-[#c9bdb1]"> · {product.productType}</span> : null}
         </p>
         <h1 className="mt-1.5 font-display text-[24px] leading-snug font-medium text-[#2f2a25] sm:text-[30px]">
           {product.title}
         </h1>
 
-        <div className="mt-2 flex items-center gap-2">
-          <span className="flex items-center gap-0.5 text-[13px] text-[#c9972b]">
-            {"★".repeat(Math.round(product.rating))}
-            <span className="text-[#d8cbbd]">{"★".repeat(5 - Math.round(product.rating))}</span>
-          </span>
-          <span className="text-[11.5px] text-[#8a8078]">
-            {product.rating.toFixed(1)} · {product.reviewCount} reviews
-          </span>
-        </div>
-
         <div className="mt-3 flex flex-wrap items-baseline gap-2.5">
-          <span className="text-[22px] font-semibold text-[#862222]">{formatPrice(product.price)}</span>
-          {product.compareAtPrice && product.compareAtPrice > product.price ? (
+          <span className="text-[22px] font-semibold text-[#862222]" data-testid="product-price">
+            {formatPrice(price)}
+          </span>
+          {compareAt && compareAt > price ? (
             <>
-              <span className="text-[14px] text-[#a49a90] line-through">
-                {formatPrice(product.compareAtPrice)}
-              </span>
+              <span className="text-[14px] text-[#a49a90] line-through">{formatPrice(compareAt)}</span>
               <span className="bg-[#fbeaea] px-1.5 py-0.5 text-[10.5px] font-semibold tracking-[.06em] text-[#862222] uppercase">
                 {off}% off
               </span>
@@ -195,6 +144,7 @@ export function ProductDetail({ product }: { product: Product }) {
             <span className="h-2 w-2 rounded-full bg-[#3ba55d]" /> Colour: {product.color}
           </span>
           <span>Fabric: {product.fabric}</span>
+          <span>{product.images.length} photos</span>
         </div>
 
         <div className="mt-4">
@@ -207,23 +157,34 @@ export function ProductDetail({ product }: { product: Product }) {
             </Link>
           </div>
           <div className="mt-2 flex flex-wrap gap-2">
-            {product.sizes.map((option) => (
-              <button
-                key={option}
-                type="button"
-                data-testid="size-option"
-                aria-pressed={size === option}
-                onClick={() => setSize(option)}
-                className={`min-w-11 border px-3 py-2 text-[12px] transition ${
-                  size === option
-                    ? "border-[#862222] bg-[#862222] text-white"
-                    : "border-[#ddd2c6] text-[#4a423b] hover:border-[#862222]"
-                }`}
-              >
-                {option}
-              </button>
-            ))}
+            {product.sizes.map((option) => {
+              const optionPricing = product.sizePricing?.[option];
+              const soldOut = optionPricing ? !optionPricing.available : false;
+              return (
+                <button
+                  key={option}
+                  type="button"
+                  data-testid="size-option"
+                  aria-pressed={size === option}
+                  onClick={() => setSize(option)}
+                  className={`min-w-11 border px-3 py-2 text-[12px] transition ${
+                    size === option
+                      ? "border-[#862222] bg-[#862222] text-white"
+                      : soldOut
+                        ? "border-[#eee6de] text-[#bdb2a7] line-through hover:border-[#ddd2c6]"
+                        : "border-[#ddd2c6] text-[#4a423b] hover:border-[#862222]"
+                  }`}
+                >
+                  {option}
+                </button>
+              );
+            })}
           </div>
+          {sizePricing && !sizePricing.available ? (
+            <p className="mt-2 text-[11.5px] text-[#b3261e]">
+              {size} is out of stock — WhatsApp 9909790455 for the next drop.
+            </p>
+          ) : null}
         </div>
 
         <div className="mt-4 flex items-center gap-2">
@@ -248,20 +209,25 @@ export function ProductDetail({ product }: { product: Product }) {
           </div>
           <button
             type="button"
-            onClick={buyNow}
+            onClick={() => add()}
             data-testid="add-to-cart"
-            className="flex-1 bg-[#862222] px-4 py-3 text-[11.5px] font-semibold tracking-[.16em] text-white uppercase transition hover:bg-[#6d1a1a]"
+            disabled={Boolean(sizePricing && !sizePricing.available)}
+            className="flex-1 bg-[#862222] px-4 py-3 text-[11.5px] font-semibold tracking-[.16em] text-white uppercase transition hover:bg-[#6d1a1a] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Add to cart
+            {sizePricing && !sizePricing.available ? "Out of stock" : "Add to cart"}
           </button>
         </div>
         <button
           type="button"
-          onClick={buyNow}
+          onClick={() => add(1)}
           className="mt-2 w-full border border-[#862222] py-3 text-[11.5px] font-semibold tracking-[.16em] text-[#862222] uppercase transition hover:bg-[#faf1ef]"
         >
           Buy it now
         </button>
+
+        <p className="mt-3 text-[11px] tracking-[.06em] text-[#8a8078]">
+          Free shipping across India · COD under Rs. 3,500 · 7 days replacement
+        </p>
 
         <div className="mt-4 border border-[#eee6de] bg-[#faf8f5] p-3">
           <p className="text-[10.5px] font-semibold tracking-[.14em] uppercase">Check delivery</p>
@@ -284,21 +250,13 @@ export function ProductDetail({ product }: { product: Product }) {
           {pinMessage ? <p className="mt-1.5 text-[11.5px] text-[#5c534b]">{pinMessage}</p> : null}
         </div>
 
-        <div className="mt-3 grid grid-cols-2 gap-2 text-[10.5px] text-[#5c534b] sm:grid-cols-4">
-          {["Free shipping", "COD available", "7-day replacement", "Secure payment"].map((item) => (
-            <span key={item} className="flex items-center gap-1.5 border border-[#eee6de] px-2 py-2">
-              <span className="text-[#862222]">✓</span>
-              {item}
-            </span>
-          ))}
-        </div>
-
         <div className="mt-5 divide-y divide-[#eee6de] border-y border-[#eee6de]">
           {accordions.map((item) => (
             <div key={item.key}>
               <button
                 type="button"
                 onClick={() => setOpenAccordion(openAccordion === item.key ? null : item.key)}
+                aria-expanded={openAccordion === item.key}
                 className="flex w-full items-center justify-between py-3 text-left text-[11.5px] font-semibold tracking-[.12em] uppercase"
               >
                 {item.title}
@@ -311,10 +269,10 @@ export function ProductDetail({ product }: { product: Product }) {
           ))}
         </div>
 
-        <p className="mt-4 text-[12.5px] leading-relaxed text-[#6b6259]">{product.description}</p>
-
         <a
-          href="https://wa.me/919909790455"
+          href={`https://wa.me/919909790455?text=${encodeURIComponent(
+            `Hi Liksha Clothing, I want to order: ${product.title} (${size})`,
+          )}`}
           target="_blank"
           rel="noreferrer"
           className="mt-4 flex items-center justify-center gap-2 border border-[#d9c6b4] py-2.5 text-[11px] font-semibold tracking-[.14em] text-[#3f3830] uppercase"

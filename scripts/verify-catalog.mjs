@@ -10,6 +10,7 @@ import path from "node:path";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const FILE = path.join(ROOT, "database/seeds/catalog.json");
+const LIVE_DIR = path.join(ROOT, "database/seeds/live");
 const LIVE_COLLECTIONS = [
   "new-arrivals",
   "party-wear-gown",
@@ -69,7 +70,14 @@ for (const product of products) {
     if (!LIVE_COLLECTIONS.includes(collection)) fail(`${product.handle}: unknown collection "${collection}"`);
   }
   if (!product.description || product.description.length < 10) {
-    warn(`${product.handle}: description is very short`);
+    fail(`${product.handle}: description is missing (live body_html se aana chahiye)`);
+  }
+  if (!product.descriptionHtml) fail(`${product.handle}: descriptionHtml is missing`);
+  if (!product.sizePricing || !Object.keys(product.sizePricing).length) {
+    fail(`${product.handle}: sizePricing is missing`);
+  }
+  for (const size of product.sizes ?? []) {
+    if (!product.sizePricing?.[size]) fail(`${product.handle}: size "${size}" has no pricing entry`);
   }
 }
 
@@ -91,11 +99,39 @@ console.log(
     .join("\n"),
 );
 
-const singleImage = products.filter((product) => (product.images ?? []).length === 1).length;
-if (singleImage) {
-  warnings.push(
-    `${singleImage} products have only the primary image — run "npm run catalog:sync-live" with internet to pull full galleries + exact descriptions`,
-  );
+// live snapshot ke against parity: galleries, descriptions, collections
+if (fs.existsSync(path.join(LIVE_DIR, "products.json"))) {
+  const live = JSON.parse(fs.readFileSync(path.join(LIVE_DIR, "products.json"), "utf8")).products;
+  const liveByHandle = new Map(live.map((item) => [item.handle, item]));
+  let missingGallery = 0;
+  for (const product of products) {
+    const source = liveByHandle.get(product.sourceHandle);
+    if (!source) {
+      fail(`${product.handle}: snapshot me source product nahi mila (${product.sourceHandle})`);
+      continue;
+    }
+    const liveImages = (source.images ?? []).length;
+    if (product.images.length !== liveImages) {
+      fail(`${product.handle}: ${product.images.length}/${liveImages} images — snapshot se gallery adhoori`);
+    }
+    if (!source.body_html && !product.descriptionHtml) fail(`${product.handle}: description missing in both`);
+    if (liveImages === 1) missingGallery += 1;
+  }
+  if (missingGallery) warnings.push(`${missingGallery} products ki live gallery me bhi ek hi image hai`);
+
+  const membership = JSON.parse(fs.readFileSync(path.join(LIVE_DIR, "membership.json"), "utf8")).collections;
+  const counts = {};
+  for (const product of products) {
+    for (const collection of product.collections ?? []) counts[collection] = (counts[collection] ?? 0) + 1;
+  }
+  for (const [handle, handles] of Object.entries(membership)) {
+    if (handle === "frontpage") continue; // home-page grouping, nav collection nahi
+    const expected = handles.length;
+    const actual = counts[handle] ?? 0;
+    if (expected !== actual) fail(`collection ${handle}: ${actual}/${expected} products match the live store`);
+  }
+} else {
+  warnings.push("live snapshot missing — parity check skipped (run npm run catalog:sync)");
 }
 
 for (const message of [...new Set(warnings)]) console.warn(`warn: ${message}`);

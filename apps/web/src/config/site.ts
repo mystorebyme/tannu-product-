@@ -1,3 +1,7 @@
+/** live store ka asli logo (shop CDN). Fallback: local SVG. */
+export const logoUrl = "https://www.likshaclothing.com/cdn/shop/files/Pink_Abstract_Watercolor_Creative_Logo_3_copy_2.png?v=1734092749&width=320";
+export const logoFallback = "/images/site/logo.svg";
+
 export const siteConfig = {
   name: "Liksha Clothing",
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.likshaclothing.com",
