@@ -30,6 +30,8 @@ export async function GET() {
       data: {
         status: db === "error" ? "degraded" : "ok",
         service: "liksha-web",
+        // deployment identity — CI isse "mera build live hai?" check karta hai
+        commit: (process.env.VERCEL_GIT_COMMIT_SHA ?? "local").slice(0, 7),
         catalogBuiltAt: catalogMeta.builtAt,
         products: catalogMeta.productCount,
         // orders ka backend: postgres (production) ya json (local dev)
