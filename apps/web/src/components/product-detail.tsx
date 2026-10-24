@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useCart } from "@/components/cart-provider";
 import { discountPercent, formatPrice } from "@/lib/format";
@@ -14,6 +15,7 @@ type Variant = ColourOption;
 
 export function ProductDetail({ product, colours = [] }: { product: Product; colours?: Variant[] }) {
   const { addItem } = useCart();
+  const router = useRouter();
 
   // ek hi design ke saare colours yahin switch hote hain — page reload nahi
   const variants = useMemo<Variant[]>(() => {
@@ -303,7 +305,11 @@ export function ProductDetail({ product, colours = [] }: { product: Product; col
         </div>
         <button
           type="button"
-          onClick={() => add(1)}
+          onClick={() => {
+            add(1);
+            router.push("/checkout");
+          }}
+          data-testid="buy-now"
           className="mt-2 w-full border border-[#862222] py-3 text-[11.5px] font-semibold tracking-[.16em] text-[#862222] uppercase transition hover:bg-[#faf1ef]"
         >
           Buy it now
