@@ -108,6 +108,35 @@ async function main() {
   note("products-with-reviews", productEntries.length);
   if (productEntries[0]) diagnostics.probes.push(`sample product ${JSON.stringify(productEntries[0]).slice(0, 300)}`);
 
+  // 1b) bundle se saare review endpoints nikaal ke probe karo (shape samajhne ke liye)
+  const endpointNames = new Set();
+  const bundleUrls = [
+    ...new Set(
+      [...html.matchAll(/https:\/\/cdn\.shopify\.com\/extensions\/[^"'\s]*trustoo[^"'\s]*\.js/g)].map((m) => m[0]),
+    ),
+  ];
+  for (const bundleUrl of bundleUrls) {
+    try {
+      const js = await fetchText(bundleUrl);
+      for (const match of js.matchAll(/api\/v1\/reviews\/([a-z0-9_]+)/gi)) endpointNames.add(match[1]);
+    } catch {
+      /* ignore */
+    }
+  }
+  diagnostics.endpointNames = [...endpointNames];
+  const sampleProductId = String(productEntries[0]?.id ?? "");
+  diagnostics.probes = [];
+  for (const name of [...endpointNames].slice(0, 20)) {
+    const url = `${proxy}/${name}?shop_id=${shopId}&product_id=${sampleProductId}&product_ids=${sampleProductId}&page=1&limit=20`;
+    try {
+      const payload = await fetchJson(url);
+      diagnostics.probes.push(`${name} → ${JSON.stringify(payload).slice(0, 260)}`);
+    } catch (error) {
+      diagnostics.probes.push(`${name} → ${error.message.slice(0, 50)}`);
+    }
+  }
+  note("probed-endpoints", endpointNames.size);
+
   // 2) har product ke reviews
   const products = {};
   let total = 0;
@@ -118,16 +147,14 @@ async function main() {
     if (!productId || !handle) continue;
 
     let reviews = [];
-    for (const query of [
-      `product_id=${productId}&page=1&limit=50`,
-      `product_id=${productId}&page=1&limit=50&sort=newest`,
-    ]) {
+    const reviewEndpoints = [...endpointNames].filter((name) => !/product_list|collect/.test(name));
+    for (const name of reviewEndpoints.slice(0, 6)) {
+      if (reviews.length) break;
       try {
-        const payload = await fetchJson(`${proxy}/get_reviews?shop_id=${shopId}&${query}`);
+        const payload = await fetchJson(`${proxy}/${name}?shop_id=${shopId}&product_id=${productId}&page=1&limit=50`);
         reviews = asList(payload).map(normaliseReview).filter((review) => review.body);
-        if (reviews.length) break;
-      } catch (error) {
-        diagnostics.probes.push(`reviews ${handle} → ${error.message.slice(0, 50)}`);
+      } catch {
+        /* next endpoint */
       }
     }
     if (!reviews.length) continue;
