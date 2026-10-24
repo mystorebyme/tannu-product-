@@ -19,7 +19,15 @@ const ROOT = path.resolve(import.meta.dirname, "..", "..");
 const OUT = path.join(ROOT, "database/seeds/reviews/reviews.json");
 const LIVE = path.join(ROOT, "database/seeds/live/products.json");
 const STORE = "https://www.likshaclothing.com";
-const UA = "Mozilla/5.0 (compatible; LikshaReviewsSync/1.0)";
+const UA =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36";
+
+/** Trustoo ka known asset base — storefront block ho jaye to yahan se endpoints milte hain */
+const KNOWN_BUNDLES = [
+  "https://cdn.shopify.com/extensions/01a15e0a-e410-7740-a068-d265bda59b79/cwilltrustoo-reviews-292/assets/swiper-reviews.min.js",
+  "https://cdn.shopify.com/extensions/01a15e0a-e410-7740-a068-d265bda59b79/cwilltrustoo-reviews-292/assets/trustoo-sign.min.js",
+  "https://cdn.shopify.com/extensions/01a15e0a-e410-7740-a068-d265bda59b79/cwilltrustoo-reviews-292/assets/seal-review.min.js",
+];
 
 const diagnostics = { steps: [], probes: [], at: new Date().toISOString() };
 const note = (step, detail) => diagnostics.steps.push(`${step}: ${detail}`);
@@ -111,9 +119,10 @@ async function main() {
   // 1b) bundle se saare review endpoints nikaal ke probe karo (shape samajhne ke liye)
   const endpointNames = new Set();
   const bundleUrls = [
-    ...new Set(
-      [...html.matchAll(/https:\/\/cdn\.shopify\.com\/extensions\/[^"'\s]*trustoo[^"'\s]*\.js/g)].map((m) => m[0]),
-    ),
+    ...new Set([
+      ...KNOWN_BUNDLES,
+      ...[...html.matchAll(/https:\/\/cdn\.shopify\.com\/extensions\/[^"'\s]*trustoo[^"'\s]*\.js/g)].map((m) => m[0]),
+    ]),
   ];
   for (const bundleUrl of bundleUrls) {
     try {
