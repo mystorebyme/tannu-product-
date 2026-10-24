@@ -104,6 +104,11 @@ async function main() {
   );
   const candidates = [
     ...proxyCandidates,
+    `${STORE}/apps/trustoo/api/v1/reviews/get_product_list?shop=${shopId}&shop_id=${shopId}&page=1&limit=100`,
+    `${STORE}/apps/trustoo/api/v1/reviews/get_product_list?shop_id=${shopId}&limit=100`,
+    `${STORE}/apps/trustoo/api/v1/reviews/list?shop_id=${shopId}&page=1&limit=100`,
+    `https://${apiDomain}/api/v1/reviews/get_product_list?shop_id=${shopId}&limit=100`,
+    `https://${apiDomain}/api/v1/reviews/collect?shop_id=${shopId}&limit=100`,
     `https://${apiDomain}/api/v1/reviews?shop_id=${shopId}&page=1&limit=100`,
     `https://${apiDomain}/api/reviews?shop_id=${shopId}&page=1&limit=100`,
     `https://${apiDomain}/v1/reviews?shop_id=${shopId}&limit=100`,
@@ -121,8 +126,13 @@ async function main() {
         found = list;
         break;
       }
+      diagnostics.probes = [
+        ...(diagnostics.probes ?? []),
+        `${url.slice(0, 110)} → 200 ${JSON.stringify(payload).slice(0, 220)}`,
+      ].slice(-12);
     } catch (error) {
       console.log("miss:", url, error.message.slice(0, 80));
+      diagnostics.probes = [...(diagnostics.probes ?? []), `${url.slice(0, 110)} → ${error.message.slice(0, 40)}`].slice(-12);
     }
   }
 
