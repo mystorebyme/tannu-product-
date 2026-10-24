@@ -156,7 +156,7 @@ export function UpiPayment({
               </button>
             </div>
             <p className="mt-1 break-words text-[11.5px] text-[#6b6259]">
-              {upiName} · Amount <strong>{formatPrice(amount)}</strong> (exact — koi extra charge nahi)
+              {upiName} · Amount <strong>{formatPrice(amount)}</strong> (exact — no extra charges)
             </p>
 
             <a
@@ -176,7 +176,7 @@ export function UpiPayment({
             ) : API_AVAILABLE ? (
               <form onSubmit={submit} className="mt-4 space-y-2.5" data-testid="upi-form">
                 <p className="text-[11px] leading-relaxed text-[#6b6259]">
-                  Payment ke baad UPI app se reference / UTR copy karke yahan daaliye.
+                  After paying, copy the reference / UTR from your UPI app and paste it here.
                 </p>
                 <div className="grid gap-2 sm:grid-cols-[1.4fr_0.8fr]">
                   <input
@@ -216,7 +216,7 @@ export function UpiPayment({
                   Send payment screenshot on WhatsApp
                 </a>
                 <p className="mt-1.5 text-[11px] leading-relaxed text-[#8a7a5f]">
-                  Screenshot bhejte hi team order confirm kar deti hai (UTR bhi likh sakte hain).
+                  Send the screenshot and our team confirms the order (you can include the UTR too).
                 </p>
               </div>
             )}

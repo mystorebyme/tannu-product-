@@ -155,7 +155,7 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
             </div>
           ) : (
             <p className="mt-3 border-t border-[#f1ebe5] pt-3 text-[11.5px] text-[#8a8078]">
-              AWB number dispatch hone par yahin aur WhatsApp par mil jaayega.
+              The AWB number appears here and on WhatsApp as soon as the parcel is dispatched.
             </p>
           )}
         </div>
@@ -164,8 +164,8 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
           <div>
             <h2 className="text-[11px] font-semibold tracking-[.16em] uppercase">GST invoice</h2>
             <p className="mt-1 text-[11.5px] text-[#6b6259]">
-              Tax invoice (GST 5% / 18%, product value ke hisaab se) download kariye — order ke phone ke
-              aakhri 4 digit maange jaate hain.
+              Download the tax invoice (GST 5% / 18% based on product value) — you will be asked for the last
+              4 digits of the order phone number.
             </p>
           </div>
           <Link

@@ -34,8 +34,8 @@ export default async function InvoicePage({
         <div className="mx-auto max-w-[420px] border border-[#e9dfd4] bg-[#faf8f5] p-6">
           <h1 className="font-display text-[24px] font-medium">Download GST invoice</h1>
           <p className="mt-1.5 text-[12.5px] leading-relaxed text-[#6b6259]">
-            Order <strong>{order.orderNumber}</strong> ki invoice ke liye order ke phone number ke
-            aakhri 4 digit daaliye.
+            Enter the last 4 digits of the phone number used for order <strong>{order.orderNumber}</strong>
+            to open its invoice.
           </p>
           <form method="get" className="mt-4 flex">
             <input

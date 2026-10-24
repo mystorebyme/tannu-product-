@@ -19,7 +19,7 @@ export default function TrackOrderPage() {
           Track your order
         </h1>
         <p className="mx-auto mt-2 max-w-[560px] px-4 text-[12.5px] leading-relaxed text-[#6b6259]">
-          Order number daaliye aur live status dekhiye — payment, packing, courier aur AWB sab ek jagah.
+          Enter your order number to see the live status — payment, packing, courier and AWB in one place.
         </p>
       </div>
 
@@ -33,15 +33,15 @@ export default function TrackOrderPage() {
             <div className="border border-[#eee6de] p-5">
               <h2 className="font-display text-[19px] font-medium text-[#862222]">Where is my order number?</h2>
               <p className="mt-2 text-[12.5px] leading-relaxed text-[#5c534b]">
-                Order confirm hone par screen par, WhatsApp par aur email me <strong>LK-…</strong> number milta
-                hai. Wahi number yahan daaliye.
+                When your order is confirmed we show the <strong>LK-…</strong> number on screen and send it on
+                WhatsApp and email. Enter that number here.
               </p>
             </div>
             <div className="border border-[#eee6de] p-5">
               <h2 className="font-display text-[19px] font-medium text-[#862222]">Need help?</h2>
               <p className="mt-2 text-[12.5px] leading-relaxed text-[#5c534b]">
-                Number kho gaya? WhatsApp par apna registered mobile number bhejiye — team order dhoondh kar
-                status bata degi.
+                Lost the number? Send your registered mobile number on WhatsApp — our team will find the order
+                and share its status.
               </p>
               <SupportChannels className="mt-3" />
             </div>

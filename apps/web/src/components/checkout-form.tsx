@@ -288,8 +288,8 @@ export function CheckoutForm() {
               <div className="min-w-0">
                 <p className="text-[12.5px] font-medium">Prepaid order — UPI (GPay, PhonePe, Paytm)</p>
                 <p className="mt-0.5 text-[11.5px] leading-relaxed text-[#8a8078]">
-                  Order place karte hi payment page khulega — QR scan kariye ya UPI ID par pay kariye.
-                  Payment seedha store ke account me jaata hai, koi gateway charge nahi.
+                  You will get the payment page right after placing the order — scan the QR or pay to the UPI ID.
+                  Payment goes straight to the store account, with no gateway charges.
                 </p>
                 <p className="mt-1.5 break-all text-[11.5px] font-medium text-[#862222]">UPI: {upiId}</p>
               </div>

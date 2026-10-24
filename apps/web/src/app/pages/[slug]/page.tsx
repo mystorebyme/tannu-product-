@@ -59,19 +59,19 @@ const pages: Record<string, PageContent> = {
     title: "Track Your Order",
     eyebrow: "Order tracking",
     intro:
-      "Apna order number daaliye aur live status dekhiye — placed se delivered tak, courier aur AWB ke saath.",
+      "Enter your order number to see the live status — from placed to delivered, with courier and AWB details.",
     sections: [
       {
         heading: "Where do I find my order number?",
         body: [
-          "Order number (jaise LK-1A2B3C) order confirm hone par screen par, WhatsApp par aur confirmation email me milta hai.",
-          "Order ke saath bheje gaye WhatsApp message me bhi wahi number hota hai — us number se status kabhi bhi dekh sakte hain.",
+          "Your order number (for example LK-1A2B3C) appears on screen when the order is confirmed and is sent on WhatsApp and email.",
+          "The same number is in the WhatsApp message we send with your order — use it any time to check the status.",
         ],
       },
       {
         heading: "Need help?",
         body: [
-          "Status update na dikhe ya parcel late ho to WhatsApp par order number bhejiye — team turant check karke reply karti hai.",
+          "If the status has not updated or the parcel is late, send the order number on WhatsApp — our team checks and replies right away.",
         ],
       },
     ],
