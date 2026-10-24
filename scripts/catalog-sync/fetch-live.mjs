@@ -49,7 +49,44 @@ async function fetchCollections() {
   return body.collections ?? [];
 }
 
+/** har collection ke andar kaun kaun se products hain — paginated, exact membership */
+async function fetchMembership(collections) {
+  const membership = {};
+  for (const c of collections) {
+    const handles = [];
+    for (let page = 1; page <= MAX_PAGES; page += 1) {
+      const url = `${ORIGIN}/collections/${encodeURIComponent(c.handle)}/products.json?limit=${PAGE_SIZE}&page=${page}`;
+      let batch = [];
+      try {
+        batch = (await getJson(url)).products ?? [];
+      } catch (err) {
+        console.log(`  ${c.handle}: ${err.message}`);
+        break;
+      }
+      if (batch.length === 0) break;
+      handles.push(...batch.map((p) => p.handle));
+    }
+    membership[c.handle] = [...new Set(handles)];
+    console.log(`collection ${c.handle}: ${membership[c.handle].length}`);
+  }
+  return membership;
+}
+
+/** page HTML snapshots — home + ek PDP, design parity check ke liye */
+async function fetchHtml(pathname) {
+  const res = await fetch(`${ORIGIN}${pathname}`, {
+    headers: { "user-agent": "Mozilla/5.0 (compatible; LikshaCatalogSync/1.0)" },
+  });
+  if (!res.ok) throw new Error(`${res.status} ${pathname}`);
+  return res.text();
+}
+
 const [products, collections] = await Promise.all([fetchProducts(), fetchCollections()]);
+const membership = await fetchMembership(collections);
+const [homeHtml, productHtml] = await Promise.all([
+  fetchHtml("/").catch((e) => `<!-- ${e.message} -->`),
+  fetchHtml(`/products/${products[0]?.handle ?? ""}`).catch((e) => `<!-- ${e.message} -->`),
+]);
 
 await mkdir(OUT_DIR, { recursive: true });
 await writeFile(
@@ -60,6 +97,14 @@ await writeFile(
   path.join(OUT_DIR, "collections.json"),
   `${JSON.stringify({ fetchedAt: new Date().toISOString(), origin: ORIGIN, collections }, null, 1)}\n`,
 );
+
+await writeFile(
+  path.join(OUT_DIR, "membership.json"),
+  `${JSON.stringify({ fetchedAt: new Date().toISOString(), origin: ORIGIN, collections: membership }, null, 1)}\n`,
+);
+await mkdir(path.join(OUT_DIR, "html"), { recursive: true });
+await writeFile(path.join(OUT_DIR, "html", "home.html"), homeHtml);
+await writeFile(path.join(OUT_DIR, "html", "product.html"), productHtml);
 
 const images = products.reduce((n, p) => n + (p.images?.length ?? 0), 0);
 console.log(`\nsaved ${products.length} products / ${images} images / ${collections.length} collections`);
