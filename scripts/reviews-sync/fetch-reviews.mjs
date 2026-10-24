@@ -66,19 +66,31 @@ const asList = (payload) =>
   [];
 
 function normaliseReview(raw) {
-  const photos = (raw.photos ?? raw.images ?? raw.attachments ?? raw.review_images ?? [])
-    .map((photo) => (typeof photo === "string" ? photo : (photo?.src ?? photo?.url ?? "")))
+  const photos = (
+    raw.resources ??
+    raw.photos ??
+    raw.images ??
+    raw.attachments ??
+    raw.review_images ??
+    []
+  )
+    .map((photo) => {
+      if (typeof photo === "string") return photo;
+      return photo?.url ?? photo?.src ?? photo?.path ?? photo?.image_src ?? "";
+    })
     .filter(Boolean)
     .map((src) => (src.startsWith("//") ? `https:${src}` : src));
+  const date = raw.commented_at ?? raw.created_at ?? raw.date ?? raw.time ?? raw.review_date;
   return {
     id: String(raw.id ?? raw.review_id ?? raw._id ?? Math.random().toString(36).slice(2)),
-    author: raw.author ?? raw.reviewer_name ?? raw.customer_name ?? raw.name ?? "Verified buyer",
-    rating: Number(raw.rating ?? raw.score ?? raw.star ?? raw.review_rating ?? 5),
-    title: raw.title ?? raw.review_title ?? undefined,
-    body: String(raw.body ?? raw.content ?? raw.review ?? raw.message ?? raw.comment ?? "").trim(),
-    date: raw.created_at ?? raw.date ?? raw.time ?? raw.review_date ?? undefined,
-    verified: raw.verified ?? raw.is_verified ?? true,
+    author: String(raw.author ?? raw.reviewer_name ?? raw.customer_name ?? raw.name ?? "Verified buyer").trim(),
+    rating: Number(raw.star ?? raw.rating ?? raw.score ?? raw.review_rating ?? 5),
+    title: raw.title || undefined,
+    body: String(raw.content ?? raw.body ?? raw.review ?? raw.message ?? raw.comment ?? "").trim(),
+    date: date ? String(date).slice(0, 10) : undefined,
+    verified: Boolean(raw.verified_badge ?? raw.verified ?? raw.is_verified ?? false),
     photos,
+    reply: raw.reply_content ? String(raw.reply_content).trim() : undefined,
   };
 }
 
