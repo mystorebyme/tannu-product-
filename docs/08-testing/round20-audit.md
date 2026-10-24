@@ -67,3 +67,15 @@ source admin Settings hai.
 
 - **Domain** `likshaclothing.com` → Vercel DNS + `NEXT_PUBLIC_SITE_URL` update.
 - **Mail ID** — email bhejne ka setup (Resend/SMTP keys) jab aap decide karein.
+
+## 6. Production verification (live, `liksha-clothing.vercel.app`)
+
+| Check | Result |
+| --- | --- |
+| Vercel deploy `dpl_zyECRuCg3tfSipgLB1zd7ggbXNPc` (prod, sha `d116230`) | **READY**, alias `liksha-clothing.vercel.app` |
+| `/api/health` | `status ok · products 446 · ordersStore postgres · db up` |
+| `/api/products?limit=1` → `total` | **388** listing cards (446 URLs intact) |
+| PDP `/products/black-cosmo-slit-anarkali-premium-suit-set` | "Colour / style: **Black** (2 available)" + swatches `Black` / `Style 1` |
+| PDP price | Rs. 549 (owner-approved), "You save Rs. 1,281" |
+| Live payment + tracking workflow (`live-payments.yml`, run 40125338823) | **21 / 0** — order place → pay page → pending → UTR → processing → tracking, unknown order → not-found |
+| CI (`ci.yml`, run 40125342883) | success |
