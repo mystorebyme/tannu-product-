@@ -76,8 +76,13 @@ faisla hai — jo pehle hi fix tha, jo is round me fix hua, aur jo owner ke bina
 | `tsc --noEmit` (web + admin) | 0 errors |
 | `next build` (web) | 485 pages, success |
 
-DB cleanup: live-test ke 2 test orders (items + payments + history) production Supabase se delete
-kar diye — sirf dummy data tha.
+Live run (`[live-test]`, commit `6782adb`) production par **21/0** — order create → pay page →
+UTR → `processing` → tracking page sab live pass. Us run ke test orders (items + payments) production
+Supabase se delete kar diye — sirf dummy data tha; store me abhi koi real order nahi hai.
+
+Note: rollout ke dauraan pehla live run fail hua (naya deployment abhi alias par nahi aaya tha) —
+deployment READY hone ke baad dobara chalaya, 21/0. Isliye deploy ke turant baad live test na chalayein,
+1–2 min rukein.
 
 ---
 
