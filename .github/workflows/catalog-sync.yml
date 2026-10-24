@@ -50,7 +50,8 @@ jobs:
           " >> "$GITHUB_STEP_SUMMARY"
 
       - name: Commit raw snapshot
-        if: ${{ inputs.commit }}
+        # push trigger par `inputs` empty hota hai — tab bhi commit karo
+        if: ${{ github.event_name != 'workflow_dispatch' || inputs.commit }}
         run: |
           git config user.name "catalog-sync[bot]"
           git config user.email "catalog-sync@users.noreply.github.com"
