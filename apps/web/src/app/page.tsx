@@ -141,7 +141,7 @@ export default async function HomePage() {
               <li aria-hidden>·</li>
               <li>Prepaid only</li>
               <li aria-hidden>·</li>
-              <li>4–7 din delivery</li>
+              <li>4–7 day delivery</li>
             </ul>
           </div>
         </div>
