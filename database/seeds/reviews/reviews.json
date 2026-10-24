@@ -2,7 +2,7 @@
  "meta": {
   "source": "trustoo",
   "shopId": "73883451696",
-  "syncedAt": "2026-10-24T08:32:21.365Z",
+  "syncedAt": "2026-10-24T08:40:44.116Z",
   "note": "scripts/reviews-sync/fetch-reviews.mjs (GitHub Actions daily) is file ko likhta hai — haath se edit na karein."
  },
  "shop": {
@@ -394,7 +394,7 @@
     }
    ]
   },
-  "✨-ruby-royale-red-anarkali-suit-set": {
+  "ruby-royale-red-anarkali-suit-set": {
    "rating": 4.9,
    "count": 7,
    "reviews": [
