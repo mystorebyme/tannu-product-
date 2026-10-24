@@ -1,23 +1,4 @@
 {
- "steps": [
-  "page: 410 bytes, shop 73883451696",
-  "catalog: 288 product ids",
-  "products-with-reviews: 300",
-  "probed-endpoints: 4"
- ],
- "probes": [
-  "collect → {\"code\":-1,\"message\":\"ClientId:required,EventCategory:required\"}",
-  "get_product_list → {\"code\":0,\"message\":\"OK\",\"data\":{\"page\":{\"total_page\":18,\"cur_page\":1,\"limit\":20,\"count\":344},\"list\":[{\"id\":\"15347787137328\",\"image_src\":\"https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08059_JPG.jpg?v=1791727270\",\"title\":\"Tridha Fendy Silk Blush Pin",
-  "add_review_via_shopify → 500 https://www.likshaclothing.com/apps/trustoo/ap",
-  "collect_event → 500 https://www.likshaclothing.com/apps/trustoo/ap"
- ],
- "at": "2026-10-24T08:17:11.617Z",
- "endpointNames": [
-  "collect",
-  "get_product_list",
-  "add_review_via_shopify",
-  "collect_event"
- ],
- "reviewedProducts": 0,
- "total": 0
+ "error": "Cannot access 'PROBE_NAMES' before initialization",
+ "at": "2026-10-24T08:23:52.356Z"
 }
