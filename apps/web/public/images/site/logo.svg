@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 76" role="img" aria-label="Liksha Clothing">
+  <rect width="260" height="76" fill="none"/>
+  <text x="130" y="40" text-anchor="middle" font-family="'Cormorant Garamond', Georgia, serif" font-size="38" letter-spacing="7" fill="#862222">LIKSHA</text>
+  <line x1="52" y1="52" x2="208" y2="52" stroke="#c9a86a" stroke-width="0.8"/>
+  <text x="130" y="66" text-anchor="middle" font-family="'Jost', Helvetica, sans-serif" font-size="9" letter-spacing="6.5" fill="#862222">CLOTHING</text>
+</svg>

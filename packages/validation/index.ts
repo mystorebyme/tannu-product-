@@ -1,0 +1,138 @@
+/**
+ * @liksha/validation
+ * SINGLE SOURCE OF TRUTH: frontend aur backend dono yahi rules use karte hain.
+ * Naya rule chahiye? yahan add karo, dono apps me automatic apply hoga.
+ */
+import { z } from "zod";
+
+export const pincodeSchema = z
+  .string()
+  .trim()
+  .regex(/^[1-9][0-9]{5}$/, "6 digit ka valid Indian pincode daaliye");
+
+export const phoneSchema = z
+  .string()
+  .trim()
+  .transform((value) => value.replace(/[\s-]/g, "").replace(/^(\+91|91)/, ""))
+  .refine((value) => /^[6-9][0-9]{9}$/.test(value), "10 digit ka valid mobile number daaliye");
+
+export const emailSchema = z.string().trim().toLowerCase().email("Valid email daaliye");
+
+export const cartLineSchema = z.object({
+  handle: z.string().min(1),
+  size: z.string().min(1).max(40),
+  quantity: z.number().int().min(1).max(10),
+});
+
+export const createOrderSchema = z.object({
+  customerName: z.string().trim().min(2, "Poora naam daaliye").max(80),
+  email: emailSchema,
+  phone: phoneSchema,
+  address: z.string().trim().min(10, "Poora address daaliye").max(300),
+  city: z.string().trim().min(2).max(60),
+  state: z.string().trim().min(2).max(60),
+  pincode: pincodeSchema,
+  notes: z.string().trim().max(500).optional().nullable(),
+  couponCode: z.string().trim().toUpperCase().max(24).optional().nullable(),
+  paymentMethod: z.enum(["prepaid", "cod"]).default("prepaid"),
+  items: z.array(cartLineSchema).min(1, "Cart khaali hai").max(20),
+});
+
+export type CreateOrderInput = z.infer<typeof createOrderSchema>;
+
+export const orderStatusSchema = z.enum([
+  "placed",
+  "confirmed",
+  "packed",
+  "shipped",
+  "delivered",
+  "cancelled",
+  "returned",
+]);
+
+export const updateOrderStatusSchema = z.object({
+  status: orderStatusSchema,
+  note: z.string().trim().max(200).optional(),
+});
+
+export const contactSchema = z.object({
+  name: z.string().trim().min(2).max(80),
+  email: emailSchema,
+  phone: phoneSchema.optional(),
+  message: z.string().trim().min(10).max(1500),
+});
+
+export const newsletterSchema = z.object({
+  email: emailSchema,
+});
+
+export const loginSchema = z.object({
+  email: emailSchema,
+  password: z.string().min(6).max(72),
+});
+
+/** ek hi jagah se business rules — UI aur API dono yahi call karein */
+export const COUPONS: Record<string, number> = {
+  LIKSHA10: 10,
+  WELCOME15: 15,
+};
+
+export const COD_MAX_SUBTOTAL = 350_000; // Rs. 3500 in paise
+export const COD_FEE = 5_000; // Rs. 50 in paise
+export const FREE_SHIPPING_THRESHOLD = 0;
+
+export function computeDiscount(subtotal: number, couponCode?: string | null): number {
+  if (!couponCode) return 0;
+  const percent = COUPONS[couponCode.toUpperCase()];
+  if (!percent) return 0;
+  return Math.round((subtotal * percent) / 100);
+}
+
+/** ---------- order status machine (web + api + admin ke liye ek hi truth) ---------- */
+
+export const ORDER_STATUSES = [
+  "placed",
+  "confirmed",
+  "packed",
+  "shipped",
+  "delivered",
+  "cancelled",
+  "returned",
+] as const;
+
+export type OrderStatusName = (typeof ORDER_STATUSES)[number];
+
+/** kaunse status se kaunse par ja sakte hain — baaki sab invalid */
+export const ORDER_TRANSITIONS: Record<OrderStatusName, readonly OrderStatusName[]> = {
+  placed: ["confirmed", "cancelled"],
+  confirmed: ["packed", "cancelled"],
+  packed: ["shipped", "cancelled"],
+  shipped: ["delivered", "returned"],
+  delivered: ["returned"],
+  cancelled: [],
+  returned: [],
+};
+
+export function canTransition(from: OrderStatusName, to: OrderStatusName): boolean {
+  if (from === to) return false;
+  return ORDER_TRANSITIONS[from]?.includes(to) ?? false;
+}
+
+export const IDEMPOTENCY_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+const ORDER_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+/**
+ * Order number: LK- + base36 timestamp (6) + 4 crypto-random chars.
+ * 36^4 combinations per millisecond — double click / burst me bhi duplicate nahi.
+ */
+export function generateOrderNumber(now: number = Date.now()): string {
+  const time = now.toString(36).toUpperCase().padStart(6, "0").slice(-6);
+  const bytes = new Uint8Array(4);
+  crypto.getRandomValues(bytes);
+  let random = "";
+  for (const byte of bytes) random += ORDER_ALPHABET[byte % ORDER_ALPHABET.length];
+  return `LK-${time}${random}`;
+}
+
+export const ORDER_NUMBER_PATTERN = /^LK-[A-Z0-9]{6,12}$/;

@@ -1,0 +1,167 @@
+import fs from "node:fs";
+import path from "node:path";
+import type { Catalog, Order, Product } from "@liksha/types";
+import { canTransition } from "@liksha/validation";
+import catalogJson from "@/data/catalog.json";
+
+export function repoRoot(): string {
+  let dir = process.cwd();
+  for (let depth = 0; depth < 6; depth += 1) {
+    if (fs.existsSync(path.join(dir, "turbo.json")) || fs.existsSync(path.join(dir, ".git"))) return dir;
+    dir = path.dirname(dir);
+  }
+  return process.cwd();
+}
+
+export function dataFile(name: string): string {
+  const dir = process.env.DATA_DIR ?? path.join(repoRoot(), ".data");
+  fs.mkdirSync(dir, { recursive: true });
+  return path.join(dir, name);
+}
+
+function readRows<T>(name: string): T[] {
+  const file = dataFile(name);
+  if (!fs.existsSync(file)) return [];
+  try {
+    return JSON.parse(fs.readFileSync(file, "utf8")) as T[];
+  } catch {
+    return [];
+  }
+}
+
+function writeRows<T>(name: string, rows: T[]) {
+  const file = dataFile(name);
+  const tmp = `${file}.${process.pid}.tmp`;
+  fs.writeFileSync(tmp, JSON.stringify(rows, null, 2));
+  fs.renameSync(tmp, file);
+}
+
+export type Override = { handle: string; price?: number; inStock?: boolean; updatedAt: string };
+
+/** Catalogue base JSON hai; admin ke edits override file me jaate hain (source data safe rehta hai) */
+export function getProducts(): Product[] {
+  const catalog = catalogJson as unknown as Catalog;
+  const overrides = readRows<Override>("catalog-overrides.json");
+  if (overrides.length === 0) return catalog.products;
+  const map = new Map(overrides.map((row) => [row.handle, row]));
+  return catalog.products.map((product) => {
+    const override = map.get(product.handle);
+    return override
+      ? {
+          ...product,
+          price: override.price ?? product.price,
+          inStock: override.inStock ?? product.inStock,
+        }
+      : product;
+  });
+}
+
+export function saveOverride(handle: string, patch: { price?: number; inStock?: boolean }) {
+  const rows = readRows<Override>("catalog-overrides.json");
+  const index = rows.findIndex((row) => row.handle === handle);
+  const next: Override = {
+    ...rows[index],
+    handle,
+    ...patch,
+    updatedAt: new Date().toISOString(),
+  };
+  if (index === -1) rows.push(next);
+  else rows[index] = next;
+  writeRows("catalog-overrides.json", rows);
+}
+
+export function getCollections() {
+  return (catalogJson as unknown as Catalog).collections;
+}
+
+export function getOrders(): Order[] {
+  return readRows<Order>("orders.json");
+}
+
+export function getOrder(orderNumber: string): Order | undefined {
+  return getOrders().find((order) => order.orderNumber === orderNumber);
+}
+
+export function updateOrderStatus(orderNumber: string, status: Order["status"], actor: string, note?: string) {
+  const rows = readRows<Order>("orders.json");
+  const index = rows.findIndex((order) => order.orderNumber === orderNumber);
+  if (index === -1) return null;
+  const current = rows[index]!;
+  // status machine ek hi jagah define hai (packages/validation)
+  if (!canTransition(current.status, status)) return null;
+  rows[index] = {
+    ...current,
+    status,
+    audit: [
+      { at: new Date().toISOString(), actor, action: `order.status.${status}`, meta: note ? { note } : undefined },
+      ...current.audit,
+    ],
+  };
+  writeRows("orders.json", rows);
+  return rows[index]!;
+}
+
+export type StoreSettings = {
+  announcement: string;
+  codLimit: number;
+  codFee: number;
+  freeShipping: boolean;
+  upiId: string;
+  gstin: string;
+  supportPhone: string;
+  supportEmail: string;
+};
+
+const DEFAULT_SETTINGS: StoreSettings = {
+  announcement: "Diwali dispatch · Free shipping across India · COD under Rs. 3,500",
+  codLimit: 350000,
+  codFee: 5000,
+  freeShipping: true,
+  upiId: "likshaclothing@upi",
+  gstin: "27AAAAA0000A1Z5",
+  supportPhone: "9909790455",
+  supportEmail: "Info.likshaclothing@gmail.com",
+};
+
+export function getSettings(): StoreSettings {
+  const file = dataFile("settings.json");
+  if (!fs.existsSync(file)) return DEFAULT_SETTINGS;
+  try {
+    return { ...DEFAULT_SETTINGS, ...(JSON.parse(fs.readFileSync(file, "utf8")) as StoreSettings) };
+  } catch {
+    return DEFAULT_SETTINGS;
+  }
+}
+
+export function saveSettings(settings: StoreSettings) {
+  const file = dataFile("settings.json");
+  fs.writeFileSync(file, JSON.stringify(settings, null, 2));
+}
+
+export type AuditRow = { at: string; actor: string; action: string; target: string; meta?: unknown };
+
+export function appendAudit(row: Omit<AuditRow, "at">) {
+  const rows = readRows<AuditRow>("admin-audit.json");
+  rows.unshift({ at: new Date().toISOString(), ...row });
+  writeRows("admin-audit.json", rows.slice(0, 500));
+}
+
+export function getAudit(limit = 100): AuditRow[] {
+  const rows = readRows<AuditRow>("admin-audit.json");
+  const orderAudit = getOrders().flatMap((order) =>
+    order.audit.map((entry) => ({
+      at: entry.at,
+      actor: entry.actor,
+      action: entry.action,
+      target: order.orderNumber,
+      meta: entry.meta,
+    })),
+  );
+  return [...orderAudit, ...rows].sort((a, b) => (a.at < b.at ? 1 : -1)).slice(0, limit);
+}
+
+export function getMessages() {
+  return readRows<{ id: string; createdAt: string; name: string; email: string; message: string; handled: boolean }>(
+    "messages.json",
+  );
+}

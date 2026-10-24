@@ -1,0 +1,180 @@
+import Link from "next/link";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { getOrder } from "@/lib/orders";
+import { formatDate, formatPrice, imageUrl } from "@/lib/format";
+import { ORDER_STATUS_COPY } from "@/config/site";
+
+export const dynamic = "force-dynamic";
+export const metadata: Metadata = { title: "Order confirmed", robots: { index: false } };
+
+export default async function OrderPage({ params }: { params: Promise<{ orderNumber: string }> }) {
+  const { orderNumber } = await params;
+  const order = getOrder(orderNumber);
+  if (!order) notFound();
+
+  const eta = new Date(order.createdAt);
+  eta.setDate(eta.getDate() + 6);
+  const etaLabel = eta.toLocaleDateString("en-IN", { day: "numeric", month: "long" });
+  const timeline = ["placed", "confirmed", "packed", "shipped", "delivered"] as const;
+  const currentStep = timeline.indexOf(order.status as (typeof timeline)[number]);
+
+  return (
+    <div className="container-liksha py-10 lg:py-14">
+      <div className="mx-auto max-w-[860px]">
+        <div className="border border-[#e9dfd4] bg-[#faf8f5] p-6 text-center sm:p-9">
+          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#e6f2e8] text-[#2f7a3f]">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <path d="m5 13 4 4L19 7" />
+            </svg>
+          </span>
+          <h1 className="mt-4 font-display text-[27px] font-medium sm:text-[32px]">
+            Thank you, {order.customerName.split(" ")[0]}!
+          </h1>
+          <p className="mt-1.5 text-[12.5px] text-[#6b6259]">
+            {order.paymentMethod === "cod"
+              ? "Order confirm ho gaya. COD amount delivery ke waqt deejiye."
+              : "Order confirm ho gaya. Payment link WhatsApp par bheja ja raha hai."}
+          </p>
+          <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-x-6 gap-y-2 border-t border-[#e9dfd4] pt-4 text-[12px]">
+            <span>
+              Order:{" "}
+              <strong data-testid="order-number" className="text-[#862222]">
+                {order.orderNumber}
+              </strong>
+            </span>
+            <span>Estimated delivery: <strong>{etaLabel}</strong></span>
+            <span>Placed: <strong>{formatDate(order.createdAt)}</strong></span>
+          </div>
+        </div>
+
+        {order.paymentStatus === "pending" ? (
+          <div className="mt-4 border border-[#e6d3a8] bg-[#fdf9ee] p-5">
+            <h2 className="text-[11px] font-semibold tracking-[.14em] text-[#8a6a1f] uppercase">
+              Payment pending · {formatPrice(order.total)}
+            </h2>
+            <p className="mt-1.5 text-[12.5px] leading-relaxed text-[#5c534b]">
+              Hamari team aapko 10 minute me UPI / Razorpay payment link WhatsApp{" "}
+              <a className="font-medium text-[#862222]" href="https://wa.me/919909790455">
+                9909790455
+              </a>{" "}
+              par bhejti hai. Link milne tak order hold par rahega — koi extra charge nahi.
+            </p>
+          </div>
+        ) : null}
+
+        <div className="mt-4 border border-[#eee6de] p-5">
+          <h2 className="text-[11px] font-semibold tracking-[.16em] uppercase">Order tracking</h2>
+          <ol className="mt-4 grid grid-cols-5 gap-1.5 text-center">
+            {timeline.map((step, index) => {
+              const done = currentStep >= index && currentStep !== -1;
+              return (
+                <li key={step} className="flex flex-col items-center gap-1.5">
+                  <span
+                    className={`flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold ${
+                      done ? "bg-[#862222] text-white" : "bg-[#efe7dd] text-[#a49a90]"
+                    }`}
+                  >
+                    {done ? "✓" : index + 1}
+                  </span>
+                  <span className="text-[10px] tracking-[.08em] uppercase text-[#6b6259]">
+                    {ORDER_STATUS_COPY[step]}
+                  </span>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <div className="border border-[#eee6de] p-5">
+            <h2 className="text-[11px] font-semibold tracking-[.16em] uppercase">Delivery address</h2>
+            <p className="mt-2 text-[12.5px] leading-relaxed text-[#5c534b]">
+              {order.customerName}
+              <br />
+              {order.address}
+              <br />
+              {order.city}, {order.state} — {order.pincode}
+              <br />
+              +91 {order.phone}
+              <br />
+              {order.email}
+            </p>
+          </div>
+          <div className="border border-[#eee6de] p-5">
+            <h2 className="text-[11px] font-semibold tracking-[.16em] uppercase">Payment</h2>
+            <p className="mt-2 text-[12.5px] text-[#5c534b]">
+              Method: <strong>{order.paymentMethod === "cod" ? "Cash on delivery" : "Prepaid (UPI / card)"}</strong>
+              <br />
+              Status: <strong>{order.paymentStatus}</strong>
+              <br />
+              Items: <strong>{order.items.reduce((sum, item) => sum + item.quantity, 0)}</strong>
+            </p>
+            <div className="mt-3 space-y-1.5 border-t border-[#f0eae3] pt-3 text-[12.5px]">
+              <Row label="Subtotal" value={formatPrice(order.subtotal)} />
+              {order.discount > 0 ? (
+                <Row label={`Coupon ${order.couponCode ?? ""}`} value={`− ${formatPrice(order.discount)}`} />
+              ) : null}
+              <Row label="Shipping" value="Free" />
+              <Row label="Total" value={formatPrice(order.total)} strong />
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 border border-[#eee6de]">
+          <h2 className="border-b border-[#eee6de] px-5 py-3 text-[11px] font-semibold tracking-[.16em] uppercase">
+            Items
+          </h2>
+          <ul className="divide-y divide-[#f1ebe5]">
+            {order.items.map((item) => (
+              <li key={`${item.handle}-${item.size}`} className="flex gap-3 p-4">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={imageUrl(item.image, 200)}
+                  alt={item.title}
+                  loading="lazy"
+                  className="h-24 w-20 shrink-0 object-cover"
+                />
+                <div className="flex-1">
+                  <Link href={`/products/${item.handle}`} className="text-[12.5px] font-medium hover:text-[#862222]">
+                    {item.title}
+                  </Link>
+                  <p className="mt-1 text-[11px] text-[#8a8078]">
+                    Size {item.size} · Qty {item.quantity}
+                  </p>
+                </div>
+                <span className="text-[12.5px] font-semibold text-[#862222]">
+                  {formatPrice(item.price * item.quantity)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <Link
+            href="/collections/new-arrivals"
+            className="bg-[#862222] px-7 py-3 text-[11px] font-semibold tracking-[.16em] text-white uppercase"
+          >
+            Continue shopping
+          </Link>
+          <a
+            href={`https://wa.me/919909790455?text=${encodeURIComponent(`Hi Liksha, my order number is ${order.orderNumber}`)}`}
+            className="border border-[#862222] px-7 py-3 text-[11px] font-semibold tracking-[.16em] text-[#862222] uppercase"
+          >
+            Chat on WhatsApp
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Row({ label, value, strong = false }: { label: string; value: string; strong?: boolean }) {
+  return (
+    <div className={`flex justify-between ${strong ? "font-semibold" : ""}`}>
+      <span className="text-[#6b6259]">{label}</span>
+      <span>{value}</span>
+    </div>
+  );
+}

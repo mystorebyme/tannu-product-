@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: typecheck · build · test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Catalogue sanity
+        run: npm run catalog:verify
+
+      - name: Typecheck (web · admin · api)
+        run: npm run typecheck
+
+      - name: Unit + integration tests
+        run: npm run test:all
+
+      - name: Build storefront
+        run: npm run build --workspace @liksha/web
+
+      - name: Build admin
+        working-directory: apps/admin
+        run: npx next build
+
+      - name: Build api
+        run: npm run build --workspace @liksha/api
+
+      - name: Dependency audit (non-blocking)
+        run: npm audit --omit=dev || true
+
+  smoke:
+    name: production-build smoke
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build --workspace @liksha/web
+
+      - name: Start storefront
+        run: npm run start --workspace @liksha/web &
+        env:
+          PORT: 3000
+
+      - name: Wait for server
+        run: npx wait-on http://localhost:3000/api/health --timeout 120000
+
+      - name: Smoke test
+        run: npm run test:smoke
+        env:
+          BASE_URL: http://localhost:3000
+
+  e2e:
+    name: playwright (optional)
+    needs: verify
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build --workspace @liksha/web
+      - run: npm run test:e2e
+        env:
+          CI: true
