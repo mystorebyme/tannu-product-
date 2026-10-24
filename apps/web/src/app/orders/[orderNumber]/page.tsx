@@ -41,7 +41,7 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
           <p className="mt-1.5 text-[12.5px] text-[#6b6259]">
             {order.paymentMethod === "cod"
               ? "Order confirm ho gaya. COD amount delivery ke waqt deejiye."
-              : "Order confirm ho gaya. Payment link WhatsApp par bheja ja raha hai."}
+              : "Aapka order mil gaya. Payment verify hone ke baad hi order confirm hota hai — WhatsApp par confirm kariye."}
           </p>
           <a
             href={orderWhatsAppLink(order, siteUrl)}
@@ -77,11 +77,11 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
               Payment pending · {formatPrice(order.total)}
             </h2>
             <p className="mt-1.5 text-[12.5px] leading-relaxed text-[#5c534b]">
-              Hamari team aapko 10 minute me UPI / Razorpay payment link WhatsApp{" "}
+              UPI se payment kariye aur screenshot WhatsApp{" "}
               <a className="font-medium text-[#862222]" href="https://wa.me/919909790455">
                 9909790455
               </a>{" "}
-              par bhejti hai. Link milne tak order hold par rahega — koi extra charge nahi.
+              par bhejiye. Team payment verify karte hi order confirm ho jaayega — koi extra charge nahi.
             </p>
           </div>
         ) : null}
