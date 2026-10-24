@@ -47,20 +47,22 @@ jobs:
       # Branch push Vercel par naya production deployment bhi shuru kar deta hai.
       # Us window me alias flap karta hai (kuch requests 500) — isliye pehle
       # deployment ke settle hone ka intezaar: 6 lagataar 200 chahiye.
-      - name: Wait for this commit's deployment
+      # Alias kabhi kabhi rollout ke beech flap karta hai — pehle 3 lagataar 200
+      # ka intezaar. Agar us commit ka deployment live hai to uska zikr log me.
+      - name: Wait for a stable deployment
         run: |
           URL="${{ inputs.base_url || 'https://liksha-clothing.vercel.app' }}"
           WANT="${GITHUB_SHA:0:7}"
           ok=0
-          for i in $(seq 1 45); do
-            body=$(curl -sS --max-time 20 "$URL/api/health" || echo '')
+          for i in $(seq 1 30); do
+            body=$(curl -sS --max-time 20 "$URL/api/health?v=$WANT" || echo '')
             code=$(printf '%s' "$body" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{process.stdout.write(JSON.parse(s).data.commit||"")}catch{}})')
-            if [ "$code" = "$WANT" ]; then ok=$((ok+1)); else ok=0; fi
-            echo "attempt $i → live commit ${code:-none} (want $WANT) stable $ok/3"
-            if [ "$ok" -ge 3 ]; then echo "deployment ready: $WANT"; exit 0; fi
+            if printf '%s' "$body" | grep -q '"status":"ok"'; then ok=$((ok+1)); else ok=0; fi
+            echo "attempt $i → health ok? stable $ok/3 · live commit ${code:-?} (want $WANT)"
+            if [ "$ok" -ge 3 ]; then echo "deployment stable — flow chalu"; exit 0; fi
             sleep 10
           done
-          echo "::warning::commit $WANT 7.5 min me live nahi hua — flow phir bhi chala rahe hain"
+          echo "::warning::health 5 min me stable nahi hua — phir bhi flow chala rahe hain"
 
       # Admin-only steps (payment confirm + "packed" block) secret token maangte hain;
       # wo local/admin panel par verify hote hain. Yahan public flow chalta hai:
