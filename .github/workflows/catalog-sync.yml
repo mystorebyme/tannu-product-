@@ -5,6 +5,11 @@ name: Catalog sync
 # Reason: kuch sandboxed dev environments se storefront reachable nahi hota.
 
 on:
+  # trigger file: `.catalog-sync-trigger` touch karke push karo (workflow_dispatch ke liye
+  # workflow default branch par hona chahiye, isliye push trigger bhi rakha hai)
+  push:
+    paths:
+      - ".catalog-sync-trigger"
   workflow_dispatch:
     inputs:
       commit:
