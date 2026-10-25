@@ -21,6 +21,7 @@ export type StoreSettings = {
   sellerAddress: string;
   sellerState: string;
   supportPhone: string;
+  /** @deprecated site par kahin dikhta nahi (owner rule) — sirf internal record */
   supportEmail: string;
   whatsapp: string;
   /** Admin panel ka link (sirf admin/owner ke liye — public API me nahi jaata) */
@@ -39,7 +40,9 @@ export const DEFAULT_STORE_SETTINGS: StoreSettings = {
   sellerAddress: process.env.SELLER_ADDRESS ?? "",
   sellerState: process.env.SELLER_STATE ?? "Rajasthan",
   supportPhone: "8005900581",
-  supportEmail: "Info.likshaclothing@gmail.com",
+  // Owner rule: site/API par support email nahi. Internal record ke liye ab
+  // sirf env (SELLER_EMAIL) — default khaali.
+  supportEmail: process.env.SELLER_EMAIL ?? "",
   whatsapp: "8005900581",
   adminUrl: process.env.ADMIN_PANEL_URL ?? "",
   updatedAt: new Date(0).toISOString(),
