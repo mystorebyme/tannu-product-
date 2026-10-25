@@ -413,3 +413,21 @@ likhega). Uske baad `/api/sheet-selftest` + connector se row confirm karna hai.
 - **Naya live test:** `tests/e2e/round27.mjs` (logo grid classes, GSC meta + file,
   analytics scripts 200, contact POST + DB save + sheet mirror ka sach) —
   `live-audit.yml` me step add.
+
+- **Deploy (R27):** web production = `dpl_8meNZY…` (commit `c301ba5`), admin =
+  `dpl_3HB9…` (commit `f6a985a`). Repo HEAD `fbe590b` me 2 cheezein extra
+  (mobile exact-center header + traffic counter) — **aaj deploy nahi hui** kyunki
+  Vercel Hobby ki 100 deployments/day limit poori ho gayi (402
+  `api-deployments-free-per-day`, UTC midnight par reset).
+- **Live proof (R27):** `live-audit.yml` (run 40166981069) — saare steps pass:
+  smoke, links (0 404), round16, round23, round27; contact page ke saare
+  WhatsApp links `wa.me/918005900581`; `/api/health?v=…` → `commit c301ba5`,
+  `db up`, 446 products.
+- **Sheet ka sach:** selftest `read` = Google ka bot/login HTML (`scriptHint`),
+  `urlDeployment: AKfycbwIJ1ge…`, `write` HTTP 200 par JSON `{ok:false}` →
+  owner ka purana Apps Script code chalu hai. Asli sheet (`Designer Clothing —
+  Store`) me Orders/Payments/Messages me **0 data rows** — website ki taraf se
+  sab taiyaar hai, script deploy hona baaki.
+- **Naya (repo, deploy pending):** `lib/traffic.ts` + `app/api/track` +
+  `components/page-view-tracker.tsx` + admin `/traffic` page (first-party
+  page-view counter, koi dashboard toggle nahi), aur mobile header bhi exact center.
