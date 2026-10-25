@@ -212,13 +212,13 @@ export function SiteHeader() {
           Logo hamesha **center** (owner ask) —
           mobile: [menu] [LOGO] [icons] · desktop: [nav] [LOGO] [icons]
         */}
-        <div className="mx-auto grid h-[66px] max-w-[1400px] grid-cols-[auto_1fr_auto] items-center gap-2 px-3 sm:h-[74px] sm:px-4 lg:h-[80px] lg:grid-cols-[1fr_auto_1fr] lg:gap-4 lg:px-6">
+        <div className="mx-auto grid h-[66px] max-w-[1400px] grid-cols-[1fr_auto_1fr] items-center gap-2 px-3 sm:h-[74px] sm:px-4 lg:h-[80px] lg:gap-4 lg:px-6">
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
             aria-label="Open menu"
             data-testid="mobile-menu"
-            className="flex h-10 w-10 shrink-0 items-center justify-center lg:hidden"
+            className="col-start-1 row-start-1 flex h-10 w-10 shrink-0 items-center justify-center justify-self-start lg:hidden"
           >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
               <path d="M3 6h18M3 12h18M3 18h18" />
