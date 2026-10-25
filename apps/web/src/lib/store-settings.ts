@@ -121,6 +121,32 @@ export async function getStoreSettings(options: { fresh?: boolean } = {}): Promi
   return value;
 }
 
+/**
+ * Payment/tracking page ke liye settings — **time budget ke saath**.
+ *
+ * Owner ki Sheet (Apps Script) thodi slow ho sakti hai (Google ~0.3–2s). Payment
+ * page ko us par intezaar nahi karana: cache garam ho to turant, warna max
+ * `budgetMs` tak wait karke env/default par chala jaata hai — aur request
+ * background me cache garam kar deti hai. Isliye step 3 kabhi "load ho raha hai"
+ * par nahi atakta, UPI ID phir bhi sahi (env fallback) rehta hai.
+ */
+export async function getStoreSettingsFast(budgetMs = 700): Promise<StoreSettings> {
+  if (cache) return cache.value;
+  const slow = getStoreSettings().catch(() => DEFAULT_STORE_SETTINGS);
+  const timeout = new Promise<null>((resolve) => {
+    const timer = setTimeout(() => resolve(null), budgetMs);
+    // server process ko timer zinda na rakhe
+    if (typeof timer === "object" && typeof (timer as { unref?: () => void }).unref === "function") {
+      (timer as { unref: () => void }).unref();
+    }
+  });
+  const fast = await Promise.race([slow, timeout]);
+  if (fast) return fast;
+  // baaki kaam background me poora ho jaaye (agle request par cache ready milega)
+  void slow;
+  return DEFAULT_STORE_SETTINGS;
+}
+
 export async function saveStoreSettings(input: unknown, actor: string): Promise<StoreSettings> {
   const next = normalizeStoreSettings({
     ...(input as StoreSettings),

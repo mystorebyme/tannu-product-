@@ -271,3 +271,19 @@ Owner ke 5 asks, sab ek hi round me:
 - **Sheet ki asli wajah:** Vercel project me `GOOGLE_SHEETS_WEBAPP_URL` + `GOOGLE_SHEETS_TOKEN` env hi nahi hain
   (confirm kiya env list se) — owner se naya `/exec` URL + token chahiye.
 - Docs: `docs/00-overview/owner-report-round23.md`, `docs/00-overview/sheet-setup-owner.md`, `docs/08-testing/round23-audit.md`.
+
+### Round 23c — sheet identify + tabs ready, step-3 polish, pay page par settings budget (2026-10-25)
+
+- **Sheet pehchaan:** owner ne jo `pub?output=csv` links diye the wo **purane account ki copy** ke hain
+  (gid 1135948941/1261780310 naye file me nahi). Asli sheet: `1k8fsea04WpbrGjiyXuDrrS2Eewt9W7wx9X2lUQc5qMo`
+  ("Designer Clothing — Store", account `prakashgothwal370@gmail.com`).
+- **Tabs ready:** us sheet me `Checkout` (8 columns) aur `Audit` (5 columns) tab + header rows bana diye —
+  baaki 5 tab pehle se the. Script ke `GIDS` asli sheet id par set, aur naya `SPREADSHEET_ID` var
+  (standalone script bhi chalega).
+- **Step 3 polish:** UTR khaali + last 4 digit bhare ho to submit **khud claim** kar deta hai
+  (customer ko samajhna nahi padta); labels Hinglish me ("Payment ho gaya — submit kariye",
+  "UTR nahi mila? Last 4 digit se submit", WhatsApp screenshot); submit timeout 20s → 12s.
+- **Speed:** pay/order page par settings ka **700ms budget** (`getStoreSettingsFast`) — Sheet slow ho to
+  bhi page atakta nahi, env fallback (UPI id/phone) se render hota hai aur cache background me garam hota hai.
+- Local: unit 117/0, e2e payments 35/0 · smoke 87/0 · links 40/0 · responsive 43/0 · round16 37/0 ·
+  breakpoints 48/0 · **round23 23/0** (order create 6ms · pay page 36ms · tracking 14ms).

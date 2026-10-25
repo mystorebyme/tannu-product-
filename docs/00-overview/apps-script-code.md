@@ -65,7 +65,7 @@ Warna purana code hi chalta rehta hai.
 
 ---
 
-## Poora code (381 lines)
+## Poora code (394 lines)
 
 ```javascript
 /**
@@ -122,20 +122,32 @@ Warna purana code hi chalta rehta hai.
 var TOKEN = 'CHANGE-ME-liksha-token';
 
 /**
- * Sheet ke tab-id (URL me `#gid=...`). Agar ye set hain to script tab ka **naam**
- * badalne par bhi sahi tab pakadta hai. Jo gid nahi mila, uske liye naam se
- * dhoondhta hai aur na mile to naya tab bana deta hai.
+ * Sheet ke tab-id (URL me `#gid=...`) — **optional**.
+ *
+ * Ye naye sheet ("Designer Clothing — Store", account: prakashgothwal370@gmail.com)
+ * ke asli id hain. Faayda: tab ka naam badalne par bhi script sahi tab pakadta hai.
+ * Jo gid yahan nahi mila / galat hai to script tab ka **naam** se dhoondhta hai
+ * (aur na mile to naya tab bana deta hai) — isliye ye khaali `null` bhi chhod sakte hain.
  */
 var GIDS = {
-  Settings: 0,
-  Orders: 1135948941,
-  Payments: 1261780310,
-  Messages: 644814285,
-  Newsletter: 380856753,
-  // Checkout naya tab hai — gid abhi nahi hai, naam se banega
+  Settings: 1827766020,
+  Orders: 19757621,
+  Payments: 1008049319,
+  Messages: 750680779,
+  Newsletter: 1223926652,
+  // ye do tab script khud banata hai (gid Google deta hai)
   Checkout: null,
   Audit: null,
 };
+
+/**
+ * Sheet ka id (URL me `/d/<ID>/edit`).
+ *
+ * Agar script sheet ke andar se khula hai (Extensions → Apps Script) to ye
+ * zaroori nahi. Par agar aap **script.google.com** par naya project banate hain
+ * (standalone), to ye line kaam aati hai — isliye dono tarah se chalta hai.
+ */
+var SPREADSHEET_ID = '1k8fsea04WpbrGjiyXuDrrS2Eewt9W7wx9X2lUQc5qMo';
 
 var HEADERS = {
   Orders: [
@@ -179,11 +191,12 @@ function json_(payload) {
 }
 
 function book_() {
+  // 1) sheet ke andar bana script (best) — seedha usi sheet par chalta hai
   var active = SpreadsheetApp.getActiveSpreadsheet();
   if (active) return active;
-  // standalone script (sheet se bind nahi) — tab bhi kaam kare
-  var id = PropertiesService.getScriptProperties().getProperty('SHEET_ID');
-  if (!id) throw new Error('SHEET_ID property set kariye (standalone script).');
+  // 2) standalone script — upar diya SPREADSHEET_ID, warna Script Property
+  var id = SPREADSHEET_ID || PropertiesService.getScriptProperties().getProperty('SHEET_ID');
+  if (!id) throw new Error('SPREADSHEET_ID set kariye (ya sheet ke andar se script kholein).');
   return SpreadsheetApp.openById(id);
 }
 

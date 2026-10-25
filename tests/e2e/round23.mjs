@@ -122,10 +122,12 @@ check("order create 2s ke andar", createTimed.ms < 2000, `${createTimed.ms}ms`);
 const number = createdBody.orderNumber ?? spellingBody.orderNumber;
 const payTimed = await timeIt(() => fetch(`${BASE}/orders/${number}/pay`));
 const payHtml = await payTimed.value.text();
+console.log(`       order create ${createTimed.ms}ms · pay page ${payTimed.ms}ms · tracking ${"(next)"}`);
 check("payment page 2s ke andar khulta hai", payTimed.ms < 2000, `${payTimed.ms}ms`);
 check("payment page 200 deta hai", payTimed.value.status === 200, String(payTimed.value.status));
 const orderTimed = await timeIt(() => fetch(`${BASE}/orders/${number}`));
 await orderTimed.value.text();
+console.log(`       tracking page ${orderTimed.ms}ms`);
 check("order/tracking page 2s ke andar khulta hai", orderTimed.ms < 2000, `${orderTimed.ms}ms`);
 
 // ── 3. step 3 — UTR / last-4 / claim / WhatsApp ─────────────────────────────

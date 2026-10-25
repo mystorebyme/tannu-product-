@@ -141,8 +141,18 @@ export function UpiPayment({
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     const clean = value.replace(/[\s-]/g, "").toUpperCase();
+    /**
+     * Owner ka step-3 rule: customer ko sochne par na chhodein —
+     *  • UTR hai → reference save,
+     *  • UTR khaali + last 4 digit hai → seedha "payment ho gaya" claim
+     *    (admin UPI statement se verify karega).
+     */
+    if (!clean && /^\d{4}$/.test(last4)) {
+      await claimPaid();
+      return;
+    }
     if (!/^[A-Z0-9]{6,30}$/.test(clean)) {
-      setError("Enter the UPI reference / UTR shown in your payment app (6–30 characters).");
+      setError("UPI app ka reference / UTR daaliye (6–30 characters) — ya khaali chhod kar mobile ke last 4 digit daal ke submit kariye.");
       return;
     }
     if (!/^\d{4}$/.test(last4)) {
@@ -154,7 +164,7 @@ export function UpiPayment({
     const result = await postJson<{ ok?: boolean; error?: string }>(
       apiUrl("/api/payments/manual"),
       { orderNumber, reference: clean, phoneLast4: last4 },
-      { timeoutMs: 20_000 },
+      { timeoutMs: 12_000 },
     );
     if (!result.data?.ok) {
       setError(result.data?.error ?? result.error ?? "Could not save the reference. Please try again.");
@@ -350,9 +360,9 @@ export function UpiPayment({
             ) : API_AVAILABLE ? (
               <form onSubmit={submit} className="mt-4 space-y-2.5" data-testid="upi-form">
                 <p className="text-[11px] leading-relaxed text-[#6b6259]">
-                  Pay karne ke baad UPI app ka <strong>reference / UTR</strong> yahan paste kariye. UTR na
-                  mile to sirf mobile ke <strong>last 4 digit</strong> daal kar neeche “UTR nahi mila” dabaiye —
-                  team verify kar degi.
+                  UPI se pay karne ke baad (scan ya app — dono) do me se ek kariye: <strong>UTR</strong> daaliye,
+                  <strong> ya</strong> sirf mobile ke <strong>last 4 digit</strong> daal kar neeche button dabaiye.
+                  Team UPI statement se verify karke order confirm kar degi (WhatsApp par update milega).
                 </p>
                 <div className="grid gap-2 sm:grid-cols-[1.4fr_0.8fr]">
                   <input
@@ -396,7 +406,7 @@ export function UpiPayment({
                     disabled={busy}
                     className="h-10 bg-[#222] px-4 text-[10.5px] font-semibold tracking-[.14em] text-white uppercase disabled:opacity-60"
                   >
-                    {busy ? "Saving…" : "I have paid — submit UTR"}
+                    {busy ? "Saving…" : "Payment ho gaya — submit kariye"}
                   </button>
                   <button
                     type="button"
@@ -405,7 +415,7 @@ export function UpiPayment({
                     data-testid="upi-claim"
                     className="h-10 border border-[#222] bg-white px-4 text-[10.5px] font-semibold tracking-[.14em] text-[#222] uppercase disabled:opacity-60"
                   >
-                    UTR nahi mila — payment hui hai
+                    UTR nahi mila? Last 4 digit se submit
                   </button>
                 </div>
                 <a
@@ -415,7 +425,7 @@ export function UpiPayment({
                   data-testid="upi-whatsapp-screenshot"
                   className="mt-1 inline-flex items-center gap-2 text-[10.5px] font-semibold tracking-[.08em] text-[#1b7a3e] uppercase underline"
                 >
-                  Ya WhatsApp par screenshot bhej dijiye
+                  Ya WhatsApp par payment ka screenshot bhejein (order number pehle se likha hai)
                 </a>
               </form>
             ) : (

@@ -7,7 +7,7 @@ import { formatDate, formatPrice, imageUrl } from "@/lib/format";
 import { ORDER_STATUS_COPY, siteConfig } from "@/config/site";
 import { SafeImage } from "@/components/safe-image";
 import { orderWhatsAppLink } from "@/lib/whatsapp";
-import { getStoreSettings } from "@/lib/store-settings";
+import { getStoreSettingsFast } from "@/lib/store-settings";
 import { PaymentStatusWatcher } from "@/components/payment-status-watcher";
 
 export const dynamic = "force-dynamic";
@@ -40,7 +40,7 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
   const { orderNumber } = await params;
   const [order, settings, headerList] = await Promise.all([
     getOrder(orderNumber),
-    getStoreSettings(),
+    getStoreSettingsFast(),
     headers(),
   ]);
   const fallbackHost = new URL(siteConfig.url).host;

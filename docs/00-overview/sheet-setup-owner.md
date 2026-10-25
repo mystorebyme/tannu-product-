@@ -5,19 +5,31 @@ account badal diya, aur naye sheet me website kuch likh nahi pa rahi thi. Isliye
 Apps Script** banaya gaya hai — neeche ke 6 step follow kariye, bas ek baar karna hai
 (≈5 minute). Uske baad har order, payment, checkout aur message apne aap sheet me aayega.
 
-> ⚠️ Ye kaam **aapko khud karna hoga** (Google login aapke paas hai). Main Vercel me URL
-> aur token daal dunga — bas aap dono value mujhe bhej dijiye.
+## 0. Pehle: kaun si sheet?
+
+**Ye sheet** (naya account `prakashgothwal370@gmail.com`) — yahi website se judni chahiye:
+
+- Naam: **Designer Clothing — Store (Orders · Payments · Settings)**
+- Sheet id: `1k8fsea04WpbrGjiyXuDrrS2Eewt9W7wx9X2lUQc5qMo`
+- Link: https://docs.google.com/spreadsheets/d/1k8fsea04WpbrGjiyXuDrrS2Eewt9W7wx9X2lUQc5qMo/edit
+
+**Tabs (aaj ready kar diye):** Settings · Orders · Payments · Messages · Newsletter ·
+**Checkout** (naya) · **Audit** (naya) — sab me header row + sahi column names.
+
+> ⚠️ Aapne jo `pub?output=csv` links bheje the (`...2PACX-1vTLs42cuo-...`) wo **purane
+> account ki copy** ke hain (uske gid 1135948941/1261780310 is naye file me nahi hain).
+> Website **naye** file se judegi. Purani copy me kuch likhne se site par asar nahi hoga.
+
+> ⚠️ Ye kaam **aapko khud karna hoga** (Apps Script deploy aapke Google login se hota hai).
+> Main Vercel me URL aur token daal dunga — bas aap dono value mujhe bhej dijiye.
 
 ---
 
-## Step 1 — Naya sheet kholiye
+## Step 1 — Sheet kholiye
 
-1. Us Google account se login kariye jis account ki sheet aap use karna chahte hain.
-2. [sheets.new](https://sheets.new) kholein → naam rakhein: **Liksha Clothing — Orders**.
-3. Sheet ka URL note kar lein: `https://docs.google.com/spreadsheets/d/**<SHEET_ID>**/edit`
-
-> Same sheet rakhna hai to naya banane ki zaroorat nahi — purani sheet bhi chalegi,
-> bas script naye account se deploy hona chahiye.
+1. Us Google account se login kariye jis account ki sheet aap use karna chahte hain
+   (`prakashgothwal370@gmail.com`).
+2. Upar diya link kholein (naya banane ki zaroorat nahi — tabs already bane hue hain).
 
 ## Step 2 — Script editor kholein
 

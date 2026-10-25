@@ -6,7 +6,7 @@ import { getOrder } from "@/lib/orders";
 import { formatPrice, imageUrl } from "@/lib/format";
 import { siteConfig } from "@/config/site";
 import { SafeImage } from "@/components/safe-image";
-import { getStoreSettings } from "@/lib/store-settings";
+import { getStoreSettingsFast } from "@/lib/store-settings";
 import { UpiPayment } from "@/components/upi-payment";
 import { signUpiReturn } from "@/lib/upi-return";
 import { PaymentStatusWatcher } from "@/components/payment-status-watcher";
@@ -34,7 +34,7 @@ export default async function PaymentPage({ params }: { params: Promise<{ orderN
    */
   const [order, settings, headerList] = await Promise.all([
     getOrder(orderNumber),
-    getStoreSettings(),
+    getStoreSettingsFast(),
     headers(),
   ]);
   if (!order) notFound();
