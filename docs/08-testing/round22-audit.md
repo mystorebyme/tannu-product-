@@ -78,7 +78,28 @@ Live smoke test lagataar 3 baar fail ho raha tha: UTR submit par
 - Test: `tests/unit/payment-reference.test.ts` (schema + guard), e2e ab har run par
   naya 12-digit UTR use karta hai.
 
-## 6. Khula hua / owner action
+## 6. Order page 500 — asli wajah: DB pool (EMAXCONNSESSION)
+
+Health endpoint ne pakda: `max clients reached in session mode - max clients are
+limited to pool_size: 15`. Kyun:
+
+- Vercel par har function instance apna `pg` pool banata tha, `max: 5`.
+- Supabase ka **session** pooler ek project ko ~15 clients deta hai → kuch
+  instances ke baad naya connection hi nahi milta; `getOrder()` throw karta tha
+  aur order/pay page **500** de deta tha (customer ko "order load nahi hua").
+- Fix (`apps/web/src/lib/db.ts`): serverless par `max: 1`, `idleTimeoutMillis: 5s`,
+  `allowExitOnIdle`, aur `EMAXCONNSESSION / too many clients / ECONNRESET` jaise
+  transient errors par 3-attempt chhota retry (`query()` + `withTransaction()`).
+- Test: `tests/unit/db-pool.test.ts`.
+
+Verify (production, commit `69f9e58`):
+
+- `/api/health` → `status: ok`, `db: up`, `commit: 69f9e58`
+- `/orders/LK-DOESNOTEXIST` → **404** "Order nahi mila" (pehle 500 error boundary)
+- live payment+tracking smoke → **28 passed / 0 failed** (UTR submit, processing,
+  failed payment, tracking, funnel event — sab pass; admin steps token ke bina skip)
+
+## 7. Khula hua / owner action
 
 - **Contact form ka email channel**: local sandbox me `formsubmit` call fail hoti
   hai (network). Production par re-check chahiye — agar fail ho to WhatsApp

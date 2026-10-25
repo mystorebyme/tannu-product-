@@ -216,3 +216,13 @@ R21 ke live verification ke baad teen cheezein tight kee gayin (koi naya feature
 - **Order page title:** pehle har order page "Order confirmed" kehta tha (pending payment par bhi);
   ab payment status ke hisaab se title, aur galat number par HTTP 404 + "Order nahi mila".
 - Docs: `docs/08-testing/round22-audit.md` (verification matrix + local suites 95/40/9/35/87/43/37).
+
+### Round 22b — production 500 ka asli root cause: DB pool
+
+- `payments` ka global unique (provider, gateway_payment_id) hata kar per-order kar diya
+  (migration 0008) — ek UTR doosre order par daalne se 500 aata tha. Ab 409 with saaf message.
+- Vercel par har instance 5 DB connections kholta tha, Supabase session pooler ~15 deta hai →
+  `EMAXCONNSESSION max clients reached` → order page + UTR submit 500. Ab serverless par
+  pool 1 + idle release + transient retry.
+- Live verify: health `db: up` (`commit 69f9e58`), `/orders/LK-DOESNOTEXIST` → 404
+  "Order nahi mila", live smoke **28/0**.
