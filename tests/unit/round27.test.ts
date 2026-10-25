@@ -95,3 +95,49 @@ test("payment page par 'payment ho gaya' confirm ka saaf message", () => {
   assert.match(pay, /Payment confirm ho gaya/);
   assert.match(pay, /Screenshot WhatsApp par bhejein/);
 });
+
+test("Pages shell: /orders/<number> aur /pay path sahi parse hote hain (base path ke saath)", async () => {
+  const { parseOrderPath } = await import("../../apps/web/src/lib/public-order-path");
+  assert.deepEqual(parseOrderPath("/orders/lk-ni93oty5o4/pay", ""), {
+    orderNumber: "LK-NI93OTY5O4",
+    pay: true,
+    livePath: "/orders/LK-NI93OTY5O4/pay",
+  });
+  assert.deepEqual(parseOrderPath("/tannu-product-/orders/LK-NI93OTY5O4", "/tannu-product-"), {
+    orderNumber: "LK-NI93OTY5O4",
+    pay: false,
+    livePath: "/orders/LK-NI93OTY5O4",
+  });
+  assert.deepEqual(parseOrderPath("/tannu-product-/orders/LK-NI93OTY5O4/pay/", "/tannu-product-"), {
+    orderNumber: "LK-NI93OTY5O4",
+    pay: true,
+    livePath: "/orders/LK-NI93OTY5O4/pay",
+  });
+  // order nahi hai — normal 404 screen
+  assert.equal(parseOrderPath("/tannu-product-/collections/sale", "/tannu-product-"), null);
+  assert.equal(parseOrderPath("/", ""), null);
+});
+
+test("Pages shell: API na chale to live store ke usi page par bhejta hai (dead end nahi)", () => {
+  const shell = read("scripts/pages/preview-order.tsx");
+  assert.match(shell, /LIVE_STORE_URL/);
+  assert.match(shell, /location\.replace/);
+  assert.match(shell, /parseOrderPath/);
+  // base path build me hi bake hota hai
+  assert.match(shell, /NEXT_PUBLIC_PAGES_BASE_PATH/);
+  // 404.html ke roop me GitHub Pages deep links sambhalta hai
+  const build = read("scripts/pages/build-preview.mjs");
+  assert.match(build, /dist", "404\.html"|"404\.html"/);
+});
+
+test("order/payment ke public API par CORS hai (Pages cross-origin call kar sakta hai)", () => {
+  const pub = read("apps/web/src/app/api/orders/[orderNumber]/public/route.ts");
+  assert.match(pub, /withCors/);
+  assert.match(pub, /OPTIONS = preflight/);
+  const status = read("apps/web/src/app/api/orders/[orderNumber]/payment/route.ts");
+  assert.match(status, /withCors/);
+  assert.match(status, /OPTIONS = preflight/);
+  // masked phone — poora number kabhi nahi
+  assert.match(pub, /phoneMasked/);
+  assert.ok(!/reference:\s*order\.reference/.test(pub), "payment reference public payload me nahi");
+});

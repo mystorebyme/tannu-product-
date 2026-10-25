@@ -1,3 +1,4 @@
+import { preflight, withCors } from "@/lib/cors";
 import { paymentStatusFor } from "@/lib/orders";
 
 export const dynamic = "force-dynamic";
@@ -12,12 +13,21 @@ export const runtime = "nodejs";
  * Security: sirf status/metadata jaata hai (koi address, item ya phone nahi).
  * Order number random `LK-XXXXXXXX` hai, aur yahi page customer ko dikhta hai.
  * `cache-control: no-store` — status kabhi purana na dikhe.
+ *
+ * CORS: GitHub Pages (static preview) par payment page client-side chalta hai,
+ * isliye status live store (Vercel) se cross-origin laana padta hai — warna
+ * Pages par "Status check nahi ho paaya" dikhta tha.
  */
-export async function GET(_request: Request, context: { params: Promise<{ orderNumber: string }> }) {
+export async function GET(request: Request, context: { params: Promise<{ orderNumber: string }> }) {
   const { orderNumber } = await context.params;
   const status = await paymentStatusFor(orderNumber);
   if (!status) {
-    return Response.json({ error: "Order not found" }, { status: 404, headers: { "cache-control": "no-store" } });
+    return withCors(
+      Response.json({ error: "Order not found" }, { status: 404, headers: { "cache-control": "no-store" } }),
+      request,
+    );
   }
-  return Response.json(status, { headers: { "cache-control": "no-store" } });
+  return withCors(Response.json(status, { headers: { "cache-control": "no-store" } }), request);
 }
+
+export const OPTIONS = preflight;

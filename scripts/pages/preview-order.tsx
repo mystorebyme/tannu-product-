@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { formatPrice } from "@/lib/format";
-import { apiUrl } from "@/lib/api-base";
+import { apiUrl, LIVE_STORE_URL } from "@/lib/api-base";
+import { parseOrderPath } from "@/lib/public-order-path";
 import { UpiPayment } from "@/components/upi-payment";
 
 /**
@@ -48,27 +49,51 @@ const STATUS_COPY: Record<string, string> = {
 };
 const TIMELINE = ["placed", "confirmed", "packed", "shipped", "delivered"];
 
-/** URL se `/orders/<number>` (aur `/pay`) nikaalo — base path (repo name) chhod kar */
-function parsePath(pathname: string): { orderNumber: string | null; pay: boolean } {
-  const match = /\/orders\/([A-Za-z0-9-]+)(\/pay)?\/?$/.exec(pathname);
-  if (!match) return { orderNumber: null, pay: false };
-  return { orderNumber: match[1]!.toUpperCase(), pay: Boolean(match[2]) };
+/**
+ * Data na milne par live store (Vercel) ke usi page par bhej do — Pages par
+ * server nahi hota, isliye API se jawab na aaye to customer ko dead-end na
+ * dikhe: asli order/payment page wahan bilkul kaam karta hai.
+ *
+ * (API up ho to redirect nahi hota — page yahin render hota hai.)
+ */
+function goToLiveStore(livePath: string) {
+  const search = window.location.search || "";
+  window.location.replace(`${LIVE_STORE_URL}${livePath}${search}`);
 }
 
 export default function PreviewOrderPage() {
-  const [state, setState] = useState<"loading" | "ready" | "missing" | "error" | "not-order">("loading");
+  const [state, setState] = useState<"loading" | "ready" | "missing" | "error" | "not-order" | "redirecting">("loading");
   const [order, setOrder] = useState<PublicOrder | null>(null);
   const [settings, setSettings] = useState<Settings | null>(null);
   const [pay, setPay] = useState(false);
 
   useEffect(() => {
-    const { orderNumber, pay: isPay } = parsePath(window.location.pathname);
-    setPay(isPay);
-    if (!orderNumber) {
+    const base = process.env.NEXT_PUBLIC_PAGES_BASE_PATH ?? "";
+    const parsed = parseOrderPath(window.location.pathname, base);
+    if (!parsed) {
       setState("not-order");
       return;
     }
+    setPay(parsed.pay);
+    const { orderNumber, livePath } = parsed;
     let cancelled = false;
+
+    /** API se jawab nahi aaya → live store ka wahi page (payment wahan chalta hai) */
+    const fallbackToLiveStore = () => {
+      if (cancelled) return;
+      setState("redirecting");
+      goToLiveStore(livePath);
+    };
+
+    // API hi configure nahi (build me base missing) — seedha live store
+    if (!apiUrl("/").replace(/\/+$/, "")) {
+      fallbackToLiveStore();
+      return;
+    }
+
+    // 12 second se zyada intezaar na karein — customer ko blank screen na mile
+    const timer = setTimeout(fallbackToLiveStore, 12_000);
+
     (async () => {
       try {
         const [orderResponse, settingsResponse] = await Promise.all([
@@ -76,12 +101,15 @@ export default function PreviewOrderPage() {
           fetch(apiUrl("/api/settings"), { cache: "no-store" }).catch(() => null),
         ]);
         if (cancelled) return;
+        clearTimeout(timer);
         if (orderResponse.status === 404) {
+          // API chal rahi hai par order nahi mila — sach me galat number
           setState("missing");
           return;
         }
         if (!orderResponse.ok) {
-          setState("error");
+          // purana deploy / route missing — live store par yahi page khul jayega
+          fallbackToLiveStore();
           return;
         }
         const payload = (await orderResponse.json()) as { data: PublicOrder };
@@ -92,18 +120,28 @@ export default function PreviewOrderPage() {
         }
         setState("ready");
       } catch {
-        if (!cancelled) setState("error");
+        fallbackToLiveStore();
       }
     })();
+
     return () => {
       cancelled = true;
+      clearTimeout(timer);
     };
   }, []);
 
-  if (state === "loading") {
+  if (state === "loading" || state === "redirecting") {
     return (
       <div className="container-liksha py-16 text-center text-[13px] text-[#8a8078]">
-        Order khul raha hai…
+        {state === "redirecting" ? "Payment page khul raha hai…" : "Order khul raha hai…"}
+        <noscript>
+          <span className="mt-2 block">
+            JavaScript band hai — order dekhne ke liye yahan click kariye:{" "}
+            <a className="underline" href={LIVE_STORE_URL}>
+              {LIVE_STORE_URL.replace(/^https?:\/\//, "")}
+            </a>
+          </span>
+        </noscript>
       </div>
     );
   }
@@ -144,6 +182,12 @@ export default function PreviewOrderPage() {
       <div className="container-liksha py-16 text-center">
         <h1 className="font-display text-[26px] font-medium">Order khul nahi paaya</h1>
         <p className="mt-2 text-[13px] text-[#6b6259]">Internet check karke page refresh kariye.</p>
+        <a
+          href={`${LIVE_STORE_URL}/track-order`}
+          className="mt-4 inline-flex bg-[#862222] px-5 py-2.5 text-[11px] font-semibold tracking-[.14em] text-white uppercase"
+        >
+          Track order
+        </a>
       </div>
     );
   }

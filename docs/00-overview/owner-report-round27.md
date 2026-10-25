@@ -222,3 +222,69 @@ script **khud apni sheet bana leti hai** — koi Share ka jhanjhat nahi.
 - UTR maangna **band**, lambe paragraphs hataye, screenshot link chhota
 - mobile par UPI app se wapas aane par order **khud confirm** (`payments/return`)
 - tests: **145 pass / 0 fail**, responsive 43/0, breakpoints 48/0
+
+---
+
+## 12. R27-3 — Pages par order/payment page, email poora hata, sheet demo data
+
+### 🔴 Asli problem: GitHub Pages par `/orders/…` page banti hi nahi thi
+
+GitHub Pages par Node server nahi chalta, isliye static build me
+`/orders/LK-…` aur `/orders/LK-…/pay` **koi file hi nahi** hoti thi → 404
+("This page has moved on"). Payment dikhna hi nahi tha.
+
+**Fix (3 layer):**
+
+1. **Naya shell** — `scripts/pages/preview-order.tsx` build ke waqt
+   `/order-preview` page banta hai aur uska HTML **`dist/404.html`** ban jaata hai.
+   GitHub Pages har missing URL par yahi file deta hai. Shell URL se order number
+   nikaal kar page render karta hai (404 ki jagah asli page).
+2. **Naya public API** — `GET /api/orders/:orderNumber/public` (CORS ke saath,
+   sirf zaroori data: items, total, status, sheher, **masked phone**). Poora
+   address / phone / email / payment reference kabhi nahi jaata.
+3. **Dead-end nahi** — API se jawab na aaye (ya 12 second se zyada lag jaye) to
+   page customer ko **live store ke usi page** par bhej deta hai
+   (`https://liksha-clothing.vercel.app/orders/LK-…/pay`) — wahan payment page
+   bilkul kaam karta hai. Yaani Pages par bhi payment ho sakti hai.
+
+Saath me payment status polling route (`/api/orders/:n/payment`) par bhi **CORS**
+laga diya — warna Pages par "Status check nahi ho paaya" aata tha.
+
+### 📧 Support email ab **kahin nahi** (site + API)
+
+- footer, header, contact page, contact form (mailto → WhatsApp), structured data
+  (SEO), policies (4 files), invoice, `siteConfig.email` → hata diya
+- `/api/settings` ab `supportEmail` **return hi nahi karta**
+- `/api/contact` ka jawab sirf `channels.whatsapp`
+- Sheet ki `Settings` tab me `support_email` khaali
+- site par sirf **WhatsApp 8005900581**
+
+### 🧪 Sheet me poora demo data (har tab, har column)
+
+`seedDemoData` ab pehle `setup_()` chalata hai, isliye **Settings tab bhi** bhar
+jaata hai. Bharte hain: **16 tabs** — Orders, OrderItems, Payments, Invoices,
+Shipments, Checkout, Messages, Newsletter, Reviews, Coupons, Inventory, Audit,
+Errors, Dashboard, Sync, Settings.
+
+- 5 demo customers (asli sheher/pincode), 5 products (₹499–₹699), 2 orders me 2 items
+- paid / pending / processing — teeno payment status, courier + AWB + tracking URL
+- GST invoice rows (CGST/SGST vs IGST), coupons (active + expired), reviews, newsletter
+- har demo row me `DEMO` nishaan → `clearDemoData` se **ek hi baar** me saaf
+
+### 🚀 Deploy status (important)
+
+- Code poori tarah commit + push ho gaya hai.
+- **Vercel par deploy aaj nahi ho paaya** — free plan ka limit
+  (`402 api-deployments-free-per-day`, 100/deploy per day) khatam hai.
+  Limit khulte hi deploy karna hai. Tab tak GitHub Pages ka shell **live store
+  par redirect** kar deta hai, isliye customer ko 404 nahi milega.
+- GitHub Pages ka naya build (404.html shell) workflow se publish ho raha hai.
+
+### ❓ "Netlify par shift kar dein?"
+
+- Hosting badalne se **code wahi rehta hai** — koi kaam dobara nahi likhna.
+- Netlify par **server + functions** chalte hain (Pages par nahi) → order/payment
+  page wahan **seedha** chalega, redirect ki zarurat nahi.
+- Par: Netlify bhi free plan par build-minutes deta hai, aur **naya account +
+  domain + env keys** dobara set karne padenge. Isliye pehle Vercel ka daily limit
+  ka intezaar karna sasta hai (0 mehnat); Netlify tab jab owner kahe.

@@ -463,3 +463,11 @@ likhega). Uske baad `/api/sheet-selftest` + connector se row confirm karna hai.
   + ek button **"Payment ho gaya — confirm kariye"**; lambe paragraphs hataye, screenshot link
   chhota; mobile par UPI app se wapas aane par order khud confirm (`payments/return`).
 - Tests: **145 pass / 0 fail**.
+
+### R27-3 (Pages order/payment fix · email removed · demo data)
+- [x] GitHub Pages `/orders/…` + `/pay` — `404.html` shell + public order API + live-store fallback
+- [x] `/api/orders/:n/payment` par CORS (Pages par status polling)
+- [x] support email site/API/policies/invoice se poora hata (sirf WhatsApp)
+- [x] `seedDemoData` → 16 tabs (Settings bhi), real-jaisa data, `clearDemoData`
+- [x] script v3.2 (`CODE_VERSION r27-2`), docs export, tests **151 pass / 0 fail**
+- [ ] Vercel production deploy (free-plan daily limit khatam — baad me)
