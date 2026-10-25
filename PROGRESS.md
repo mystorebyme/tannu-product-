@@ -287,3 +287,22 @@ Owner ke 5 asks, sab ek hi round me:
   bhi page atakta nahi, env fallback (UPI id/phone) se render hota hai aur cache background me garam hota hai.
 - Local: unit 117/0, e2e payments 35/0 · smoke 87/0 · links 40/0 · responsive 43/0 · round16 37/0 ·
   breakpoints 48/0 · **round23 23/0** (order create 6ms · pay page 36ms · tracking 14ms).
+
+### R24 — owner ke liye code map + live verify (2026-10-25)
+
+- **Naya doc: `docs/00-overview/owner-code-map.md`** — owner ka ask *"ye sab kahan hai code mai, mai
+  manually daalunga"* ka poora jawab: har feature ka **exact file + function**.
+  Isme: storefront page↔file table, price/catalog chain (`database/seeds` → `apps/web/src/data/catalog.json`
+  → `lib/store.ts`), Settings tab ke keys, checkout+order create ka rasta, step-3 payment
+  (UTR / last-4 / WhatsApp screenshot) ka rasta, sheet ke **7 tab + exact columns**, Apps Script
+  write path (`appendSheetRows` → `doPost` → `appendRows_`), admin ke saare pages + server actions
+  (order detail/edit, payment verify, invoice, delivery block), GST invoice, reviews, SEO, pincode,
+  env vars, DNS.
+- `owner-report-round23.md` §2 — sheet ki **asli pehchaan** (id + link + "purane account ki copy" warning)
+  aur aaj bane `Checkout`/`Audit` tab + real gids.
+- Live verify: `/api/health` → `commit: ded0125`, `db: up`, 446 products.
+  Live flow (`[live-test]`): payments 28/0, round23 18/0,
+  **order create 1961ms · pay page 331ms · tracking 458ms** (CI runner → Vercel network + lambda cold start;
+  local same pages 6 ms / 36 ms / 14 ms).
+- Admin clickable-number audit: `PhoneLinks` (call + WhatsApp) dashboard/orders/customers/messages par,
+  order number → `/orders/[id]` jahan contact edit + status + tracking + payment verify sab hai — **confirm**.
