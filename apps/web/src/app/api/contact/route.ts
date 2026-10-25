@@ -1,6 +1,7 @@
 import { contactSchema } from "@liksha/validation";
 import { mirrorMessageToSheet, saveMessage } from "@/lib/messages";
 import { contactChannels, notifyContactMessage } from "@/lib/notify";
+import { runInBackground } from "@/lib/background";
 
 export const dynamic = "force-dynamic";
 
@@ -25,8 +26,11 @@ export async function POST(request: Request) {
 
   const input = parsed.data;
   const message = await saveMessage(input);
-  // owner ki Google Sheet me turant row (admin panel + email ke alawa)
-  void mirrorMessageToSheet(message);
+  /**
+   * Owner ki Google Sheet me row — response ke **baad** bhi chalti rahe.
+   * (`void promise` Vercel par freeze ho jaata tha → sheet me row nahi aati thi.)
+   */
+  runInBackground(() => mirrorMessageToSheet(message));
 
   // best-effort email — kabhi request fail nahi karta
   let delivered: Awaited<ReturnType<typeof notifyContactMessage>> = [];

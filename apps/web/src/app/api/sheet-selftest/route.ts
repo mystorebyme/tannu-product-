@@ -144,6 +144,42 @@ export async function GET(request: Request) {
     result.stats = stats;
   }
 
+  /**
+   * 1c) **Contact form** ka asli path, live: saveMessage → mirrorMessageToSheet →
+   *     listMessages. `?message=1` par chalta hai. Isse pata chalta hai ki
+   *     "message kaam nahi kar raha" kahan atka hai (DB / sheet / dono).
+   */
+  if (url.searchParams.get("message") === "1") {
+    const started = Date.now();
+    try {
+      const { saveMessage, mirrorMessageToSheet, listMessages } = await import("@/lib/messages");
+      const saved = await saveMessage({
+        name: "Selftest",
+        email: "selftest@example.com",
+        phone: "8005900581",
+        subject: "Selftest (ignore)",
+        message: "api/sheet-selftest se bheja gaya test message — ignore kariye.",
+      });
+      let mirrored: boolean | string = false;
+      try {
+        mirrored = await mirrorMessageToSheet(saved);
+      } catch (error) {
+        mirrored = (error as Error).message;
+      }
+      const rows = await listMessages(5);
+      result.message = {
+        ok: true,
+        ms: Date.now() - started,
+        id: saved.id,
+        rowInDb: rows.some((row) => row.id === saved.id),
+        dbCount: rows.length,
+        sheetMirror: mirrored,
+      };
+    } catch (error) {
+      result.message = { ok: false, ms: Date.now() - started, error: (error as Error).message };
+    }
+  }
+
   // 2) write check — ek row Audit tab me (yahi asli append path hai)
   const sheet = url.searchParams.get("sheet") === "Orders" ? "Orders" : AUDIT_TAB;
   const startedWrite = Date.now();

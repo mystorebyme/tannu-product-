@@ -1,7 +1,6 @@
 import "server-only";
 
 import fs from "node:fs";
-import { after } from "next/server";
 import { randomUUID } from "node:crypto";
 import type { AuditEntry, InvoiceMeta, Order, OrderStatus, PaymentMethod, Tracking } from "@liksha/types";
 import {
@@ -11,6 +10,7 @@ import {
   generateOrderNumber,
   invoiceNumber,
 } from "@liksha/validation";
+import { runInBackground } from "./background";
 import { dataFile } from "./data-dir";
 import { dbEnabled } from "./db";
 import { checkPincode } from "./delivery";
@@ -27,25 +27,6 @@ type StoredOrder = Order;
  * (dev + tests). Dono ka behaviour same hai — baaki code ko farq nahi padta.
  */
 let lastLoaded: StoredOrder[] = [];
-/**
- * Google Sheet ki row request ke **baad** bhejni hai (customer/owner ko wait nahi
- * karana). `after()` sirf request scope me chalta hai — tests/CLI me wo throw karta
- * hai, isliye try/catch ke saath fire-and-forget fallback rakha hai.
- */
-function runInBackground(task: () => void | Promise<unknown>): void {
-  if (typeof after === "function") {
-    try {
-      after(task);
-      return;
-    } catch {
-      // request scope nahi (test / script) — neeche fire-and-forget
-    }
-  }
-  void Promise.resolve()
-    .then(task)
-    .catch((error) => console.warn("[background] task failed", (error as Error).message));
-}
-
 /** read ke waqt ka snapshot — in-memory array mutate hone se diff kharab na ho */
 let lastSnapshot = new Map<string, string>();
 let hydrated = false;

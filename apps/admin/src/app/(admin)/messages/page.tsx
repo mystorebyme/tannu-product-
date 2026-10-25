@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getMessages } from "@/lib/data";
 import { markMessageHandledAction, setMessageReplyAction } from "@/app/actions";
 import { dateTime } from "@/lib/format";
@@ -9,10 +10,28 @@ export const dynamic = "force-dynamic";
  * Website ke "Send us a message" form se aaye messages.
  * Storefront API (Postgres) se aate hain — koi message kho nahi jaata.
  */
-export default async function MessagesPage() {
+export default async function MessagesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ filter?: string }>;
+}) {
+  const { filter } = await searchParams;
   const messages = await getMessages(100);
   const open = messages.filter((message) => !message.handled);
   const replied = messages.filter((message) => message.replied);
+
+  /**
+   * "New" default view — owner ko sabse pehle wahi dikhna chahiye jo abhi tak
+   * dekha nahi gaya. Pehle sab messages ek hi list me the, isliye naya message
+   * purane 50 ke neeche chhup jaata tha.
+   */
+  const view = filter === "all" || filter === "replied" ? filter : open.length > 0 ? "new" : "all";
+  const shown = view === "new" ? open : view === "replied" ? replied : messages;
+  const TABS = [
+    { key: "new", label: "New", count: open.length },
+    { key: "replied", label: "Replied", count: replied.length },
+    { key: "all", label: "All", count: messages.length },
+  ] as const;
 
   return (
     <>
@@ -20,19 +39,40 @@ export default async function MessagesPage() {
         <div>
           <h1>Messages</h1>
           <p>
-            Website ke contact form se — {messages.length} total, {open.length} unreplied, {replied.length} replied
+            Website ke contact form se — {messages.length} total, <strong>{open.length} new</strong>,{" "}
+            {replied.length} replied
           </p>
         </div>
       </div>
 
+      <nav className="tabs" data-testid="message-tabs" style={{ display: "flex", gap: 8, marginBottom: 14 }}>
+        {TABS.map((tab) => (
+          <Link
+            key={tab.key}
+            href={`/messages?filter=${tab.key}`}
+            className={`btn btn-sm${view === tab.key ? "" : " btn-ghost"}`}
+            data-testid={`message-tab-${tab.key}`}
+            style={view === tab.key ? { fontWeight: 600 } : { opacity: 0.75 }}
+          >
+            {tab.label} <span className="small muted">({tab.count})</span>
+          </Link>
+        ))}
+      </nav>
+
       <div className="panel">
         <div className="panel-head">
-          <h2>Inbox</h2>
+          <h2>{view === "new" ? "New messages" : view === "replied" ? "Replied" : "All messages"}</h2>
           <span className="badge">{open.length} new</span>
         </div>
         <div className="panel-body">
-          {messages.length === 0 ? (
-            <p className="muted">Abhi koi message nahi aaya.</p>
+          {shown.length === 0 ? (
+            <p className="muted">
+              {messages.length === 0
+                ? "Abhi koi message nahi aaya. Contact page se bheja gaya message yahan turant dikhta hai."
+                : view === "new"
+                  ? "Naya message nahi hai — sab dekh liye. Purane dekhne ke liye “All” dabaiye."
+                  : "Is list me koi message nahi hai."}
+            </p>
           ) : (
             <table className="table">
               <thead>
@@ -46,7 +86,7 @@ export default async function MessagesPage() {
                 </tr>
               </thead>
               <tbody>
-                {messages.map((message) => (
+                {shown.map((message) => (
                   <tr key={message.id}>
                     <td className="small muted">{dateTime(message.createdAt)}</td>
                     <td className="small">
