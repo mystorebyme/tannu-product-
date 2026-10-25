@@ -22,6 +22,15 @@ export function dbEnabled(): boolean {
 
 let pool: Pool | null = null;
 
+/**
+ * Serverless (Vercel) par har invocation apna pool banata hai. Managed Postgres
+ * ka pooler (Supabase session mode) sirf ~15 clients deta hai — 5-per-instance
+ * pool rakhne par `EMAXCONNSESSION max clients reached` aata hai aur order page
+ * / UTR submit 500 dete hain. Isliye serverless par pool chhota + jaldi idle.
+ */
+const IS_SERVERLESS = Boolean(process.env.VERCEL);
+const POOL_MAX = Number(process.env.DB_POOL_MAX ?? (IS_SERVERLESS ? 1 : 5));
+
 export function getPool(): Pool {
   if (!DATABASE_URL) throw new Error("DATABASE_URL set nahi hai — Postgres mode available nahi.");
   if (!pool) {
@@ -29,14 +38,34 @@ export function getPool(): Pool {
       connectionString: DATABASE_URL,
       // Render/Neon jaise managed Postgres ke liye SSL zaroori hota hai.
       ssl: /localhost|127\.0\.0\.1/.test(DATABASE_URL) ? undefined : { rejectUnauthorized: false },
-      max: Number(process.env.DB_POOL_MAX ?? 5),
-      idleTimeoutMillis: 30_000,
+      max: POOL_MAX,
+      idleTimeoutMillis: IS_SERVERLESS ? 5_000 : 30_000,
+      allowExitOnIdle: IS_SERVERLESS,
       connectionTimeoutMillis: 10_000,
     });
     // idle client error se process crash na ho
     pool.on("error", (error) => console.error("[db] idle client error", error.message));
   }
   return pool;
+}
+
+/** Pooler ke transient errors — ek chhota retry user ko 500 se bacha leta hai. */
+const TRANSIENT_DB_ERROR =
+  /EMAXCONNSESSION|too many clients|ECONNRESET|ECONNREFUSED|ETIMEDOUT|timeout exceeded when trying to connect|Connection terminated/i;
+
+async function withDbRetry<T>(run: () => Promise<T>, attempts = 3): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await run();
+    } catch (error) {
+      lastError = error;
+      const message = error instanceof Error ? error.message : String(error);
+      if (!TRANSIENT_DB_ERROR.test(message) || attempt === attempts) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 200 * attempt));
+    }
+  }
+  throw lastError;
 }
 
 /**
@@ -110,23 +139,27 @@ export async function query<T extends QueryResultRow = QueryResultRow>(
   values: unknown[] = [],
 ): Promise<T[]> {
   await ensureSchema();
-  const result = await getPool().query<T>(text, values as never[]);
+  const result = await withDbRetry(() => getPool().query<T>(text, values as never[]));
   return result.rows;
 }
 
 /** Ek transaction — sab writes ek saath commit ya rollback. */
 export async function withTransaction<T>(fn: (client: PoolClient) => Promise<T>): Promise<T> {
   await ensureSchema();
-  const client = await getPool().connect();
-  try {
-    await client.query("begin");
-    const result = await fn(client);
-    await client.query("commit");
-    return result;
-  } catch (error) {
-    await client.query("rollback").catch(() => undefined);
-    throw error;
-  } finally {
-    client.release();
-  }
+  // connection milne me pooler "too many clients" deta hai — poora transaction
+  // dobara chalao (rollback ho chuka hota hai, isliye safe).
+  return withDbRetry(async () => {
+    const client = await getPool().connect();
+    try {
+      await client.query("begin");
+      const result = await fn(client);
+      await client.query("commit");
+      return result;
+    } catch (error) {
+      await client.query("rollback").catch(() => undefined);
+      throw error;
+    } finally {
+      client.release();
+    }
+  });
 }
