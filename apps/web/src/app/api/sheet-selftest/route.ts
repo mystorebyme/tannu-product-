@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { EXPECTED_SHEET_ID } from "@/lib/google-sheets";
 
 /**
  * Sheet write selftest — **sirf debugging ke liye**, secret key ke bina band.
@@ -45,11 +46,28 @@ export async function GET(request: Request) {
       headers: { accept: "application/json" },
       signal: AbortSignal.timeout(15_000),
     });
-    result.read = {
-      status: response.status,
-      ms: Date.now() - startedRead,
-      body: (await response.text()).slice(0, 600),
-    };
+    const raw = await response.text();
+    result.read = { status: response.status, ms: Date.now() - startedRead, body: raw.slice(0, 600) };
+    /**
+     * Sabse zaroori check: script **kaun si sheet** pakde hue hai?
+     * Mismatch = rows kisi doosri (copy) sheet me jaa rahe hain.
+     */
+    try {
+      const parsed = JSON.parse(raw) as {
+        spreadsheet?: string;
+        spreadsheetId?: string;
+        sheets?: { name?: string; rows?: number }[];
+      };
+      result.book = {
+        name: parsed.spreadsheet ?? null,
+        id: parsed.spreadsheetId ?? null,
+        expectedId: EXPECTED_SHEET_ID,
+        match: parsed.spreadsheetId ? parsed.spreadsheetId === EXPECTED_SHEET_ID : null,
+        rows: Object.fromEntries((parsed.sheets ?? []).map((entry) => [entry.name ?? "?", Number(entry.rows ?? 0)])),
+      };
+    } catch {
+      result.book = { parseError: true, expectedId: EXPECTED_SHEET_ID };
+    }
   } catch (error) {
     result.read = { error: (error as Error).message, ms: Date.now() - startedRead };
   }
