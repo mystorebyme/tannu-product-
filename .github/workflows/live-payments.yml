@@ -81,6 +81,22 @@ jobs:
           done
           exit $code
 
+      # R23: state↔pincode guard, order create/pay page speed, UTR-less claim,
+      # WhatsApp screenshot option — sab public APIs par (admin panel checks skip).
+      - name: R23 checks (state guard · speed · claim · WhatsApp)
+        if: hashFiles('tests/e2e/round23.mjs') != ''
+        env:
+          BASE_URL: ${{ inputs.base_url || 'https://liksha-clothing.vercel.app' }}
+          ADMIN_API_TOKEN: ""
+        run: |
+          set +e
+          node tests/e2e/round23.mjs 2>&1 | tee -a flow.log
+          code=${PIPESTATUS[0]}
+          grep -E "FAIL|round23:" flow.log | while IFS= read -r line; do
+            echo "::error title=r23::${line}"
+          done
+          exit $code
+
       # log dekhne ke liye ek chhoti `live-logs` branch par commit (temporary)
       - name: Publish flow log
         if: always()
