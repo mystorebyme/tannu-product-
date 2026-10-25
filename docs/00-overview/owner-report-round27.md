@@ -108,3 +108,30 @@ me nahi gaya (Vercel me abhi bhi purana URL pada hai).
 - Unit tests: **121 pass / 0 fail**
 - Web build: ✅ pass
 - Deploy: `dpl_3jred8TXRqepKCrXurMe5jjAxHK5` (web), `dpl_3HB9ckjtTLfVjifvMvnoF6F5q5CX` (admin)
+
+## 7. Traffic ka apna counter (dashboard toggle ke bina) — naya
+
+Vercel ka analytics script sirf tab chalta hai jab dashboard me "Enable" ho. Aaj test
+kiya: `/_vercel/insights/script.js` = **404** (enable nahi hua). Isliye ek **apna**
+counter bhi laga diya:
+
+- website ke har page view par chhoti si POST `/api/track` (koi cookie nahi, IP ka
+  sirf hash) → Postgres me `traffic_daily` + `traffic_visitors`
+- **admin → Traffic** page: aaj/kal ke views, 7 din ka graph, top pages, aur traffic
+  kahan se aaya (Google / Instagram / WhatsApp / Direct)
+- bots + preview traffic count nahi hota
+
+File: `apps/web/src/lib/traffic.ts`, `app/api/track/route.ts`,
+`components/page-view-tracker.tsx`, `apps/admin/src/app/(admin)/traffic/page.tsx`
+
+Iske saath hi Vercel Analytics/GA4 bhi code me lage hain — jab aap dashboard me
+"Enable" karenge, dono jagah data milega.
+
+## 8. Aaj ke test (live, GitHub Actions se)
+
+`Live site audit` chalaya — **saare steps pass**:
+storefront smoke (order → pay → invoice → track → contact), internal links (0 404),
+Round 16, Round 23 (pincode/speed/WhatsApp), Round 27 (logo center · GSC meta +
+file · analytics tags · contact submit + DB save).
+
+Unit tests: **129 pass / 0 fail**.

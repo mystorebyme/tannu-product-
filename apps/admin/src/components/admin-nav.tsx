@@ -14,6 +14,7 @@ const links = [
   { href: "/delivery", label: "Delivery" },
   { href: "/customers", label: "Customers" },
   { href: "/messages", label: "Messages" },
+  { href: "/traffic", label: "Traffic" },
   { href: "/reports", label: "Reports" },
   { href: "/coupons", label: "Coupons" },
   { href: "/reviews", label: "Reviews" },

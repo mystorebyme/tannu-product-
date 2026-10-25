@@ -19,4 +19,31 @@ export const MIGRATIONS: Record<string, string> = {
   "0006_message_replies.sql": "-- Round 16: contact messages ka reply tracking.\n-- Owner/admin ab \"replied\" mark kar sakta hai (aur undo bhi), taaki inbox me\n-- pata rahe kaunsa message answered hai aur kaunsa pending.\n\nalter table contact_messages add column if not exists is_replied boolean not null default false;\nalter table contact_messages add column if not exists replied_at timestamptz;\nalter table contact_messages add column if not exists replied_by text;\n\ncreate index if not exists contact_messages_replied on contact_messages (is_replied, created_at desc);\n",
   "0007_checkout_events.sql": "-- 0007 — checkout funnel (owner request)\n--\n-- \"Koi checkout tak pahuncha, order kiya, failed kiya ya success kiya\" — ye sab\n-- DB me rehna chahiye, aur owner ki Google Sheet ke \"Checkout\" tab me bhi.\n-- Order number yahin se trace hota hai (Track Order me wahi number kaam karta hai).\n\ncreate table if not exists checkout_events (\n  id            uuid primary key default gen_random_uuid(),\n  created_at    timestamptz not null default now(),\n  event         text not null,                 -- checkout.started | checkout.review | order.placed | order.failed\n  step          text,\n  order_number  text,\n  items         jsonb not null default '[]'::jsonb,\n  items_count   int not null default 0,\n  subtotal      int not null default 0,        -- paise\n  reason        text,\n  session_id    text,\n  phone         text,\n  user_agent    text\n);\n\ncreate index if not exists checkout_events_created on checkout_events (created_at desc);\ncreate index if not exists checkout_events_event on checkout_events (event, created_at desc);\ncreate index if not exists checkout_events_order on checkout_events (order_number);\n",
   "0008_payments_reference_per_order.sql": "-- 0008 \u2014 UPI reference (UTR) sirf apne order ke andar unique\n--\n-- Pehle `unique (provider, gateway_payment_id)` tha: ek hi UTR doosre order par\n-- daalte hi Postgres ne unique violation diya aur API ne generic 500 lauta diya\n-- (customer ko laga payment save hi nahi hua). Asli niyam ye hai ki ek UTR ek\n-- hi payment ka hota hai \u2014 use ek hi order ke andar dobara likha ja sakta hai\n-- (retry / re-open), doosre order par nahi. Wo guard DB me nahi, app me hai\n-- (`ORDER_REFERENCE_IN_USE` \u2014 saaf 409 message).\n\nalter table payments drop constraint if exists payments_provider_gateway_payment_id_key;\n\ndrop index if exists payments_provider_gateway_payment_id_key;\n\ncreate unique index if not exists payments_order_reference_uniq\n  on payments (order_id, provider, gateway_payment_id);\n",
+  "0009_traffic.sql": `-- 0009 — apna traffic counter (owner: "pure traffic ka pata chale")
+--
+-- Kyun apna: Vercel Analytics dashboard me enable na ho to script 404 deti hai aur
+-- owner ko koi data nahi milta. Ye counter us par depend nahi karta — har page view
+-- ek chhoti POST /api/track par aati hai.
+--
+-- Ek row = ek din + ek page + ek source; "views" badhta jaata hai, isliye table
+-- chhoti rehti hai (row per view nahi).
+
+create table if not exists traffic_daily (
+  day       date not null,
+  path      text not null,
+  referrer  text not null default 'direct',
+  views     int  not null default 0,
+  primary key (day, path, referrer)
+);
+create index if not exists traffic_daily_day on traffic_daily (day desc);
+
+-- unique visitors: din + visitor hash (IP+UA ka sha256 — koi personal data nahi)
+create table if not exists traffic_visitors (
+  day        date not null,
+  visitor    text not null,
+  first_path text,
+  primary key (day, visitor)
+);
+create index if not exists traffic_visitors_day on traffic_visitors (day desc);
+`,
 };

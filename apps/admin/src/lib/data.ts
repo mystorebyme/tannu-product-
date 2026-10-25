@@ -531,6 +531,72 @@ export async function getCheckoutEvents(
  * Remote mode me storefront API (Postgres) se — pehle admin apni local file
  * padhta tha jahan kabhi kuch aata hi nahi tha.
  */
+/**
+ * Site traffic (owner ask: "pure traffic ka pata chale").
+ * Remote mode me storefront ke apne counter se (`/api/admin/traffic`);
+ * local me `.data/traffic.json` se — dono jagah same shape.
+ */
+export type TrafficSummary = {
+  today: number;
+  yesterday: number;
+  last7: number;
+  visitorsToday: number;
+  visitors7: number;
+  days: { day: string; views: number; visitors: number }[];
+  pages: { path: string; views: number }[];
+  referrers: { referrer: string; views: number }[];
+  source: "db" | "file";
+};
+
+const EMPTY_TRAFFIC: TrafficSummary = {
+  today: 0,
+  yesterday: 0,
+  last7: 0,
+  visitorsToday: 0,
+  visitors7: 0,
+  days: [],
+  pages: [],
+  referrers: [],
+  source: "file",
+};
+
+export async function getTraffic(): Promise<TrafficSummary> {
+  if (remoteMode()) {
+    const payload = await storeRequest<TrafficSummary>("/api/admin/traffic");
+    if (payload && Array.isArray(payload.days)) return payload;
+    return EMPTY_TRAFFIC;
+  }
+  const store = readRows<{ key: string; views: number; referrer: string }>("traffic.json");
+  const byDay = new Map<string, number>();
+  const byPage = new Map<string, number>();
+  const byRef = new Map<string, number>();
+  for (const row of store) {
+    const [day = "", path = ""] = String(row.key ?? "").split("|");
+    byDay.set(day, (byDay.get(day) ?? 0) + (row.views ?? 0));
+    byPage.set(path, (byPage.get(path) ?? 0) + (row.views ?? 0));
+    byRef.set(row.referrer ?? "direct", (byRef.get(row.referrer ?? "direct") ?? 0) + (row.views ?? 0));
+  }
+  const days = [...byDay.entries()]
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .slice(-7)
+    .map(([day, views]) => ({ day, views, visitors: 0 }));
+  return {
+    ...EMPTY_TRAFFIC,
+    today: days[days.length - 1]?.views ?? 0,
+    yesterday: days[days.length - 2]?.views ?? 0,
+    last7: days.reduce((sum, row) => sum + row.views, 0),
+    days,
+    pages: [...byPage.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 12)
+      .map(([path, views]) => ({ path, views })),
+    referrers: [...byRef.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8)
+      .map(([referrer, views]) => ({ referrer, views })),
+  };
+}
+
 export async function getMessages(limit = 100): Promise<ContactMessage[]> {
   if (remoteMode()) {
     const payload = await storeRequest<{ messages: ContactMessage[] }>(`/api/admin/messages?limit=${limit}`);

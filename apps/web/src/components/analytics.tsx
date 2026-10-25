@@ -1,4 +1,5 @@
 import Script from "next/script";
+import { PageViewTracker } from "@/components/page-view-tracker";
 
 /**
  * Traffic tracking — owner ko "kitna traffic aaya, kaha se aaya" dikhna chahiye.
@@ -19,6 +20,9 @@ export function Analytics() {
 
   return (
     <>
+      {/* apna counter — har page view admin → Traffic me (dashboard toggle ke bina) */}
+      <PageViewTracker />
+
       {onVercel ? (
         <>
           {/* Vercel Web Analytics — page views / visitors */}
