@@ -121,29 +121,41 @@ function json_(payload) {
 }
 
 /**
- * Kaun si sheet? — **SPREADSHEET_ID pehle**, phir active sheet, phir Script Property.
+ * Kaun si sheet? — pehle `SPREADSHEET_ID`, phir Script Property `SHEET_ID`,
+ * phir (last me) jis sheet ke saath script bana hai.
  *
  * Kyun order badla (25 Oct 2026): owner ka Apps Script `prkigothwal@gmail.com` se
  * chal raha hai aur wo kisi **doosri (copy) sheet** ke saath bind tha. Isliye
  * `getActiveSpreadsheet()` pehle chalne se data copy me ja raha tha — asli sheet
- * (`prakashgothwal370@gmail.com`) khaali dikh rahi thi. Ab explicit id jeetta hai.
+ * (`prakashgothwal370@gmail.com`) khaali dikh rahi thi.
+ *
+ * ⚠️ `typeof` ka use jaan-boojhkar: agar aapne `SPREADSHEET_ID` line delete kar di
+ * ho to script crash na kare — fallback id neeche hardcoded hai.
  */
+var SHEET_ID_FALLBACK = '1k8fsea04WpbrGjiyXuDrrS2Eewt9W7wx9X2lUQc5qMo';
+
 function book_() {
-  var props = PropertiesService.getScriptProperties();
-  var id = SPREADSHEET_ID || props.getProperty('SHEET_ID');
-  if (id) {
-    try {
-      return SpreadsheetApp.openById(id);
-    } catch (error) {
-      throw new Error(
-        'Sheet "' + id + '" khul nahi rahi: ' + error.message +
-        ' — is Google account ko us sheet par Editor access dijiye (Share → Editor).'
-      );
-    }
+  var id = (typeof SPREADSHEET_ID === 'string' && SPREADSHEET_ID) || SHEET_ID_FALLBACK;
+  try {
+    var props = PropertiesService.getScriptProperties();
+    if (props && props.getProperty('SHEET_ID')) id = props.getProperty('SHEET_ID');
+  } catch (error) {
+    // Script Properties na mile to bhi chalta rahe
   }
-  var active = SpreadsheetApp.getActiveSpreadsheet();
-  if (active) return active;
-  throw new Error('SPREADSHEET_ID set kariye (ya sheet ke andar se script kholein).');
+  try {
+    return SpreadsheetApp.openById(id);
+  } catch (error) {
+    // last try: jis sheet ke saath ye script bana hai
+    var active = null;
+    try {
+      active = SpreadsheetApp.getActiveSpreadsheet();
+    } catch (ignored) {}
+    if (active) return active;
+    throw new Error(
+      'Sheet "' + id + '" khul nahi rahi: ' + error.message +
+      ' — is Google account ko us sheet par Editor access dijiye (Share → Editor).'
+    );
+  }
 }
 
 /** Naam ya gid se sheet dhoondho; na mile to (khaali naam ke liye) bana do. */

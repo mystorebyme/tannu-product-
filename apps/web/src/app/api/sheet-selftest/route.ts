@@ -72,6 +72,43 @@ export async function GET(request: Request) {
     result.read = { error: (error as Error).message, ms: Date.now() - startedRead };
   }
 
+  /**
+   * 1b) Contact form ("Send us a message") ka poora server path:
+   *     DB me save → Messages tab me mirror. `?message=1` par chalta hai.
+   */
+  if (url.searchParams.get("message") === "1") {
+    const startedMsg = Date.now();
+    try {
+      const { saveMessage, mirrorMessageToSheet, listMessages } = await import("@/lib/messages");
+      const saved = await saveMessage({
+        name: "Selftest",
+        email: "selftest@example.com",
+        phone: "8005900581",
+        subject: "Selftest (ignore)",
+        message: "api/sheet-selftest se bheja gaya test message — ignore kariye.",
+      });
+      let mirrored: boolean | string = false;
+      try {
+        await mirrorMessageToSheet(saved);
+        mirrored = true;
+      } catch (error) {
+        mirrored = (error as Error).message;
+      }
+      const recent = await listMessages(3);
+      result.message = {
+        ok: true,
+        ms: Date.now() - startedMsg,
+        id: saved.id,
+        savedAt: saved.createdAt,
+        rowInDb: recent.some((row) => row.id === saved.id),
+        dbCount: recent.length,
+        sheetMirror: mirrored,
+      };
+    } catch (error) {
+      result.message = { ok: false, ms: Date.now() - startedMsg, error: (error as Error).message };
+    }
+  }
+
   // 2) write check — ek row Audit tab me (yahi asli append path hai)
   const sheet = url.searchParams.get("sheet") === "Orders" ? "Orders" : AUDIT_TAB;
   const startedWrite = Date.now();
