@@ -288,3 +288,18 @@ Errors, Dashboard, Sync, Settings.
 - Par: Netlify bhi free plan par build-minutes deta hai, aur **naya account +
   domain + env keys** dobara set karne padenge. Isliye pehle Vercel ka daily limit
   ka intezaar karna sasta hai (0 mehnat); Netlify tab jab owner kahe.
+
+### ✅ Owner ke 3 step (10 minute)
+
+1. **Naya Apps Script code paste kariye** — sheet me demo data bharna hai:
+   - Sheet → Extensions → Apps Script → `Code.gs` → `Ctrl+A` → delete
+   - `docs/00-overview/apps-script-code.md` ka **poora code** copy → paste → **Save**
+   - **Deploy → Manage deployments → ✏️ pencil → Version: `New version` → Deploy**
+   - Check: `<webapp URL>?action=health&token=<TOKEN>` me `"version":"r27-2"` dikhna chahiye
+2. Phir **demo data bharne ka** ek hi kaam (jo aapke liye main bhi kar sakta hoon):
+   - `<webapp URL>?action=seed&token=<TOKEN>` — 16 tabs me real-jaisa data bhar jayega
+   - ya Apps Script editor me function `seedDemoData` → **Run**
+   - hataana ho to: `?action=clear-demo&token=<TOKEN>` / function `clearDemoData`
+3. **Vercel deploy** — free plan ka daily limit (`402 … free-per-day`) khatam hone
+   par main khud kar dunga; tab tak GitHub Pages par purane link bhi live store par
+   redirect ho kar payment kholte hain.
