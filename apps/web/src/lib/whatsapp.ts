@@ -1,4 +1,5 @@
 import type { Order } from "@liksha/types";
+import { whatsappNumber } from "@/lib/phone";
 import { siteConfig } from "@/config/site";
 
 /**
@@ -27,8 +28,9 @@ export function productUrl(handle: string): string {
   return `${currentSiteUrl()}/products/${handle}`;
 }
 
+/** wa.me link — number me country code zaroori hai (dekho `phone.ts`) */
 export function whatsappLink(message: string, phone = WHATSAPP_NUMBER): string {
-  return `https://wa.me/${phone.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`;
+  return `https://wa.me/${whatsappNumber(phone, WHATSAPP_NUMBER)}?text=${encodeURIComponent(message)}`;
 }
 
 export function orderWhatsAppMessage(order: Order, origin = siteConfig.url): string {

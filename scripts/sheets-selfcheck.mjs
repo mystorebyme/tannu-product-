@@ -43,7 +43,8 @@ if (!/^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec$/.test(rawUrl)) {
   console.log("    Sahi shape: https://script.google.com/macros/s/AKfycb.../exec");
   console.log("    (Deploy → Web app URL; `/dev` nahi, `/exec` chahiye.)\n");
 }
-const base = rawUrl.replace(/\/+$/, "");
+// testing/mock ke liye base override (production me iski zaroorat nahi)
+const base = (process.env.SHEETS_SELFCHECK_BASE ?? rawUrl).replace(/\/+$/, "");
 
 async function getJson(query) {
   const url = `${base}?${query}&token=${encodeURIComponent(token)}`;
@@ -69,6 +70,23 @@ try {
     expect("script version 2 hai", health.body.version === 2, String(health.body.version));
     expect("Spreadsheet khul raha hai", Boolean(health.body.spreadsheet), health.body.spreadsheet);
     info(`spreadsheet: ${health.body.spreadsheet}`);
+    /**
+     * Sabse ahem check: script **aapki** sheet pakde hue hai ya kisi copy ko?
+     * (25 Oct 2026 ko yahi bug tha — data ek copy me ja raha tha.)
+     */
+    const wantedId = (process.argv[4] ?? process.env.EXPECTED_SHEET_ID ?? "1k8fsea04WpbrGjiyXuDrrS2Eewt9W7wx9X2lUQc5qMo").trim();
+    if (health.body.spreadsheetId) {
+      const match = health.body.spreadsheetId === wantedId;
+      expect("script sahi sheet pakde hue hai", match, `mila: ${health.body.spreadsheetId} · chahiye: ${wantedId}`);
+      info(`sheet id: ${health.body.spreadsheetId}`);
+      if (!match) {
+        console.log("       FIX: Code.gs me `book_()` update kariye (SPREADSHEET_ID pehle),");
+        console.log("            phir Deploy → Manage deployments → ✏️ → New version → Deploy.");
+      }
+    } else {
+      info("sheet id nahi mila — purana code chal raha hai (book_() update karke New version deploy kariye)");
+    }
+
     const sheets = Array.isArray(health.body.sheets) ? health.body.sheets : [];
     const wanted = ["Settings", "Orders", "Payments", "Checkout", "Messages", "Newsletter", "Audit"];
     for (const name of wanted) {

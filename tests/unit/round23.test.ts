@@ -10,6 +10,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { canonicalStateName, statesMatch, INDIAN_STATES } from "../../apps/web/src/lib/state-match";
 import { parseSettingsCsv } from "../../apps/web/src/lib/sheet-format";
+import { whatsappNumber } from "../../apps/web/src/lib/phone";
 
 const read = (relative: string) => fs.readFileSync(path.join(process.cwd(), relative), "utf8");
 
@@ -79,4 +80,19 @@ test("CSV fallback sirf docs.google.com published link par chalta hai", () => {
   assert.match(sheets, /readSettingsFromCsv/);
   // host allowlist regex (escape ke saath) — plain words se check karte hain
   assert.ok(sheets.includes("spreadsheets") && sheets.includes("docs"), "CSV host guard");
+});
+
+/**
+ * R24 — WhatsApp link me country code.
+ *
+ * Bug tha: settings se `8005900581` aata tha aur link `wa.me/8005900581` banta tha
+ * (WhatsApp kehta hai "invalid number") — contact page ka CTA khaali pada tha.
+ */
+test("whatsappLink me country code 91 lagta hai", () => {
+  assert.equal(whatsappNumber("8005900581"), "918005900581");
+  assert.equal(whatsappNumber("+91 80059 00581"), "918005900581");
+  assert.equal(whatsappNumber("08005900581"), "918005900581");
+  assert.equal(whatsappNumber("918005900581"), "918005900581");
+  // fallback number bhi 91 ke saath hi jaata hai
+  assert.equal(whatsappNumber("", "918005900581"), "918005900581");
 });
