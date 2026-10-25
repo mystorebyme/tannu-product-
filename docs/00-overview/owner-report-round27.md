@@ -1,6 +1,6 @@
 # Round 27 — Owner report (logo center, Google verification, traffic, sheet)
 
-Date: 2026-10-25 · Commit: `f6a985a` (is line ke baad ka code live hoga)
+Date: 2026-10-25 · Live commit: `c301ba5` (web) · Repo HEAD: `57f250e`
 Site: https://liksha-clothing.vercel.app · Admin: https://liksha-admin.vercel.app
 
 ---
@@ -107,7 +107,7 @@ me nahi gaya (Vercel me abhi bhi purana URL pada hai).
 - TypeScript: web ✅ clean, admin ✅ clean
 - Unit tests: **121 pass / 0 fail**
 - Web build: ✅ pass
-- Deploy: `dpl_3jred8TXRqepKCrXurMe5jjAxHK5` (web), `dpl_3HB9ckjtTLfVjifvMvnoF6F5q5CX` (admin)
+- Deploy: `dpl_8meNZYXfGrEAMow8iLbVDhy3eW2x` (web, production par live), `dpl_3HB9ckjtTLfVjifvMvnoF6F5q5CX` (admin)
 
 ## 7. Traffic ka apna counter (dashboard toggle ke bina) — naya
 
@@ -135,3 +135,20 @@ Round 16, Round 23 (pincode/speed/WhatsApp), Round 27 (logo center · GSC meta +
 file · analytics tags · contact submit + DB save).
 
 Unit tests: **129 pass / 0 fail**.
+
+---
+
+## 9. Deploy ki limit (isliye 2 cheezein kal live hongi)
+
+Vercel **Hobby (free)** plan par ek din me **100 deployments** ki limit hai — aaj wo
+limit poori ho gayi (`Resource is limited … api-deployments-free-per-day`). Isliye
+aaj ka last deploy `c301ba5` hai; uske baad ke 2 chhote changes (mobile par logo
+bilkul exact center + Traffic ka apna counter) **agle deploy par** live honge
+(kal automatic, ya jab main redeploy karunga).
+
+Jo aaj **live** hai: logo center (desktop), GSC meta + file, analytics tags,
+contact form ka success + admin Messages, admin auto-refresh, sheet error hints,
+payment step ki speed.
+
+**Bachne ka tareeka:** ek din me 2-3 se zyada deploy na karein — har push par naya
+deploy banta hai, aur limit cross hone par us din koi deploy nahi hota.
