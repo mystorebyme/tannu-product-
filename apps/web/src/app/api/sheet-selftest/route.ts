@@ -27,9 +27,17 @@ export async function GET(request: Request) {
 
   const config = (process.env.GOOGLE_SHEETS_WEBAPP_URL ?? "").trim();
   const token = (process.env.GOOGLE_SHEETS_TOKEN ?? "").trim();
+  /**
+   * Deployment id ka sirf pehla hissa dikhate hain (poora /exec URL secret rehta hai):
+   * owner apne Apps Script ke "Manage deployments" me yahi id dekh kar compare kar
+   * sake ki Vercel me **purana** deployment to nahi pada hai.
+   */
+  const deploymentId = /\/macros\/s\/([A-Za-z0-9_-]+)/.exec(config)?.[1] ?? null;
   const result: Record<string, unknown> = {
     urlSet: Boolean(config),
     urlHost: config ? new URL(config).host : null,
+    urlDeployment: deploymentId ? `${deploymentId.slice(0, 12)}…` : null,
+    csvSet: Boolean((process.env.GOOGLE_SHEETS_SETTINGS_CSV_URL ?? "").trim()),
     tokenSet: Boolean(token),
     tokenLength: token.length,
   };
