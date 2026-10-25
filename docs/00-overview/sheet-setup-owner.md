@@ -20,8 +20,43 @@ Apps Script** banaya gaya hai — neeche ke 6 step follow kariye, bas ek baar ka
 > account ki copy** ke hain (uske gid 1135948941/1261780310 is naye file me nahi hain).
 > Website **naye** file se judegi. Purani copy me kuch likhne se site par asar nahi hoga.
 
-> ⚠️ Ye kaam **aapko khud karna hoga** (Apps Script deploy aapke Google login se hota hai).
-> Main Vercel me URL aur token daal dunga — bas aap dono value mujhe bhej dijiye.
+> ✅ **HO GAYA (25 Oct 2026).** Aapne Apps Script deploy kar diya, maine usse test kiya:
+> web app jawab de raha hai, sahi sheet pakad raha hai (6 tab dikh rahe hain) aur Settings
+> tab se phone/UPI/announcement padh raha hai. **Vercel me dono env var bhi daal diye hain**
+> (`GOOGLE_SHEETS_WEBAPP_URL`, `GOOGLE_SHEETS_TOKEN`) — ab order/payment/message apne aap
+> sheet me aane chahiye. Neeche ke steps sirf **dobara karne** ke liye hain (ya token badalne ke liye).
+
+## "Token konsa hai?" — 30 second ka jawab
+
+Apps Script ke **Project settings** page par jo cheezein dikhti hain, unme se **koi bhi token nahi hai**:
+
+| Jo aapne dekha | Wo kya hai | Token? |
+| --- | --- | --- |
+| Script ID `1-27IU7a…` | project ki id (code ka naam) | ❌ |
+| Deployment ID `AKfycbwIJ1ge_…` | deployment ki id | ❌ |
+| Web app URL `.../AKfycbw…/exec` | **yahi** website ko chahiye (`GOOGLE_SHEETS_WEBAPP_URL`) | ❌ (par secret hai) |
+| Time zone / V8 / GCP "Default" / Script properties (khaali) | settings | ❌ |
+
+**Token = code ke andar ki ek line** hai (`Code.gs` sabse upar):
+
+```js
+var TOKEN = 'CHANGE-ME-liksha-token';   // ← ye token hai
+```
+
+Aapne deploy karte waqt ise badla nahi tha, isliye abhi token **`CHANGE-ME-liksha-token`** hi hai
+aur maine wahi Vercel me daala hai. Dono jagah **bilkul same** hona chahiye, warna script kuch
+bhi accept nahi karti (chup-chaap skip).
+
+**Ise badalna ho to (safety ke liye recommended):**
+
+1. `Code.gs` me `var TOKEN = 'kuch-lamba-random';` kariye → **Ctrl+S**.
+2. **Deploy → Manage deployments → ✏️ Edit → Version: New version → Deploy**.
+3. Mujhe naya token bhejiye — main Vercel me `GOOGLE_SHEETS_TOKEN` update karke redeploy kar dunga
+   (ya aap khud: Vercel → Settings → Environment Variables → edit → Redeploy).
+
+⚠️ **Web app URL ko public me mat daaliye** (Instagram/WhatsApp/issue me nahi). Us URL me hi
+asli "chaabi" hai — jo bhi usse jaanta hai wo sheet me row likh sakta hai. Isliye maine wo URL
+repo/docs me **save nahi kiya**, sirf Vercel ke env me rakha hai.
 
 ---
 
