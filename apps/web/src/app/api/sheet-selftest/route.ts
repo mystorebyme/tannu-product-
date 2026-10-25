@@ -108,6 +108,36 @@ export async function GET(request: Request) {
     }
   }
 
+  /**
+   * 1c) "Data kitna hai?" — orders / messages / checkout events ka count.
+   *     `?stats=1` (kuch nahi likhta, sirf ginta hai).
+   */
+  if (url.searchParams.get("stats") === "1") {
+    const stats: Record<string, unknown> = {};
+    try {
+      const { dbEnabled, query } = await import("@/lib/db");
+      stats.db = dbEnabled();
+      if (dbEnabled()) {
+        // har table alag — koi ek missing ho to baaki counts phir bhi milein
+        const one = async (label: string, sql: string) => {
+          try {
+            const rows = await query<{ n: string }>(sql);
+            stats[label] = Number(rows[0]?.n ?? 0);
+          } catch (error) {
+            stats[label] = `error: ${(error as Error).message}`;
+          }
+        };
+        await one("orders", "select count(*)::text as n from orders");
+        await one("paidOrders", "select count(*)::text as n from orders where payment_status = 'paid'");
+        await one("messages", "select count(*)::text as n from contact_messages");
+        await one("checkoutEvents", "select count(*)::text as n from checkout_events");
+      }
+    } catch (error) {
+      stats.error = (error as Error).message;
+    }
+    result.stats = stats;
+  }
+
   // 2) write check — ek row Audit tab me (yahi asli append path hai)
   const sheet = url.searchParams.get("sheet") === "Orders" ? "Orders" : AUDIT_TAB;
   const startedWrite = Date.now();
