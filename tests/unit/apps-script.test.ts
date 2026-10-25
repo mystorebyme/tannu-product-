@@ -80,6 +80,8 @@ function loadScript(token = "test-token") {
   const sheets: ReturnType<typeof makeSheet>[] = [];
   const book = {
     getName: () => "Liksha Test Sheet",
+    getId: () => "test-sheet-id",
+    getUrl: () => "https://docs.google.com/spreadsheets/d/test-sheet-id/edit",
     getSheets: () => sheets,
     getSheetByName: (name: string) => sheets.find((sheet) => sheet.getName() === name) ?? null,
     insertSheet: (name: string) => {

@@ -1,5 +1,11 @@
 import { getStoreSettings } from "@/lib/store-settings";
-import { readSheetRecent, readSheetSettings, sheetsConfigured } from "@/lib/google-sheets";
+import {
+  EXPECTED_SHEET_ID,
+  readSheetHealth,
+  readSheetRecent,
+  readSheetSettings,
+  sheetsConfigured,
+} from "@/lib/google-sheets";
 
 export const dynamic = "force-dynamic";
 
@@ -25,11 +31,12 @@ export async function GET(request: Request) {
     });
   }
 
-  const [sheetSettings, orders, payments, messages] = await Promise.all([
+  const [sheetSettings, orders, payments, messages, health] = await Promise.all([
     readSheetSettings({ fresh: true }),
     readSheetRecent("Orders", 15),
     readSheetRecent("Payments", 10),
     readSheetRecent("Messages", 10),
+    readSheetHealth(),
   ]);
 
   return Response.json({
@@ -37,6 +44,13 @@ export async function GET(request: Request) {
     reachable: Boolean(sheetSettings),
     settings: sheetSettings ?? current,
     live: current,
+    /**
+     * Script kaun si sheet pakde hue hai — mismatch ho to admin panel me
+     * warning aata hai (warna data chup-chaap kisi copy me chala jaata hai).
+     */
+    health,
+    expectedSheetId: EXPECTED_SHEET_ID,
+    sheetMismatch: Boolean(health?.spreadsheetId && health.spreadsheetId !== EXPECTED_SHEET_ID),
     // sheet ka URL/token frontend par kabhi nahi jaata
     sheet: null,
     recent: {

@@ -225,6 +225,69 @@ export async function appendSheetRows(appends: SheetAppend[]): Promise<boolean> 
   }
 }
 
+/**
+ * Asli sheet ka id (owner ne jo link diya) — sirf **verify** karne ke liye.
+ *
+ * Sheet ki id public information hai (owner ka link). Token/URL kabhi yahan nahi.
+ */
+export const EXPECTED_SHEET_ID = "1k8fsea04WpbrGjiyXuDrrS2Eewt9W7wx9X2lUQc5qMo";
+
+export type SheetHealth = {
+  ok: boolean;
+  spreadsheet: string | null;
+  spreadsheetId: string | null;
+  spreadsheetUrl: string | null;
+  rows: Record<string, number>;
+  ms: number;
+  error?: string;
+};
+
+/**
+ * Apps Script se poochho: "tum kaun si sheet pakde ho?".
+ *
+ * Kyun zaroori: 25 Oct 2026 ko script `getActiveSpreadsheet()` ki wajah se ek
+ * **copy** me likh raha tha — website ke hisaab se sab theek tha, par owner ki
+ * sheet khaali. Isliye admin panel ab id match karke warning dikhata hai.
+ */
+export async function readSheetHealth(): Promise<SheetHealth | null> {
+  const config = googleSheetsConfig();
+  if (!config) return null;
+  const started = Date.now();
+  try {
+    const endpoint = new URL(config.url);
+    endpoint.searchParams.set("action", "health");
+    if (config.token) endpoint.searchParams.set("token", config.token);
+    const response = await fetch(endpoint, {
+      cache: "no-store",
+      headers: { accept: "application/json" },
+      signal: AbortSignal.timeout(READ_TIMEOUT_MS * 2),
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const payload = (await response.json()) as {
+      ok?: boolean;
+      spreadsheet?: string;
+      spreadsheetId?: string;
+      spreadsheetUrl?: string;
+      sheets?: { name?: string; rows?: number }[];
+    };
+    if (!payload?.ok) throw new Error("script ne ok:false diya");
+    const rows: Record<string, number> = {};
+    for (const entry of payload.sheets ?? []) {
+      if (entry?.name) rows[entry.name] = Number(entry.rows ?? 0);
+    }
+    return {
+      ok: true,
+      spreadsheet: payload.spreadsheet ?? null,
+      spreadsheetId: payload.spreadsheetId ?? null,
+      spreadsheetUrl: payload.spreadsheetUrl ?? null,
+      rows,
+      ms: Date.now() - started,
+    };
+  } catch (error) {
+    return { ok: false, spreadsheet: null, spreadsheetId: null, spreadsheetUrl: null, rows: {}, ms: Date.now() - started, error: (error as Error).message };
+  }
+}
+
 const inr = (paise: number) => Math.round(paise) / 100;
 
 /** Fire-and-forget sync — caller `await` kare to bhi 6s max. */

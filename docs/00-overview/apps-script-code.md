@@ -65,7 +65,7 @@ Warna purana code hi chalta rehta hai.
 
 ---
 
-## Poora code (394 lines)
+## Poora code (412 lines)
 
 ```javascript
 /**
@@ -190,14 +190,30 @@ function json_(payload) {
   );
 }
 
+/**
+ * Kaun si sheet? — **SPREADSHEET_ID pehle**, phir active sheet, phir Script Property.
+ *
+ * Kyun order badla (25 Oct 2026): owner ka Apps Script `prkigothwal@gmail.com` se
+ * chal raha hai aur wo kisi **doosri (copy) sheet** ke saath bind tha. Isliye
+ * `getActiveSpreadsheet()` pehle chalne se data copy me ja raha tha — asli sheet
+ * (`prakashgothwal370@gmail.com`) khaali dikh rahi thi. Ab explicit id jeetta hai.
+ */
 function book_() {
-  // 1) sheet ke andar bana script (best) — seedha usi sheet par chalta hai
+  var props = PropertiesService.getScriptProperties();
+  var id = SPREADSHEET_ID || props.getProperty('SHEET_ID');
+  if (id) {
+    try {
+      return SpreadsheetApp.openById(id);
+    } catch (error) {
+      throw new Error(
+        'Sheet "' + id + '" khul nahi rahi: ' + error.message +
+        ' — is Google account ko us sheet par Editor access dijiye (Share → Editor).'
+      );
+    }
+  }
   var active = SpreadsheetApp.getActiveSpreadsheet();
   if (active) return active;
-  // 2) standalone script — upar diya SPREADSHEET_ID, warna Script Property
-  var id = SPREADSHEET_ID || PropertiesService.getScriptProperties().getProperty('SHEET_ID');
-  if (!id) throw new Error('SPREADSHEET_ID set kariye (ya sheet ke andar se script kholein).');
-  return SpreadsheetApp.openById(id);
+  throw new Error('SPREADSHEET_ID set kariye (ya sheet ke andar se script kholein).');
 }
 
 /** Naam ya gid se sheet dhoondho; na mile to (khaali naam ke liye) bana do. */
@@ -348,6 +364,8 @@ function doGet(e) {
       version: 2,
       time: new Date().toISOString(),
       spreadsheet: book_().getName(),
+      spreadsheetId: book_().getId(),
+      spreadsheetUrl: book_().getUrl(),
       sheets: names.map(function (sheetName) {
         var sheet = sheet_(sheetName);
         return { name: sheetName, tab: sheet.getName(), rows: Math.max(0, sheet.getLastRow() - 1) };

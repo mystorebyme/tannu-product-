@@ -385,11 +385,26 @@ export type SheetOverview = {
     payments: Record<string, string | number>[];
     messages: Record<string, string | number>[];
   };
+  /** Apps Script ka live status (kaun si book pakdi hai) */
+  health?: {
+    ok?: boolean;
+    spreadsheet?: string | null;
+    spreadsheetId?: string | null;
+    spreadsheetUrl?: string | null;
+    rows?: Record<string, number>;
+    error?: string;
+  } | null;
+  expectedSheetId?: string;
+  sheetMismatch?: boolean;
 };
 
 /** Admin ka "Google Sheet" screen — storefront API se live sheet data. */
 export async function getSheetOverview(): Promise<SheetOverview> {
   if (remoteMode()) {
+    /**
+     * `health` / `expectedSheetId` / `sheetMismatch` storefront se aate hain —
+     * sheet page isse "script doosri sheet me likh raha hai" warning dikhata hai.
+     */
     const payload = await storeRequest<SheetOverview>("/api/admin/sheet");
     if (payload) return payload;
   }

@@ -20,11 +20,32 @@ Apps Script** banaya gaya hai — neeche ke 6 step follow kariye, bas ek baar ka
 > account ki copy** ke hain (uske gid 1135948941/1261780310 is naye file me nahi hain).
 > Website **naye** file se judegi. Purani copy me kuch likhne se site par asar nahi hoga.
 
-> ✅ **HO GAYA (25 Oct 2026).** Aapne Apps Script deploy kar diya, maine usse test kiya:
-> web app jawab de raha hai, sahi sheet pakad raha hai (6 tab dikh rahe hain) aur Settings
-> tab se phone/UPI/announcement padh raha hai. **Vercel me dono env var bhi daal diye hain**
-> (`GOOGLE_SHEETS_WEBAPP_URL`, `GOOGLE_SHEETS_TOKEN`) — ab order/payment/message apne aap
-> sheet me aane chahiye. Neeche ke steps sirf **dobara karne** ke liye hain (ya token badalne ke liye).
+> ## 🔴 25 Oct 2026 — asli wajah mil gayi (ek chhota step baaki)
+
+> Aapka Apps Script **deploy ho gaya hai aur chal raha hai** (maine test kiya: token sahi,
+> reply aa raha hai, rows bhi likh raha hai). Par wo **doosri sheet** me likh raha hai —
+> aapki asli sheet me nahi. Kaise pata chala:
+>
+> * Script ne bataya: `Orders` = 1 row, `Payments` = 1 row, `Checkout` = 1 row
+>   (yaani live test order usme gaya)…
+> * …par aapki sheet (`1k8fsea04…`) me **0 rows**. Matlab script kisi **copy** ko pakde hue hai.
+>
+> **Wajah:** purane code me `book_()` sabse pehle `getActiveSpreadsheet()` dekhta tha — yaani
+> "jis sheet ke saath ye script bana hai". Aapka script `prkigothwal@gmail.com` se bana hai aur
+> wo kisi doosri (copy) sheet ke saath bandha hua hai, isliye data wahin jaa raha tha.
+>
+> **Fix (60 second, aapko karna hai):** naya code `SPREADSHEET_ID` ko sabse pehle dekhta hai —
+> yaani wo **hamesha aapki asli sheet** me likhega.
+>
+> 1. Apps Script kholein → `Code.gs` ka poora code **delete** kariye →
+>    `docs/00-overview/apps-script-code.md` se **naya code** copy-paste kariye → **Ctrl+S**.
+>    *(Aapka token `CHANGE-ME-liksha-token` hi rehne dijiye — maine wahi Vercel me daala hai.)*
+> 2. **Deploy → Manage deployments → ✏️ (pencil) → Version: `New version` → Deploy.**
+>    *(Sirf Save karne se purana code chalta rehta hai — ye step zaroori hai.)*
+> 3. Agar script kahe **"Sheet khul nahi rahi … Editor access"** → sheet kholiye →
+>    **Share** → `prkigothwal@gmail.com` → **Editor** → Send. (Ye sirf ek baar.)
+>
+> Uske baad main dobara test karke confirm kar dunga — aap sirf "ho gaya" bhej dijiye.
 
 ## "Token konsa hai?" — 30 second ka jawab
 

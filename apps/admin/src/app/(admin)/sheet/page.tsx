@@ -13,6 +13,10 @@ export default async function SheetPage() {
   const overview = await getSheetOverview();
   const settings = overview.settings ?? {};
   const recent = overview.recent ?? { orders: [], payments: [], messages: [] };
+  /** Sheet write path ka live status (kaun si book, kitni rows) */
+  const health = (overview as { health?: { ok?: boolean; spreadsheet?: string | null; spreadsheetId?: string | null; rows?: Record<string, number> } }).health;
+  const expectedId = (overview as { expectedSheetId?: string }).expectedSheetId;
+  const mismatch = Boolean((overview as { sheetMismatch?: boolean }).sheetMismatch);
   const orderRows = recent.orders.slice(0, 10);
   const columns = ["Timestamp", "Event", "Order number", "Order status", "Payment status", "Total", "Customer", "Phone"];
 
@@ -32,6 +36,22 @@ export default async function SheetPage() {
           </Link>
         </div>
       </div>
+
+      {mismatch ? (
+        <div className="notice warn" data-testid="sheet-mismatch" style={{ marginBottom: 12 }}>
+          <strong>⚠️ Script doosri sheet me likh raha hai.</strong>
+          <div style={{ marginTop: 6 }}>
+            Apps Script abhi <span className="mono">{health?.spreadsheetId}</span> pakde hue hai
+            {health?.spreadsheet ? ` ("${health.spreadsheet}")` : ""} — par owner ki asli sheet{" "}
+            <span className="mono">{expectedId}</span> hai. Isliye orden sheet me nahi dikh rahe.
+          </div>
+          <div style={{ marginTop: 6 }} className="small">
+            Fix: sheet me <span className="mono">Extensions → Apps Script</span> →{" "}
+            <span className="mono">book_()</span> me <span className="mono">SPREADSHEET_ID</span> pehle chalta hai
+            (naya code) → <span className="mono">Deploy → Manage deployments → ✏️ → New version → Deploy</span>.
+          </div>
+        </div>
+      ) : null}
 
       <div className={`notice ${overview.configured ? "" : "warn"}`} data-testid="sheet-status">
         {overview.configured ? (
