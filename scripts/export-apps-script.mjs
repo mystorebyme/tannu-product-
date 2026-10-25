@@ -69,7 +69,7 @@ const doc = `# Apps Script v3 — poora code (copy-paste)
    - **Deploy** → **Web app URL** copy kariye (\`.../exec\` par khatam hota hai).
 7. Test: browser me
    \`<Web app URL>?action=health&token=<TOKEN>\`
-   → \`{"ok":true,"version":"r27-1","spreadsheet":"…","sheets":[…]}\` aana chahiye.
+   → \`{"ok":true,"version":"r27-2","spreadsheet":"…","sheets":[…]}\` aana chahiye.
    (version purana dikhe to Step 6 dobara — sirf Ctrl+S se code nahi chalta.)
 8. **2 value Vercel me daaliye** (project \`liksha-clothing\` → Settings → Environment
    Variables → **Redeploy**):

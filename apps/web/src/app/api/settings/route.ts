@@ -19,7 +19,6 @@ async function handleGet() {
         upiId: settings.upiId,
         upiName: settings.upiName,
         supportPhone: settings.supportPhone,
-        supportEmail: settings.supportEmail,
         whatsapp: settings.whatsapp,
         updatedAt: settings.updatedAt,
         source: sheetsConfigured() ? "google-sheet" : "admin",

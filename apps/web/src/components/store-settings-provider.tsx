@@ -20,7 +20,8 @@ export type PublicSettings = {
   upiId: string;
   upiName: string;
   supportPhone: string;
-  supportEmail: string;
+  /** @deprecated site par kahin dikhta nahi (owner rule) — sirf internal record */
+  supportEmail?: string;
   whatsapp: string;
   freeShipping: boolean;
   updatedAt?: string;
@@ -31,7 +32,6 @@ export const DEFAULT_PUBLIC_SETTINGS: PublicSettings = {
   upiId: "dhakadgourav@fam",
   upiName: "Designer Clothing",
   supportPhone: "8005900581",
-  supportEmail: "Info.likshaclothing@gmail.com",
   whatsapp: "8005900581",
   freeShipping: true,
 };

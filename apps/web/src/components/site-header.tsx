@@ -43,7 +43,7 @@ const defaultAnnouncements = [
 export function SiteHeader() {
   const { count, openCart, lines, removeLine, setQuantity, subtotal } = useCart();
   const { wishlist } = useWishlist();
-  const { whatsapp, supportEmail, supportPhone, announcement } = useStoreSettings();
+  const { whatsapp, supportPhone, announcement } = useStoreSettings();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -489,8 +489,8 @@ export function SiteHeader() {
               </div>
             </nav>
             <div className="border-t border-[#eee6de] px-5 py-4 text-[11.5px] text-[#5c534b]">
-              <p className="font-medium text-[#862222]">{supportEmail}</p>
-              <p className="mt-1">WhatsApp {whatsapp}</p>
+              <p className="font-medium text-[#862222]">WhatsApp {whatsapp}</p>
+              <p className="mt-1">Support: Mon–Sat, 10 AM – 8 PM</p>
             </div>
           </div>
         </div>

@@ -36,6 +36,17 @@ function makeSheet(name: string, id: number, grid: Grid = []) {
       sheet.rows.push([...row]);
     },
     setFrozenRows: () => {},
+    deleteRow: (row: number) => {
+      sheet.rows.splice(row - 1, 1);
+    },
+    clearContents: () => {
+      sheet.rows = [];
+    },
+    getFilter: () => null,
+    setColumnWidth: () => {},
+    getMaxRows: () => Math.max(50, sheet.rows.length + 10),
+    getMaxColumns: () => Math.max(30, sheet.getLastColumn()),
+    deleteColumns: () => {},
     getDataRange: () => range(1, 1, Math.max(1, sheet.rows.length), Math.max(1, sheet.getLastColumn())),
     getRange: (row: number, column: number, numRows = 1, numColumns = 1) => range(row, column, numRows, numColumns),
   };
@@ -70,6 +81,11 @@ function makeSheet(name: string, id: number, grid: Grid = []) {
         return api;
       },
       setFontWeight: () => api,
+      setBackground: () => api,
+      setVerticalAlignment: () => api,
+      setWrapStrategy: () => api,
+      setNumberFormat: () => api,
+      createFilter: () => api,
     };
     return api;
   }
@@ -750,4 +766,61 @@ test("v3: guard ke bina wale functions bhi sheet access par hi chalte hain", () 
   const migrated = sandbox.migrate();
   assert.ok(Array.isArray(migrated.headers));
   assert.ok(sheets.length >= 16);
+});
+
+test("v3.2: seedDemoData har tab me demo rows bharta hai (har column bhara hua)", () => {
+  const { sandbox, sheets } = loadScript();
+  sandbox.setup();
+  const result = sandbox.seedDemoData();
+  assert.ok(result.written > 60, `kaafi rows likhi jaani chahiye (mila ${result.written})`);
+
+  const rowsOf = (name: string) => sheets.find((sheet) => sheet.getName() === name)!.rows;
+  for (const tab of [
+    "Orders", "OrderItems", "Payments", "Invoices", "Shipments", "Checkout",
+    "Messages", "Newsletter", "Reviews", "Coupons", "Inventory", "Audit", "Errors", "Sync", "Settings",
+  ]) {
+    assert.ok(rowsOf(tab).length > 1, `${tab} me demo rows nahi aayi`);
+  }
+
+  // har column me kuch na kuch bhara ho (header ke hisaab se)
+  const orders = rowsOf("Orders");
+  const header = orders[0]!;
+  const first = orders[1]!;
+  const filled = header.filter((_, index) => String(first[index] ?? "").trim() !== "");
+  assert.ok(filled.length >= 18, `Orders ke zyada column bhare hone chahiye (mila ${filled.length})`);
+
+  // demo nishaan (baad me clearDemoData se hatane ke liye)
+  assert.ok(orders.slice(1).every((row) => row.join(" ").includes("DEMO") || row.join(" ").includes("LK-DEMO")));
+});
+
+test("v3.2: seedDemoData bina setup ke bhi Settings tab bhar deta hai", () => {
+  const { sandbox, sheets } = loadScript();
+  // setup() jaan-boojh kar nahi chala rahe — owner seed hi dabaye to bhi sab bhara ho
+  const result = sandbox.seedDemoData();
+  assert.ok(result.written > 60);
+  const settings = sheets.find((sheet) => sheet.getName() === "Settings")!.rows;
+  assert.ok(settings.length > 5, `Settings me default values aani chahiye (mili ${settings.length})`);
+  const keys = settings.map((row) => String(row[0]));
+  assert.ok(keys.includes("upi_id"));
+  assert.ok(keys.includes("whatsapp"));
+  // owner rule: support email khaali
+  const emailRow = settings.find((row) => String(row[0]) === "support_email");
+  assert.ok(!emailRow || String(emailRow[1]).trim() === "", "support email bhara nahi hona chahiye");
+});
+
+test("v3.2: clearDemoData sirf demo rows hataata hai (asli data safe)", () => {
+  const { sandbox, sheets } = loadScript();
+  sandbox.setup();
+  sandbox.appendRows_([
+    { sheet: "Messages", row: { Timestamp: "t", Name: "Asli Customer", Email: "real@example.com", Message: "asli message" } },
+  ]);
+  sandbox.seedDemoData();
+  const before = sheets.find((sheet) => sheet.getName() === "Messages")!.rows.length;
+  assert.ok(before > 2);
+
+  const removed = sandbox.clearDemoData();
+  assert.ok(removed > 10);
+  const messages = sheets.find((sheet) => sheet.getName() === "Messages")!.rows;
+  assert.equal(messages.length, 2, "sirf header + asli row bachi");
+  assert.equal(messages[1]![messages[0]!.indexOf("Name")], "Asli Customer");
 });

@@ -8,7 +8,7 @@ import { whatsappNumber } from "@/lib/phone";
  * Sheet me number badla -> site par bhi badal jaata hai, redeploy nahi.
  */
 export function ContactDetails() {
-  const { whatsapp, supportEmail } = useStoreSettings();
+  const { whatsapp } = useStoreSettings();
   const wa = whatsapp.replace(/\D/g, "").slice(-10);
 
   return (
@@ -23,11 +23,13 @@ export function ContactDetails() {
         <span className="text-[14px] font-medium break-words text-[#862222]">{whatsapp}</span>
       </a>
       <a
-        href={`mailto:${supportEmail}`}
+        href={`https://wa.me/${whatsappNumber(wa)}?text=${encodeURIComponent("Hi Designer Clothing, I need help choosing a size.")}`}
+        target="_blank"
+        rel="noreferrer"
         className="flex flex-col gap-1 border border-[#eee6de] bg-white p-4 transition hover:border-[#862222]"
       >
-        <span className="text-[10px] tracking-[.14em] text-[#9c8f82] uppercase">Email</span>
-        <span className="text-[14px] font-medium break-all">{supportEmail}</span>
+        <span className="text-[10px] tracking-[.14em] text-[#9c8f82] uppercase">Sizing help</span>
+        <span className="text-[14px] font-medium">Chat on WhatsApp</span>
       </a>
       <a
         href={`https://wa.me/${whatsappNumber(wa)}?text=${encodeURIComponent("Hi Designer Clothing, I need help with an order.")}`}
@@ -45,9 +47,9 @@ export function ContactDetails() {
   );
 }
 
-/** Compact WhatsApp + email row (track page, order page ke liye) */
+/** Compact WhatsApp row (track page, order page ke liye) — email nahi (owner rule) */
 export function SupportChannels({ className = "" }: { className?: string }) {
-  const { whatsapp, supportEmail } = useStoreSettings();
+  const { whatsapp } = useStoreSettings();
   const wa = whatsapp.replace(/\D/g, "").slice(-10);
   return (
     <div className={`flex flex-wrap gap-2 ${className}`}>
@@ -60,10 +62,12 @@ export function SupportChannels({ className = "" }: { className?: string }) {
         WhatsApp {whatsapp}
       </a>
       <a
-        href={`mailto:${supportEmail}`}
+        href={`https://wa.me/${whatsappNumber(wa)}?text=${encodeURIComponent("Hi Designer Clothing, I need help with my order.")}`}
+        target="_blank"
+        rel="noreferrer"
         className="inline-flex h-9 items-center border border-[#862222] px-3 text-[10.5px] font-semibold tracking-[.1em] text-[#862222] uppercase"
       >
-        Email us
+        Order help
       </a>
     </div>
   );

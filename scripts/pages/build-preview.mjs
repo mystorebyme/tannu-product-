@@ -55,6 +55,17 @@ try {
     path.join(APP_DIR, "search/page.tsx"),
   );
 
+  /**
+   * Order + payment page (Pages par server nahi hota, isliye client version).
+   * Is page ka HTML `404.html` ban kar GitHub Pages ki jagah leta hai — url me
+   * `/orders/<number>` ho to shell order live store se laa kar wahi page dikhata hai.
+   */
+  fs.mkdirSync(path.join(APP_DIR, "order-preview"), { recursive: true });
+  fs.copyFileSync(
+    path.join(ROOT, "scripts/pages/preview-order.tsx"),
+    path.join(APP_DIR, "order-preview/page.tsx"),
+  );
+
   // client-side search ke liye chhota catalogue index
   const catalog = JSON.parse(fs.readFileSync(path.join(ROOT, "database/seeds/catalog.json"), "utf8"));
   const index = catalog.products
@@ -114,9 +125,30 @@ try {
   fs.cpSync(out, dist, { recursive: true });
   // GitHub Pages Jekyll ko bypass kare
   fs.writeFileSync(path.join(dist, ".nojekyll"), "");
+
+  /**
+   * `/orders/…` deep links chalein: order shell ka HTML `404.html` ke roop me
+   * rakha jaata hai. GitHub Pages har missing path par yahi file deta hai, aur
+   * shell URL se order number nikaal kar page render kar deta hai (404 ki jagah).
+   */
+  const orderShell = path.join(out, "order-preview", "index.html");
+  if (fs.existsSync(orderShell)) {
+    fs.copyFileSync(orderShell, path.join(dist, "404.html"));
+    const ordersDir = path.join(dist, "orders");
+    fs.mkdirSync(ordersDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(ordersDir, "index.html"),
+      fs.readFileSync(orderShell, "utf8").replace(
+        "</head>",
+        '<meta name="robots" content="noindex"><script>location.replace("/" + (location.pathname.split("/")[1] || "") + "/track-order/");</script></head>',
+      ),
+    );
+    console.log("order shell → dist/404.html (deep links ke liye)");
+  }
   console.log(`static preview ready: ${dist} (${BASE_PATH || "/"})`);
 } finally {
   fs.rmSync(path.join(APP_DIR, "search"), { recursive: true, force: true });
+  fs.rmSync(path.join(APP_DIR, "order-preview"), { recursive: true, force: true });
   restoreAll();
   fs.rmSync(path.join(APP, "public/catalog-index.json"), { force: true });
   fs.rmSync(TMP, { recursive: true, force: true });

@@ -80,7 +80,8 @@ export const siteConfig = {
     "Designer Anarkali suits, lehenga choli and printed suit sets by Designer Clothing — hand-finished for weddings and festivals.",
   phone: "+91 8005900581",
   whatsapp: "8005900581",
-  email: "Info.likshaclothing@gmail.com",
+  /** owner rule: site par support email kahin nahi — sirf WhatsApp/phone */
+  email: "",
   address: "India",
   /**
    * Sirf asli accounts — koi dummy link nahi. Abhi ke liye Instagram sirf

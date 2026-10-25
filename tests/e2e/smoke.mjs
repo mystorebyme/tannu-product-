@@ -268,7 +268,11 @@ async function main() {
   });
   const contactBody = await contact.json().catch(() => ({}));
   check("contact form accepts a message", contact.status === 201 && contactBody.ok === true, `status ${contact.status}`);
-  check("contact response gives a direct email fallback", Boolean(contactBody.channels?.mailto), JSON.stringify(contactBody).slice(0, 120));
+  check(
+    "contact response gives a WhatsApp channel (no email on the site)",
+    Boolean(contactBody.channels?.whatsapp) && !contactBody.channels?.mailto,
+    JSON.stringify(contactBody).slice(0, 120),
+  );
 
   const badContact = await fetch(`${BASE}/api/contact`, {
     method: "POST",
@@ -346,8 +350,9 @@ async function main() {
     settingsBody.data?.upiId,
   );
   check(
-    "settings expose support whatsapp + email",
-    Boolean(settingsBody.data?.whatsapp) && Boolean(settingsBody.data?.supportEmail),
+    "settings expose support WhatsApp only (owner rule: no email anywhere)",
+    Boolean(settingsBody.data?.whatsapp) && !("supportEmail" in (settingsBody.data ?? {})),
+    JSON.stringify(settingsBody.data).slice(0, 160),
   );
 
   // festive sale: hero poster + ₹499–₹699 final prices

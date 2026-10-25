@@ -33,10 +33,13 @@ function ownerEmail(): string {
   );
 }
 
+/**
+ * Public channels — sirf WhatsApp. Owner rule: site/API par support email kahin
+ * dikhega nahi, isliye `mailto` yahan se hata diya gaya hai (email sirf andar,
+ * owner ko notification bhejne ke liye use hota hai).
+ */
 export function contactChannels() {
   return {
-    // static mail — har device par khulta hai, koi service nahi chahiye
-    mailto: ownerEmail(),
     whatsapp: siteConfig.whatsapp,
   };
 }
@@ -81,6 +84,10 @@ export async function notifyContactMessage(input: {
 }): Promise<NotifyResult[]> {
   const results: NotifyResult[] = [];
   const to = ownerEmail();
+  // Owner rule: support email site par nahi. Agar env me koi owner address nahi
+  // diya gaya to email layer chup-chaap skip ho jaata hai (message DB + Sheet me
+  // to jaata hi hai) — khaali address par request bhej kar error nahi banate.
+  if (!to) return [{ channel: "sheet", ok: true, detail: "message DB + Google Sheet me save" }];
   const subject = `New website message — ${input.subject ?? "General"} (${input.name})`;
 
   const resendKey = process.env.RESEND_API_KEY;

@@ -6,7 +6,7 @@ These terms govern your use of likshaclothing.com and any order you place with D
 
 ## 1. Who we are
 
-Designer Clothing is a designer ethnic wear label operating from Jaipur, Rajasthan. You can reach us on WhatsApp 8005900581 or at Info.likshaclothing@gmail.com.
+Designer Clothing is a designer ethnic wear label operating from Jaipur, Rajasthan. You can reach us on WhatsApp 8005900581.
 
 ## 2. Products and descriptions
 
@@ -48,4 +48,4 @@ We are responsible for the products we sell and for delivering them safely. We a
 
 ## 11. Complaints and law
 
-Write to Info.likshaclothing@gmail.com with your order number; we acknowledge complaints within 48 hours and aim to resolve them within 15 days. These terms are governed by Indian law, and courts at Jaipur, Rajasthan have jurisdiction.
+WhatsApp 8005900581 par order number bhejiye; we acknowledge complaints within 48 hours and aim to resolve them within 15 days. These terms are governed by Indian law, and courts at Jaipur, Rajasthan have jurisdiction.

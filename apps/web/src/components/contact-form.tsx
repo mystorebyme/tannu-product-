@@ -7,31 +7,31 @@ import { apiUrl } from "@/lib/api-base";
 import { useStoreSettings } from "@/components/store-settings-provider";
 import { whatsappNumber } from "@/lib/phone";
 
-/** fallback — live value Google Sheet / admin settings se aati hai */
-const FALLBACK_EMAIL = "Info.likshaclothing@gmail.com";
 const FALLBACK_WHATSAPP = "8005900581";
 
-/** static mailto — koi server/API fail ho to bhi ye kaam karta hai */
-function mailtoHref(
+/**
+ * Server fail ho to bhi customer atke nahi — poori baat WhatsApp par (owner rule:
+ * site par support email kahin nahi dikhta, sirf WhatsApp).
+ */
+function whatsappFallbackHref(
   form: { name: string; email: string; phone: string; subject: string; message: string },
-  supportEmail: string,
+  supportWhatsapp: string,
 ) {
   const body = [
+    `Subject: ${form.subject}`,
     `Name: ${form.name}`,
-    `Email: ${form.email}`,
     form.phone ? `Phone: ${form.phone}` : "",
     "",
     form.message,
   ]
     .filter(Boolean)
     .join("\n");
-  return `mailto:${supportEmail}?subject=${encodeURIComponent(`[Website] ${form.subject}`)}&body=${encodeURIComponent(body)}`;
+  return `https://wa.me/${whatsappNumber(supportWhatsapp)}?text=${encodeURIComponent(body)}`;
 }
 
 export function ContactForm() {
   const router = useRouter();
-  const { supportEmail, whatsapp } = useStoreSettings();
-  const SUPPORT_EMAIL = supportEmail || FALLBACK_EMAIL;
+  const { whatsapp } = useStoreSettings();
   const SUPPORT_WHATSAPP = whatsapp || FALLBACK_WHATSAPP;
   const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "Order enquiry", message: "" });
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
@@ -74,12 +74,6 @@ export function ContactForm() {
             className="bg-[#25d366] px-4 py-2 text-[11px] font-semibold tracking-[.12em] text-white uppercase"
           >
             WhatsApp us
-          </a>
-          <a
-            href={`mailto:${SUPPORT_EMAIL}`}
-            className="border border-[#862222] px-4 py-2 text-[11px] font-semibold tracking-[.12em] text-[#862222] uppercase"
-          >
-            Email us
           </a>
           <button
             type="button"
@@ -142,11 +136,7 @@ export function ContactForm() {
           <p>{error}</p>
           {/* honest fallback — static preview / server down par message kho na jaye */}
           <p className="mt-1 text-[#5c534b]">
-            Aap seedha bhi bhej sakte hain:{" "}
-            <a href={mailtoHref(form, SUPPORT_EMAIL)} className="underline">
-              email
-            </a>{" "}
-            ya{" "}
+            Aap seedha WhatsApp par bhi bhej sakte hain:{" "}
             <a
               href={`https://wa.me/${whatsappNumber(SUPPORT_WHATSAPP)}?text=${encodeURIComponent(
                 `Hi Designer Clothing! ${form.subject}\nName: ${form.name}\n${form.message}`,
@@ -171,11 +161,13 @@ export function ContactForm() {
           {status === "loading" ? "Sending…" : "Send message"}
         </button>
         <a
-          href={mailtoHref(form, SUPPORT_EMAIL)}
-          data-testid="contact-mailto"
+          href={whatsappFallbackHref(form, SUPPORT_WHATSAPP)}
+          target="_blank"
+          rel="noreferrer"
+          data-testid="contact-whatsapp"
           className="text-[11.5px] text-[#5c534b] underline decoration-[#c9b9a8] underline-offset-4 hover:text-[#862222]"
         >
-          or email {SUPPORT_EMAIL}
+          ya WhatsApp {SUPPORT_WHATSAPP} par bhejein
         </a>
       </div>
     </form>

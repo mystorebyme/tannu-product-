@@ -65,7 +65,8 @@ export function sellerFromSettings(settings?: {
     name: settings?.sellerName?.trim() || process.env.SELLER_NAME?.trim() || "Designer Clothing",
     address: settings?.sellerAddress?.trim() || process.env.SELLER_ADDRESS?.trim() || "India",
     gstin: settings?.gstin?.trim() || process.env.SELLER_GSTIN?.trim() || "GSTIN pending",
-    email: settings?.supportEmail?.trim() || process.env.SELLER_EMAIL?.trim() || "info.likshaclothing@gmail.com",
+    // owner rule: invoice par bhi support email nahi — sirf phone/WhatsApp
+    email: "",
     phone: settings?.supportPhone?.trim() || process.env.SELLER_PHONE?.trim() || "+91 8005900581",
     state: settings?.sellerState?.trim() || process.env.SELLER_STATE?.trim() || SELLER_STATE,
   };

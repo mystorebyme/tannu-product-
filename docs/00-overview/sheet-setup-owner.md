@@ -8,7 +8,7 @@
 > troubleshooting table sab hai.
 >
 > Naya code: [`apps-script-code.md`](./apps-script-code.md) ·
-> Check: `<webapp URL>?action=health&token=<TOKEN>` → `"version":"r27-1"`
+> Check: `<webapp URL>?action=health&token=<TOKEN>` → `"version":"r27-2"`
 
 
 **Kyun:** website pehle purane Google account ki sheet me data bhej rahi thi. Aapne sheet

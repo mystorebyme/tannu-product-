@@ -39,7 +39,7 @@ You do not have permission to access the requested document.
 | Layer | Test | Result |
 |---|---|---|
 | Deployment public hai? | galat token ke saath `/exec` call | ✅ JSON aaya (`unauthorized`) — yaani anonymous call script tak pahunch rahi hai |
-| Version naya hai? | jawab me `version` | ✅ `r27-1` |
+| Version naya hai? | jawab me `version` | ✅ `r27-2` |
 | Token Vercel se match? | `CHANGE-ME-liksha-token` ke saath call | ✅ token pass hua (aage badha) |
 | Sheet khul rahi hai? | usi call ka agla step | ❌ **"You do not have permission to access the requested document"** |
 
@@ -56,7 +56,7 @@ karni hain (dono ek hi baar me):
 <webapp URL>?action=health&token=CHANGE-ME-liksha-token
 ```
 - ❌ "You do not have permission…" = upar ke 2 step abhi baaki hain
-- ✅ `{"ok":true,"version":"r27-1","sheets":[...]}` = ho gaya, website bhi chal jayegi
+- ✅ `{"ok":true,"version":"r27-2","sheets":[...]}` = ho gaya, website bhi chal jayegi
 
 
 ---
@@ -109,7 +109,7 @@ Formatting kabhi bigad jaye to function **`formatAll`** → Run (sab dobara set 
 
 ```js
 var TOKEN = 'CHANGE-ME-liksha-token';
-var CODE_VERSION = 'r27-1';
+var CODE_VERSION = 'r27-2';
 ```
 
 `TOKEN` ki jagah apna lamba random word daalo (jaise `liksha-9f3k2m-2026`).
@@ -180,10 +180,10 @@ var SPREADSHEET_ID = '1k8fsea04WpbrGjiyXuDrrS2Eewt9W7wx9X2lUQc5qMo';
 ```
 Jawab aisa aana chahiye:
 ```json
-{"ok":true,"version":"r27-1","spreadsheet":"Designer Clothing — Store","sheets":[…]}
+{"ok":true,"version":"r27-2","spreadsheet":"Designer Clothing — Store","sheets":[…]}
 ```
 - `ok:true` = script chal rahi hai ✅
-- `version: r27-1` = naya code chal raha hai ✅ (purana version dikhe to Step 4 dobara
+- `version: r27-2` = naya code chal raha hai ✅ (purana version dikhe to Step 4 dobara
   karein — sirf Ctrl+S se code **nahi** chalta)
 - `unauthorized` = token galat (dono jagah same karein)
 

@@ -20,7 +20,6 @@ export function StoreStructuredData() {
     "@context": "https://schema.org",
     "@type": "Organization",
     "@id": `${siteConfig.url}#org`,
-    ...(settings.supportEmail ? { email: settings.supportEmail } : {}),
     ...(phone ? { telephone: `+91${phone.slice(-10)}` } : {}),
     ...(phone
       ? {

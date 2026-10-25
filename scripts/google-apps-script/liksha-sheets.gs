@@ -48,7 +48,7 @@
  *     → Save → Deployments → latest → ⋯ → **Redeploy**.
  *  9. Test: browser me kholein (TOKEN apna):
  *       <webapp URL>?action=health&token=<TOKEN>
- *     Jawab: {"ok":true,"version":"r27-1","sheets":[…]}
+ *     Jawab: {"ok":true,"version":"r27-2","sheets":[…]}
  *     Phir website par ek test message bhejiye → Messages tab me row aa jayegi.
  *
  * ── ZAROORI BAATEIN ───────────────────────────────────────────────────────────
@@ -70,7 +70,7 @@
 var TOKEN = 'CHANGE-ME-liksha-token';
 
 /** Code ka version — `?action=health` me dikhta hai. Code badle to isse badhaayein. */
-var CODE_VERSION = 'r27-1';
+var CODE_VERSION = 'r27-2';
 
 /**
  * Sheet ka id (URL me `/d/<ID>/edit`).
@@ -182,7 +182,8 @@ var HEADERS = {
 var DEFAULT_SETTINGS = [
   ['support_phone', '8005900581'],
   ['whatsapp', '8005900581'],
-  ['support_email', 'Info.likshaclothing@gmail.com'],
+  // Owner rule: support email site/admin par kahin dikhta nahi — khaali rakha hai.
+  ['support_email', ''],
   ['upi_id', 'dhakadgourav@fam'],
   ['upi_name', 'Designer Clothing'],
   ['announcement', 'Diwali Sale — Flat 70% OFF · Final price ₹499 onwards'],
@@ -1326,6 +1327,326 @@ function stockUpdate_(body) {
   return { ok: true, written: written };
 }
 
+/* ═══════════════════════════ 10b. DEMO DATA (poori sheet test) ══════════════ */
+
+/**
+ * DEMO_* — test ke liye "asli user" jaisa data. Owner ne kaha: "jitni bhi sheet
+ * hai, ek baar poora data se bhar do, har column, real user jaisa".
+ *
+ * Har demo row me DEMO ka nishaan hai (naam/note me), isliye asli data se alag
+ * pehchana ja sakta hai aur `clearDemoData` se ek hi baar me hata bhi sakte hain.
+ * Demo order numbers `LK-DEMO…` se shuru hote hain.
+ */
+var DEMO_CUSTOMERS = [
+  { name: 'Demo — Priya Sharma', phone: '9876500011', email: 'priya.demo@example.com', address: '12, Civil Lines, Near Jain Mandir', city: 'Jaipur', state: 'Rajasthan', pincode: '302006' },
+  { name: 'Demo — Anjali Verma', phone: '9876500012', email: 'anjali.demo@example.com', address: 'B-44, Sector 15, Near Metro', city: 'Noida', state: 'Uttar Pradesh', pincode: '201301' },
+  { name: 'Demo — Ritu Agarwal', phone: '9876500013', email: 'ritu.demo@example.com', address: 'Flat 302, Lake View Apartments, Powai', city: 'Mumbai', state: 'Maharashtra', pincode: '400076' },
+  { name: 'Demo — Neha Gupta', phone: '9876500014', email: 'neha.demo@example.com', address: 'House 8, Model Town, Near Bus Stand', city: 'Ludhiana', state: 'Punjab', pincode: '141002' },
+  { name: 'Demo — Kavita Yadav', phone: '9876500015', email: 'kavita.demo@example.com', address: '22, Vaishali Nagar, Block C', city: 'Jaipur', state: 'Rajasthan', pincode: '302021' },
+];
+
+var DEMO_PRODUCTS = [
+  { title: 'Creme Coloured Organza Suit', handle: 'creme-coloured-organza-suit', sku: 'ORGANZA-CREME-M', size: 'M', colour: 'Creme', price: 599, category: 'anarkali', image: 'https://liksha-clothing.vercel.app/images/brand/logo-desktop.png' },
+  { title: 'Wine Silk Anarkali Set', handle: 'wine-silk-anarkali-set', sku: 'ANARK-WINE-L', size: 'L', colour: 'Wine', price: 649, category: 'anarkali', image: 'https://liksha-clothing.vercel.app/images/brand/logo-desktop.png' },
+  { title: 'Sea Green Lehenga Choli', handle: 'sea-green-lehenga-choli', sku: 'LEH-SEAGREEN-XL', size: 'XL', colour: 'Sea Green', price: 699, category: 'lehenga', image: 'https://liksha-clothing.vercel.app/images/brand/logo-desktop.png' },
+  { title: 'Rani Pink Sharara Set', handle: 'rani-pink-sharara-set', sku: 'SHARARA-PINK-S', size: 'S', colour: 'Rani Pink', price: 549, category: 'sharara', image: 'https://liksha-clothing.vercel.app/images/brand/logo-desktop.png' },
+  { title: 'Ivory Chikankari Kurta Set', handle: 'ivory-chikankari-kurta-set', sku: 'CHIKAN-IVORY-XS', size: 'XS', colour: 'Ivory', price: 499, category: 'kurta', image: 'https://liksha-clothing.vercel.app/images/brand/logo-desktop.png' },
+];
+
+var DEMO_MESSAGES = [
+  { subject: 'Order enquiry', message: 'Maine kal order kiya tha, delivery kab tak hogi? Shaadi ke liye chahiye.' },
+  { subject: 'Sizing help', message: 'Mera bust 36 hai, M size theek rahega ya L lena chahiye? Height 5 foot 4.' },
+  { subject: 'Replacement request', message: 'Suit mil gaya par size chhota hai — exchange ka process bata dijiye.' },
+  { subject: 'Bulk / wholesale', message: 'Mujhe 20 pieces chahiye boutique ke liye. Wholesale rate milega?' },
+  { subject: 'Other', message: 'Payment ho gaya par status pending dikha raha hai, screenshot bhej diya WhatsApp par.' },
+];
+
+/** Demo order number */
+function demoOrderNumber_(index) {
+  return 'LK-DEMO' + String(1000 + index);
+}
+
+/**
+ * `seedDemoData` — har tab me **poora demo data** (har column bhara hua).
+ * Owner ne maanga: "poori sheet real user jaise data se bhar do, test ke liye".
+ *
+ * `?action=seed&token=…` se bhi chalta hai (website/agent se trigger).
+ */
+function seedDemoData() {
+  return guard_('seedDemoData', seedDemoData_);
+}
+
+function seedDemoData_() {
+  // Pehle saare tabs + Settings ki default values pakki karo — owner ne kaha
+  // "jitni bhi sheet hai, poore data se bhar do". Settings khaali reh jaata tha.
+  try {
+    setup_();
+  } catch (setupError) {
+    Logger.log('seedDemoData: setup_ skip — ' + setupError);
+  }
+  var rows = [];
+  var stamp = istNow_();
+  var iso = now_();
+
+  DEMO_CUSTOMERS.forEach(function (customer, index) {
+    var orderNumber = demoOrderNumber_(index + 1);
+    var product = DEMO_PRODUCTS[index % DEMO_PRODUCTS.length];
+    var second = DEMO_PRODUCTS[(index + 1) % DEMO_PRODUCTS.length];
+    var qty = (index % 2) + 1;
+    var secondQty = index % 2 === 0 ? 1 : 0;
+    var subtotal = product.price * qty + (secondQty ? second.price : 0);
+    var discount = index % 3 === 0 ? 50 : 0;
+    var shipping = subtotal - discount >= 499 ? 0 : 49;
+    var total = subtotal - discount + shipping;
+    var paid = index < 3;
+    var status = ['confirmed', 'shipped', 'delivered', 'placed', 'packed'][index];
+    var paymentStatus = paid ? 'paid' : index === 3 ? 'pending' : 'processing';
+    var courier = index === 1 ? 'Delhivery' : index === 2 ? 'Blue Dart' : '';
+    var awb = index === 1 ? 'DL77120' + index : index === 2 ? 'BD55440' + index : '';
+    var trackingUrl = awb ? 'https://www.delhivery.com/track/package/' + awb : '';
+    var itemDetails = product.title + ' (' + product.size + ') x' + qty + (secondQty ? ' | ' + second.title + ' (' + second.size + ') x1' : '');
+
+    rows.push({
+      sheet: 'Orders',
+      row: {
+        Timestamp: iso, Event: 'order.placed', 'Order number': orderNumber,
+        'Order status': 'placed', 'Payment status': 'pending', 'Payment method': 'prepaid',
+        'Payment reference': '', 'UPI ID': 'dhakadgourav@fam', Total: total, Subtotal: subtotal,
+        Discount: discount, Coupon: discount ? 'DEMO50' : '', Items: qty + secondQty,
+        'Item details': itemDetails, Customer: customer.name, Phone: customer.phone, Email: customer.email,
+        Address: customer.address, City: customer.city, State: customer.state, Pincode: customer.pincode,
+        'Tracking courier': '', AWB: '', 'Tracking URL': '',
+        Notes: 'DEMO row — test data (clearDemoData se hataayein)', Source: 'demo', Device: 'mobile',
+      },
+    });
+    rows.push({
+      sheet: 'Orders',
+      row: {
+        Timestamp: iso, Event: paid ? 'payment.paid' : 'payment.pending', 'Order number': orderNumber,
+        'Order status': status, 'Payment status': paymentStatus, 'Payment method': 'prepaid',
+        'Payment reference': paid ? 'UTRDEMO' + (900000 + index) : '',
+        'UPI ID': 'dhakadgourav@fam', Total: total, Subtotal: subtotal,
+        Discount: discount, Coupon: discount ? 'DEMO50' : '', Items: qty + secondQty,
+        'Item details': itemDetails, Customer: customer.name, Phone: customer.phone, Email: customer.email,
+        Address: customer.address, City: customer.city, State: customer.state, Pincode: customer.pincode,
+        'Tracking courier': courier, AWB: awb, 'Tracking URL': trackingUrl,
+        Notes: 'DEMO — payment ' + paymentStatus, Source: 'demo', Device: 'mobile',
+      },
+    });
+
+    rows.push({
+      sheet: 'OrderItems',
+      row: {
+        Timestamp: iso, 'Order number': orderNumber, Product: product.title, Handle: product.handle,
+        SKU: product.sku, Size: product.size, Colour: product.colour, Quantity: qty,
+        Price: product.price, 'Line total': product.price * qty, Category: product.category,
+        'Image URL': product.image, Status: status,
+      },
+    });
+    if (secondQty) {
+      rows.push({
+        sheet: 'OrderItems',
+        row: {
+          Timestamp: iso, 'Order number': orderNumber, Product: second.title, Handle: second.handle,
+          SKU: second.sku, Size: second.size, Colour: second.colour, Quantity: secondQty,
+          Price: second.price, 'Line total': second.price * secondQty, Category: second.category,
+          'Image URL': second.image, Status: status,
+        },
+      });
+    }
+
+    rows.push({
+      sheet: 'Payments',
+      row: {
+        Timestamp: iso, Event: 'payment.' + paymentStatus, 'Order number': orderNumber,
+        'Order status': status, 'Payment status': paymentStatus, 'Payment method': 'prepaid',
+        'Payment reference': paid ? 'UTRDEMO' + (900000 + index) : '', 'UPI ID': 'dhakadgourav@fam',
+        Total: total, Subtotal: subtotal, Discount: discount, Coupon: discount ? 'DEMO50' : '',
+        Items: qty + secondQty, 'Item details': itemDetails, Customer: customer.name,
+        Phone: customer.phone, Email: customer.email, Address: customer.address, City: customer.city,
+        State: customer.state, Pincode: customer.pincode, 'Tracking courier': courier, AWB: awb,
+        'Tracking URL': trackingUrl, Notes: 'DEMO payment row',
+        'Verified by': paid ? 'admin (demo)' : '', 'Verified at': paid ? stamp : '',
+      },
+    });
+
+    if (courier) {
+      rows.push({
+        sheet: 'Shipments',
+        row: {
+          Timestamp: iso, 'Order number': orderNumber, Courier: courier, AWB: awb,
+          'Tracking URL': trackingUrl, Status: status, 'Expected delivery': '29-Oct-2026',
+          Note: 'DEMO — pickup ho gaya, transit me', 'Updated by': 'demo',
+        },
+      });
+    }
+
+    if (paid) {
+      var taxable = Math.round(total / 1.05);
+      var gst = total - taxable;
+      var interState = customer.state !== 'Rajasthan';
+      rows.push({
+        sheet: 'Invoices',
+        row: {
+          Timestamp: iso, 'Invoice number': 'INV-DEMO' + (100 + index), 'Order number': orderNumber,
+          Type: 'gst', Customer: customer.name, Phone: customer.phone, Email: customer.email,
+          GSTIN: '', Address: customer.address, State: customer.state, 'Taxable value': taxable,
+          CGST: interState ? 0 : Math.round(gst / 2), SGST: interState ? 0 : Math.round(gst / 2),
+          IGST: interState ? gst : 0, Shipping: shipping, Discount: discount, Total: total,
+          Notes: 'DEMO — ' + (interState ? 'Inter-state (IGST)' : 'Intra-state (CGST+SGST)'),
+        },
+      });
+    }
+
+    rows.push({
+      sheet: 'Checkout',
+      row: {
+        Timestamp: iso, Event: 'checkout.started', Step: 'details', 'Order number': '',
+        Items: qty + secondQty, Subtotal: subtotal, Reason: '', Phone: customer.phone,
+        Session: 'demo-' + (1000 + index), City: customer.city, State: customer.state, Pincode: customer.pincode,
+      },
+    });
+    rows.push({
+      sheet: 'Checkout',
+      row: {
+        Timestamp: iso, Event: 'order.placed', Step: 'review', 'Order number': orderNumber,
+        Items: qty + secondQty, Subtotal: subtotal, Reason: '', Phone: customer.phone,
+        Session: 'demo-' + (1000 + index), City: customer.city, State: customer.state, Pincode: customer.pincode,
+      },
+    });
+
+    rows.push({
+      sheet: 'Inventory',
+      row: {
+        Timestamp: iso, Product: product.title, Handle: product.handle, SKU: product.sku,
+        Size: product.size, Stock: Math.max(0, 12 - index * 2), Change: 0 - qty,
+        Reason: 'order ' + orderNumber + ' (DEMO)', 'Updated by': 'demo',
+        'Low stock alert': Math.max(0, 12 - index * 2) <= 3 ? 'yes' : 'no',
+      },
+    });
+  });
+
+  DEMO_MESSAGES.forEach(function (message, index) {
+    var customer = DEMO_CUSTOMERS[index % DEMO_CUSTOMERS.length];
+    rows.push({
+      sheet: 'Messages',
+      row: {
+        Timestamp: stamp, Name: customer.name, Email: customer.email, Phone: customer.phone,
+        Subject: message.subject, Message: message.message,
+        Status: index < 2 ? 'new' : 'replied', Replied: index < 2 ? '' : 'yes',
+        'Replied at': index < 2 ? '' : stamp, 'Source page': '/pages/contact',
+        'Message ID': 'demo-msg-' + (100 + index),
+      },
+    });
+  });
+
+  DEMO_CUSTOMERS.slice(0, 4).forEach(function (customer, index) {
+    rows.push({
+      sheet: 'Newsletter',
+      row: {
+        Timestamp: stamp, Email: customer.email,
+        Source: index % 2 === 0 ? 'footer' : 'checkout', Status: 'subscribed',
+      },
+    });
+  });
+
+  var demoReviews = [
+    { rating: 5, title: 'Fabric bahut accha', review: 'Organza ka fall bahut sundar hai, stitching bhi neat. Shaadi me pehna, sabne poochha kahan se liya.' },
+    { rating: 5, title: 'Perfect fit', review: 'Size chart sahi hai, M mera exact fit hua. Colour photo jaisa hi hai.' },
+    { rating: 4, title: 'Delivery time par', review: '3 din me mil gaya, packing acchi thi. Bas dupatta thoda chhota laga.' },
+    { rating: 5, title: 'Value for money', review: 'Is price me itna accha suit — dobara order karungi.' },
+  ];
+  demoReviews.forEach(function (review, index) {
+    var product = DEMO_PRODUCTS[index % DEMO_PRODUCTS.length];
+    var customer = DEMO_CUSTOMERS[index % DEMO_CUSTOMERS.length];
+    rows.push({
+      sheet: 'Reviews',
+      row: {
+        Timestamp: stamp, Product: product.title, Handle: product.handle, Customer: customer.name,
+        Rating: review.rating, Title: review.title, Review: review.review, Verified: 'yes',
+        Status: index === 3 ? 'pending' : 'approved', 'Photo URL': '',
+        'Order number': demoOrderNumber_(index + 1),
+      },
+    });
+  });
+
+  var demoCoupons = [
+    { code: 'DEMO50', type: 'flat', value: 50, minOrder: 499, maxUses: 100, used: 12, active: true, expires: '31-Dec-2026', note: 'DEMO — flat ₹50 off' },
+    { code: 'DIWALI10', type: 'percent', value: 10, minOrder: 999, maxUses: 500, used: 84, active: true, expires: '15-Nov-2026', note: 'DEMO — Diwali sale' },
+    { code: 'EXPIRED5', type: 'percent', value: 5, minOrder: 0, maxUses: 50, used: 50, active: false, expires: '01-Jan-2026', note: 'DEMO — band coupon' },
+  ];
+  demoCoupons.forEach(function (coupon) {
+    rows.push({
+      sheet: 'Coupons',
+      row: {
+        Timestamp: stamp, Code: coupon.code, Type: coupon.type, Value: coupon.value,
+        'Min order': coupon.minOrder, 'Max uses': coupon.maxUses, Used: coupon.used,
+        Active: coupon.active ? 'yes' : 'no', Expires: coupon.expires, Note: coupon.note,
+      },
+    });
+  });
+
+  var demoAudit = [
+    { action: 'settings_save', target: 'Settings', details: 'announcement + upi_id' },
+    { action: 'order_update', target: demoOrderNumber_(2), details: 'shipped · Delhivery' },
+    { action: 'invoice_save', target: 'INV-DEMO100', details: demoOrderNumber_(1) },
+    { action: 'stock_update', target: 'creme-coloured-organza-suit', details: '-1 (order)' },
+  ];
+  demoAudit.forEach(function (entry) {
+    rows.push({
+      sheet: 'Audit',
+      row: { Timestamp: stamp, Actor: 'demo', Action: entry.action, Target: entry.target, Details: entry.details, IP: '103.0.0.1' },
+    });
+  });
+
+  rows.push({
+    sheet: 'Errors',
+    row: { Timestamp: stamp, Context: 'demo/sample', Message: 'DEMO — sample error row (asli error nahi)', Payload: '{"sample":true}', Version: CODE_VERSION },
+  });
+
+  var written = appendRows_(rows);
+  refreshDashboard_();
+  noteSync_('demo→sheet', 'all', written, 'ok', 'seedDemoData');
+  Logger.log('✅ seedDemoData: ' + written + ' demo rows likhi gayi.');
+  Logger.log('   Hataana ho to function `clearDemoData` chalaiye.');
+  try {
+    book_().toast('Demo data bhar gaya ✔ (' + written + ' rows)', 'seedDemoData', 8);
+  } catch (ignored) {}
+  return { written: written, time: stamp };
+}
+
+/**
+ * `clearDemoData` — sirf demo rows hataao (asli data safe).
+ * Pehchan: DEMO / Demo — / LK-DEMO / demo-msg- / seedDemoData.
+ */
+function clearDemoData() {
+  return guard_('clearDemoData', clearDemoData_);
+}
+
+function clearDemoData_() {
+  var removed = 0;
+  Object.keys(HEADERS).forEach(function (name) {
+    if (name === 'Settings' || name === 'Dashboard') return;
+    var sheet = sheet_(name);
+    var last = sheet.getLastRow();
+    if (last < 2) return;
+    var values = sheet.getRange(2, 1, last - 1, Math.max(1, sheet.getLastColumn())).getValues();
+    for (var i = values.length - 1; i >= 0; i -= 1) {
+      var line = values[i].join(' | ');
+      if (/DEMO|Demo —|demo-msg-|LK-DEMO|seedDemoData/i.test(line)) {
+        sheet.deleteRow(i + 2);
+        removed += 1;
+      }
+    }
+  });
+  refreshDashboard_();
+  Logger.log('🧹 clearDemoData: ' + removed + ' demo rows hata di gayi.');
+  try {
+    book_().toast(removed + ' demo rows hata di gayi ✔', 'clearDemoData', 8);
+  } catch (ignored) {}
+  return removed;
+}
+
 /* ═══════════════════════════ 11. SELF-TEST (owner ke liye) ══════════════════ */
 
 /**
@@ -1547,6 +1868,15 @@ function doGet(e) {
       return json_({ ok: true, dashboardRows: rows, stats: stats_() });
     }
 
+    // demo data (test ke liye) — token ke bina nahi chalta
+    if (action === 'seed') {
+      return json_({ ok: true, seeded: seedDemoData_() });
+    }
+
+    if (action === 'clear-demo') {
+      return json_({ ok: true, removed: clearDemoData_() });
+    }
+
     if (action === 'health') {
       var book = book_();
       return json_({
@@ -1674,6 +2004,14 @@ function doPost(e) {
       return json_({ ok: true, dashboardRows: dashboardRows, stats: stats_() });
     }
 
+    if (action === 'seed') {
+      return json_({ ok: true, seeded: seedDemoData_() });
+    }
+
+    if (action === 'clear_demo') {
+      return json_({ ok: true, removed: clearDemoData_() });
+    }
+
     if (action === 'setup') {
       var created = setup();
       return json_({ ok: true, version: CODE_VERSION, created: created });
@@ -1705,6 +2043,7 @@ function doPost(e) {
 /* ═══════════════════════════ 14. OWNER CHEAT-SHEET ══════════════════════════
  *
  * Sheet me kabhi kuch toot jaye to:
+ *   • `seedDemoData` → har tab me poora demo data (test) · `clearDemoData` → hataao
  *   • `createOwnSheet` → isi account me **nayi sheet** banao aur website wahi use kare
  *   • `formatAll`    → columns ki width/format dobara set karo (manually kaam karne me aasan)
  *   • `whoAmI`       → kaun sa Google account chal raha hai + sheet mil rahi hai?
