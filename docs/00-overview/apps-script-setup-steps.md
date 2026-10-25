@@ -34,6 +34,30 @@ You do not have permission to access the requested document.
 > Kaun sa account script chala raha hai — pata karna ho to function **`whoAmI`** → Run.
 > Poora check chahiye to function **`doctor`** → Run (log me report + problems).
 
+### Aaj ka verified diagnosis (25 Oct 2026, live test)
+
+| Layer | Test | Result |
+|---|---|---|
+| Deployment public hai? | galat token ke saath `/exec` call | ✅ JSON aaya (`unauthorized`) — yaani anonymous call script tak pahunch rahi hai |
+| Version naya hai? | jawab me `version` | ✅ `r27-1` |
+| Token Vercel se match? | `CHANGE-ME-liksha-token` ke saath call | ✅ token pass hua (aage badha) |
+| Sheet khul rahi hai? | usi call ka agla step | ❌ **"You do not have permission to access the requested document"** |
+
+Matlab: code ✅, deploy ✅, token ✅ — sirf **sheet ka access** baaki hai. Do cheezein
+karni hain (dono ek hi baar me):
+
+1. **Sheet share:** sheet ke owner account se → Share → `prkigothwal@gmail.com` → **Editor** → Send.
+2. **Script authorize:** Apps Script (prkigothwal se) → function `setup` → Run →
+   permission prompt me **Allow**. (Pehli baar authorize na hone par bhi anonymous
+   call par wahi "permission" error aata hai.)
+
+**Checkpoint (10 second):** incognito window (logged out) me ye kholein —
+```
+<webapp URL>?action=health&token=CHANGE-ME-liksha-token
+```
+- ❌ "You do not have permission…" = upar ke 2 step abhi baaki hain
+- ✅ `{"ok":true,"version":"r27-1","sheets":[...]}` = ho gaya, website bhi chal jayegi
+
 ---
 
 ## Step 0 — pehle purana code hatao (zaroori)
