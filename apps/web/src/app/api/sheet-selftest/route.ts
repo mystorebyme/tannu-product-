@@ -56,6 +56,9 @@ export async function GET(request: Request) {
       const parsed = JSON.parse(raw) as {
         spreadsheet?: string;
         spreadsheetId?: string;
+        version?: string;
+        codeVersion?: string;
+        error?: string;
         sheets?: { name?: string; rows?: number }[];
       };
       result.book = {
@@ -64,6 +67,9 @@ export async function GET(request: Request) {
         expectedId: EXPECTED_SHEET_ID,
         match: parsed.spreadsheetId ? parsed.spreadsheetId === EXPECTED_SHEET_ID : null,
         rows: Object.fromEntries((parsed.sheets ?? []).map((entry) => [entry.name ?? "?", Number(entry.rows ?? 0)])),
+        // r25-1 (ya usse naya) = New version deploy hua; `null` = purana code chal raha hai
+        codeVersion: parsed.codeVersion ?? parsed.version ?? null,
+        scriptError: parsed.error ?? null,
       };
     } catch {
       result.book = { parseError: true, expectedId: EXPECTED_SHEET_ID };

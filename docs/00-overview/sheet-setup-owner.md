@@ -227,3 +227,40 @@ chalta rehta hai:
 
 **Sheet ke header badalne se row galat jagah ja sakti hai** — isliye headers jaise hain waise
 rakhein (naye column add karna theek hai, hatana/palata nahi).
+
+---
+
+## 🔎 "Sheet me data aa raha hai ya nahi?" — 30 second me khud check kariye
+
+Ye 3 cheezein **aap khud** dekh sakte hain, mujhse poochne ki zaroorat nahi:
+
+| Check | Kaise | Sahi jawab |
+| --- | --- | --- |
+| 1. Sheet me rows | Sheet kholiye → `Orders` tab | 2nd row se neeche order rows |
+| 2. Kaunsa code chal raha hai | browser me `.../exec?action=health&token=CHANGE-ME-liksha-token` | `"version":"r25-1"` (ya usse naya) |
+| 3. Script zinda hai | wahi URL kholne par JSON aaye (HTML page nahi) | `{"ok":true,...}` |
+
+Agar check 2 me `version` **nahi** dikhta (ya `ReferenceError` aata hai) → **purana code chal
+raha hai**, yaani *New version* deploy nahi hua. Sirf `Ctrl+S` kaafi nahi hota.
+
+### Aaj (25 Oct) ka test result — exact
+
+| Kya | Result | Matlab |
+| --- | --- | --- |
+| Vercel → Apps Script request | HTTP **200**, token sahi | rasta theek hai, password theek hai |
+| Script ka jawab | `{"ok":false,"error":"ReferenceError: SPREADSHEET_ID is not defined"}` | **purana/aadha code** chal raha hai |
+| Aapki sheet ke tabs | Orders · Payments · Messages · Checkout · Audit sab me **sirf header** (0 rows) | ek bhi row save nahi hui |
+| Website ka database | messages/orders **save ho rahe hain** | customer ka data safe hai, sheet mirror nahi bana |
+
+Isliye abhi ka kaam **sirf ek** hai: naya code + **New version** deploy. Uske baad pehla order
+khud sheet me dikh jayega.
+
+### Deploy ke baad kaise pata chalega (main test kar dunga)
+
+`https://liksha-clothing.vercel.app/api/sheet-selftest?key=lk-st-9f3k2m-7hq4rt-2026` kholiye:
+
+- `book.codeVersion: "r25-1"` → naya code chal raha hai ✅
+- `write.ok: true` → sheet me row likh gayi ✅
+- `book.match: true` → **sahi sheet** pakdi hai ✅
+
+> `sheet-selftest` tab me **ek test row** `Audit` tab me daalta hai (order data nahi chhoota).

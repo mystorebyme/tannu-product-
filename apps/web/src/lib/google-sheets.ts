@@ -100,7 +100,10 @@ export async function readSheetSettings(options: { fresh?: boolean } = {}): Prom
   } catch (error) {
     console.warn(`[sheets] settings read failed: ${(error as Error).message}`);
     cache = { at: now, value: null, failedAt: now };
-    return null;
+    // Apps Script down/galat ho to bhi owner ki csv (publish to web) se padho
+    const csv = await readSettingsFromCsv({ fresh: true });
+    if (csv) cache = { at: now, value: csv, failedAt: 0 };
+    return csv;
   }
 }
 
@@ -165,6 +168,12 @@ export async function writeSheetSettings(settings: {
       signal: AbortSignal.timeout(WRITE_TIMEOUT_MS),
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    // Apps Script galti par bhi HTTP 200 deta hai — body check karna zaroori hai
+    const body = await response.json().catch(() => null);
+    if (body && body.ok === false) {
+      console.warn(`[sheets] settings write rejected: ${String(body.error ?? "unknown")}`);
+      return false;
+    }
     invalidateSheetSettings();
     return true;
   } catch (error) {

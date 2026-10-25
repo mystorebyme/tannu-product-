@@ -52,6 +52,15 @@
 var TOKEN = 'CHANGE-ME-liksha-token';
 
 /**
+ * Code ka version — **yahi sabse pehle dekhiye**.
+ *
+ *   `?action=health` ka jawab me `version` dikhta hai. Agar waha purana version
+ *   aaye to matlab "New version" deploy nahi hua (sirf Ctrl+S se code save hota
+ *   hai, chalna purana hi rehta hai).
+ */
+var CODE_VERSION = 'r25-1';
+
+/**
  * Sheet ke tab-id (URL me `#gid=...`) — **optional**.
  *
  * Ye naye sheet ("Designer Clothing — Store", account: prakashgothwal370@gmail.com)
@@ -285,7 +294,7 @@ function testAppend() {
 function doGet(e) {
   var params = (e && e.parameter) || {};
   if (TOKEN && String(params.token || '') !== TOKEN) {
-    return json_({ ok: false, error: 'unauthorized — token match nahi hua' });
+    return json_({ ok: false, version: CODE_VERSION, error: 'unauthorized — token match nahi hua' });
   }
   var action = params.action || 'settings';
 
@@ -303,7 +312,8 @@ function doGet(e) {
     var names = Object.keys(HEADERS);
     return json_({
       ok: true,
-      version: 2,
+      version: CODE_VERSION,
+      codeVersion: CODE_VERSION,
       time: new Date().toISOString(),
       spreadsheet: book_().getName(),
       spreadsheetId: book_().getId(),
@@ -396,7 +406,7 @@ function doPost(e) {
     return json_({ ok: false, error: 'invalid json' });
   }
   if (TOKEN && String(body.token || '') !== TOKEN) {
-    return json_({ ok: false, error: 'unauthorized — token match nahi hua' });
+    return json_({ ok: false, version: CODE_VERSION, error: 'unauthorized — token match nahi hua' });
   }
 
   if (body.action === 'settings_save') {
