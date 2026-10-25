@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { TrackOrderForm } from "@/components/track-order-form";
 import { siteConfig } from "@/config/site";
+import { whatsappNumber } from "@/lib/phone";
 
 export const metadata: Metadata = {
   title: "My account & order tracking",
@@ -40,7 +41,7 @@ export default function AccountPage() {
             <TrackOrderForm />
             <p className="mt-3 text-[11px] text-[#8a8078]">
               Order number nahi mila? WhatsApp{" "}
-              <a href={`https://wa.me/91${siteConfig.whatsapp}`} className="text-[#862222]">
+              <a href={`https://wa.me/${whatsappNumber(siteConfig.whatsapp)}`} className="text-[#862222]">
                 {siteConfig.whatsapp}
               </a>
             </p>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { siteConfig } from "@/config/site";
+import { whatsappNumber } from "@/lib/phone";
 
 /**
  * Order tracking ka apna "not found" — global 404 ki jagah customer ko saaf
@@ -39,7 +40,7 @@ export default function OrderNotFound() {
             Try another number
           </Link>
           <a
-            href={`https://wa.me/91${wa}`}
+            href={`https://wa.me/${whatsappNumber(wa)}`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 border border-[#25D366] px-6 py-3 text-[11px] font-semibold tracking-[.14em] text-[#128c4b] uppercase"

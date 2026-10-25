@@ -1,6 +1,7 @@
 "use client";
 
 import { useStoreSettings } from "@/components/store-settings-provider";
+import { whatsappNumber } from "@/lib/phone";
 
 /**
  * Contact details — owner ki Google Sheet / admin settings se (real time).
@@ -13,7 +14,7 @@ export function ContactDetails() {
   return (
     <div className="grid gap-3 sm:grid-cols-3" data-testid="contact-details">
       <a
-        href={`https://wa.me/91${wa}`}
+        href={`https://wa.me/${whatsappNumber(wa)}`}
         target="_blank"
         rel="noreferrer"
         className="flex flex-col gap-1 border border-[#eee6de] bg-white p-4 transition hover:border-[#862222]"
@@ -29,7 +30,7 @@ export function ContactDetails() {
         <span className="text-[14px] font-medium break-all">{supportEmail}</span>
       </a>
       <a
-        href={`https://wa.me/91${wa}?text=${encodeURIComponent("Hi Designer Clothing, I need help with an order.")}`}
+        href={`https://wa.me/${whatsappNumber(wa)}?text=${encodeURIComponent("Hi Designer Clothing, I need help with an order.")}`}
         target="_blank"
         rel="noreferrer"
         className="flex flex-col gap-1 border border-[#eee6de] bg-white p-4 transition hover:border-[#862222]"
@@ -51,7 +52,7 @@ export function SupportChannels({ className = "" }: { className?: string }) {
   return (
     <div className={`flex flex-wrap gap-2 ${className}`}>
       <a
-        href={`https://wa.me/91${wa}`}
+        href={`https://wa.me/${whatsappNumber(wa)}`}
         target="_blank"
         rel="noreferrer"
         className="inline-flex h-9 items-center gap-1.5 bg-[#25D366] px-3 text-[10.5px] font-semibold tracking-[.1em] text-white uppercase"

@@ -10,7 +10,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { canonicalStateName, statesMatch, INDIAN_STATES } from "../../apps/web/src/lib/state-match";
 import { parseSettingsCsv } from "../../apps/web/src/lib/sheet-format";
-import { whatsappNumber } from "../../apps/web/src/lib/phone";
+import { whatsappHref, whatsappNumber } from "../../apps/web/src/lib/phone";
 
 const read = (relative: string) => fs.readFileSync(path.join(process.cwd(), relative), "utf8");
 
@@ -95,4 +95,13 @@ test("whatsappLink me country code 91 lagta hai", () => {
   assert.equal(whatsappNumber("918005900581"), "918005900581");
   // fallback number bhi 91 ke saath hi jaata hai
   assert.equal(whatsappNumber("", "918005900581"), "918005900581");
+});
+
+test("WhatsApp link me country code hamesha lagta hai (wa.me/91…)", () => {
+  assert.equal(whatsappNumber("8005900581"), "918005900581");
+  assert.equal(whatsappNumber("+91 80059 00581"), "918005900581");
+  assert.equal(whatsappNumber("918005900581"), "918005900581");
+  assert.equal(whatsappNumber("08005900581"), "918005900581");
+  assert.equal(whatsappNumber(""), "918005900581");
+  assert.equal(whatsappHref("8005900581", "hi"), "https://wa.me/918005900581?text=hi");
 });

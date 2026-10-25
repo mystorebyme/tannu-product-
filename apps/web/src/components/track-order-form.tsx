@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { API_AVAILABLE, LIVE_STORE_URL } from "@/lib/api-base";
 import { useStoreSettings } from "@/components/store-settings-provider";
+import { whatsappNumber } from "@/lib/phone";
 
 /**
  * Order tracking form.
@@ -105,7 +106,7 @@ export function TrackOrderForm() {
               </a>
             )}
             <a
-              href={`https://wa.me/91${wa}?text=${encodeURIComponent(`Hi Designer Clothing, please share the status of order ${resolved}.`)}`}
+              href={`https://wa.me/${whatsappNumber(wa)}?text=${encodeURIComponent(`Hi Designer Clothing, please share the status of order ${resolved}.`)}`}
               target="_blank"
               rel="noreferrer"
               className="inline-flex h-10 items-center bg-[#25D366] px-4 text-[10.5px] font-semibold tracking-[.12em] text-white uppercase"

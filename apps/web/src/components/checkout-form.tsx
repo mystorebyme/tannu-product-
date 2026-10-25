@@ -11,6 +11,7 @@ import { API_AVAILABLE, LIVE_STORE_URL, apiUrl } from "@/lib/api-base";
 import { postJson, readJson } from "@/lib/http-json";
 import { checkPincodeOffline } from "@/lib/pincode-offline";
 import { INDIAN_STATES, canonicalStateName, statesMatch } from "@/lib/state-match";
+import { whatsappNumber } from "@/lib/phone";
 
 const indianStates = INDIAN_STATES;
 
@@ -198,7 +199,7 @@ export function CheckoutForm() {
     ]
       .filter(Boolean)
       .join("\n");
-    return `https://wa.me/91${whatsapp.replace(/\D/g, "").slice(-10)}?text=${encodeURIComponent(text)}`;
+    return `https://wa.me/${whatsappNumber(whatsapp.replace(/\D/g, "").slice(-10))}?text=${encodeURIComponent(text)}`;
   }
 
   async function submit(event: React.FormEvent) {

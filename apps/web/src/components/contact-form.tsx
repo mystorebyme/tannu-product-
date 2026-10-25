@@ -4,6 +4,7 @@ import { useState } from "react";
 import { postJson } from "@/lib/http-json";
 import { apiUrl } from "@/lib/api-base";
 import { useStoreSettings } from "@/components/store-settings-provider";
+import { whatsappNumber } from "@/lib/phone";
 
 /** fallback — live value Google Sheet / admin settings se aati hai */
 const FALLBACK_EMAIL = "Info.likshaclothing@gmail.com";
@@ -63,7 +64,7 @@ export function ContactForm() {
         </p>
         <div className="mt-3 flex flex-wrap justify-center gap-2">
           <a
-            href={`https://wa.me/91${SUPPORT_WHATSAPP}?text=${encodeURIComponent("Hi Designer Clothing, I sent a message from the website.")}`}
+            href={`https://wa.me/${whatsappNumber(SUPPORT_WHATSAPP)}?text=${encodeURIComponent("Hi Designer Clothing, I sent a message from the website.")}`}
             target="_blank"
             rel="noreferrer"
             className="bg-[#25d366] px-4 py-2 text-[11px] font-semibold tracking-[.12em] text-white uppercase"
@@ -135,7 +136,7 @@ export function ContactForm() {
             </a>{" "}
             ya{" "}
             <a
-              href={`https://wa.me/91${SUPPORT_WHATSAPP}?text=${encodeURIComponent(
+              href={`https://wa.me/${whatsappNumber(SUPPORT_WHATSAPP)}?text=${encodeURIComponent(
                 `Hi Designer Clothing! ${form.subject}\nName: ${form.name}\n${form.message}`,
               )}`}
               target="_blank"

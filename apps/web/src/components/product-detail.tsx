@@ -16,6 +16,7 @@ import { useStoreSettings } from "@/components/store-settings-provider";
 import { ShippingNote } from "@/components/shipping-note";
 import { productUrl } from "@/lib/whatsapp";
 import { checkPincodeOffline } from "@/lib/pincode-offline";
+import { whatsappNumber } from "@/lib/phone";
 
 /** catalogue me hai lekin type import ke liye alias */
 type Variant = ColourOption;
@@ -393,7 +394,7 @@ export function ProductDetail({
             {sizeSoldOut || productSoldOut ? "Sold out" : "Buy it now"}
           </button>
           <a
-            href={`https://wa.me/91${whatsapp.replace(/\D/g, "").slice(-10)}?text=${encodeURIComponent(
+            href={`https://wa.me/${whatsappNumber(whatsapp.replace(/\D/g, "").slice(-10))}?text=${encodeURIComponent(
               [
                 `Hi Designer Clothing, I want to order:`,
                 `${product.title}`,

@@ -6,6 +6,7 @@ import { Stars } from "@/components/stars";
 import { productUrl } from "@/lib/whatsapp";
 import { ratingBreakdown, type ProductReviewBlock, type Review } from "@/lib/reviews";
 import { useStoreSettings } from "@/components/store-settings-provider";
+import { whatsappNumber } from "@/lib/phone";
 
 /**
  * Product reviews — live store ke Trustoo widget jaisa layout:
@@ -33,7 +34,7 @@ export function ProductReviews({
   const visible = filter ? block.reviews.filter((review) => Math.round(review.rating) === filter) : block.reviews;
 
   const wa = whatsapp.replace(/\D/g, "").slice(-10);
-  const whatsappReview = `https://wa.me/91${wa}?text=${encodeURIComponent(
+  const whatsappReview = `https://wa.me/${whatsappNumber(wa)}?text=${encodeURIComponent(
     `Hi Designer Clothing! I'd like to review "${productTitle}" (${productUrl(productHandle)}). My rating: `,
   )}`;
 

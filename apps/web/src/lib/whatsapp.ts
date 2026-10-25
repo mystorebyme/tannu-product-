@@ -1,6 +1,6 @@
 import type { Order } from "@liksha/types";
-import { whatsappNumber } from "@/lib/phone";
 import { siteConfig } from "@/config/site";
+import { whatsappNumber } from "@/lib/phone";
 
 /**
  * Order WhatsApp par bhejna — customer "Confirm on WhatsApp" dabata hai,

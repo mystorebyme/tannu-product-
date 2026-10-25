@@ -7,6 +7,7 @@ import { API_AVAILABLE, apiUrl } from "@/lib/api-base";
 import { formatPrice } from "@/lib/format";
 import { buildUpiUri } from "@/lib/upi";
 import { UpiQr } from "@/components/upi-qr";
+import { whatsappNumber } from "@/lib/phone";
 
 /**
  * UPI payment card — seedha owner ke UPI account me paisa.
@@ -419,7 +420,7 @@ export function UpiPayment({
                   </button>
                 </div>
                 <a
-                  href={`https://wa.me/91${wa}?text=${waText}`}
+                  href={`https://wa.me/${whatsappNumber(wa)}?text=${waText}`}
                   target="_blank"
                   rel="noreferrer"
                   data-testid="upi-whatsapp-screenshot"
@@ -431,7 +432,7 @@ export function UpiPayment({
             ) : (
               <div className="mt-3">
                 <a
-                  href={`https://wa.me/91${wa}?text=${waText}`}
+                  href={`https://wa.me/${whatsappNumber(wa)}?text=${waText}`}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex h-10 items-center bg-[#25D366] px-4 text-[10.5px] font-semibold tracking-[.12em] text-white uppercase"

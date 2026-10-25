@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useCart } from "@/components/cart-provider";
 import { useStoreSettings } from "@/components/store-settings-provider";
+import { whatsappNumber } from "@/lib/phone";
 
 export function FloatingHelp() {
   const { isOpen } = useCart();
@@ -33,7 +34,7 @@ export function FloatingHelp() {
         </button>
       ) : null}
       <a
-        href={`https://wa.me/91${whatsapp.replace(/\D/g, "").slice(-10)}`}
+        href={`https://wa.me/${whatsappNumber(whatsapp.replace(/\D/g, "").slice(-10))}`}
         target="_blank"
         rel="noreferrer"
         className="flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition hover:scale-105"

@@ -13,6 +13,7 @@ import type { SearchHit } from "@/types/catalog";
 import { useStoreSettings } from "@/components/store-settings-provider";
 import { SafeImage } from "@/components/safe-image";
 import { BrandLockup } from "@/components/brand-lockup";
+import { whatsappNumber } from "@/lib/phone";
 
 /**
  * Desktop nav — sirf wahi categories jo sach me products rakhti hain (khaali
@@ -167,7 +168,7 @@ export function SiteHeader() {
         <div className="mx-auto flex min-h-9 max-w-[1400px] items-center justify-between gap-3 px-4 py-1.5">
           {/* WhatsApp hi contact option hai — call nahi (owner request) */}
           <a
-            href={`https://wa.me/91${supportPhone.replace(/\D/g, "").slice(-10)}`}
+            href={`https://wa.me/${whatsappNumber(supportPhone.replace(/\D/g, "").slice(-10))}`}
             target="_blank"
             rel="noreferrer"
             className="hidden shrink-0 items-center gap-1.5 text-[11px] tracking-[.06em] md:flex"
