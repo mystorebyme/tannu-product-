@@ -36,7 +36,7 @@ export type SheetAppend = {
   row: Record<string, string | number | boolean | null | undefined>;
 };
 
-const READ_TIMEOUT_MS = 2_500;
+const READ_TIMEOUT_MS = 900;
 const WRITE_TIMEOUT_MS = 6_000;
 /** Sheet page load ko kabhi block na kare — 2.5s ke baad defaults/DB hi chalega. */
 const CACHE_MS = 15_000;

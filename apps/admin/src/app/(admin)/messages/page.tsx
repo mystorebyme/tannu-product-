@@ -93,7 +93,17 @@ export default async function MessagesPage({
                   <tr key={message.id}>
                     <td className="small muted">{dateTime(message.createdAt)}</td>
                     <td className="small">
-                      <strong>{message.name}</strong>
+                      {/* customer ka naam → uski detail (orders + total spend + edit) */}
+                      {message.phone ? (
+                        <Link
+                          href={`/customers?phone=${encodeURIComponent(message.phone)}`}
+                          data-testid="message-customer-link"
+                        >
+                          <strong>{message.name}</strong>
+                        </Link>
+                      ) : (
+                        <strong>{message.name}</strong>
+                      )}
                       <br />
                       <a href={`mailto:${message.email}`}>{message.email}</a>
                       {message.phone ? (
@@ -104,8 +114,14 @@ export default async function MessagesPage({
                       ) : null}
                     </td>
                     <td className="small">{message.subject ?? "—"}</td>
-                    <td className="small" style={{ maxWidth: 420, whiteSpace: "pre-wrap" }}>
-                      {message.message}
+                    <td className="small" style={{ maxWidth: 420 }}>
+                      {/* poori baat padhne ke liye kholiye (list chhoti rehti hai) */}
+                      <details data-testid="message-detail">
+                        <summary style={{ cursor: "pointer" }}>
+                          {message.message.length > 90 ? `${message.message.slice(0, 90)}…` : message.message}
+                        </summary>
+                        <div style={{ marginTop: 6, whiteSpace: "pre-wrap" }}>{message.message}</div>
+                      </details>
                     </td>
                     <td>
                       {message.replied ? (

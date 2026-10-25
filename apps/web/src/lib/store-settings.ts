@@ -130,7 +130,7 @@ export async function getStoreSettings(options: { fresh?: boolean } = {}): Promi
  * background me cache garam kar deti hai. Isliye step 3 kabhi "load ho raha hai"
  * par nahi atakta, UPI ID phir bhi sahi (env fallback) rehta hai.
  */
-export async function getStoreSettingsFast(budgetMs = 700): Promise<StoreSettings> {
+export async function getStoreSettingsFast(budgetMs = 350): Promise<StoreSettings> {
   if (cache) return cache.value;
   const slow = getStoreSettings().catch(() => DEFAULT_STORE_SETTINGS);
   const timeout = new Promise<null>((resolve) => {
