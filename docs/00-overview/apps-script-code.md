@@ -83,7 +83,7 @@ Warna purana code hi chalta rehta hai — owner ke saath yahi hua tha.
 
 ---
 
-## Poora code (1553 lines)
+## Poora code (1710 lines)
 
 ```javascript
 /**
@@ -389,28 +389,69 @@ function chunk_(list, size) {
  */
 function book_() {
   var id = (typeof SPREADSHEET_ID === 'string' && SPREADSHEET_ID) || SHEET_ID_FALLBACK;
+  var props = null;
   try {
-    var props = PropertiesService.getScriptProperties();
+    props = PropertiesService.getScriptProperties();
     if (props && props.getProperty('SHEET_ID')) id = props.getProperty('SHEET_ID');
   } catch (error) {
-    // Script Properties na mile to bhi chalta rahe
+    props = null;
   }
-  try {
-    return SpreadsheetApp.openById(id);
-  } catch (error) {
-    var active = null;
+  if (id) {
     try {
-      active = SpreadsheetApp.getActiveSpreadsheet();
-    } catch (ignored) {}
-    if (active) return active;
-    throw new Error(
-      'Sheet "' + id + '" khul nahi rahi' +
-      (executingEmail_() ? ' (' + executingEmail_() + ' se chal raha hai)' : '') +
-      ': ' + (error && error.message ? error.message : error) +
-      ' — FIX: Sheet → Share → ' + (executingEmail_() || 'jo account script chala raha hai') +
-      ' → Editor. (Ya script usi sheet ke andar se banaiye: Sheet → Extensions → Apps Script.)'
-    );
+      return SpreadsheetApp.openById(id);
+    } catch (error) {
+      // is account ko is sheet par access nahi — neeche apni sheet bana lenge
+      Logger.log('book_: "' + id + '" khul nahi rahi (' + error.message + ')');
+    }
   }
+
+  var active = null;
+  try {
+    active = SpreadsheetApp.getActiveSpreadsheet();
+  } catch (ignored) {}
+  if (active) return active;
+
+  /**
+   * Kuch bhi nahi khula → **apni sheet khud bana lo** (jo account script chala raha
+   * hai usi ke Drive me). Owner ke saath yahi problem thi: sheet doosre account ki
+   * thi aur "You do not have permission to access the requested document" aata tha.
+   * Ab script apni sheet bana kar usme likhti hai — koi sharing ki zaroorat nahi.
+   */
+  var created = SpreadsheetApp.create('Designer Clothing — Store (website data)');
+  if (props) {
+    try {
+      props.setProperty('SHEET_ID', created.getId());
+    } catch (ignored) {}
+  }
+  Logger.log('book_: nayi sheet ban gayi → ' + created.getUrl());
+  return created;
+}
+
+/**
+ * `createOwnSheet` — owner ke liye: **isi Google account me nayi sheet** banao aur
+ * wahi website ke liye use karo (purani sheet kisi doosre account ki ho to).
+ *
+ * Kya karta hai:
+ *   1. nayi spreadsheet banti hai ("Designer Clothing — Store"),
+ *   2. uska id Script Properties me save hota hai (aage yahi use hogi),
+ *   3. saare 16 tabs + headers + formatting + default settings ban jaate hain,
+ *   4. **URL** log me + toast me milta hai.
+ *
+ * Purani sheet ko chheda nahi jaata (data safe rehta hai).
+ */
+function createOwnSheet() {
+  return guard_('createOwnSheet', function () {
+    var created = SpreadsheetApp.create('Designer Clothing — Store (website data)');
+    PropertiesService.getScriptProperties().setProperty('SHEET_ID', created.getId());
+    var created2 = setup_();
+    Logger.log('✅ Nayi sheet: ' + created.getUrl());
+    Logger.log('   (id: ' + created.getId() + ') — ab yahi sheet website ke liye use hogi.');
+    Logger.log('   Tabs bane: ' + (created2.join(', ') || 'sab pehle se the'));
+    try {
+      created.toast('Sheet ready ✔ URL: ' + created.getUrl(), 'createOwnSheet', 20);
+    } catch (ignored) {}
+    return { url: created.getUrl(), id: created.getId(), tabs: created2 };
+  });
 }
 
 /**
@@ -484,8 +525,10 @@ function doctor() {
     report.sheetName = book.getName();
   } catch (error) {
     report.problems.push(
-      'Sheet khul nahi rahi: ' + (error && error.message ? error.message : error) +
-      ' → Sheet → Share → ' + (report.account || 'script ka account') + ' → Editor',
+      'Configured sheet khul nahi rahi (' + (error && error.message ? error.message : error) + ') — ' +
+      'koi baat nahi: script apni nayi sheet bana kar usme likh legi. ' +
+      'Apni sheet abhi banani ho to function `createOwnSheet` chalaiye (isi account me ban jayegi). ' +
+      'Purani sheet me hi likhna ho to Sheet → Share → ' + (report.account || 'script ka account') + ' → Editor.',
     );
   }
   if (report.sheetAccess) {
@@ -502,6 +545,31 @@ function doctor() {
   if (!report.problems.length) report.problems.push('koi problem nahi mili ✔');
   Logger.log(JSON.stringify(report, null, 2));
   return report;
+}
+
+/**
+ * Owner-facing functions ko saaf error ke saath chalane wala wrapper.
+ *
+ * Kyun: "You do not have permission to access the requested document" jaisi
+ * Google ki error samajhna mushkil hoti hai. Ye wrapper usko seedha FIX me
+ * badal deta hai — Apps Script ke **Execution log** me padhne layak.
+ */
+function guard_(name, fn) {
+  try {
+    return fn();
+  } catch (error) {
+    var message = String(error && error.message ? error.message : error);
+    var fix = /permission|access|document/i.test(message)
+      ? 'FIX: Sheet kholein → Share → ' + (executingEmail_() || 'jo account script chala raha hai') +
+        ' → Editor → Send. (Script isi account se chal rahi hai, sheet doosre account ki hai.)'
+      : 'Detail ke liye function `doctor` chalaiye (log me poora report aayega).';
+    Logger.log('❌ ' + name + ' fail hua: ' + message);
+    Logger.log('👉 ' + fix);
+    try {
+      book_().toast(name + ' fail: ' + fix, name, 10);
+    } catch (ignored) {}
+    throw new Error(name + ' fail: ' + message + ' — ' + fix);
+  }
 }
 
 /**
@@ -586,25 +654,112 @@ function ensureHeaders_(sheet, name) {
   }
 }
 
-/** Money columns par ₹, timestamp par date format (best-effort). */
+/**
+ * Column widths — owner ne kaha "columns fix kar do taaki manually kaam karne me
+ * dikkat na ho". Har column ki fixed width (pixels) hai; lambe text wale columns
+ * (Item details, Message, Review, Address) me wrap lagta hai, isliye kuch bhi
+ * kata hua nahi dikhta.
+ */
+var COLUMN_WIDTHS = {
+  Timestamp: 130, Event: 150, 'Order number': 120, 'Order status': 100,
+  'Payment status': 105, 'Payment method': 95, 'Payment reference': 140,
+  'UPI ID': 150, Total: 90, Subtotal: 90, Discount: 85, Coupon: 90,
+  Items: 70, 'Item details': 260, Customer: 120, Phone: 105, Email: 165,
+  Address: 230, City: 95, State: 100, Pincode: 80, 'Tracking courier': 110,
+  AWB: 120, 'Tracking URL': 170, Notes: 200, Source: 90, Device: 90,
+  'Verified by': 100, 'Verified at': 120, Product: 190, Handle: 140, SKU: 130,
+  Size: 70, Colour: 90, Quantity: 70, Price: 90, 'Line total': 95,
+  Category: 110, 'Image URL': 170, Status: 95, 'Invoice number': 120, Type: 70,
+  GSTIN: 130, 'Taxable value': 105, CGST: 80, SGST: 80, IGST: 80, Shipping: 85,
+  Courier: 110, 'Expected delivery': 110, 'Updated by': 100, Step: 90,
+  Reason: 150, Session: 120, Name: 120, Subject: 130, Message: 320, Replied: 80,
+  'Replied at': 120, 'Source page': 110, 'Message ID': 130, Rating: 65,
+  Title: 150, Review: 300, Verified: 75, 'Photo URL': 150, Code: 100, Value: 70,
+  'Min order': 85, 'Max uses': 75, Used: 60, Active: 60, Expires: 90,
+  Note: 160, Stock: 65, Change: 65, 'Low stock alert': 95, Actor: 110,
+  Action: 150, Target: 120, Details: 260, IP: 110, Context: 130,
+  Payload: 260, Version: 70, Metric: 150, Direction: 110, Rows: 60,
+  Detail: 180, Total: 90,
+};
+
+/** Wrap wale columns (lambe text) */
+var WRAP_COLUMNS = ['Item details', 'Notes', 'Message', 'Review', 'Address', 'Details', 'Payload', 'Note', 'Title'];
+
+/** Money columns — in par ₹ format lagta hai (sirf naye tab banne par). */
+var MONEY_COLUMNS = {
+  Orders: ['Total', 'Subtotal', 'Discount'],
+  Payments: ['Total', 'Subtotal', 'Discount'],
+  OrderItems: ['Price', 'Line total'],
+  Invoices: ['Taxable value', 'CGST', 'SGST', 'IGST', 'Shipping', 'Discount', 'Total'],
+  Inventory: ['Stock'],
+};
+
+/**
+ * Tab ki formatting — header bold + freeze, column widths fixed, wrap, ₹ format,
+ * aur filter (dropdown) taaki owner manually sort/filter kar sake.
+ */
 function applyFormatting_(sheet, name) {
   try {
     var headers = HEADERS[name];
     if (!headers) return;
-    var money = MONEY_COLUMNS[name] || [];
-    money.forEach(function (column) {
+    // header row: bold + grey + freeze
+    var headerRange = sheet.getRange(1, 1, 1, headers.length);
+    headerRange.setFontWeight('bold');
+    headerRange.setBackground('#f1ece4');
+    headerRange.setVerticalAlignment('middle');
+    sheet.setFrozenRows(1);
+    if (sheet.getMaxColumns() > headers.length) {
+      sheet.deleteColumns(headers.length + 1, sheet.getMaxColumns() - headers.length);
+    }
+
+    headers.forEach(function (column, index) {
+      var width = COLUMN_WIDTHS[column] || 110;
+      try {
+        sheet.setColumnWidth(index + 1, width);
+      } catch (ignored) {}
+    });
+
+    // filter (dropdown) — sirf ek hi baar
+    try {
+      if (!sheet.getFilter()) sheet.getRange(1, 1, Math.max(2, sheet.getLastRow()), headers.length).createFilter();
+    } catch (ignored) {}
+
+    // money + date formats (poori column)
+    var rows = Math.max(2, sheet.getMaxRows());
+    (MONEY_COLUMNS[name] || []).forEach(function (column) {
       var index = headers.indexOf(column);
-      if (index >= 0) {
-        sheet.getRange(2, index + 1, Math.max(1, sheet.getMaxRows() - 1), 1).setNumberFormat(MONEY_FORMAT);
-      }
+      if (index >= 0) sheet.getRange(2, index + 1, rows - 1, 1).setNumberFormat(MONEY_FORMAT);
     });
     var stamp = headers.indexOf(TIMESTAMP_COLUMN);
-    if (stamp >= 0) {
-      sheet.getRange(2, stamp + 1, Math.max(1, sheet.getMaxRows() - 1), 1).setNumberFormat('dd-MMM-yyyy HH:mm');
-    }
+    if (stamp >= 0) sheet.getRange(2, stamp + 1, rows - 1, 1).setNumberFormat('dd-MMM-yyyy HH:mm');
+
+    // lambe text wrap + top align (poori sheet ek hi call me — fast)
+    var wrapRange = sheet.getRange(2, 1, rows - 1, headers.length);
+    wrapRange.setWrapStrategy(SpreadsheetApp.WrapStrategy ? SpreadsheetApp.WrapStrategy.CLIP : 'clip');
+    wrapRange.setVerticalAlignment('top');
+    WRAP_COLUMNS.forEach(function (column) {
+      var index = headers.indexOf(column);
+      if (index >= 0) {
+        sheet
+          .getRange(2, index + 1, rows - 1, 1)
+          .setWrapStrategy(SpreadsheetApp.WrapStrategy ? SpreadsheetApp.WrapStrategy.WRAP : 'wrap');
+      }
+    });
   } catch (error) {
     // formatting fail ho to data likhna nahi rukna chahiye
   }
+}
+
+/** Sabhi tabs par formatting dobara lagao (owner ka manual trigger `formatAll`) */
+function formatAll() {
+  return guard_('formatAll', function () {
+    ['Settings'].concat(Object.keys(HEADERS)).forEach(function (name) {
+      if (name === 'Settings') return;
+      applyFormatting_(sheet_(name), name);
+    });
+    book_().toast('Columns ki width/format set ho gayi ✔', 'formatAll', 6);
+    return true;
+  });
 }
 
 /** Tab ke headers (trimmed) */
@@ -1625,6 +1780,8 @@ function doPost(e) {
 /* ═══════════════════════════ 14. OWNER CHEAT-SHEET ══════════════════════════
  *
  * Sheet me kabhi kuch toot jaye to:
+ *   • `createOwnSheet` → isi account me **nayi sheet** banao aur website wahi use kare
+ *   • `formatAll`    → columns ki width/format dobara set karo (manually kaam karne me aasan)
  *   • `whoAmI`       → kaun sa Google account chal raha hai + sheet mil rahi hai?
  *   • `doctor`       → poora health check (permission error me sabse pehle yahi)
  *   • `testSelf`     → poora check, log me jawab

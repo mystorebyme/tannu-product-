@@ -43,7 +43,6 @@ export function UpiPayment({
   /** apni site ka URL — callback isi par wapas aata hai */
   siteUrl?: string;
 }) {
-  const [value, setValue] = useState("");
   const [last4, setLast4] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -139,46 +138,22 @@ export function UpiPayment({
     }
   }
 
+  /**
+   * Ek hi button — "Payment ho gaya — confirm kariye".
+   *
+   * Owner ka final rule (R27): **UTR kabhi na maango** (customer ke paas hota hi
+   * nahi). Sirf mobile ke last 4 digit → order `processing` (team UPI statement se
+   * verify). Mobile par UPI app se wapas aane par `payments/return` khud confirm
+   * kar deta hai — yaani zyadatar cases me order apne aap confirm ho jaata hai.
+   */
   async function submit(event: React.FormEvent) {
     event.preventDefault();
-    const clean = value.replace(/[\s-]/g, "").toUpperCase();
-    /**
-     * Owner ka step-3 rule: customer ko sochne par na chhodein —
-     *  • UTR hai → reference save,
-     *  • UTR khaali + last 4 digit hai → seedha "payment ho gaya" claim
-     *    (admin UPI statement se verify karega).
-     */
-    if (!clean && /^\d{4}$/.test(last4)) {
-      await claimPaid();
-      return;
-    }
-    if (!/^[A-Z0-9]{6,30}$/.test(clean)) {
-      setError("UPI app ka reference / UTR daaliye (6–30 characters) — ya khaali chhod kar mobile ke last 4 digit daal ke submit kariye.");
-      return;
-    }
-    if (!/^\d{4}$/.test(last4)) {
-      setError("Enter the last 4 digits of the mobile number used for this order.");
-      return;
-    }
-    setBusy(true);
-    setError(null);
-    const result = await postJson<{ ok?: boolean; error?: string }>(
-      apiUrl("/api/payments/manual"),
-      { orderNumber, reference: clean, phoneLast4: last4 },
-      { timeoutMs: 12_000 },
-    );
-    if (!result.data?.ok) {
-      setError(result.data?.error ?? result.error ?? "Could not save the reference. Please try again.");
-      setBusy(false);
-      return;
-    }
-    setSubmitted(true);
-    setBusy(false);
+    await claimPaid();
   }
 
   /**
-   * "Paisa kat gaya par UTR nahi mila" — customer atakta nahi. Order verify ke
-   * liye `processing` ho jaata hai (paisa confirm tab hi hoga jab admin match kare).
+   * "Paisa kat gaya" — customer atakta nahi. Order `processing` ho jaata hai
+   * (verify hone par confirm). UTR ki zaroorat nahi, sirf last 4 digit.
    */
   async function claimPaid() {
     if (!/^\d{4}$/.test(last4)) {
@@ -194,7 +169,7 @@ export function UpiPayment({
     );
     setBusy(false);
     if (!result.data?.ok) {
-      setError(result.data?.error ?? result.error ?? "Claim save nahi hua — WhatsApp par screenshot bhej dijiye.");
+      setError(result.data?.error ?? result.error ?? "Confirm nahi ho paaya — WhatsApp par screenshot bhej dijiye.");
       return;
     }
     setSubmitted(true);
@@ -224,7 +199,7 @@ export function UpiPayment({
 
   const wa = whatsapp.replace(/\D/g, "").slice(-10);
   const waText = encodeURIComponent(
-    `Hi Designer Clothing, I have paid ${formatPrice(amount)} for order ${orderNumber} via UPI (${upiId}). UTR: `,
+    `Hi Designer Clothing, I have paid ${formatPrice(amount)} for order ${orderNumber} via UPI (${upiId}). Ye payment ka screenshot hai:`,
   );
   const paid = paymentStatus === "paid";
 
@@ -327,9 +302,8 @@ export function UpiPayment({
               >
                 Open UPI app to pay {formatPrice(amount)}
               </a>
-              <p className="mt-1.5 text-[10.5px] leading-relaxed text-[#8a7a5f]">
-                Button dabane par phone apne aap UPI app khol dega (amount bhara hua). Na khule to
-                upar diya QR scan kariye ya UPI ID copy karke pay kariye.
+              <p className="mt-1.5 text-[10.5px] text-[#8a7a5f]">
+                Button se UPI app khulegi (amount bhara hua). Na khule to QR scan kariye.
               </p>
             </div>
 
@@ -341,93 +315,64 @@ export function UpiPayment({
 
             {autoChecked && paymentStatus !== "paid" ? (
               <p className="mt-2 border border-[#e6d3a8] bg-[#fbf3df] px-2.5 py-2 text-[11px] leading-relaxed text-[#7a5c14]">
-                UPI app se confirmation nahi mila. Neeche reference (UTR) daal dijiye ya WhatsApp par screenshot
-                bhej dijiye — team turant verify karegi.
+                App se confirmation nahi mila — agar paisa kat gaya hai to neeche last 4 digit daal kar confirm
+                kariye, ya screenshot WhatsApp par bhej dein.
               </p>
             ) : null}
-
-            <p className="mt-2 text-[11px] leading-relaxed text-[#8a7a5f]">
-              Mobile par UPI app khud khul jaati hai. Na khule to is page ko refresh karein ya QR scan
-              karein — UPI ID par bhi pay kar sakte hain.
-            </p>
 
             {submitted ? (
               <div className="mt-3 border border-[#c9dcc9] bg-[#eef7ee] px-3 py-2.5" data-testid="upi-submitted">
                 <p className="text-[12px] leading-relaxed text-[#2f6b3f]">
-                  Payment reference received. Our team verifies it within a few minutes and confirms your
-                  order on WhatsApp.
+                  <strong>Payment confirm ho gaya.</strong> Aapka order ab verify hokar dispatch ke liye
+                  ready hai — update WhatsApp par milega.
                 </p>
               </div>
             ) : API_AVAILABLE ? (
               <form onSubmit={submit} className="mt-4 space-y-2.5" data-testid="upi-form">
-                <p className="text-[11px] leading-relaxed text-[#6b6259]">
-                  UPI se pay karne ke baad (scan ya app — dono) do me se ek kariye: <strong>UTR</strong> daaliye,
-                  <strong> ya</strong> sirf mobile ke <strong>last 4 digit</strong> daal kar neeche button dabaiye.
-                  Team UPI statement se verify karke order confirm kar degi (WhatsApp par update milega).
+                <p className="text-[11.5px] leading-relaxed text-[#6b6259]">
+                  UPI se pay karne ke baad neeche apne <strong>mobile ke last 4 digit</strong> daaliye —
+                  order turant verify ho jayega.
                 </p>
-                <div className="grid gap-2 sm:grid-cols-[1.4fr_0.8fr]">
-                  <input
-                    value={value}
-                    onChange={(event) => setValue(event.target.value)}
-                    placeholder="UPI reference / UTR"
-                    inputMode="text"
-                    data-testid="upi-utr"
-                    aria-label="UPI reference or UTR"
-                    className="h-10 w-full min-w-0 border border-[#ddd2c6] bg-white px-2.5 text-[12px] outline-none focus:border-[#862222]"
-                  />
+                <div className="flex flex-wrap items-center gap-2">
                   <input
                     value={last4}
                     onChange={(event) => setLast4(event.target.value.replace(/\D/g, "").slice(0, 4))}
-                    placeholder="Phone last 4"
+                    placeholder="Mobile ke last 4 digit"
                     inputMode="numeric"
+                    maxLength={4}
                     data-testid="upi-last4"
                     aria-label="Last 4 digits of your mobile number"
-                    className="h-10 w-full min-w-0 border border-[#ddd2c6] bg-white px-2.5 text-[12px] outline-none focus:border-[#862222]"
+                    className="h-10 w-[150px] border border-[#ddd2c6] bg-white px-2.5 text-center text-[13px] tracking-[.3em] outline-none focus:border-[#862222]"
                   />
+                  <button
+                    type="submit"
+                    disabled={busy || last4.length !== 4}
+                    data-testid="upi-claim"
+                    className="h-10 bg-[#5c1010] px-4 text-[10.5px] font-semibold tracking-[.12em] text-white uppercase disabled:opacity-40"
+                  >
+                    {busy ? "Confirm ho raha hai…" : "Payment ho gaya — confirm kariye"}
+                  </button>
                 </div>
                 {error ? <p className="text-[11px] text-[#b3261e]">{error}</p> : null}
-                {failed ? (
-                  <p className="text-[11px] text-[#8a6a1f]">
-                    Payment failed mark ho gayi — dobara UPI app se try kariye, ya WhatsApp par order confirm kar
-                    dijiye.
-                  </p>
-                ) : (
+                <div className="flex flex-wrap items-center gap-3 pt-0.5">
+                  <a
+                    href={`https://wa.me/${whatsappNumber(wa)}?text=${waText}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    data-testid="upi-whatsapp-screenshot"
+                    className="text-[10.5px] font-semibold tracking-[.06em] text-[#1b7a3e] uppercase underline"
+                  >
+                    Screenshot WhatsApp par bhejein
+                  </a>
                   <button
                     type="button"
                     onClick={reportFailed}
                     disabled={busy}
-                    className="text-[10.5px] tracking-[.08em] text-[#8a7a5f] uppercase underline"
+                    className="text-[10.5px] tracking-[.06em] text-[#8a7a5f] uppercase underline"
                   >
-                    Payment fail ho gayi? Report kariye
-                  </button>
-                )}
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    type="submit"
-                    disabled={busy}
-                    className="h-10 bg-[#222] px-4 text-[10.5px] font-semibold tracking-[.14em] text-white uppercase disabled:opacity-60"
-                  >
-                    {busy ? "Saving…" : "Payment ho gaya — submit kariye"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={claimPaid}
-                    disabled={busy}
-                    data-testid="upi-claim"
-                    className="h-10 border border-[#222] bg-white px-4 text-[10.5px] font-semibold tracking-[.14em] text-[#222] uppercase disabled:opacity-60"
-                  >
-                    UTR nahi mila? Last 4 digit se submit
+                    {failed ? "Fail report ho gaya" : "Payment fail hui? Batayein"}
                   </button>
                 </div>
-                <a
-                  href={`https://wa.me/${whatsappNumber(wa)}?text=${waText}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  data-testid="upi-whatsapp-screenshot"
-                  className="mt-1 inline-flex items-center gap-2 text-[10.5px] font-semibold tracking-[.08em] text-[#1b7a3e] uppercase underline"
-                >
-                  Ya WhatsApp par payment ka screenshot bhejein (order number pehle se likha hai)
-                </a>
               </form>
             ) : (
               <div className="mt-3">

@@ -58,6 +58,39 @@ karni hain (dono ek hi baar me):
 - ❌ "You do not have permission…" = upar ke 2 step abhi baaki hain
 - ✅ `{"ok":true,"version":"r27-1","sheets":[...]}` = ho gaya, website bhi chal jayegi
 
+
+---
+
+## 🆕 Naya (R27-2): sheet ka jhanjhat khatam — script apni sheet khud bana leti hai
+
+Agar configured sheet kisi doosre account ki ho (ya "Sorry, unable to open the file"
+aaye), to ab script **khud apni nayi sheet** bana leti hai — usi Google account me
+jo script chala raha hai (`prkigothwal@gmail.com`). Koi Share/Editor ka chakkar nahi.
+
+**Chalane ka tareeka (30 second):**
+
+1. Apps Script → function dropdown → **`createOwnSheet`** → **▶ Run**
+2. **Execution log** me URL aayega:
+   `✅ Nayi sheet: https://docs.google.com/spreadsheets/d/…/edit`
+   (toast me bhi dikhega)
+3. Wo link kholein — 16 tabs, headers, **fixed column widths** aur formatting ready milenge.
+4. Purani sheet ka data waisa hi safe rehta hai (kuch delete nahi hota).
+
+> Iske baad sab kuch nayi sheet me aayega. Verify:
+> `<webapp URL>?action=health&token=<TOKEN>` → `spreadsheetUrl` naya link dikhayega.
+
+## 🆕 Columns fix (manually kaam karne me aasan)
+
+`setup` / `createOwnSheet` chalane par har tab me:
+
+- **header row freeze** + bold + grey (scroll karte waqt naam dikhte rehte hain)
+- **fixed column widths** (jaise Order number 120px, Total 90px, Message 320px…)
+- **lambe columns me wrap** (Message, Review, Item details, Address…) — text kata nahi
+- **₹ format** money columns par, **date format** Timestamp par
+- **filter dropdown** header par — owner khud sort/filter kar sakta hai
+
+Formatting kabhi bigad jaye to function **`formatAll`** → Run (sab dobara set ho jayega).
+
 ---
 
 ## Step 0 — pehle purana code hatao (zaroori)

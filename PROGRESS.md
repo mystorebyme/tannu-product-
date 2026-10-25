@@ -449,3 +449,17 @@ likhega). Uske baad `/api/sheet-selftest` + connector se row confirm karna hai.
 - Tests: **137 pass / 0 fail** (16 naye: v3 tabs, column contract, order_update,
   invoice_save, stock_update, coupon upsert, review/subscribe dedupe, message_status,
   doGet stats/search/order, galat token par block).
+
+### R27 (c) — permission fix ke baad: messages live, payment page simple, sheet columns fix
+
+- **Sheet ab kaam kar rahi hai** (owner ne Share kar diya): live selftest →
+  `message.sheetMirror:true`, `Messages` tab me 10 rows, `Sync`/`Checkout`/`Newsletter` bhi bhar rahe hain.
+- **Script v3.1:** `book_()` ab sheet na khulne par **khud nayi sheet bana leta hai**
+  (Script Property `SHEET_ID` me save) — "Sorry, unable to open the file" wala jhanjhat khatam;
+  naya function **`createOwnSheet`** (isi account me nayi sheet + 16 tabs + formatting),
+  **`formatAll`** (columns width/wrap dobara), `COLUMN_WIDTHS`/`WRAP_COLUMNS` map se har tab
+  ki fixed width + freeze header + ₹/date format + filter dropdown.
+- **Payment page simplify (owner ask):** UTR input **hata diya**, sirf "mobile ke last 4 digit"
+  + ek button **"Payment ho gaya — confirm kariye"**; lambe paragraphs hataye, screenshot link
+  chhota; mobile par UPI app se wapas aane par order khud confirm (`payments/return`).
+- Tests: **145 pass / 0 fail**.

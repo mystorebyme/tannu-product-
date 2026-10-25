@@ -78,3 +78,20 @@ test("traffic table migration maujood hai (DB par data sambhalne ke liye)", () =
   assert.match(schema, /create table if not exists traffic_daily/);
   assert.match(schema, /create table if not exists traffic_visitors/);
 });
+
+test("payment page: UTR nahi maangta — sirf last 4 digit + ek confirm button", () => {
+  const pay = read("apps/web/src/components/upi-payment.tsx");
+  assert.ok(!/data-testid="upi-utr"/.test(pay), "UTR input hata diya hona chahiye");
+  assert.ok(!/UTR nahi mila/.test(pay), "purana UTR wala button text nahi");
+  assert.match(pay, /data-testid="upi-last4"/);
+  assert.match(pay, /data-testid="upi-claim"/);
+  assert.match(pay, /Mobile ke last 4 digit/);
+  // page par lambi text wall na ho (owner ne kam karne ko kaha)
+  assert.ok(pay.split("\n").length < 420, "payment card compact ho gaya");
+});
+
+test("payment page par 'payment ho gaya' confirm ka saaf message", () => {
+  const pay = read("apps/web/src/components/upi-payment.tsx");
+  assert.match(pay, /Payment confirm ho gaya/);
+  assert.match(pay, /Screenshot WhatsApp par bhejein/);
+});
