@@ -70,6 +70,9 @@ jobs:
       - name: Round 23 (pincode guard · speed · claim · WhatsApp)
         run: node tests/e2e/round23.mjs
 
+      - name: Round 27 (logo center · GSC · analytics · contact)
+        run: node tests/e2e/round27.mjs
+
       - name: Selftest (DB + sheet mirror)
         continue-on-error: true
         run: |

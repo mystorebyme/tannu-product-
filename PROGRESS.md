@@ -388,3 +388,28 @@ likhega). Uske baad `/api/sheet-selftest` + connector se row confirm karna hai.
   `ReferenceError` (owner ka deploy pending).
 - Note: `fetch_page` same URL ka **purana response cache** karta hai — verify karte waqt
   `?v=<sha>` lagayein, warna purana HTML dekhkar galat nateeja aata hai.
+
+### R27 — logo center · GSC · traffic analytics · contact refresh · sheet ka asli karan
+
+- **Logo center:** header desktop `lg:grid-cols-[1fr_auto_1fr]` (logo `col-start-2`),
+  footer lockup center. Mobile pehle jaisa center.
+- **GSC:** `layout.tsx` me `verification.google` meta + `public/googleb3b0e3defc1daa17.html`
+  (dono method, owner ne jo file di thi wahi).
+- **Traffic:** naya `components/analytics.tsx` — Vercel Web Analytics + Speed Insights
+  (`/_vercel/insights/script.js`, `/_vercel/speed-insights/script.js`) + optional GA4
+  (`NEXT_PUBLIC_GA_ID`). Dashboard me Analytics "Enable" karna owner ka 1-click kaam.
+- **Contact:** success par `router.refresh()` + "Send another" (form turant reset).
+- **Admin:** `components/auto-refresh.tsx` (15s, tab visible ho tab) messages page par;
+  message ka naam → customer detail link; message par click → poora text.
+- **Sheet blocker ka exact karan (aaj proof hua):** Vercel ke env me jo
+  `GOOGLE_SHEETS_WEBAPP_URL` pada hai wo `AKfycbwIJ1ge…` deployment hai jo
+  **Google ka login page (HTML)** laut raha hai → deployment ka access "Anyone" nahi
+  (ya wo purana/dead hai). Isliye `sheetMirror:false`. Selftest ab
+  `urlDeployment` (id ka 12-char prefix) bhi dikhata hai taaki owner compare kar sake.
+- **Payment step ki speed:** `getStoreSettingsFast` budget 700ms → **350ms**,
+  sheet read timeout 2.5s → **900ms**. Sheet slow ho to bhi step 3 turant.
+- **Cold start:** `.github/workflows/keep-warm.yml` — 5 min cron par 5 halke pages
+  (GitHub Actions public repo par free).
+- **Naya live test:** `tests/e2e/round27.mjs` (logo grid classes, GSC meta + file,
+  analytics scripts 200, contact POST + DB save + sheet mirror ka sach) —
+  `live-audit.yml` me step add.
