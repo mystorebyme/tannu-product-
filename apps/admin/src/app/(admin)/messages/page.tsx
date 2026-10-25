@@ -3,6 +3,7 @@ import { getMessages } from "@/lib/data";
 import { markMessageHandledAction, setMessageReplyAction } from "@/app/actions";
 import { dateTime } from "@/lib/format";
 import { PhoneLinks } from "@/components/contact-links";
+import { AutoRefresh } from "@/components/auto-refresh";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +36,8 @@ export default async function MessagesPage({
 
   return (
     <>
+      {/* naya message aaye to list khud update ho jaye */}
+      <AutoRefresh seconds={15} />
       <div className="topbar">
         <div>
           <h1>Messages</h1>

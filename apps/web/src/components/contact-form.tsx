@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { postJson } from "@/lib/http-json";
 import { apiUrl } from "@/lib/api-base";
 import { useStoreSettings } from "@/components/store-settings-provider";
@@ -28,6 +29,7 @@ function mailtoHref(
 }
 
 export function ContactForm() {
+  const router = useRouter();
   const { supportEmail, whatsapp } = useStoreSettings();
   const SUPPORT_EMAIL = supportEmail || FALLBACK_EMAIL;
   const SUPPORT_WHATSAPP = whatsapp || FALLBACK_WHATSAPP;
@@ -49,6 +51,8 @@ export function ContactForm() {
       }
       setStatus("done");
       setForm({ name: "", email: "", phone: "", subject: "Order enquiry", message: "" });
+      // page state turant update ho jaye (owner ask: "send karne ke baad update ho")
+      router.refresh();
     } catch {
       setError("Network error, please try again.");
       setStatus("error");
@@ -77,6 +81,14 @@ export function ContactForm() {
           >
             Email us
           </a>
+          <button
+            type="button"
+            onClick={() => setStatus("idle")}
+            className="border border-[#c9bfb4] px-4 py-2 text-[11px] font-semibold tracking-[.12em] text-[#5c534b] uppercase"
+            data-testid="contact-again"
+          >
+            Send another
+          </button>
         </div>
       </div>
     );

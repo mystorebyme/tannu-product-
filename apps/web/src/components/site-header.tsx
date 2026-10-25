@@ -208,7 +208,11 @@ export function SiteHeader() {
         }`}
       >
         {/* mobile: [menu] [logo center] [search · cart] — tablet/desktop: [logo] [nav] [icons] */}
-        <div className="mx-auto grid h-[66px] max-w-[1400px] grid-cols-[auto_1fr_auto] items-center gap-2 px-3 sm:h-[74px] sm:px-4 lg:flex lg:h-[80px] lg:justify-between lg:gap-4 lg:px-6">
+        {/*
+          Logo hamesha **center** (owner ask) —
+          mobile: [menu] [LOGO] [icons] · desktop: [nav] [LOGO] [icons]
+        */}
+        <div className="mx-auto grid h-[66px] max-w-[1400px] grid-cols-[auto_1fr_auto] items-center gap-2 px-3 sm:h-[74px] sm:px-4 lg:h-[80px] lg:grid-cols-[1fr_auto_1fr] lg:gap-4 lg:px-6">
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
@@ -224,12 +228,12 @@ export function SiteHeader() {
           <Link
             href="/"
             aria-label="Designer Clothing home"
-            className="col-start-2 flex min-w-0 shrink-0 items-center justify-center lg:col-start-auto lg:justify-start"
+            className="col-start-2 row-start-1 flex min-w-0 shrink-0 items-center justify-center lg:col-start-2 lg:justify-center"
           >
             <BrandLockup />
           </Link>
 
-          <nav className="hidden min-w-0 flex-1 items-center justify-center gap-2 lg:flex xl:gap-6">
+          <nav className="hidden min-w-0 items-center justify-start gap-2 lg:col-start-1 lg:row-start-1 lg:flex xl:gap-5">
             {quickLinks.map((link) => {
               const active = pathname === link.href;
               return (
@@ -251,7 +255,7 @@ export function SiteHeader() {
             })}
           </nav>
 
-          <div className="col-start-3 flex items-center gap-0.5 sm:gap-1.5 lg:col-start-auto">
+          <div className="col-start-3 row-start-1 flex items-center justify-end gap-0.5 sm:gap-1.5 lg:col-start-3">
             <button
               type="button"
               onClick={() => setSearchOpen((open) => !open)}

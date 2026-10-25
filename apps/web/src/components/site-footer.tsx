@@ -69,11 +69,12 @@ export function SiteFooter() {
   return (
     <footer className="mt-16 bg-[#8a000e] text-white">
       <div className="mx-auto max-w-[1400px] px-4 pt-11 pb-8 lg:px-6">
-        <div className="flex flex-col items-center">
+        {/* logo footer me bhi center (owner ask) */}
+        <div className="flex w-full flex-col items-center justify-center text-center">
           <Link
             href="/"
             aria-label="Designer Clothing home"
-            className="inline-block"
+            className="mx-auto inline-flex justify-center"
           >
             {/* same brand lockup jo header me hai — maroon band par gold wordmark */}
             <BrandLockup tone="light" size="large" variant="stacked" />

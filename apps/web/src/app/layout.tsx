@@ -9,6 +9,7 @@ import { AnnouncementBar } from "@/components/announcement-bar";
 import { WishlistProvider } from "@/components/wishlist-provider";
 import { StoreSettingsProvider } from "@/components/store-settings-provider";
 import { StoreStructuredData } from "@/components/store-structured-data";
+import { Analytics } from "@/components/analytics";
 import { brandAssets, logoMark, siteConfig } from "@/config/site";
 import { assetUrl } from "@/lib/format";
 
@@ -52,6 +53,12 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image" },
   alternates: { canonical: "/" },
   robots: { index: true, follow: true },
+  /**
+   * Google Search Console — owner ka verification tag.
+   * (Backup: `public/googleb3b0e3defc1daa17.html` bhi serve hota hai, dono method
+   * se verification pass ho jayega.)
+   */
+  verification: { google: "hFaqyp-9LdUXSKPA9RF011TkO2m_-7AUMasXqm_0dGI" },
 };
 
 export const viewport: Viewport = {
@@ -121,6 +128,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <main id="main-content" className="min-h-[60vh]">{children}</main>
             <SiteFooter />
             <FloatingHelp />
+        {/* traffic tracking — Vercel Analytics + optional GA4 */}
+        <Analytics />
           </WishlistProvider>
         </CartProvider>
         </StoreSettingsProvider>

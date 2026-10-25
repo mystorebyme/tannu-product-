@@ -47,7 +47,17 @@ export async function GET(request: Request) {
       signal: AbortSignal.timeout(15_000),
     });
     const raw = await response.text();
-    result.read = { status: response.status, ms: Date.now() - startedRead, body: raw.slice(0, 600) };
+    /**
+     * Apps Script kabhi JSON ki jagah Google ka **HTML page** bhej deta hai.
+     * Do hi wajah hoti hain (aur dono ka fix alag hai) — isliye seedha hint dete hain.
+     */
+    const looksHtml = /^\s*<(!doctype|html)/i.test(raw);
+    const scriptHint = !looksHtml
+      ? null
+      : /accounts\.google\.com|signin|Sign in|You need (access|permission)|permission/i.test(raw)
+        ? "Deployment ka access 'Anyone' nahi hai. Apps Script → Deploy → Manage deployments → ✏️ → Who has access: Anyone → Deploy."
+        : "Purana/archived deployment URL lag raha hai (ya script error). Apps Script → Deploy → Manage deployments → ✏️ → Version: New version → Deploy, aur wahi /exec URL Vercel me GOOGLE_SHEETS_WEBAPP_URL me daalein.";
+    result.read = { status: response.status, ms: Date.now() - startedRead, body: raw.slice(0, 600), scriptHint };
     /**
      * Sabse zaroori check: script **kaun si sheet** pakde hue hai?
      * Mismatch = rows kisi doosri (copy) sheet me jaa rahe hain.
