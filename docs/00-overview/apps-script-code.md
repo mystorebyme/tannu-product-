@@ -1,51 +1,68 @@
-# Apps Script — poora code (copy-paste)
+# Apps Script v3 — poora code (copy-paste)
 
 > Ye file `scripts/google-apps-script/liksha-sheets.gs` se **automatic** bani hai
-> (`node scripts/export-apps-script.mjs`). Yahan se copy kariye, code hamesha latest rahega.
+> (`node scripts/apps-script:export` → `node scripts/export-apps-script.mjs`).
+> Yahan se copy kariye, code hamesha latest rahega.
+>
+> **Step-by-step guide:** [`apps-script-setup-steps.md`](./apps-script-setup-steps.md)
+> (permission, deploy, Vercel env, troubleshooting — sab detail me)
 
-**Kya karta hai:** website ke sab events Google Sheet me likhta hai —
+**Kya karta hai:** website ke sab events Google Sheet me likhta hai (16 tabs) —
 
 | Tab | Kya aata hai |
 | --- | --- |
 | **Settings** | phone, WhatsApp, email, UPI ID, UPI name, announcement, free shipping, GSTIN |
+| **Dashboard** | aaj ke orders, revenue, pending payment, naye messages (script khud bharta hai) |
 | **Orders** | har order + har status change (append-only timeline) |
+| **OrderItems** | order ki har item alag row (size, colour, qty, price) |
 | **Payments** | UTR submit, "payment hui hai" claim, verify, fail, reverse |
+| **Invoices** | GST invoice (taxable value, CGST/SGST/IGST, total) |
+| **Shipments** | courier, AWB, tracking URL, dispatch/delivery status |
 | **Checkout** | funnel: checkout khula → review → order placed → order fail (reason ke saath) |
-| **Messages** | contact form |
-| **Newsletter** | email subscribers |
-| **Audit** | self-check / manual entries |
+| **Messages** | contact form (+ replied status) |
+| **Newsletter** | email subscribers (duplicate apne aap skip) |
+| **Reviews** | customer reviews (rating, verified, approve/pending) |
+| **Coupons** | coupon codes, uses, limit, active |
+| **Inventory** | stock ka har change (kisne, kitna, kyun) |
+| **Audit** | admin panel ki activity |
+| **Errors** | website/script ki error (debug ke liye) |
+| **Sync** | har sync call ka hisaab (kab, kya, kitni rows) |
 
 ---
 
-## Steps (ek baar, ~5 minute)
+## Steps (ek baar, ~4 minute)
 
 1. Google Sheet kholein → **Extensions → Apps Script**.
-2. `Code.gs` ka default code poora delete kariye → neeche wala **poora code** paste kariye.
+2. `Code.gs` ka purana code **poora delete** kariye (Ctrl+A → Delete) →
+   neeche wala **poora code** paste kariye.
 3. Sabse upar `var TOKEN = 'CHANGE-ME-liksha-token';` me apna lamba random word daaliye
-   (jaise `liksha-9f3k2m-r23`). **Yahi token Vercel me daalna hai** — yaad rakhein.
+   (jaise `liksha-9f3k2m-2026`). **Yahi token Vercel me daalna hai** — dono jagah same.
 4. **Ctrl+S** (save).
 5. Editor me upar function dropdown → **`setup`** → **Run** → permission maange to
    **Review permissions → apna account → Advanced → Go to … (unsafe) → Allow**.
-   Sheet me 7 tab ban jayenge.
+   → Sheet me 16 tab + headers + default settings ban jayenge.
 6. **Deploy → New deployment → (cog) Web app**
-   - Description: `liksha v2`
+   - Description: `liksha v3`
    - **Execute as: Me**
-   - **Who has access: Anyone**
+   - **Who has access: Anyone**   ⚠️ ("Anyone with a Google account" **nahi**)
    - **Deploy** → **Web app URL** copy kariye (`.../exec` par khatam hota hai).
 7. Test: browser me
    `<Web app URL>?action=health&token=<TOKEN>`
-   → `{"ok":true,"version":2,"spreadsheet":"…","sheets":[…]}` aana chahiye.
-   Phir editor me function **`testAppend`** → **Run** → Orders + Checkout tab me test row.
-8. **Mujhe 2 value bhej dijiye:** Web app URL + TOKEN. Main Vercel
-   (`liksha-clothing` → Settings → Environment Variables) me daal kar redeploy kar dunga:
+   → `{"ok":true,"version":"r27-1","spreadsheet":"…","sheets":[…]}` aana chahiye.
+   (version purana dikhe to Step 6 dobara — sirf Ctrl+S se code nahi chalta.)
+8. **2 value Vercel me daaliye** (project `liksha-clothing` → Settings → Environment
+   Variables → **Redeploy**):
 
    | Variable | Value |
    | --- | --- |
    | `GOOGLE_SHEETS_WEBAPP_URL` | aapka `/exec` URL |
    | `GOOGLE_SHEETS_TOKEN` | aapka token |
-   | *(optional)* `GOOGLE_SHEETS_SETTINGS_CSV_URL` | Settings tab ka published CSV link |
 
-9. Verify (main ya aap): `node scripts/sheets-selfcheck.mjs "<URL>" "<TOKEN>"`
+9. Verify: website par test message + test order → Messages / Orders / OrderItems tabs me
+   rows. Ya `node scripts/sheets-selfcheck.mjs "<URL>" "<TOKEN>"`.
+
+**Optional:** function `installTriggers` → Run (roz 9 PM Dashboard + Sunday backup),
+`testSelf` (poora check), `repairHeaders` (header repair), `backupNow` (Drive me copy).
 
 ---
 
@@ -53,7 +70,7 @@
 
 Apps Script me code update karne ke baad **naya version deploy** karna padta hai:
 **Deploy → Manage deployments → (pencil) Edit → Version: New version → Deploy**.
-Warna purana code hi chalta rehta hai.
+Warna purana code hi chalta rehta hai — owner ke saath yahi hua tha.
 
 ## Sheet ke rules
 
@@ -62,6 +79,7 @@ Warna purana code hi chalta rehta hai.
 - Naya column add karna theek hai (script khud bhi missing column add kar deta hai).
 - `Who has access: Anyone` rakhein — website anonymous request bhejti hai. Data safe hai
   kyunki token ke bina script kuch read/write nahi karta.
+- `/exec` URL aur TOKEN kisi ko na dein — inse sheet me row daali ja sakti hai.
 
 ---
 
