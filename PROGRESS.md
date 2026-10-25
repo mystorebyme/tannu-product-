@@ -257,3 +257,17 @@ Owner ke 5 asks, sab ek hi round me:
 - **Tests:** unit **114/0** (naya `tests/unit/round23.test.ts`, `tests/unit/apps-script.test.ts` — Apps Script
   ko fake Google Sheets par chala kar rows/settings verify), e2e `tests/e2e/round23.mjs` **31/0**,
   payments 35/0, smoke 87/0, links 40/0, responsive 43/0, round16 37/0, breakpoints 48/0.
+
+### Round 23 — verification & delivery
+
+- **CI green:** typecheck · build · test · production-build smoke (`40156640414`).
+- **Live:** store + admin `8c60324` deployed; health `db: up`, products 446.
+- **Live automated flow:** `payments` 28/0, naya `round23` 18/0 (state guard 400, order create/pay/tracking <2s,
+  claim 202 → processing, WhatsApp screenshot, galat last-4 par 403).
+- **Local:** unit 114/0, integration 40/0, db 9/0, payments 35/0, smoke 87/0, links 40/0, responsive 43/0,
+  round16 37/0, breakpoints 48/0, round23 31/0.
+- **Bug fix jo tests ne pakda:** `after()` request scope ke bahar throw karta hai → `runInBackground()` helper
+  (test/CLI me fire-and-forget).
+- **Sheet ki asli wajah:** Vercel project me `GOOGLE_SHEETS_WEBAPP_URL` + `GOOGLE_SHEETS_TOKEN` env hi nahi hain
+  (confirm kiya env list se) — owner se naya `/exec` URL + token chahiye.
+- Docs: `docs/00-overview/owner-report-round23.md`, `docs/00-overview/sheet-setup-owner.md`, `docs/08-testing/round23-audit.md`.
