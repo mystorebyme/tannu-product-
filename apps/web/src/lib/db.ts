@@ -24,24 +24,52 @@ let pool: Pool | null = null;
 
 /**
  * Serverless (Vercel) par har invocation apna pool banata hai. Managed Postgres
- * ka pooler (Supabase session mode) sirf ~15 clients deta hai — 5-per-instance
- * pool rakhne par `EMAXCONNSESSION max clients reached` aata hai aur order page
- * / UTR submit 500 dete hain. Isliye serverless par pool chhota + jaldi idle.
+ * ka pooler **session mode** me sirf ~15 clients deta hai — isse
+ * `EMAXCONNSESSION max clients reached` aata hai aur order page / contact form /
+ * UTR submit 500 dete hain (owner ko "kuch kaam nahi kar raha" dikhta hai).
+ *
+ * Isliye:
+ *   - serverless par pool sirf **1** connection;
+ *   - connection jaldi idle chhod do (1s) — doosri invocation ko jagah mile;
+ *   - Supabase pooler ho aur session port (5432) par ho to **transaction mode
+ *     (6543)** par switch kar dete hain (wahan limit bahut zyada hai);
+ *   - `DATABASE_URL_POOLED` set karein to wahi use hoga (owner ka control).
  */
 const IS_SERVERLESS = Boolean(process.env.VERCEL);
 const POOL_MAX = Number(process.env.DB_POOL_MAX ?? (IS_SERVERLESS ? 1 : 5));
 
+/** Pooler URL — session mode (5432) ko transaction mode (6543) me badal dete hain. */
+export function pooledConnectionString(raw: string = DATABASE_URL): string {
+  const override = (process.env.DATABASE_URL_POOLED ?? "").trim();
+  if (override) return override;
+  if (!raw) return raw;
+  try {
+    const url = new URL(raw);
+    // Supabase: pooler.supabase.com:5432 = session mode, :6543 = transaction mode
+    if (url.hostname.endsWith("pooler.supabase.com") && (url.port === "5432" || url.port === "")) {
+      url.port = "6543";
+      return url.toString();
+    }
+    return raw;
+  } catch {
+    return raw;
+  }
+}
+
 export function getPool(): Pool {
   if (!DATABASE_URL) throw new Error("DATABASE_URL set nahi hai — Postgres mode available nahi.");
   if (!pool) {
+    const connectionString = pooledConnectionString();
     pool = new Pool({
-      connectionString: DATABASE_URL,
-      // Render/Neon jaise managed Postgres ke liye SSL zaroori hota hai.
-      ssl: /localhost|127\.0\.0\.1/.test(DATABASE_URL) ? undefined : { rejectUnauthorized: false },
+      connectionString,
+      // Render/Neon/Supabase jaise managed Postgres ke liye SSL zaroori hota hai.
+      ssl: /localhost|127\.0\.0\.1/.test(connectionString) ? undefined : { rejectUnauthorized: false },
       max: POOL_MAX,
-      idleTimeoutMillis: IS_SERVERLESS ? 5_000 : 30_000,
+      idleTimeoutMillis: IS_SERVERLESS ? 1_000 : 30_000,
       allowExitOnIdle: IS_SERVERLESS,
-      connectionTimeoutMillis: 10_000,
+      connectionTimeoutMillis: 8_000,
+      // purani connection chhod kar nayi lo — pooler ke stale client nahi jamte
+      maxUses: IS_SERVERLESS ? 50 : Infinity,
     });
     // idle client error se process crash na ho
     pool.on("error", (error) => console.error("[db] idle client error", error.message));
@@ -49,11 +77,18 @@ export function getPool(): Pool {
   return pool;
 }
 
+/** Pooler bhara ho to pool naya banao (purani connections chhod do). */
+async function resetPool(): Promise<void> {
+  const current = pool;
+  pool = null;
+  if (current) await current.end().catch(() => undefined);
+}
+
 /** Pooler ke transient errors — ek chhota retry user ko 500 se bacha leta hai. */
 const TRANSIENT_DB_ERROR =
   /EMAXCONNSESSION|too many clients|ECONNRESET|ECONNREFUSED|ETIMEDOUT|timeout exceeded when trying to connect|Connection terminated/i;
 
-async function withDbRetry<T>(run: () => Promise<T>, attempts = 3): Promise<T> {
+async function withDbRetry<T>(run: () => Promise<T>, attempts = 5): Promise<T> {
   let lastError: unknown;
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     try {
@@ -62,7 +97,9 @@ async function withDbRetry<T>(run: () => Promise<T>, attempts = 3): Promise<T> {
       lastError = error;
       const message = error instanceof Error ? error.message : String(error);
       if (!TRANSIENT_DB_ERROR.test(message) || attempt === attempts) throw error;
-      await new Promise((resolve) => setTimeout(resolve, 200 * attempt));
+      // pool bhara hai to naya pool banane se turant jagah mil jaati hai
+      if (/EMAXCONNSESSION|too many clients/i.test(message)) await resetPool();
+      await new Promise((resolve) => setTimeout(resolve, Math.min(2_500, 300 * attempt)));
     }
   }
   throw lastError;
