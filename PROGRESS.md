@@ -306,3 +306,28 @@ Owner ke 5 asks, sab ek hi round me:
   local same pages 6 ms / 36 ms / 14 ms).
 - Admin clickable-number audit: `PhoneLinks` (call + WhatsApp) dashboard/orders/customers/messages par,
   order number → `/orders/[id]` jahan contact edit + status + tracking + payment verify sab hai — **confirm**.
+
+### R24b — sheet write ka asli bug pakda (copy-sheet) — 2026-10-25
+
+**Kya mila:** owner ne Apps Script deploy kar diya (`/exec` Zinda, token OK, reply JSON). Lekin
+sheet khaali thi. `scripts/google-apps-script/liksha-sheets.gs` ka `book_()` sabse pehle
+`SpreadsheetApp.getActiveSpreadsheet()` dekhta tha — yaani "jis sheet ke saath script bana hai".
+Owner ka script `prkigothwal@gmail.com` se bana hai aur kisi **copy** ke saath bound hai, isliye
+site ke saare rows (Orders/Payments/Checkout) us copy me ja rahe the, asli sheet me nahi.
+
+**Saboot:** script ke `action=health` ne bataya `Orders: 1, Payments: 1, Checkout: 1` rows —
+aur `1k8fsea04…` sheet me us waqt 0 rows. (Self-test ne `written: 1` bhi diya, par row copy me.)
+
+**Fix (code):**
+- `book_()` ab **`SPREADSHEET_ID` pehle** dekhta hai, phir active, phir Script Property `SHEET_ID`;
+  permission fail ho to saaf error ("is Google account ko Editor access dijiye").
+- `action=health` ab `spreadsheetId` + `spreadsheetUrl` bhi deta hai.
+- `apps/web/src/lib/google-sheets.ts` → `EXPECTED_SHEET_ID`, `readSheetHealth()`;
+  `GET /api/admin/sheet` → `health`, `expectedSheetId`, `sheetMismatch`.
+- Admin → Google Sheet page par **loud mismatch warning** (script doosri sheet pakde ho to).
+- Naya key-gated `/api/sheet-selftest` (env `SHEET_SELFTEST_KEY`) — read + write dono ka asli
+  jawab JSON me (status, redirect, timing). Isse debugging browser se hoti hai.
+- `tests/unit/apps-script.test.ts` mock book me `getId`/`getUrl` (117 unit tests green).
+
+**Baaki:** owner ko naya code paste + **New version** deploy karna hai (tab hi id wali sheet me
+likhega). Uske baad `/api/sheet-selftest` + connector se row confirm karna hai.
