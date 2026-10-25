@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { EXPECTED_SHEET_ID } from "@/lib/google-sheets";
+import { EXPECTED_SHEET_ID , SHEET_REQUEST_HEADERS } from "@/lib/google-sheets";
 
 /**
  * Sheet write selftest — **sirf debugging ke liye**, secret key ke bina band.
@@ -51,7 +51,7 @@ export async function GET(request: Request) {
     if (token) health.searchParams.set("token", token);
     const response = await fetch(health, {
       cache: "no-store",
-      headers: { accept: "application/json" },
+      headers: SHEET_REQUEST_HEADERS,
       signal: AbortSignal.timeout(15_000),
     });
     const raw = await response.text();
@@ -205,7 +205,7 @@ export async function GET(request: Request) {
     const response = await fetch(config, {
       method: "POST",
       cache: "no-store",
-      headers: { "content-type": "text/plain;charset=utf-8", accept: "application/json" },
+      headers: { ...SHEET_REQUEST_HEADERS, "content-type": "text/plain;charset=utf-8" },
       body: JSON.stringify({
         token,
         action: "append",

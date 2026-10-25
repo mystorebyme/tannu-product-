@@ -6,6 +6,34 @@ aur Settings tab se site ki values (phone, UPI, announcement) control hoti hain.
 
 Code yahan hai: **[`apps-script-code.md`](./apps-script-code.md)** (poora copy karne layak)
 
+
+---
+
+## ⚠️ SABSE PEHLE — sheet ka access (yahi asli problem hai)
+
+Aapke sheet (`1k8fsea04…`) **prakashgothwal370@gmail.com** ka hai, par Apps Script
+**prkigothwal@gmail.com** se chal rahi hai. Isi wajah se har function fail ho raha hai:
+
+```
+You do not have permission to access the requested document.
+```
+
+**Fix — 2 minute (koi bhi ek):**
+
+**A) Sheet share kar do (sabse aasan, URL wahi rahega):**
+1. Jis account me sheet hai (`prakashgothwal370@gmail.com`) us se sheet kholein.
+2. **Share** (upar right) → `prkigothwal@gmail.com` daalein → **Editor** → **Send**.
+3. Apps Script me wapas → function **`setup`** → **▶ Run**. Ab chalega ✅
+
+**B) Script usi account se banao jiske paas sheet hai:**
+1. `prakashgothwal370@gmail.com` se sheet kholein → **Extensions → Apps Script**.
+2. Poora code paste karein → `setup` → Run (permission → Allow).
+3. Deploy → New deployment → Web app (Execute as **Me**, access **Anyone**) → naya
+   `/exec` URL copy → mujhe bhej dein (main Vercel me daal dunga).
+
+> Kaun sa account script chala raha hai — pata karna ho to function **`whoAmI`** → Run.
+> Poora check chahiye to function **`doctor`** → Run (log me report + problems).
+
 ---
 
 ## Step 0 — pehle purana code hatao (zaroori)
@@ -158,6 +186,7 @@ Settings tab me jo value badlegi, site par **15 second** me live ho jayegi
 
 | Dikh raha hai | Matlab | Fix |
 |---|---|---|
+| **`You do not have permission to access the requested document`** | script ka account sheet ka owner nahi hai | upar wala **access section** (Share → Editor ya script sheet ke andar se banaiye) |
 | `ReferenceError: SPREADSHEET_ID is not defined` | purana code chal raha hai | Step 1 se dobara paste + Step 4 (**New version**) |
 | Google ka **login page** (HTML) | access "Anyone" nahi | Deploy → Manage deployments → ✏️ → Who has access: **Anyone** → Deploy |
 | `unauthorized — token match nahi hua` | token alag hai | script ka TOKEN = Vercel ka `GOOGLE_SHEETS_TOKEN` |

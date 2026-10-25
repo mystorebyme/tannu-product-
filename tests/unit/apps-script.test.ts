@@ -79,7 +79,7 @@ function makeSheet(name: string, id: number, grid: Grid = []) {
 
 function loadScript(
   token = "test-token",
-  options: { dropSpreadsheetId?: boolean; activeIsCopy?: boolean } = {},
+  options: { dropSpreadsheetId?: boolean; activeIsCopy?: boolean; openByIdFails?: boolean; activeIsNull?: boolean } = {},
 ) {
   const file = path.join(process.cwd(), "scripts/google-apps-script/liksha-sheets.gs");
   let source = fs.readFileSync(file, "utf8").replace(
@@ -133,8 +133,22 @@ function loadScript(
 
   const sandbox: Record<string, unknown> = {
     SpreadsheetApp: {
-      getActiveSpreadsheet: () => (options.activeIsCopy ? copyBook : book),
-      openById: () => book,
+      getActiveSpreadsheet: () => (options.activeIsNull ? null : options.activeIsCopy ? copyBook : book),
+      openById: () => {
+        /**
+         * Owner ka asli case: script `prkigothwal@gmail.com` se chalti hai aur sheet
+         * doosre account ki hai → Google "You do not have permission to access the
+         * requested document" deta hai.
+         */
+        if (options.openByIdFails) {
+          throw new Error("You do not have permission to access the requested document.");
+        }
+        return book;
+      },
+    },
+    Session: {
+      getEffectiveUser: () => ({ getEmail: () => "prkigothwal@gmail.com" }),
+      getActiveUser: () => ({ getEmail: () => "prkigothwal@gmail.com" }),
     },
     ContentService: {
       MimeType: { JSON: "json" },
@@ -642,4 +656,70 @@ test("v3: galat token par naye endpoints bhi block hain", () => {
   assert.equal(response.ok, false);
   const invoices = sheets.find((sheet) => sheet.getName() === "Invoices")!;
   assert.equal(invoices.rows.length, 1, "sirf header");
+});
+
+test("v3: 'You do not have permission' par saaf message + Share ka raasta", () => {
+  const { sandbox } = loadScript("test-token", { openByIdFails: true, activeIsCopy: false, activeIsNull: true });
+  const body = sandbox.doGet({ parameter: { token: "test-token", action: "health" } }).getJson();
+  assert.equal(body.ok, false);
+  assert.match(String(body.error), /permission|access/i);
+  // hint me account + "Share" dono hone chahiye (owner ko seedha fix pata chale)
+  assert.match(String(body.hint || ""), /Share/);
+  assert.match(String(body.hint || ""), /prkigothwal@gmail\.com/);
+});
+
+test("v3: doctor permission problem ko pakadta hai aur account batata hai", () => {
+  const broken = loadScript("test-token", { openByIdFails: true, activeIsCopy: false, activeIsNull: true });
+  const report = broken.sandbox.doctor();
+  assert.equal(report.sheetAccess, false);
+  assert.match(String(report.problems.join(" ")), /Share/);
+  assert.equal(report.account, "prkigothwal@gmail.com");
+
+  const healthy = loadScript();
+  healthy.sandbox.setup();
+  const ok = healthy.sandbox.doctor();
+  assert.equal(ok.sheetAccess, true);
+  assert.equal(ok.sheetName, "Liksha Test Sheet");
+  assert.match(String(ok.problems.join(" ")), /koi problem nahi/);
+  assert.ok(ok.tabs.length >= 16);
+});
+
+test("v3: whoAmI batata hai kaun sa account chal raha hai", () => {
+  const { sandbox } = loadScript();
+  sandbox.setup();
+  const info = sandbox.whoAmI();
+  assert.equal(info.effectiveUser, "prkigothwal@gmail.com");
+  assert.equal(info.sheetAccess, true);
+  assert.equal(info.sheetName, "Liksha Test Sheet");
+});
+
+test("v3: permission error par setup/repair ka message seedha FIX batata hai", () => {
+  const { sandbox } = loadScript("test-token", { openByIdFails: true, activeIsNull: true });
+  let message = "";
+  try {
+    sandbox.setup();
+  } catch (error) {
+    message = String((error as Error).message);
+  }
+  assert.match(message, /setup fail/i);
+  assert.match(message, /Share/);
+  assert.match(message, /prkigothwal@gmail\.com/, "executing account batana chahiye");
+
+  let repairMessage = "";
+  try {
+    sandbox.repairHeaders();
+  } catch (error) {
+    repairMessage = String((error as Error).message);
+  }
+  assert.match(repairMessage, /Share/);
+});
+
+test("v3: guard ke bina wale functions bhi sheet access par hi chalte hain", () => {
+  const { sandbox, sheets } = loadScript();
+  sandbox.setup();
+  const fixed = sandbox.repairHeaders();
+  assert.ok(Array.isArray(fixed), "repairHeaders array lautaata hai");
+  const migrated = sandbox.migrate();
+  assert.ok(Array.isArray(migrated.headers));
+  assert.ok(sheets.length >= 16);
 });

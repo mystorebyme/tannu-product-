@@ -57,6 +57,27 @@ const WRITE_TIMEOUT_MS = 6_000;
 /** Sheet page load ko kabhi block na kare — 2.5s ke baad defaults/DB hi chalega. */
 const CACHE_MS = 15_000;
 
+/**
+ * Google Apps Script ko browser jaisi request chahiye.
+ *
+ * Kyun (25 Oct 2026): bina `User-Agent` bheje Google datacenter IP (Vercel) ko
+ * bot samajh kar `window['ppConfig']` wala JS challenge page lauta deta hai —
+ * request script tak pahunchti hi nahi, aur owner ko "permission / HTML" problem
+ * dikhti hai. Isliye har call me normal browser UA + accept headers jaate hain.
+ */
+const BROWSER_UA =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
+
+export const SHEET_REQUEST_HEADERS: Record<string, string> = {
+  "user-agent": BROWSER_UA,
+  accept: "application/json",
+  "accept-language": "en-IN,en;q=0.9",
+};
+
+function sheetHeaders(extra: Record<string, string> = {}): Record<string, string> {
+  return { ...SHEET_REQUEST_HEADERS, ...extra };
+}
+
 export function googleSheetsConfig(): { url: string; token: string } | null {
   const url = (process.env.GOOGLE_SHEETS_WEBAPP_URL ?? "").trim();
   if (!url) return null;
@@ -106,7 +127,7 @@ export async function readSheetSettings(options: { fresh?: boolean } = {}): Prom
     if (config.token) endpoint.searchParams.set("token", config.token);
     const response = await fetch(endpoint, {
       cache: "no-store",
-      headers: { accept: "application/json" },
+      headers: sheetHeaders(),
       signal: AbortSignal.timeout(READ_TIMEOUT_MS),
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -133,7 +154,7 @@ async function readSettingsFromCsv(options: { fresh?: boolean } = {}): Promise<S
   try {
     const response = await fetch(url, {
       cache: "no-store",
-      headers: { accept: "text/csv" },
+      headers: sheetHeaders({ accept: "text/csv" }),
       signal: AbortSignal.timeout(READ_TIMEOUT_MS),
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -165,7 +186,7 @@ export async function writeSheetSettings(settings: {
     const response = await fetch(config.url, {
       method: "POST",
       cache: "no-store",
-      headers: { "content-type": "text/plain;charset=utf-8", accept: "application/json" },
+      headers: sheetHeaders({ "content-type": "text/plain;charset=utf-8" }),
       body: JSON.stringify({
         token: config.token,
         action: "settings_save",
@@ -215,7 +236,7 @@ export async function readSheetRecent(
     if (config.token) endpoint.searchParams.set("token", config.token);
     const response = await fetch(endpoint, {
       cache: "no-store",
-      headers: { accept: "application/json" },
+      headers: sheetHeaders(),
       signal: AbortSignal.timeout(READ_TIMEOUT_MS),
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -238,7 +259,7 @@ export async function appendSheetRows(appends: SheetAppend[]): Promise<boolean> 
       cache: "no-store",
       // Apps Script preflight (OPTIONS) handle nahi karta — isliye simple request
       // `text/plain` bhejte hain, script body ko JSON.parse karti hai. CORS error nahi aata.
-      headers: { "content-type": "text/plain;charset=utf-8", accept: "application/json" },
+      headers: sheetHeaders({ "content-type": "text/plain;charset=utf-8" }),
       body: JSON.stringify({ token: config.token, action: "append", rows: appends }),
       signal: AbortSignal.timeout(WRITE_TIMEOUT_MS),
     });
@@ -313,7 +334,7 @@ export async function readSheetHealth(): Promise<SheetHealth | null> {
     if (config.token) endpoint.searchParams.set("token", config.token);
     const response = await fetch(endpoint, {
       cache: "no-store",
-      headers: { accept: "application/json" },
+      headers: sheetHeaders(),
       signal: AbortSignal.timeout(READ_TIMEOUT_MS * 2),
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);

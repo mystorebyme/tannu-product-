@@ -316,9 +316,128 @@ function book_() {
     } catch (ignored) {}
     if (active) return active;
     throw new Error(
-      'Sheet "' + id + '" khul nahi rahi: ' + error.message +
-      ' — is Google account ko us sheet par Editor access dijiye (Share → Editor).'
+      'Sheet "' + id + '" khul nahi rahi' +
+      (executingEmail_() ? ' (' + executingEmail_() + ' se chal raha hai)' : '') +
+      ': ' + (error && error.message ? error.message : error) +
+      ' — FIX: Sheet → Share → ' + (executingEmail_() || 'jo account script chala raha hai') +
+      ' → Editor. (Ya script usi sheet ke andar se banaiye: Sheet → Extensions → Apps Script.)'
     );
+  }
+}
+
+/**
+ * Kis Google account se script chal rahi hai?
+ *
+ * Ye sabse zaroori sawaal hai jab "You do not have permission to access the
+ * requested document" aata hai — sheet kisi **doosre** account ki hoti hai aur
+ * is account ko us par Editor access nahi hota.
+ */
+function executingEmail_() {
+  try {
+    if (typeof Session !== 'undefined' && Session.getEffectiveUser) {
+      var effective = Session.getEffectiveUser().getEmail();
+      if (effective) return effective;
+    }
+  } catch (ignored) {}
+  try {
+    if (typeof Session !== 'undefined' && Session.getActiveUser) return Session.getActiveUser().getEmail() || '';
+  } catch (ignored) {}
+  return '';
+}
+
+/**
+ * `whoAmI` — function dropdown se Run kariye, **Execution log** me dikhega:
+ * kaun sa account chal raha hai, aur us account ko sheet mil rahi hai ya nahi.
+ * Permission wali error me sabse pehle yahi chalaiye.
+ */
+function whoAmI() {
+  var id = (typeof SPREADSHEET_ID === 'string' && SPREADSHEET_ID) || SHEET_ID_FALLBACK;
+  var info = { version: CODE_VERSION, effectiveUser: executingEmail_(), sheetId: id, sheetAccess: false, sheetName: '', error: '' };
+  try {
+    var book = SpreadsheetApp.openById(id);
+    info.sheetAccess = true;
+    info.sheetName = book.getName();
+  } catch (error) {
+    info.error = String(error && error.message ? error.message : error);
+  }
+  Logger.log(JSON.stringify(info, null, 2));
+  try {
+    book_().toast(
+      info.sheetAccess ? 'Sheet mil gayi ✔ (' + info.sheetName + ')' : 'Sheet access nahi — Share → Editor kariye',
+      'whoAmI',
+      8,
+    );
+  } catch (ignored) {}
+  return info;
+}
+
+/**
+ * `doctor` — poora health check ek jagah (log me padhne layak):
+ * account, sheet access, tabs, settings, token length, version.
+ * Kuch bhi fail ho to yahin pata chal jayega — pehle isi ko chalaiye.
+ */
+function doctor() {
+  var report = {
+    version: CODE_VERSION,
+    time: istNow_(),
+    account: executingEmail_(),
+    tokenSet: Boolean(TOKEN) && TOKEN !== 'CHANGE-ME-liksha-token',
+    tokenLength: String(TOKEN || '').length,
+    sheetId: (typeof SPREADSHEET_ID === 'string' && SPREADSHEET_ID) || SHEET_ID_FALLBACK,
+    sheetAccess: false,
+    sheetName: '',
+    tabs: [],
+    settingsKeys: 0,
+    problems: [],
+  };
+  try {
+    var book = SpreadsheetApp.openById(report.sheetId);
+    report.sheetAccess = true;
+    report.sheetName = book.getName();
+  } catch (error) {
+    report.problems.push(
+      'Sheet khul nahi rahi: ' + (error && error.message ? error.message : error) +
+      ' → Sheet → Share → ' + (report.account || 'script ka account') + ' → Editor',
+    );
+  }
+  if (report.sheetAccess) {
+    try {
+      report.tabs = sheetCounts_().map(function (row) {
+        return row.name + '(' + row.rows + ')';
+      });
+      report.settingsKeys = Object.keys(readSettings_()).length;
+    } catch (error) {
+      report.problems.push('Tabs/settings padhne me dikkat: ' + (error && error.message ? error.message : error) + ' → `setup` chalaiye');
+    }
+  }
+  if (!report.tokenSet) report.problems.push('TOKEN default par hai — apna lamba token daal kar Vercel me bhi wahi daaliye');
+  if (!report.problems.length) report.problems.push('koi problem nahi mili ✔');
+  Logger.log(JSON.stringify(report, null, 2));
+  return report;
+}
+
+/**
+ * Owner-facing functions ko saaf error ke saath chalane wala wrapper.
+ *
+ * Kyun: "You do not have permission to access the requested document" jaisi
+ * Google ki error samajhna mushkil hoti hai. Ye wrapper usko seedha FIX me
+ * badal deta hai — Apps Script ke **Execution log** me padhne layak.
+ */
+function guard_(name, fn) {
+  try {
+    return fn();
+  } catch (error) {
+    var message = String(error && error.message ? error.message : error);
+    var fix = /permission|access|document/i.test(message)
+      ? 'FIX: Sheet kholein → Share → ' + (executingEmail_() || 'jo account script chala raha hai') +
+        ' → Editor → Send. (Script isi account se chal rahi hai, sheet doosre account ki hai.)'
+      : 'Detail ke liye function `doctor` chalaiye (log me poora report aayega).';
+    Logger.log('❌ ' + name + ' fail hua: ' + message);
+    Logger.log('👉 ' + fix);
+    try {
+      book_().toast(name + ' fail: ' + fix, name, 10);
+    } catch (ignored) {}
+    throw new Error(name + ' fail: ' + message + ' — ' + fix);
   }
 }
 
@@ -467,6 +586,10 @@ function noteAudit_(actor, action, target, details) {
  * add hoti hain).
  */
 function setup() {
+  return guard_('setup', setup_);
+}
+
+function setup_() {
   var created = [];
   Object.keys(HEADERS).forEach(function (name) {
     var before = findSheet_(book_(), name);
@@ -506,6 +629,10 @@ function setup() {
 
 /** Owner ke liye — kabhi header toot jaye to dobara theek kar deta hai. */
 function repairHeaders() {
+  return guard_('repairHeaders', repairHeaders_);
+}
+
+function repairHeaders_() {
   var fixed = [];
   Object.keys(HEADERS).forEach(function (name) {
     var sheet = sheet_(name);
@@ -523,7 +650,9 @@ function repairHeaders() {
  * hai, isliye alag chalane ki zaroorat nahi.
  */
 function migrate() {
-  return { headers: repairHeaders(), dashboard: refreshDashboard_() };
+  return guard_('migrate', function () {
+    return { headers: repairHeaders_(), dashboard: refreshDashboard_() };
+  });
 }
 
 /* ═══════════════════════════ 7. SETTINGS ════════════════════════════════════ */
@@ -629,9 +758,10 @@ function orderStory_(orderNumber) {
   return found ? story : null;
 }
 
-/** Har tab kitni rows — health/stats me. */
+/** Har tab kitni rows — health/stats me (Settings sabse pehle). */
 function sheetCounts_() {
-  return Object.keys(HEADERS).map(function (name) {
+  var names = ['Settings'].concat(Object.keys(HEADERS));
+  return names.map(function (name) {
     var sheet = sheet_(name);
     return { name: name, tab: sheet.getName(), rows: Math.max(0, sheet.getLastRow() - 1) };
   });
@@ -1036,6 +1166,10 @@ function stockUpdate_(body) {
  * likhna kaam kar raha hai. Baad me in rows ko delete kar sakte hain.
  */
 function testAppend() {
+  return guard_('testAppend', testAppend_);
+}
+
+function testAppend_() {
   var stamp = istNow_();
   var written = appendRows_([
     {
@@ -1074,6 +1208,10 @@ function testAppend() {
  * padhi ja rahi hain ya nahi, aur write chal raha hai ya nahi. Log me dikhta hai.
  */
 function testSelf() {
+  return guard_('testSelf', testSelf_);
+}
+
+function testSelf_() {
   var report = { version: CODE_VERSION, time: now_(), checks: [] };
   function check(name, fn) {
     try {
@@ -1112,6 +1250,10 @@ function testSelf() {
  * Folder na mile to Drive ke root me copy banti hai.
  */
 function backupNow() {
+  return guard_('backupNow', backupNow_);
+}
+
+function backupNow_() {
   try {
     var book = book_();
     var name = 'Liksha backup ' + Utilities.formatDate(new Date(), TIMEZONE, 'yyyy-MM-dd HHmm');
@@ -1128,6 +1270,10 @@ function backupNow() {
 
 /** Daily dashboard refresh + weekly backup ke triggers laga do (ek hi baar). */
 function installTriggers() {
+  return guard_('installTriggers', installTriggers_);
+}
+
+function installTriggers_() {
   var existing = ScriptApp.getProjectTriggers();
   existing.forEach(function (trigger) {
     var handler = trigger.getHandlerFunction();
@@ -1141,9 +1287,11 @@ function installTriggers() {
 
 /** Trigger se chalta hai — Dashboard refresh + Sync note */
 function dailyRefresh() {
-  var rows = refreshDashboard_();
-  noteSync_('script', 'Dashboard', rows || 0, 'ok', 'daily refresh');
-  return rows;
+  return guard_('dailyRefresh', function () {
+    var rows = refreshDashboard_();
+    noteSync_('script', 'Dashboard', rows || 0, 'ok', 'daily refresh');
+    return rows;
+  });
 }
 
 /** Trigger se chalta hai — hafte me ek backup */
@@ -1250,7 +1398,15 @@ function doGet(e) {
     return json_({ ok: false, error: 'unknown action: ' + action });
   } catch (error) {
     logError_('doGet/' + action, error, params);
-    return json_({ ok: false, version: CODE_VERSION, error: String(error && error.message ? error.message : error) });
+    var getMessage = String(error && error.message ? error.message : error);
+    return json_({
+      ok: false,
+      version: CODE_VERSION,
+      error: getMessage,
+      hint: /permission|access/i.test(getMessage)
+        ? 'Sheet → Share → ' + (executingEmail_() || 'script ka account') + ' → Editor. Phir `setup` Run kariye.'
+        : undefined,
+    });
   }
 }
 
@@ -1366,13 +1522,23 @@ function doPost(e) {
     return json_({ ok: false, error: 'unknown action: ' + action });
   } catch (error) {
     logError_('doPost/' + action, error, { action: action });
-    return json_({ ok: false, version: CODE_VERSION, error: String(error && error.message ? error.message : error) });
+    var postMessage = String(error && error.message ? error.message : error);
+    return json_({
+      ok: false,
+      version: CODE_VERSION,
+      error: postMessage,
+      hint: /permission|access/i.test(postMessage)
+        ? 'Sheet → Share → ' + (executingEmail_() || 'script ka account') + ' → Editor. Phir `setup` Run kariye.'
+        : undefined,
+    });
   }
 }
 
 /* ═══════════════════════════ 14. OWNER CHEAT-SHEET ══════════════════════════
  *
  * Sheet me kabhi kuch toot jaye to:
+ *   • `whoAmI`       → kaun sa Google account chal raha hai + sheet mil rahi hai?
+ *   • `doctor`       → poora health check (permission error me sabse pehle yahi)
  *   • `testSelf`     → poora check, log me jawab
  *   • `setup`        → missing tabs/headers/settings add
  *   • `repairHeaders`→ sirf header repair
