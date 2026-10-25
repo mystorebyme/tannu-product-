@@ -354,3 +354,24 @@ likhega). Uske baad `/api/sheet-selftest` + connector se row confirm karna hai.
   → `rowInDb: true`); sheet write sirf owner ke Apps Script deploy par depend hai.
 - Published CSV (`pub?output=csv`) abhi bhi Google ki taraf se HTTP 500 deta hai —
   isliye settings ka fallback = code defaults (phone/UPI sahi) + admin panel.
+
+### R25 — live audit + sheet ka sach (maine khud dekha)
+
+- **Site-wide audit workflow** (`.github/workflows/live-audit.yml`, commit message me
+  `[audit]`) — production par chala: `smoke` (order → pay → GST invoice → track →
+  contact → newsletter), `links` (40 pages), `round16`, `round23` — **sab steps success**.
+  Sirf admin-only steps skip hue (unke liye `ADMIN_API_TOKEN` secret chahiye).
+- **Asli sheet (`1k8fsea04…`) seedha Google API se padhi**: Orders / Payments / Messages /
+  Checkout / Audit — **sab me sirf header, 0 data rows**. Settings tab me sahi
+  values (phone, UPI) hain.
+- Matlab: website ka **DB save chal raha hai**, par **sheet mirror abhi tak 0** — kyunki
+  owner ka Apps Script purana code chala raha hai (`{ok:false,"ReferenceError:
+  SPREADSHEET_ID is not defined"}`, HTTP 200 ke saath).
+- Isliye `.gs` me **`CODE_VERSION = 'r25-1'`** add kiya — `?action=health` ab batata hai
+  kaunsa code chal raha hai; `sheet-selftest` bhi `book.codeVersion` dikhata hai.
+- `readSheetSettings` me: Apps Script fail → **published CSV fallback** (pehle sirf null).
+- `writeSheetSettings` me: HTTP 200 + `{ok:false}` bhi fail (pehle success dikhta tha).
+- `docs/00-overview/sheet-setup-owner.md` me **self-check table** (owner khud 30 second me
+  verify kare) + aaj ka exact test result.
+- Domain ka sach: `www.likshaclothing.com` = purana Shopify store (hamara nahi) — DNS
+  chhua nahi. Vercel par apna domain add karne ke liye owner se naam chahiye.
