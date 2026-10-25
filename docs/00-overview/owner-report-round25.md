@@ -105,3 +105,23 @@ se zyada data. Us waqt tak Vercel Pro ($20) ka option hai — abhi zaroorat nahi
 | `tests/unit/apps-script.test.ts` | owner ki galti (SPREADSHEET_ID line delete) simulate karke test — **120 tests pass** |
 | `.github/workflows/live-audit.yml` | poora live audit ek command me |
 | `.github/workflows/keep-warm.yml` | 10 min me 4 halki request → cold start kam, page fast |
+
+---
+
+## 🔧 25 Oct (shaam) — "message kaam nahi kar raha" ke 3 asli bug (fix ho gaye)
+
+| # | Bug | Kya hota tha | Fix |
+| --- | --- | --- | --- |
+| 1 | Contact form sheet mirror `void promise` se bhejta tha | Vercel response ke baad function freeze → **sheet me row kabhi nahi jaati** (DB me chala jaata) | `after()` (Next.js) — response ke baad bhi kaam poora hota hai |
+| 2 | Sheet ka jawab HTML error page aane par bhi "success" | Admin/owner ko lagta "mirror ho gaya", asal me kuch nahi | ab JSON na aaye to **fail** (log + `false`) |
+| 3 | Postgres pooler: `EMAXCONNSESSION max clients reached` | DB connection limit khatam → order page / contact form / UTR **500** ("kuch bhi kaam nahi kar raha") | pool 1 connection, 1s idle, **transaction-mode pooler (6543)**, pool reset + 5 retries |
+
+Saath me:
+
+- **Admin → Messages** me ab **New / Replied / All** tabs hain (count ke saath) — naya message
+  default view me sabse upar.
+- Admin aur storefront ka `ADMIN_API_TOKEN` **same** set kar diya (pehle mismatch ho sakta tha →
+  admin me message dikhta hi nahi).
+- Saare WhatsApp links ab `wa.me/91XXXXXXXXXX` (country code ke bina link invalid hota tha).
+- DB down hone par bhi form **kabhi chup-chaap fail nahi** hota — error + WhatsApp/email
+  fallback dikhta hai.
