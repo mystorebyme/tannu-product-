@@ -165,6 +165,31 @@ export function UpiPayment({
     setBusy(false);
   }
 
+  /**
+   * "Paisa kat gaya par UTR nahi mila" — customer atakta nahi. Order verify ke
+   * liye `processing` ho jaata hai (paisa confirm tab hi hoga jab admin match kare).
+   */
+  async function claimPaid() {
+    if (!/^\d{4}$/.test(last4)) {
+      setError("Apne mobile number ke last 4 digit daaliye (order isi number par hai).");
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    const result = await postJson<{ ok?: boolean; error?: string }>(
+      apiUrl("/api/payments/claim"),
+      { orderNumber, phoneLast4: last4 },
+      { timeoutMs: 15_000 },
+    );
+    setBusy(false);
+    if (!result.data?.ok) {
+      setError(result.data?.error ?? result.error ?? "Claim save nahi hua — WhatsApp par screenshot bhej dijiye.");
+      return;
+    }
+    setSubmitted(true);
+    router.refresh();
+  }
+
   /** UPI app me payment fail hui — order par failed mark + owner ki sheet me row */
   async function reportFailed() {
     if (!/^\d{4}$/.test(last4)) {
@@ -204,7 +229,7 @@ export function UpiPayment({
     appOpened.current = true;
     const timer = window.setTimeout(() => {
       window.location.href = upiUri;
-    }, 600);
+    }, 250);
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -325,7 +350,9 @@ export function UpiPayment({
             ) : API_AVAILABLE ? (
               <form onSubmit={submit} className="mt-4 space-y-2.5" data-testid="upi-form">
                 <p className="text-[11px] leading-relaxed text-[#6b6259]">
-                  After paying, copy the reference / UTR from your UPI app and paste it here.
+                  Pay karne ke baad UPI app ka <strong>reference / UTR</strong> yahan paste kariye. UTR na
+                  mile to sirf mobile ke <strong>last 4 digit</strong> daal kar neeche “UTR nahi mila” dabaiye —
+                  team verify kar degi.
                 </p>
                 <div className="grid gap-2 sm:grid-cols-[1.4fr_0.8fr]">
                   <input
@@ -333,6 +360,7 @@ export function UpiPayment({
                     onChange={(event) => setValue(event.target.value)}
                     placeholder="UPI reference / UTR"
                     inputMode="text"
+                    data-testid="upi-utr"
                     aria-label="UPI reference or UTR"
                     className="h-10 w-full min-w-0 border border-[#ddd2c6] bg-white px-2.5 text-[12px] outline-none focus:border-[#862222]"
                   />
@@ -341,6 +369,7 @@ export function UpiPayment({
                     onChange={(event) => setLast4(event.target.value.replace(/\D/g, "").slice(0, 4))}
                     placeholder="Phone last 4"
                     inputMode="numeric"
+                    data-testid="upi-last4"
                     aria-label="Last 4 digits of your mobile number"
                     className="h-10 w-full min-w-0 border border-[#ddd2c6] bg-white px-2.5 text-[12px] outline-none focus:border-[#862222]"
                   />
@@ -361,13 +390,33 @@ export function UpiPayment({
                     Payment fail ho gayi? Report kariye
                   </button>
                 )}
-                <button
-                  type="submit"
-                  disabled={busy}
-                  className="h-10 w-full bg-[#222] px-4 text-[10.5px] font-semibold tracking-[.14em] text-white uppercase disabled:opacity-60 sm:w-auto"
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="submit"
+                    disabled={busy}
+                    className="h-10 bg-[#222] px-4 text-[10.5px] font-semibold tracking-[.14em] text-white uppercase disabled:opacity-60"
+                  >
+                    {busy ? "Saving…" : "I have paid — submit UTR"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={claimPaid}
+                    disabled={busy}
+                    data-testid="upi-claim"
+                    className="h-10 border border-[#222] bg-white px-4 text-[10.5px] font-semibold tracking-[.14em] text-[#222] uppercase disabled:opacity-60"
+                  >
+                    UTR nahi mila — payment hui hai
+                  </button>
+                </div>
+                <a
+                  href={`https://wa.me/91${wa}?text=${waText}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  data-testid="upi-whatsapp-screenshot"
+                  className="mt-1 inline-flex items-center gap-2 text-[10.5px] font-semibold tracking-[.08em] text-[#1b7a3e] uppercase underline"
                 >
-                  {busy ? "Saving…" : "I have paid — submit reference"}
-                </button>
+                  Ya WhatsApp par screenshot bhej dijiye
+                </a>
               </form>
             ) : (
               <div className="mt-3">

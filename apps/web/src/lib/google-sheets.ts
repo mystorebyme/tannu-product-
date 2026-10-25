@@ -1,9 +1,14 @@
 import "server-only";
 
 import type { Order } from "@liksha/types";
-import { normaliseSheetSettings, orderSheetRow, type SheetSettings } from "./sheet-format";
+import {
+  normaliseSheetSettings,
+  orderSheetRow,
+  parseSettingsCsv,
+  type SheetSettings,
+} from "./sheet-format";
 
-export { normaliseSheetSettings, orderSheetRow };
+export { normaliseSheetSettings, orderSheetRow, parseSettingsCsv };
 export type { SheetSettings };
 
 /**
@@ -31,8 +36,9 @@ export type SheetAppend = {
   row: Record<string, string | number | boolean | null | undefined>;
 };
 
-const READ_TIMEOUT_MS = 5_000;
+const READ_TIMEOUT_MS = 2_500;
 const WRITE_TIMEOUT_MS = 6_000;
+/** Sheet page load ko kabhi block na kare — 2.5s ke baad defaults/DB hi chalega. */
 const CACHE_MS = 15_000;
 
 export function googleSheetsConfig(): { url: string; token: string } | null {
@@ -47,6 +53,22 @@ export function sheetsConfigured(): boolean {
   return Boolean(googleSheetsConfig());
 }
 
+/**
+ * Owner ki **published** Settings CSV (File → Share → Publish to web).
+ *
+ * Kyun: Apps Script ke bina bhi settings (phone, UPI ID, announcement) sheet se
+ * padhi ja sakti hain — published CSV read-only hoti hai par padhne ke liye kaafi
+ * hai. Isse "sheet me value badli, site par nahi aayi" wala gap band hota hai
+ * jab tak naya Apps Script deployment set nahi hota.
+ */
+export function settingsCsvUrl(): string | null {
+  const url = (process.env.GOOGLE_SHEETS_SETTINGS_CSV_URL ?? "").trim();
+  if (!url) return null;
+  if (!/^https:\/\/docs\.google\.com\/spreadsheets\//.test(url)) return null;
+  return url;
+}
+
+
 let cache: { at: number; value: SheetSettings | null; failedAt: number } | null = null;
 
 export function invalidateSheetSettings() {
@@ -56,7 +78,7 @@ export function invalidateSheetSettings() {
 /** Owner ki Settings sheet padho. Fail ho to `null` (site defaults par chalti rehti hai). */
 export async function readSheetSettings(options: { fresh?: boolean } = {}): Promise<SheetSettings | null> {
   const config = googleSheetsConfig();
-  if (!config) return null;
+  if (!config) return readSettingsFromCsv(options);
   const now = Date.now();
   if (!options.fresh && cache && now - cache.at < CACHE_MS) return cache.value;
   // network down hai to har page par 5s wait na karo
@@ -77,6 +99,30 @@ export async function readSheetSettings(options: { fresh?: boolean } = {}): Prom
     return value;
   } catch (error) {
     console.warn(`[sheets] settings read failed: ${(error as Error).message}`);
+    cache = { at: now, value: null, failedAt: now };
+    return null;
+  }
+}
+
+/** Public CSV se settings (Apps Script set na ho to bhi sheet padhi jaati hai). */
+async function readSettingsFromCsv(options: { fresh?: boolean } = {}): Promise<SheetSettings | null> {
+  const url = settingsCsvUrl();
+  if (!url) return null;
+  const now = Date.now();
+  if (!options.fresh && cache && now - cache.at < CACHE_MS) return cache.value;
+  if (cache && now - cache.failedAt < CACHE_MS && cache.value === null) return null;
+  try {
+    const response = await fetch(url, {
+      cache: "no-store",
+      headers: { accept: "text/csv" },
+      signal: AbortSignal.timeout(READ_TIMEOUT_MS),
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const value = parseSettingsCsv(await response.text());
+    cache = { at: now, value, failedAt: value ? 0 : now };
+    return value;
+  } catch (error) {
+    console.warn(`[sheets] settings CSV read failed: ${(error as Error).message}`);
     cache = { at: now, value: null, failedAt: now };
     return null;
   }

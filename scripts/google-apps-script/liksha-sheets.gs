@@ -1,36 +1,71 @@
 /**
- * LIKSHA CLOTHING — Google Sheet ↔ website bridge (Apps Script)
- * ------------------------------------------------------------
- * Yeh script ek hi Google Sheet ke saath kaam karta hai:
+ * ═══════════════════════════════════════════════════════════════════════════
+ * LIKSHA / DESIGNER CLOTHING — Google Sheet ↔ website bridge  (Apps Script v2)
+ * ═══════════════════════════════════════════════════════════════════════════
  *
- *   Settings   → owner yahan phone / email / UPI ID / announcement badalta hai.
- *                Website har 15 second me padh leti hai (redeploy ki zaroorat nahi).
- *   Orders     → har order + status change ki nayi row (append-only timeline).
- *   Payments   → payment reference submit / verified rows.
- *   Checkout   → checkout funnel (started / review / order placed / failed).
- *   Messages   → contact form ("Send us a message") ke messages.
- *   Newsletter → email subscribers.
+ * Owner ne sheet account badal diya — ye script **naye sheet** ke liye hai aur
+ * purane sheet ke tab-id (gid) bhi samajhta hai, isliye tab ka naam badla ho to
+ * bhi data sahi jagah jaata hai.
  *
- * SETUP (ek baar, 5 minute):
- *   1. Google Sheet kholiye → Extensions → Apps Script.
- *   2. Is file ka poora code paste kijiye.
- *   3. Neeche TOKEN me koi lamba random word daaliye (jaise 'liksha-9f3k2m').
- *   4. Save → Run → `setup` (permission maange to Allow).
- *   5. Deploy → New deployment → type "Web app"
- *        Execute as: Me
- *        Who has access: Anyone
- *      → Deploy → Web app URL copy kariye (…/exec par khatam hota hai).
- *   6. Website ke env me daaliye:
- *        GOOGLE_SHEETS_WEBAPP_URL = <wahi /exec URL>
- *        GOOGLE_SHEETS_TOKEN      = <TOKEN jaisa hi>
- *      (Render/Vercel → Environment → redeploy)
+ * KAAM:
+ *   Settings   → phone / WhatsApp / email / UPI ID / announcement (site 15s me padh leti hai)
+ *   Orders     → har order + status change (append-only timeline)
+ *   Payments   → payment pending / UTR submitted / claimed / verified / failed
+ *   Checkout   → funnel: checkout khula → review → order placed → order failed
+ *   Messages   → contact form
+ *   Newsletter → email subscribers
  *
- * NOTE: "Anyone" access zaroori hai — website anonymous request bhejti hai.
- * Token ke bina koi data nahi milta / likha nahi jaata.
+ * ── SETUP (ek baar, 3 minute) ─────────────────────────────────────────────
+ *  1. Naya Google Sheet kholiye → Extensions → Apps Script.
+ *  2. Jo code neeche hai, poora paste kijiye (`Code.gs` me).
+ *  3. Neeche TOKEN me apna lamba random word daaliye, e.g. `liksha-9f3k2m-r23`.
+ *  4. Save (Ctrl+S) → Run → function `setup` → permission maange to Allow.
+ *     → Sheet me Settings/Orders/Payments/Checkout/Messages/Newsletter tabs ban jayenge.
+ *  5. Deploy → New deployment → type: **Web app**
+ *       Description : liksha v2
+ *       Execute as  : **Me**
+ *       Who has access : **Anyone**
+ *     → Deploy → **Web app URL** copy kariye (`.../exec` par khatam hota hai).
+ *  6. Vercel → project `liksha-clothing` → Settings → Environment Variables:
+ *       GOOGLE_SHEETS_WEBAPP_URL = <wahi /exec URL>
+ *       GOOGLE_SHEETS_TOKEN      = <TOKEN jaisa hi>
+ *     (optional, sirf padhne ke liye)
+ *       GOOGLE_SHEETS_SETTINGS_CSV_URL = <Settings tab ka published CSV link>
+ *     → Save → Redeploy (ya main redeploy kar dunga).
+ *  7. Test: browser me kholein
+ *       <webapp URL>?action=health&token=<TOKEN>
+ *     Jawab me `{"ok":true,"sheets":[...rows...]}` aana chahiye.
+ *     Phir website par ek test order kar ke Orders tab me row dekh lein.
+ *
+ * ── ZAROORI ──────────────────────────────────────────────────────────────
+ *  • Code badalne par **naya version deploy** karna hota hai:
+ *    Deploy → Manage deployments → Edit (pencil) → Version: **New version** → Deploy.
+ *    Warna purana code hi chalta rehta hai.
+ *  • "Who has access: Anyone" hi rakhein (website anonymous request bhejti hai);
+ *    TOKEN galat ho to kuch bhi read/write nahi hota.
+ *  • Published CSV (Publish to web) **read-only** hoti hai — usme website kabhi
+ *    likh nahi sakti. Likhne ke liye sirf yahi Apps Script Web App kaam karta hai.
+ * ═══════════════════════════════════════════════════════════════════════════
  */
 
-/** Apna secret token yahan daaliye (website ke GOOGLE_SHEETS_TOKEN se same) */
+/** Apna secret token (Vercel ke GOOGLE_SHEETS_TOKEN se bilkul same) */
 var TOKEN = 'CHANGE-ME-liksha-token';
+
+/**
+ * Sheet ke tab-id (URL me `#gid=...`). Agar ye set hain to script tab ka **naam**
+ * badalne par bhi sahi tab pakadta hai. Jo gid nahi mila, uske liye naam se
+ * dhoondhta hai aur na mile to naya tab bana deta hai.
+ */
+var GIDS = {
+  Settings: 0,
+  Orders: 1135948941,
+  Payments: 1261780310,
+  Messages: 644814285,
+  Newsletter: 380856753,
+  // Checkout naya tab hai — gid abhi nahi hai, naam se banega
+  Checkout: null,
+  Audit: null,
+};
 
 var HEADERS = {
   Orders: [
@@ -49,9 +84,10 @@ var HEADERS = {
   // checkout funnel — kaun checkout tak pahuncha / order kiya / fail hua
   Checkout: ['Timestamp', 'Event', 'Step', 'Order number', 'Items', 'Subtotal', 'Reason', 'Phone'],
   Newsletter: ['Timestamp', 'Email'],
+  Audit: ['Timestamp', 'Actor', 'Action', 'Target', 'Details'],
 };
 
-/** Settings sheet ke keys — website inhe padhti hai */
+/** Settings tab ke default rows (sirf tab khaali ho tab likhe jaate hain) */
 var DEFAULT_SETTINGS = [
   ['support_phone', '8005900581'],
   ['whatsapp', '8005900581'],
@@ -61,9 +97,10 @@ var DEFAULT_SETTINGS = [
   ['announcement', 'Diwali Sale — Flat 70% OFF · Final price ₹499 onwards'],
   ['gstin', ''],
   ['free_shipping', 'true'],
-  // admin panel ka link — sirf owner ke liye (frontend par kabhi nahi dikhta)
   ['admin_url', ''],
 ];
+
+/* ───────────────────────────── helpers ───────────────────────────── */
 
 function json_(payload) {
   return ContentService.createTextOutput(JSON.stringify(payload)).setMimeType(
@@ -71,29 +108,101 @@ function json_(payload) {
   );
 }
 
+function book_() {
+  var active = SpreadsheetApp.getActiveSpreadsheet();
+  if (active) return active;
+  // standalone script (sheet se bind nahi) — tab bhi kaam kare
+  var id = PropertiesService.getScriptProperties().getProperty('SHEET_ID');
+  if (!id) throw new Error('SHEET_ID property set kariye (standalone script).');
+  return SpreadsheetApp.openById(id);
+}
+
+/** Naam ya gid se sheet dhoondho; na mile to (khaali naam ke liye) bana do. */
+function findSheet_(book, name) {
+  var gid = GIDS[name];
+  if (gid !== null && gid !== undefined && gid !== '') {
+    var sheets = book.getSheets();
+    for (var i = 0; i < sheets.length; i += 1) {
+      if (sheets[i].getSheetId() === Number(gid)) return sheets[i];
+    }
+  }
+  return book.getSheetByName(name);
+}
+
 function sheet_(name) {
-  var book = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = book.getSheetByName(name);
+  var book = book_();
+  var sheet = findSheet_(book, name);
   if (!sheet) {
     sheet = book.insertSheet(name);
-    if (HEADERS[name]) sheet.appendRow(HEADERS[name]);
-    sheet.setFrozenRows(1);
-    sheet.getRange(1, 1, 1, HEADERS[name].length).setFontWeight('bold');
+    if (HEADERS[name]) {
+      sheet.appendRow(HEADERS[name]);
+      sheet.setFrozenRows(1);
+      sheet.getRange(1, 1, 1, HEADERS[name].length).setFontWeight('bold');
+    }
   }
+  ensureHeaders_(sheet, name);
   return sheet;
 }
 
-/** Ek baar chalaiye — sab sheets + headers + default settings bana deta hai */
+/**
+ * Header row ko sahi karo: agar sheet me purane/kam columns hain to missing
+ * column jod diye jaate hain — warna naye fields (jaise `Reason`) chup-chaap
+ * drop ho jaate the.
+ */
+function ensureHeaders_(sheet, name) {
+  var headers = HEADERS[name];
+  if (!headers) return;
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(headers);
+    sheet.setFrozenRows(1);
+    sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
+    return;
+  }
+  var width = Math.max(1, sheet.getLastColumn());
+  var current = sheet.getRange(1, 1, 1, width).getValues()[0].map(function (value) {
+    return String(value || '').trim();
+  });
+  var missing = headers.filter(function (header) {
+    return current.indexOf(header) === -1;
+  });
+  if (missing.length) {
+    sheet.getRange(1, width + 1, 1, missing.length).setValues([missing]).setFontWeight('bold');
+  }
+}
+
+/** Settings sheet: key/value rows → object */
+function readSettings_() {
+  var sheet = sheet_('Settings');
+  var values = sheet.getDataRange().getValues();
+  var out = {};
+  for (var i = 0; i < values.length; i += 1) {
+    var key = String(values[i][0] || '').trim().toLowerCase();
+    var value = String(values[i][1] === null || values[i][1] === undefined ? '' : values[i][1]).trim();
+    if (!key || !value) continue;
+    if (key === 'key' || key === 'store' || key === 'admin' || key === 'preview') continue;
+    out[key] = value;
+  }
+  return out;
+}
+
+/* ───────────────────────────── one-time setup ───────────────────────────── */
+
+/** Ek baar chalaiye — sab tabs + headers + default settings bana deta hai. */
 function setup() {
-  Object.keys(HEADERS).forEach(sheet_);
+  Object.keys(HEADERS).forEach(function (name) {
+    sheet_(name);
+  });
 
   var settings = sheet_('Settings');
   if (settings.getLastRow() === 0) settings.appendRow(['key', 'value']);
   var existing = {};
   if (settings.getLastRow() > 1) {
-    settings.getRange(2, 1, settings.getLastRow() - 1, 2).getValues().forEach(function (row) {
-      existing[String(row[0]).trim().toLowerCase()] = true;
-    });
+    settings
+      .getRange(2, 1, settings.getLastRow() - 1, 2)
+      .getValues()
+      .forEach(function (row) {
+        existing[String(row[0]).trim().toLowerCase()] = true;
+      });
   }
   DEFAULT_SETTINGS.forEach(function (entry) {
     if (!existing[entry[0]]) settings.appendRow(entry);
@@ -101,50 +210,72 @@ function setup() {
   settings.setFrozenRows(1);
   settings.getRange(1, 1, 1, 2).setFontWeight('bold');
 
-  SpreadsheetApp.getActiveSpreadsheet().toast('Liksha sheets ready ✔', 'Setup', 5);
+  book_().toast('Liksha sheets ready ✔ (Orders / Payments / Checkout / Messages / Newsletter)', 'Setup', 6);
 }
 
-function readSettings_() {
-  var sheet = sheet_('Settings');
-  var values = sheet.getDataRange().getValues();
-  var out = {};
-  for (var i = 1; i < values.length; i += 1) {
-    var key = String(values[i][0] || '').trim().toLowerCase();
-    var value = String(values[i][1] === null ? '' : values[i][1]).trim();
-    if (!key || !value) continue;
-    out[key] = value;
-  }
-  return out;
+/** Extensions → Apps Script me chalaiye — append kaam kar raha hai ya nahi. */
+function testAppend() {
+  var stamp = new Date().toISOString();
+  var written = appendRows_([
+    {
+      sheet: 'Orders',
+      row: {
+        Timestamp: stamp,
+        Event: 'test.from_apps_script',
+        'Order number': 'LK-TEST-' + Math.floor(Math.random() * 9000 + 1000),
+        'Order status': 'placed',
+        'Payment status': 'pending',
+        Customer: 'Apps Script test',
+        Total: 499,
+      },
+    },
+    {
+      sheet: 'Checkout',
+      row: { Timestamp: stamp, Event: 'checkout.test', Step: 'test', Items: 1, Subtotal: 499 },
+    },
+  ]);
+  Logger.log('rows written: ' + written);
+  book_().toast('Test rows likh diye (' + written + ')', 'testAppend', 6);
+  return written;
 }
+
+/* ───────────────────────────── HTTP API ───────────────────────────── */
 
 function doGet(e) {
   var params = (e && e.parameter) || {};
   if (TOKEN && String(params.token || '') !== TOKEN) {
-    return json_({ ok: false, error: 'unauthorized' });
+    return json_({ ok: false, error: 'unauthorized — token match nahi hua' });
   }
   var action = params.action || 'settings';
+
   if (action === 'settings') {
     return json_({ ok: true, settings: readSettings_(), time: new Date().toISOString() });
   }
+
   if (action === 'recent') {
     var name = String(params.sheet || 'Orders');
     var limit = Math.min(100, Math.max(1, Number(params.limit || 20)));
     return json_({ ok: true, sheet: name, rows: recentRows_(name, limit) });
   }
-  if (action === 'health') {
+
+  if (action === 'health' || action === 'ping') {
     var names = Object.keys(HEADERS);
     return json_({
       ok: true,
+      version: 2,
       time: new Date().toISOString(),
-      sheets: names.map(function (name) {
-        return { name: name, rows: Math.max(0, sheet_(name).getLastRow() - 1) };
+      spreadsheet: book_().getName(),
+      sheets: names.map(function (sheetName) {
+        var sheet = sheet_(sheetName);
+        return { name: sheetName, tab: sheet.getName(), rows: Math.max(0, sheet.getLastRow() - 1) };
       }),
     });
   }
-  return json_({ ok: false, error: 'unknown action' });
+
+  return json_({ ok: false, error: 'unknown action: ' + action });
 }
 
-/** Last N rows (sheet ke headers ke saath object bana kar) — admin panel ise dikhata hai */
+/** Last N rows (headers ke saath object) — admin panel ise dikhata hai */
 function recentRows_(name, limit) {
   if (!HEADERS[name]) return [];
   var sheet = sheet_(name);
@@ -163,12 +294,12 @@ function recentRows_(name, limit) {
   });
 }
 
-/** Settings sheet me owner/admin ki values likho (key/value rows update/insert) */
+/** Settings tab me admin ki values likho (key/value update ya naya row) */
 function writeSettings_(settings) {
   var sheet = sheet_('Settings');
   var values = sheet.getDataRange().getValues();
   var index = {};
-  for (var i = 1; i < values.length; i += 1) {
+  for (var i = 0; i < values.length; i += 1) {
     index[String(values[i][0] || '').trim().toLowerCase()] = i + 1;
   }
   var written = 0;
@@ -184,19 +315,24 @@ function writeSettings_(settings) {
   return written;
 }
 
+/**
+ * Rows append — header **naam** se column dhoondha jaata hai, isliye column ka
+ * order badalne ya beech me naya column jodne se data galat jagah nahi jaata.
+ */
 function appendRows_(rows) {
   var lock = LockService.getScriptLock();
   lock.waitLock(20000);
   var written = 0;
   try {
-    rows.forEach(function (entry) {
-      var name = String(entry.sheet || 'Orders');
+    (rows || []).forEach(function (entry) {
+      var name = String((entry && entry.sheet) || 'Orders');
       if (!HEADERS[name]) return;
       var sheet = sheet_(name);
-      var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+      var width = Math.max(1, sheet.getLastColumn());
+      var headers = sheet.getRange(1, 1, 1, width).getValues()[0];
       var row = [];
       for (var i = 0; i < headers.length; i += 1) {
-        var key = String(headers[i]);
+        var key = String(headers[i]).trim();
         var value = entry.row ? entry.row[key] : '';
         row.push(value === undefined || value === null ? '' : value);
       }
@@ -217,8 +353,9 @@ function doPost(e) {
     return json_({ ok: false, error: 'invalid json' });
   }
   if (TOKEN && String(body.token || '') !== TOKEN) {
-    return json_({ ok: false, error: 'unauthorized' });
+    return json_({ ok: false, error: 'unauthorized — token match nahi hua' });
   }
+
   if (body.action === 'settings_save') {
     try {
       var count = writeSettings_(body.settings || {});
@@ -227,10 +364,13 @@ function doPost(e) {
       return json_({ ok: false, error: String(error) });
     }
   }
+
   if (body.action !== 'append') {
-    return json_({ ok: false, error: 'unknown action' });
+    return json_({ ok: false, error: 'unknown action: ' + body.action });
   }
-  var rows = Array.isArray(body.rows) ? body.rows : [];
+
+  // ek call me ek ya kai rows ({sheet, row} objects)
+  var rows = Array.isArray(body.rows) ? body.rows : body.row ? [body] : [];
   if (!rows.length) return json_({ ok: false, error: 'no rows' });
   try {
     var written = appendRows_(rows);
@@ -238,21 +378,4 @@ function doPost(e) {
   } catch (error) {
     return json_({ ok: false, error: String(error) });
   }
-}
-
-/** Test: Apps Script editor me chalaiye — do row append karke result dikhata hai */
-function testAppend() {
-  var result = appendRows_([
-    {
-      sheet: 'Orders',
-      row: {
-        Timestamp: new Date().toISOString(),
-        Event: 'test',
-        'Order number': 'LK-TEST01',
-        Customer: 'Test Customer',
-        Total: 499,
-      },
-    },
-  ]);
-  Logger.log('written: ' + result);
 }

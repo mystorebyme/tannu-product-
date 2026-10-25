@@ -1,0 +1,152 @@
+# Google Sheet setup — owner ke liye (naya account)
+
+**Kyun:** website pehle purane Google account ki sheet me data bhej rahi thi. Aapne sheet
+account badal diya, aur naye sheet me website kuch likh nahi pa rahi thi. Isliye ek **naya
+Apps Script** banaya gaya hai — neeche ke 6 step follow kariye, bas ek baar karna hai
+(≈5 minute). Uske baad har order, payment, checkout aur message apne aap sheet me aayega.
+
+> ⚠️ Ye kaam **aapko khud karna hoga** (Google login aapke paas hai). Main Vercel me URL
+> aur token daal dunga — bas aap dono value mujhe bhej dijiye.
+
+---
+
+## Step 1 — Naya sheet kholiye
+
+1. Us Google account se login kariye jis account ki sheet aap use karna chahte hain.
+2. [sheets.new](https://sheets.new) kholein → naam rakhein: **Liksha Clothing — Orders**.
+3. Sheet ka URL note kar lein: `https://docs.google.com/spreadsheets/d/**<SHEET_ID>**/edit`
+
+> Same sheet rakhna hai to naya banane ki zaroorat nahi — purani sheet bhi chalegi,
+> bas script naye account se deploy hona chahiye.
+
+## Step 2 — Script editor kholein
+
+Sheet ke menu me: **Extensions → Apps Script**. Ek naya tab khulega (`Code.gs`).
+
+## Step 3 — Code paste kariye
+
+1. `Code.gs` me jo default code hai, wo poora **delete** kar dijiye.
+2. Repo ki file `scripts/google-apps-script/liksha-sheets.gs` ka **poora content** copy karke
+   paste kar dijiye.
+3. Sabse upar is line ko dhoondhiye:
+
+   ```js
+   var TOKEN = 'CHANGE-ME-liksha-token';
+   ```
+
+   Isme apna koi lamba random word daaliye, jaise:
+
+   ```js
+   var TOKEN = 'liksha-9f3k2m-r23';
+   ```
+
+   👉 **Yahi token maine Vercel me daalna hai**, isliye ise yaad rakhein / mujhe bhej dein.
+4. **Ctrl+S** (Mac: ⌘+S) → save.
+
+## Step 4 — Setup chalaiye (tabs ban jaate hain)
+
+1. Editor ke upar function dropdown me **`setup`** chuniye.
+2. **Run** dabaiye.
+3. Pehli baar Google **permission** maangega:
+   **Review permissions → apna account chuniye → Advanced → "Go to Liksha (unsafe)" → Allow**.
+   (Ye "unsafe" warning har personal script par aati hai — ye aapka hi script hai.)
+4. Sheet me wapas aaiye — 6 tab ban chuke honge:
+
+   | Tab | Kya aata hai |
+   | --- | --- |
+   | **Settings** | phone, WhatsApp, email, UPI ID, announcement (site isi se padhti hai) |
+   | **Orders** | har order + status change |
+   | **Payments** | UTR submit, payment claim, verify, fail, reverse |
+   | **Checkout** | kaun checkout tak pahuncha → review → order → fail |
+   | **Messages** | contact form |
+   | **Newsletter** | email subscribers |
+
+## Step 5 — Web App deploy kariye
+
+1. Editor me upar right: **Deploy → New deployment**.
+2. Gear/cog icon → **Web app** chuniye.
+3. Fields:
+
+   | Field | Value |
+   | --- | --- |
+   | Description | `liksha v2` |
+   | **Execute as** | **Me (aapka email)** |
+   | **Who has access** | **Anyone** |
+
+   > "Anyone" ka matlab: website bina login request bhej sakti hai. Data safe hai kyunki
+   > bina **token** ke script kuch nahi deta/likh'ta.
+
+4. **Deploy** → **Web app URL** copy kariye. Wo aisa dikhega:
+   `https://script.google.com/macros/s/AKfycb..................../exec`
+5. **Authorize access** maange to Allow kariye.
+
+## Step 6 — Test kariye (30 second)
+
+Browser me ye link kholein (TOKEN aur URL apna daaliye):
+
+```
+<Web app URL>?action=health&token=<TOKEN>
+```
+
+Sahi jawab aisa aayega:
+
+```json
+{"ok":true,"version":2,"spreadsheet":"Liksha Clothing — Orders",
+ "sheets":[{"name":"Settings","tab":"Settings","rows":9},{"name":"Orders", ...}]}
+```
+
+Phir script editor me function **`testAppend`** chala kar **Run** kariye — Orders aur Checkout
+tab me ek test row aa jayegi.
+
+---
+
+## Mujhe ye 2 cheezein bhej dijiye
+
+1. **Web app URL** (jis ke end me `/exec` hai)
+2. **TOKEN** (jo aapne Step 3 me daala)
+
+Main inhe Vercel → `liksha-clothing` → Settings → Environment Variables me daal kar redeploy
+kar dunga:
+
+| Variable | Value |
+| --- | --- |
+| `GOOGLE_SHEETS_WEBAPP_URL` | aapka `/exec` URL |
+| `GOOGLE_SHEETS_TOKEN` | aapka token |
+
+Uske baad: ek test order karke **Orders** tab me row dekh lein. Ho gaya ✅
+
+---
+
+## Optional — Settings ka turant refresh (bina Apps Script ke bhi)
+
+Agar aap chahte hain ki **Settings** tab ki value (phone / UPI / announcement) site par
+turant dikhe, to:
+
+1. **Settings** tab kholein → **File → Share → Publish to web**.
+2. **Settings** tab chuniye → format **Comma-separated values (.csv)** → **Publish**.
+3. Jo link mile (`https://docs.google.com/spreadsheets/d/e/.../pub?output=csv`), wo mujhe bhej dein.
+
+Main use `GOOGLE_SHEETS_SETTINGS_CSV_URL` me daal dunga — site har 60 second me wahan se
+phone/UPI/announcement utha legi.
+
+---
+
+## Baad me code badalna ho to (yaad rakhiye)
+
+Apps Script me code badalne par **naya version deploy** karna padta hai, warna purana code
+chalta rehta hai:
+
+**Deploy → Manage deployments → (pencil) Edit → Version: New version → Deploy**
+
+## Kuch na aaye to —
+
+| Problem | Wajah / fix |
+| --- | --- |
+| Sheet me kuch nahi aata | `Who has access` "Anyone" nahi hai, ya token galat hai → health link se test kariye |
+| Health link par `unauthorized` | URL ka token aur Vercel ka `GOOGLE_SHEETS_TOKEN` alag hain |
+| Tabs nahi bane | `setup` function nahi chalaya — Step 4 dobara |
+| Payment/UTR ki row nahi aayi | Orders/Payments tab ke **header** delete/modify nahi karne (script header naam se column dhoondhta hai) |
+| Purana data dikh raha hai | Deploy ke baad **New version** nahi banaya — upar wala step dekhiye |
+
+**Sheet ke header badalne se row galat jagah ja sakti hai** — isliye headers jaise hain waise
+rakhein (naye column add karna theek hai, hatana/palata nahi).

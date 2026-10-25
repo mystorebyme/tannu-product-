@@ -160,6 +160,57 @@ export async function setOrderNote(orderNumber: string, text: string, actor: str
   return rows[index]!;
 }
 
+/**
+ * Customer ki contact details admin se theek karna (galat phone/pincode,
+ * customer ka call par address change). Storefront hi source of truth hai,
+ * isliye remote mode me PATCH se jaata hai.
+ */
+export async function updateOrderContact(
+  orderNumber: string,
+  input: {
+    customerName?: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    pincode?: string;
+  },
+  actor: string,
+): Promise<Order | null> {
+  if (remoteMode()) {
+    const payload = await storeRequest<{ order: Order }>(`/api/admin/orders/${encodeURIComponent(orderNumber)}`, {
+      method: "PATCH",
+      body: JSON.stringify({ action: "contact", ...input, actor }),
+    });
+    return payload?.order ?? null;
+  }
+
+  const rows = readRows<Order>("orders.json");
+  const index = rows.findIndex((order) => order.orderNumber === orderNumber);
+  if (index === -1) return null;
+  const current = rows[index]!;
+  const now = new Date().toISOString();
+  const clean = (value: string | undefined, fallback: string) =>
+    value === undefined ? fallback : String(value).replace(/\s+/g, " ").trim() || fallback;
+  rows[index] = {
+    ...current,
+    customerName: clean(input.customerName, current.customerName),
+    email: clean(input.email, current.email),
+    phone: clean(input.phone, current.phone).replace(/\D/g, "").slice(-10) || current.phone,
+    address: clean(input.address, current.address),
+    city: clean(input.city, current.city),
+    state: clean(input.state, current.state),
+    pincode: /^[1-9]\d{5}$/.test(String(input.pincode ?? "")) ? String(input.pincode) : current.pincode,
+    audit: [
+      { at: now, actor, action: "order.contact_updated", meta: { via: "admin-panel" } },
+      ...current.audit,
+    ],
+  };
+  writeRows("orders.json", rows);
+  return rows[index]!;
+}
+
 export async function setOrderTracking(
   orderNumber: string,
   input: { courier?: string; awb?: string; url?: string },

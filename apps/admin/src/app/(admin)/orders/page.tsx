@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getCheckoutEvents, getOrders } from "@/lib/data";
 import { dateTime, inr } from "@/lib/format";
+import { PhoneLinks } from "@/components/contact-links";
 
 export const dynamic = "force-dynamic";
 
@@ -120,8 +121,12 @@ export default async function OrdersPage({
                     </Link>
                   </td>
                   <td>
-                    {order.customerName}
-                    <div className="small muted">+91 {order.phone}</div>
+                    <Link href={`/customers?phone=${encodeURIComponent(order.phone)}`} data-testid="customer-link">
+                      {order.customerName}
+                    </Link>
+                    <div className="small muted" style={{ marginTop: 3 }}>
+                      <PhoneLinks phone={order.phone} />
+                    </div>
                   </td>
                   <td>{order.items.reduce((sum, item) => sum + item.quantity, 0)}</td>
                   <td>

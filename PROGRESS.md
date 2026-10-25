@@ -228,3 +228,32 @@ R21 ke live verification ke baad teen cheezein tight kee gayin (koi naya feature
   "Order nahi mila", live smoke **28/0**.
 - Owner report (Hinglish): `docs/00-overview/owner-report-round22.md`.
 - Admin production bhi `b83b07b` par deploy (funnel card + checkout events live).
+
+## Round 23 — state↔pincode, fast payment page, sheet wapas chalu, admin numbers clickable (2026-10-25)
+
+Owner ke 5 asks, sab ek hi round me:
+
+- **State ↔ pincode:** naya `apps/web/src/lib/state-match.ts` (36 states/UTs + alias:
+  J&K / Orissa / Pondicherry / Uttaranchal). `checkout-form.tsx` mismatch par step 1→2 roktа hai
+  aur **ek tap me sahi state** bhar deta hai (`data-testid="state-mismatch"` / `"state-fix"`).
+  Server bhi mana karta hai — `createOrder` me `state_mismatch` (400) taaki GST place-of-supply galat na jaye.
+- **Speed (payment page + order create):** DB mode me order fetch = **1 row** (`orders-pg.loadOrder`,
+  pehle poora table padhta tha), order create = **1 upsert** (`saveOrders(new Map(), [order])`) aur
+  Google Sheet sync `after()` me background — customer ko sheet ka wait nahi. Pay page + order page
+  `Promise.all([getOrder, getStoreSettings, headers()])`. Sheet read timeout 5s → 2.5s. UPI auto-open 600ms → 250ms.
+- **Step 3 (payment):** UTR **ya sirf phone ke last 4 digit**, naya `POST /api/payments/claim` (202,
+  `paymentStatus: processing`, audit `payment.claimed`) + button "UTR nahi mila — payment hui hai"
+  (`data-testid="upi-claim"`). WhatsApp screenshot link har haal me dikhta hai (`data-testid="upi-whatsapp-screenshot"`).
+- **Sheet wapas chalu:** `scripts/google-apps-script/liksha-sheets.gs` v2 — naye sheet account ke liye,
+  gid-aware tabs, **header naam se column mapping** (column order badle to bhi data sahi jagah),
+  missing header auto-add, `setup()` / `testAppend()` / `health` / `settings_save`, LockService 20s.
+  Owner ke liye step-by-step: `docs/00-overview/sheet-setup-owner.md`.
+  Bonus: Apps Script deployment ke bina bhi settings live — `GOOGLE_SHEETS_SETTINGS_CSV_URL` (published CSV).
+- **Admin:** har phone number **clickable** (`tel:` + `wa.me`) — dashboard, orders list, order detail,
+  customers, messages (`apps/admin/src/components/contact-links.tsx`). Customers page par
+  `?phone=` se **customer detail** (lifetime value, saare orders, address) + inline **edit**
+  (`PATCH /api/admin/orders/:no {action:"contact"}` → audit `order.contact_updated`).
+  "New order" par customer ki purani details prefill.
+- **Tests:** unit **114/0** (naya `tests/unit/round23.test.ts`, `tests/unit/apps-script.test.ts` — Apps Script
+  ko fake Google Sheets par chala kar rows/settings verify), e2e `tests/e2e/round23.mjs` **31/0**,
+  payments 35/0, smoke 87/0, links 40/0, responsive 43/0, round16 37/0, breakpoints 48/0.

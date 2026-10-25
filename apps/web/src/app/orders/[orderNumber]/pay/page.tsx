@@ -28,14 +28,20 @@ export const metadata: Metadata = { title: "Complete payment", robots: { index: 
  */
 export default async function PaymentPage({ params }: { params: Promise<{ orderNumber: string }> }) {
   const { orderNumber } = await params;
-  const order = await getOrder(orderNumber);
+  /**
+   * Speed: order (single row) aur settings **saath** padhe jaate hain — pehle
+   * serial the, isliye step 3 khulne me 2-3 second extra lagta tha.
+   */
+  const [order, settings, headerList] = await Promise.all([
+    getOrder(orderNumber),
+    getStoreSettings(),
+    headers(),
+  ]);
   if (!order) notFound();
 
   // already paid → seedha order page (dobara pay karne ka koi matlab nahi)
   if (order.paymentStatus === "paid") redirect(`/orders/${order.orderNumber}`);
 
-  const settings = await getStoreSettings();
-  const headerList = await headers();
   const fallbackHost = new URL(siteConfig.url).host;
   const host = headerList.get("x-forwarded-host") ?? headerList.get("host") ?? fallbackHost;
   const proto = headerList.get("x-forwarded-proto") ?? "https";

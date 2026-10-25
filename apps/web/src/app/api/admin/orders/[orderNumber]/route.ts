@@ -1,5 +1,12 @@
 import type { OrderStatus } from "@liksha/types";
-import { getOrder, OrderError, setStatusNote, setTracking, updateOrderStatus } from "@/lib/orders";
+import {
+  getOrder,
+  OrderError,
+  setStatusNote,
+  setTracking,
+  updateOrderContact,
+  updateOrderStatus,
+} from "@/lib/orders";
 import { confirmPayment, failPayment, reversePayment } from "@/lib/orders";
 
 export const dynamic = "force-dynamic";
@@ -58,6 +65,23 @@ export async function PATCH(request: Request, context: { params: Promise<{ order
           courier: body.courier ? String(body.courier) : null,
           awb: body.awb ? String(body.awb) : null,
           url: body.url ? String(body.url) : null,
+        },
+        actor,
+      );
+      return Response.json({ order });
+    }
+
+    if (action === "contact") {
+      const order = await updateOrderContact(
+        orderNumber,
+        {
+          customerName: body.customerName === undefined ? undefined : String(body.customerName),
+          email: body.email === undefined ? undefined : String(body.email),
+          phone: body.phone === undefined ? undefined : String(body.phone),
+          address: body.address === undefined ? undefined : String(body.address),
+          city: body.city === undefined ? undefined : String(body.city),
+          state: body.state === undefined ? undefined : String(body.state),
+          pincode: body.pincode === undefined ? undefined : String(body.pincode),
         },
         actor,
       );

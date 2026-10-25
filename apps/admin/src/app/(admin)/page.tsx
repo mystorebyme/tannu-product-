@@ -3,6 +3,7 @@ import { getManualInvoices, getOrders, getProducts, getMessages } from "@/lib/da
 import { overrideStats } from "@/lib/catalog-admin";
 import { publishCatalogAction } from "@/app/actions";
 import { dateTime, inr } from "@/lib/format";
+import { PhoneLinks } from "@/components/contact-links";
 
 export const dynamic = "force-dynamic";
 
@@ -139,7 +140,17 @@ export default async function DashboardPage() {
                       {order.orderNumber}
                     </Link>
                   </td>
-                  <td>{order.customerName}</td>
+                  <td>
+                    <Link
+                      href={`/customers?phone=${encodeURIComponent(order.phone)}`}
+                      data-testid="customer-link"
+                    >
+                      {order.customerName}
+                    </Link>
+                    <div className="small" style={{ marginTop: 2 }}>
+                      <PhoneLinks phone={order.phone} />
+                    </div>
+                  </td>
                   <td className="muted">{order.city}</td>
                   <td>{inr(order.total)}</td>
                   <td>

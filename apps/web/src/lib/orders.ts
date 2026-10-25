@@ -1,6 +1,7 @@
 import "server-only";
 
 import fs from "node:fs";
+import { after } from "next/server";
 import { randomUUID } from "node:crypto";
 import type { AuditEntry, InvoiceMeta, Order, OrderStatus, PaymentMethod, Tracking } from "@liksha/types";
 import {
@@ -13,6 +14,7 @@ import {
 import { dataFile } from "./data-dir";
 import { dbEnabled } from "./db";
 import { checkPincode } from "./delivery";
+import { canonicalStateName, statesMatch } from "./state-match";
 import { products } from "./store";
 import { syncOrderToSheet } from "./google-sheets";
 
@@ -127,6 +129,19 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
     if (!serviceability.serviceable) {
       throw new OrderError(serviceability.message, 400, "pincode_not_serviceable");
     }
+    /**
+     * Owner rule: pincode jis state ka hai, wahi state hona chahiye. Client me
+     * bhi guard hai, par server par bhi check hota hai — galat state se GST
+     * place-of-supply aur courier zone dono galat ho jaate hain.
+     */
+    const pinState = canonicalStateName(serviceability.state) ?? serviceability.state;
+    if (pinState && !statesMatch(payload.state, pinState)) {
+      throw new OrderError(
+        `Ye pincode ${pinState} ka hai — State me "${pinState}" daaliye (aapne "${payload.state}" bheja hai).`,
+        400,
+        "state_mismatch",
+      );
+    }
   }
 
   const items = payload.items.map((line) => {
@@ -231,13 +246,38 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
     ],
   };
 
-  const all = await readAll();
-  all.unshift(order);
-  await writeAll(all);
-  // owner ki Google Sheet me turant row (best-effort — order create kabhi fail nahi hota)
-  await syncOrderToSheet(order, "order.placed");
-  // payment ka har stage sheet me — pending bhi, taaki owner ko pata rahe kis order ka paisa aana hai
-  await syncOrderToSheet(order, "payment.pending");
+  /**
+   * Performance: pehle yahan poora ledger padha jaata tha (`readAll`) aur phir
+   * dobara likha jaata tha. Ek order insert karne ke liye poora history load karna
+   * bekaar tha — ab DB mode me seedha ek upsert.
+   */
+  if (dbEnabled()) {
+    const { saveOrders } = await import("./orders-pg");
+    await saveOrders(new Map(), [order]);
+  } else {
+    const all = readJson();
+    all.unshift(order);
+    writeJson(all);
+  }
+  lastLoaded = [order, ...lastLoaded];
+  lastSnapshot.set(order.orderNumber, JSON.stringify(order));
+  /**
+   * Google Sheet rows **background me** jaati hain. Pehle `await` tha, isliye
+   * customer "Place order" ke baad 6-12 second (do Apps Script calls) rukta tha —
+   * ab order turant banta hai aur Sheet rows baad me likhi jaati hain
+   * (Postgres hi source of truth hai, sheet sirf owner ke liye copy).
+   */
+  const sheetRow = (event: string) =>
+    syncOrderToSheet(order, event).catch((error) =>
+      console.warn("[sheets] background sync failed", (error as Error).message),
+    );
+  if (typeof after === "function") {
+    after(() => sheetRow("order.placed"));
+    after(() => sheetRow("payment.pending"));
+  } else {
+    void sheetRow("order.placed");
+    void sheetRow("payment.pending");
+  }
   return order;
 }
 
@@ -246,9 +286,17 @@ export async function listOrders(): Promise<Order[]> {
 }
 
 export async function getOrder(orderNumberValue: string): Promise<Order | undefined> {
-  const orders = await readAll();
   const wanted = normalizeOrderNumber(orderNumberValue);
-  return orders.find((order) => order.orderNumber === wanted);
+  /**
+   * Performance: pehle yahan `readAll()` tha, jo **poore ledger** ko DB se load
+   * karta tha — payment page (step 3) isi wajah se 2-4 second leta tha. Ab DB
+   * mode me sirf wahi ek row padhi jaati hai (order_number unique index).
+   */
+  if (dbEnabled()) {
+    const { loadOrder } = await import("./orders-pg");
+    return (await loadOrder(wanted)) ?? undefined;
+  }
+  return readJson().find((order) => order.orderNumber === wanted);
 }
 
 export async function updateOrderStatus(
@@ -481,6 +529,123 @@ export async function markPaymentPaid(orderNumberValue: string, reference: strin
   await writeAll(all);
   await syncOrderToSheet(all[index]!, "payment.paid");
   return all[index];
+}
+
+/**
+ * Admin: customer ki contact/delivery details theek karna (galat naam/phone/
+ * pincode, customer ka call par address change). History nahi badalti — sirf
+ * order ka snapshot + audit entry.
+ */
+export async function updateOrderContact(
+  orderNumberValue: string,
+  input: {
+    customerName?: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    pincode?: string;
+  },
+  actor = "admin",
+): Promise<Order> {
+  const all = await readAll();
+  const wanted = normalizeOrderNumber(orderNumberValue);
+  const index = all.findIndex((order) => order.orderNumber === wanted);
+  if (index === -1) throw new OrderError("Order nahi mila", 404, "order_not_found");
+  const order = all[index]!;
+
+  const text = (value: string | undefined, current: string, min = 1, max = 240) => {
+    if (value === undefined) return current;
+    const clean = String(value).replace(/\s+/g, " ").trim().slice(0, max);
+    return clean.length >= min ? clean : current;
+  };
+  const pincode = input.pincode === undefined
+    ? order.pincode
+    : String(input.pincode).replace(/\D/g, "").slice(0, 6);
+
+  const changed: Record<string, { from: string; to: string }> = {};
+  const next = {
+    customerName: text(input.customerName, order.customerName, 2, 80),
+    email: text(input.email, order.email, 5, 120),
+    phone: text(input.phone, order.phone, 10, 15).replace(/\D/g, "").slice(-10) || order.phone,
+    address: text(input.address, order.address, 8, 400),
+    city: text(input.city, order.city, 2, 80),
+    state: text(input.state, order.state, 2, 80),
+    pincode: /^[1-9]\d{5}$/.test(pincode) ? pincode : order.pincode,
+  };
+  (Object.keys(next) as (keyof typeof next)[]).forEach((key) => {
+    if (next[key] !== order[key]) changed[key] = { from: String(order[key]), to: String(next[key]) };
+  });
+  if (!Object.keys(changed).length) return order;
+
+  const updated: Order = {
+    ...order,
+    ...next,
+    audit: [
+      { at: new Date().toISOString(), actor, action: "order.contact_updated", meta: { changed } },
+      ...order.audit,
+    ],
+  };
+  all[index] = updated;
+  await writeAll(all);
+  return updated;
+}
+
+/**
+ * Customer kehta hai "paisa kat gaya, par UTR nahi mila".
+ *
+ * UPI app band ho gaya / UTR screen miss ho gaya — customer ko payment page par
+ * atakna nahi chahiye. Order `processing` (verify hona baaki) ho jaata hai,
+ * reference khaali rehta hai, aur owner ki Sheet me `payment.claimed` row jaati
+ * hai taaki admin bank/UPI statement se match karke confirm kar sake.
+ */
+export async function claimPayment(
+  orderNumberValue: string,
+  options: { note?: string | null } = {},
+): Promise<Order> {
+  const all = await readAll();
+  const wanted = normalizeOrderNumber(orderNumberValue);
+  const index = all.findIndex((order) => order.orderNumber === wanted);
+  if (index === -1) throw new OrderError("Order not found.", 404, "order_not_found");
+  const order = all[index]!;
+  if (order.paymentStatus === "paid") {
+    throw new OrderError("This order is already paid.", 409, "already_paid");
+  }
+  const now = new Date().toISOString();
+  const note = (options.note ?? "").trim().slice(0, 180);
+  const updated: Order = {
+    ...order,
+    paymentStatus: "processing",
+    payment: {
+      gateway: order.payment?.gateway && order.payment.gateway !== "pending" ? order.payment.gateway : "manual-upi",
+      reference: order.payment?.reference ?? null,
+      upiUri: order.payment?.upiUri ?? null,
+      amount: order.payment?.amount ?? order.total,
+      status: "processing",
+      createdAt: order.payment?.createdAt ?? now,
+      verifiedAt: null,
+      verifiedBy: null,
+      failureReason: null,
+    },
+    audit: [
+      {
+        at: now,
+        actor: "customer",
+        action: "payment.claimed",
+        meta: note ? { no_reference: true, note } : { no_reference: true },
+      },
+      ...order.audit,
+    ],
+  };
+  all[index] = updated;
+  await writeAll(all);
+  if (typeof after === "function") {
+    after(() => syncOrderToSheet(updated, "payment.claimed"));
+  } else {
+    void syncOrderToSheet(updated, "payment.claimed");
+  }
+  return updated;
 }
 
 /**

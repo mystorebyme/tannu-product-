@@ -10,13 +10,9 @@ import { useStoreSettings } from "@/components/store-settings-provider";
 import { API_AVAILABLE, LIVE_STORE_URL, apiUrl } from "@/lib/api-base";
 import { postJson, readJson } from "@/lib/http-json";
 import { checkPincodeOffline } from "@/lib/pincode-offline";
+import { INDIAN_STATES, canonicalStateName, statesMatch } from "@/lib/state-match";
 
-const indianStates = [
-  "Andhra Pradesh", "Assam", "Bihar", "Chandigarh", "Chhattisgarh", "Delhi", "Goa", "Gujarat",
-  "Haryana", "Himachal Pradesh", "Jammu & Kashmir", "Jharkhand", "Karnataka", "Kerala",
-  "Madhya Pradesh", "Maharashtra", "Odisha", "Puducherry", "Punjab", "Rajasthan", "Sikkim",
-  "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal",
-];
+const indianStates = INDIAN_STATES;
 
 export function CheckoutForm() {
   const { lines, subtotal, count, clear, isOpen, closeCart, removeLine } = useCart();
@@ -111,6 +107,13 @@ export function CheckoutForm() {
   const discount = 0;
   const total = Math.max(0, subtotal - discount);
 
+  /**
+   * Owner rule: pincode jis state ka hai, wahi state select hona chahiye.
+   * Mismatch par aage nahi jaane dete aur sahi state ek tap me set ho jaati hai.
+   */
+  const pinState = canonicalStateName(pinStatus?.state) ?? pinStatus?.state ?? null;
+  const stateMismatch = Boolean(pinStatus?.ok && pinState && !statesMatch(form.state, pinState));
+
   /** Step 1 → Step 2: delivery details theek hon tabhi aage */
   function goToReview() {
     const missing =
@@ -130,7 +133,9 @@ export function CheckoutForm() {
                     ? "Pincode check hone dein — delivery availability verify ho rahi hai."
                     : !pinStatus.ok
                       ? pinStatus.message
-                      : null;
+                      : stateMismatch
+                        ? `Ye pincode ${pinState} ka hai — State me "${pinState}" select kariye (abhi "${form.state}" chuna hua hai).`
+                        : null;
     if (missing) {
       setError(missing);
       return;
@@ -373,6 +378,30 @@ export function CheckoutForm() {
                     ? `Deliverable${pinStatus.district ? ` — ${pinStatus.district}, ${pinStatus.state}` : ""}. Free shipping, 4-7 business days.`
                     : pinStatus.message}
                 </p>
+              ) : null}
+              {/*
+                Owner rule: pincode aur state match hone chahiye. Mismatch par
+                saaf message + ek tap me sahi state set (aage jaana block rehta hai).
+              */}
+              {stateMismatch ? (
+                <div
+                  className="mt-1.5 border border-[#e6c9a8] bg-[#fdf6ea] px-2.5 py-2"
+                  data-testid="state-mismatch"
+                  role="alert"
+                >
+                  <p className="text-[11px] leading-relaxed text-[#8a5a14]">
+                    Ye pincode <strong>{pinState}</strong> ka hai, par State me{" "}
+                    <strong>{form.state}</strong> chuna hua hai. State badal kar {pinState} kariye.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => update("state", pinState ?? form.state)}
+                    className="mt-1.5 inline-flex h-7 items-center border border-[#8a5a14] bg-white px-2.5 text-[10px] font-semibold tracking-[.08em] text-[#8a5a14] uppercase"
+                    data-testid="state-fix"
+                  >
+                    State {pinState} set kariye
+                  </button>
+                </div>
               ) : null}
             </div>
             <Field label="Order notes (optional)" value={form.notes} onChange={(v) => update("notes", v)} />

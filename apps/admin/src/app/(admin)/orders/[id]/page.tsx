@@ -4,12 +4,14 @@ import { getOrder } from "@/lib/data";
 import { dateTime, inr } from "@/lib/format";
 import {
   setOrderNoteAction,
+  updateContactAction,
   updateOrderStatusAction,
   reversePaymentAction,
   updateTrackingAction,
   verifyPaymentAction,
 } from "@/app/actions";
 import { getSession } from "@/lib/session";
+import { PhoneLinks, whatsappHref } from "@/components/contact-links";
 
 export const dynamic = "force-dynamic";
 
@@ -111,7 +113,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             <div className="panel-head">
               <h2>Customer</h2>
             </div>
-            <div className="panel-body small">
+            <div className="panel-body small" id="contact">
               <p style={{ marginTop: 0 }}>
                 <strong>{order.customerName}</strong>
                 <br />
@@ -119,14 +121,64 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                 <br />
                 {order.city}, {order.state} — {order.pincode}
                 <br />
-                +91 {order.phone}
-                <br />
-                {order.email}
+                <a href={`mailto:${order.email}`}>{order.email}</a>
               </p>
+              <PhoneLinks
+                phone={order.phone}
+                whatsappText={`Namaste ${order.customerName.split(" ")[0]}! Designer Clothing se — aapke order ${order.orderNumber} ke baare me.`}
+              />
               {order.notes ? <p className="notice">{order.notes}</p> : null}
-              <a className="btn btn-sm" href={`https://wa.me/91${order.phone}`} target="_blank" rel="noreferrer">
-                WhatsApp customer
-              </a>
+              <div className="actions" style={{ marginTop: 10 }}>
+                <a className="btn btn-sm" href={whatsappHref(order.phone, `Order ${order.orderNumber} ka update`)} target="_blank" rel="noreferrer">
+                  WhatsApp customer
+                </a>
+                <Link className="btn btn-sm" href={`/customers?phone=${encodeURIComponent(order.phone)}`}>
+                  Customer history
+                </Link>
+              </div>
+
+              <details className="contact-edit" open={false}>
+                <summary>Details edit kariye (naam / phone / address)</summary>
+                <form action={updateContactAction} style={{ marginTop: 10 }}>
+                  <input type="hidden" name="orderNumber" value={order.orderNumber} />
+                  <div className="field">
+                    <label htmlFor="customerName">Naam</label>
+                    <input id="customerName" name="customerName" defaultValue={order.customerName} />
+                  </div>
+                  <div className="field">
+                    <label htmlFor="phone">Phone (10 digit)</label>
+                    <input id="phone" name="phone" inputMode="numeric" defaultValue={order.phone} />
+                  </div>
+                  <div className="field">
+                    <label htmlFor="email">Email</label>
+                    <input id="email" name="email" type="email" defaultValue={order.email} />
+                  </div>
+                  <div className="field">
+                    <label htmlFor="address">Address</label>
+                    <textarea id="address" name="address" rows={2} defaultValue={order.address} />
+                  </div>
+                  <div className="row">
+                    <div className="field">
+                      <label htmlFor="city">City</label>
+                      <input id="city" name="city" defaultValue={order.city} />
+                    </div>
+                    <div className="field">
+                      <label htmlFor="state">State</label>
+                      <input id="state" name="state" defaultValue={order.state} />
+                    </div>
+                    <div className="field">
+                      <label htmlFor="pincode">Pincode</label>
+                      <input id="pincode" name="pincode" inputMode="numeric" defaultValue={order.pincode} />
+                    </div>
+                  </div>
+                  <button className="btn btn-primary" type="submit">
+                    Save details
+                  </button>
+                  <p className="small muted" style={{ marginBottom: 0 }}>
+                    Change audit log me `order.contact_updated` ke roop me jaata hai. Tracking/AWB alag section me hai.
+                  </p>
+                </form>
+              </details>
             </div>
           </div>
 

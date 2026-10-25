@@ -21,6 +21,7 @@ import {
   setOrderNote,
   setOrderTracking,
   reverseOrderPayment,
+  updateOrderContact,
   updateOrderStatus,
   verifyOrderPayment,
 } from "@/lib/data";
@@ -104,6 +105,40 @@ export async function updatePriceAction(formData: FormData) {
   if (!saveProductOverride(handle, { price: Math.round(rupees * 100) }, actor)) return;
   appendAudit({ actor, action: "product.price_updated", target: handle, meta: { rupees } });
   revalidatePath("/products");
+}
+
+/**
+ * Customer ki details edit — galat naam/phone/pincode ya call par address
+ * change. Order page par inline form se aata hai.
+ */
+export async function updateContactAction(formData: FormData) {
+  const session = await requireSession();
+  const orderNumber = String(formData.get("orderNumber") ?? "").trim();
+  if (!orderNumber) redirect("/orders?error=order-missing");
+  const field = (name: string) => {
+    const value = formData.get(name);
+    return value === null ? undefined : String(value);
+  };
+  const actor = session.email;
+  const updated = await updateOrderContact(
+    orderNumber,
+    {
+      customerName: field("customerName"),
+      email: field("email"),
+      phone: field("phone"),
+      address: field("address"),
+      city: field("city"),
+      state: field("state"),
+      pincode: field("pincode"),
+    },
+    actor,
+  );
+  if (!updated) redirect(`/orders/${encodeURIComponent(orderNumber)}?error=order-missing`);
+  appendAudit({ actor, action: "order.contact_updated", target: orderNumber });
+  revalidatePath(`/orders/${orderNumber}`);
+  revalidatePath("/orders");
+  revalidatePath("/customers");
+  redirect(`/orders/${encodeURIComponent(orderNumber)}?contactSaved=1`);
 }
 
 export async function updateTrackingAction(formData: FormData) {

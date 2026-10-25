@@ -38,9 +38,11 @@ export async function generateMetadata({
 
 export default async function OrderPage({ params }: { params: Promise<{ orderNumber: string }> }) {
   const { orderNumber } = await params;
-  const order = await getOrder(orderNumber);
-  const settings = await getStoreSettings();
-  const headerList = await headers();
+  const [order, settings, headerList] = await Promise.all([
+    getOrder(orderNumber),
+    getStoreSettings(),
+    headers(),
+  ]);
   const fallbackHost = new URL(siteConfig.url).host;
   const host = headerList.get("x-forwarded-host") ?? headerList.get("host") ?? fallbackHost;
   const proto = headerList.get("x-forwarded-proto") ?? "https";

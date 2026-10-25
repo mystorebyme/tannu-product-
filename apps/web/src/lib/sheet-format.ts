@@ -100,3 +100,23 @@ export function orderSheetRow(
     ...extra,
   };
 }
+
+/** CSV (key,value rows) → SheetSettings. Sirf 2-column layout expect karta hai. */
+export function parseSettingsCsv(csv: string): SheetSettings | null {
+  const rows: Record<string, string> = {};
+  for (const line of csv.split(/\r?\n/)) {
+    const cells = line.match(/("([^"]|"")*"|[^,]*)(,|$)/g);
+    if (!cells || cells.length < 2) continue;
+    const clean = (value: string) =>
+      value
+        .replace(/,$/, "")
+        .replace(/^"|"$/g, "")
+        .replace(/""/g, '"')
+        .trim();
+    const key = clean(cells[0]!).replace(/\s+/g, " ").toLowerCase().replace(/ /g, "_");
+    const value = clean(cells.slice(1).join(","));
+    if (!key || key === "key" || !value) continue;
+    rows[key] = value;
+  }
+  return normaliseSheetSettings(rows);
+}

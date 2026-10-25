@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createOrderAction } from "@/app/actions";
 import { OrderItemPicker } from "@/components/order-item-picker";
-import { getProducts, getSettings } from "@/lib/data";
+import { getOrders, getProducts, getSettings } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
@@ -13,11 +13,19 @@ export const dynamic = "force-dynamic";
 export default async function NewOrderPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; handle?: string }>;
+  searchParams: Promise<{ error?: string; handle?: string; phone?: string }>;
 }) {
-  const { error, handle } = await searchParams;
+  const { error, handle, phone = "" } = await searchParams;
   const products = getProducts().filter((product) => product.inStock !== false);
   const settings = await getSettings();
+
+  // customer detail page se "New order" — purani details prefill ho jaati hain
+  const digits = phone.replace(/\D/g, "").slice(-10);
+  const previous = digits
+    ? (await getOrders())
+        .filter((order) => order.phone === digits)
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0]
+    : undefined;
 
   return (
     <>
@@ -34,6 +42,12 @@ export default async function NewOrderPage({
       </div>
 
       {error ? <div className="notice warn">{error}</div> : null}
+      {previous ? (
+        <div className="notice" data-testid="prefilled-customer">
+          {previous.customerName} (+91 {previous.phone}) ki details prefill kar di gayi hain — {previous.orderNumber} se.
+          Badalna ho to seedha edit kar lijiye.
+        </div>
+      ) : null}
 
       <form action={createOrderAction} className="panel">
         <div className="panel-head">
@@ -44,33 +58,33 @@ export default async function NewOrderPage({
           <div className="row">
             <div className="field">
               <label htmlFor="customerName">Full name</label>
-              <input id="customerName" name="customerName" required autoComplete="off" />
+              <input id="customerName" name="customerName" defaultValue={previous?.customerName ?? ""} required autoComplete="off" />
             </div>
             <div className="field">
               <label htmlFor="phone">Mobile (10 digit)</label>
-              <input id="phone" name="phone" required inputMode="numeric" pattern="[0-9 ]{10,14}" />
+              <input id="phone" name="phone" defaultValue={previous?.phone ?? digits} required inputMode="numeric" pattern="[0-9 ]{10,14}" />
             </div>
             <div className="field">
               <label htmlFor="email">Email</label>
-              <input id="email" name="email" type="email" required autoComplete="off" />
+              <input id="email" name="email" defaultValue={previous?.email ?? ""} type="email" required autoComplete="off" />
             </div>
           </div>
           <div className="field">
             <label htmlFor="address">Address</label>
-            <input id="address" name="address" required autoComplete="off" />
+            <input id="address" name="address" defaultValue={previous?.address ?? ""} required autoComplete="off" />
           </div>
           <div className="row">
             <div className="field">
               <label htmlFor="city">City</label>
-              <input id="city" name="city" required autoComplete="off" />
+              <input id="city" name="city" defaultValue={previous?.city ?? ""} required autoComplete="off" />
             </div>
             <div className="field">
               <label htmlFor="state">State</label>
-              <input id="state" name="state" required defaultValue="Rajasthan" />
+              <input id="state" name="state" required defaultValue={previous?.state ?? "Rajasthan"} />
             </div>
             <div className="field">
               <label htmlFor="pincode">Pincode</label>
-              <input id="pincode" name="pincode" required inputMode="numeric" pattern="[0-9]{6}" />
+              <input id="pincode" name="pincode" defaultValue={previous?.pincode ?? ""} required inputMode="numeric" pattern="[0-9]{6}" />
             </div>
           </div>
           <div className="field">

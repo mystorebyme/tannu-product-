@@ -1,6 +1,7 @@
 import { getMessages } from "@/lib/data";
 import { markMessageHandledAction, setMessageReplyAction } from "@/app/actions";
 import { dateTime } from "@/lib/format";
+import { PhoneLinks } from "@/components/contact-links";
 
 export const dynamic = "force-dynamic";
 
@@ -55,13 +56,7 @@ export default async function MessagesPage() {
                       {message.phone ? (
                         <>
                           <br />
-                          <a
-                            href={`https://wa.me/91${message.phone.replace(/\D/g, "").slice(-10)}`}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            {message.phone}
-                          </a>
+                          <PhoneLinks phone={message.phone} />
                         </>
                       ) : null}
                     </td>
