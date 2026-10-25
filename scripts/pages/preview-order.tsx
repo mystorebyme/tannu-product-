@@ -102,9 +102,16 @@ export default function PreviewOrderPage() {
         ]);
         if (cancelled) return;
         clearTimeout(timer);
+        const contentType = orderResponse.headers.get("content-type") ?? "";
         if (orderResponse.status === 404) {
-          // API chal rahi hai par order nahi mila — sach me galat number
-          setState("missing");
+          // Do tarah ke 404 hote hain:
+          //   • JSON   → API chal rahi hai, par is number ka order nahi (galat number)
+          //   • HTML   → API route hi maujood nahi (purana deploy) → live store par bhejo
+          if (contentType.includes("application/json")) {
+            setState("missing");
+          } else {
+            fallbackToLiveStore();
+          }
           return;
         }
         if (!orderResponse.ok) {
