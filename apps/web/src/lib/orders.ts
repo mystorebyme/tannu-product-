@@ -27,6 +27,25 @@ type StoredOrder = Order;
  * (dev + tests). Dono ka behaviour same hai — baaki code ko farq nahi padta.
  */
 let lastLoaded: StoredOrder[] = [];
+/**
+ * Google Sheet ki row request ke **baad** bhejni hai (customer/owner ko wait nahi
+ * karana). `after()` sirf request scope me chalta hai — tests/CLI me wo throw karta
+ * hai, isliye try/catch ke saath fire-and-forget fallback rakha hai.
+ */
+function runInBackground(task: () => void | Promise<unknown>): void {
+  if (typeof after === "function") {
+    try {
+      after(task);
+      return;
+    } catch {
+      // request scope nahi (test / script) — neeche fire-and-forget
+    }
+  }
+  void Promise.resolve()
+    .then(task)
+    .catch((error) => console.warn("[background] task failed", (error as Error).message));
+}
+
 /** read ke waqt ka snapshot — in-memory array mutate hone se diff kharab na ho */
 let lastSnapshot = new Map<string, string>();
 let hydrated = false;
@@ -271,13 +290,8 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
     syncOrderToSheet(order, event).catch((error) =>
       console.warn("[sheets] background sync failed", (error as Error).message),
     );
-  if (typeof after === "function") {
-    after(() => sheetRow("order.placed"));
-    after(() => sheetRow("payment.pending"));
-  } else {
-    void sheetRow("order.placed");
-    void sheetRow("payment.pending");
-  }
+  runInBackground(() => sheetRow("order.placed"));
+  runInBackground(() => sheetRow("payment.pending"));
   return order;
 }
 
@@ -640,11 +654,7 @@ export async function claimPayment(
   };
   all[index] = updated;
   await writeAll(all);
-  if (typeof after === "function") {
-    after(() => syncOrderToSheet(updated, "payment.claimed"));
-  } else {
-    void syncOrderToSheet(updated, "payment.claimed");
-  }
+  runInBackground(() => syncOrderToSheet(updated, "payment.claimed"));
   return updated;
 }
 

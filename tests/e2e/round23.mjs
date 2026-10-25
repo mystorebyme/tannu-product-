@@ -21,8 +21,18 @@ const CAN_ADMIN = TOKEN.length > 0;
 const ADMIN = (process.env.ADMIN_URL ?? "").replace(/\/+$/, "");
 /** local admin run par session cookie: ADMIN_COOKIE=liksha_admin=<token> */
 const ADMIN_COOKIE = process.env.ADMIN_COOKIE ?? "";
-const adminFetch = (path) =>
-  fetch(`${ADMIN}${path}`, { headers: ADMIN_COOKIE ? { cookie: ADMIN_COOKIE } : {}, redirect: "manual" });
+const adminFetch = async (path) => {
+  try {
+    return await fetch(`${ADMIN}${path}`, {
+      headers: ADMIN_COOKIE ? { cookie: ADMIN_COOKIE } : {},
+      redirect: "manual",
+    });
+  } catch (error) {
+    // admin band hai / URL galat — suite crash na ho, sirf check fail ho
+    console.log(`  warn admin unreachable: ${error.message}`);
+    return { status: 0, text: async () => "" };
+  }
+};
 
 let passed = 0;
 const failures = [];
