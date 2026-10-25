@@ -1,0 +1,30 @@
+name: Keep warm (cold start kam karo)
+
+# Kyun: Vercel serverless functions kuch minute idle rehne par "so" jaate hain, aur
+# uske baad pehla request 3-6 second leta hai (customer ko "step 3 slow" lagta hai).
+# Ye workflow har 10 minute me 4 halke requests bhejta hai — lambda aur DB connection
+# garam rehte hain, isliye order/payment page turant khulta hai.
+#
+# Public repo par GitHub Actions minutes free hain. Band karna ho to is file me
+# `cron:` line hata dijiye (ya workflow disable kar dijiye).
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  warm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      BASE_URL: https://liksha-clothing.vercel.app
+    steps:
+      - name: Ping important routes
+        run: |
+          set +e
+          for path in "/api/health" "/" "/checkout" "/orders/warmup"; do
+            code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 25 "$BASE_URL$path")
+            ms=$(curl -s -o /dev/null -w "%{time_total}" --max-time 25 "$BASE_URL$path")
+            echo "$path → HTTP $code · ${ms}s"
+          done

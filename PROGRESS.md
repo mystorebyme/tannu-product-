@@ -331,3 +331,26 @@ aur `1k8fsea04…` sheet me us waqt 0 rows. (Self-test ne `written: 1` bhi diya,
 
 **Baaki:** owner ko naya code paste + **New version** deploy karna hai (tab hi id wali sheet me
 likhega). Uske baad `/api/sheet-selftest` + connector se row confirm karna hai.
+
+### R25 — sheet: owner apna Apps Script khud set karega; code + self-check ready
+
+- **`docs/00-overview/apps-script-code.md`** = poora code (auto-generated from
+  `scripts/google-apps-script/liksha-sheets.gs`, 424 lines) + 9 steps + env var table.
+- `book_()` ab **bulletproof**: `SPREADSHEET_ID` → Script Property `SHEET_ID` →
+  hardcoded `SHEET_ID_FALLBACK` → active sheet. `typeof` guard ki wajah se agar
+  constant delete bhi ho jaye to script crash nahi karti (owner ke edit se
+  `ReferenceError: SPREADSHEET_ID is not defined` aa raha tha).
+- `scripts/sheets-selfcheck.mjs` ab **galat sheet** bhi pakadta hai
+  (`health.spreadsheetId` vs expected id) + mock server par test kiya:
+  sahi sheet → sab ok; copy sheet → FAIL + exact fix; galat token → FAIL.
+- `appendSheetRows` ab Apps Script ka `{ok:false,error}` **HTTP 200 ke saath** bhi
+  fail maanta hai (pehle chup-chaap success dikhta tha — "sheet me row nahi aayi"
+  ka pata hi nahi chalta).
+- `whatsappNumber()` (naya `lib/phone.ts`, pure) — 10-digit number par `91` lagta hai;
+  pehle contact page ka "WhatsApp us" button `wa.me/8005900581` (invalid) bana raha tha.
+- `.github/workflows/keep-warm.yml` — har 10 min me 4 halke requests (health, home,
+  checkout, orders) → serverless cold start kam, step-3 payment page turant.
+- Live verify: contact form DB me save hota hai (`/api/sheet-selftest?message=1`
+  → `rowInDb: true`); sheet write sirf owner ke Apps Script deploy par depend hai.
+- Published CSV (`pub?output=csv`) abhi bhi Google ki taraf se HTTP 500 deta hai —
+  isliye settings ka fallback = code defaults (phone/UPI sahi) + admin panel.
