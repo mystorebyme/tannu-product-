@@ -69,13 +69,25 @@ function makeSheet(name: string, id: number, grid: Grid = []) {
   return sheet;
 }
 
-function loadScript(token = "test-token") {
+function loadScript(
+  token = "test-token",
+  options: { dropSpreadsheetId?: boolean; activeIsCopy?: boolean } = {},
+) {
   const file = path.join(process.cwd(), "scripts/google-apps-script/liksha-sheets.gs");
-  const source = fs.readFileSync(file, "utf8").replace(
+  let source = fs.readFileSync(file, "utf8").replace(
     "var TOKEN = 'CHANGE-ME-liksha-token';",
     `var TOKEN = '${token}';`,
   );
   assert.ok(source.includes(`var TOKEN = '${token}';`), "token replace hua");
+
+  /**
+   * Owner ne paste karte waqt `SPREADSHEET_ID` line delete kar di thi — usi galti
+   * ka test. Script crash nahi honi chahiye, fallback id se asli sheet pakdni chahiye.
+   */
+  if (options.dropSpreadsheetId) {
+    source = source.replace(/^var SPREADSHEET_ID = '[^']*';\s*$/m, "");
+    assert.ok(!/^var SPREADSHEET_ID/m.test(source), "SPREADSHEET_ID line hataayi gayi");
+  }
 
   const sheets: ReturnType<typeof makeSheet>[] = [];
   const book = {
@@ -92,8 +104,30 @@ function loadScript(token = "test-token") {
     toast: () => {},
   };
 
+  /**
+   * "copy" book = jis sheet ke saath script bana hai (owner ke case me galat sheet).
+   * `book` = asli sheet. Test pakadta hai ki writes **asli** sheet me jaate hain.
+   */
+  const copySheets: ReturnType<typeof makeSheet>[] = [];
+  const copyBook = {
+    getName: () => "Copy of Liksha (galat sheet)",
+    getId: () => "copy-sheet-id",
+    getUrl: () => "https://docs.google.com/spreadsheets/d/copy-sheet-id/edit",
+    getSheets: () => copySheets,
+    getSheetByName: (name: string) => copySheets.find((sheet) => sheet.getName() === name) ?? null,
+    insertSheet: (name: string) => {
+      const sheet = makeSheet(name, 2000 + copySheets.length);
+      copySheets.push(sheet);
+      return sheet;
+    },
+    toast: () => {},
+  };
+
   const sandbox: Record<string, unknown> = {
-    SpreadsheetApp: { getActiveSpreadsheet: () => book, openById: () => book },
+    SpreadsheetApp: {
+      getActiveSpreadsheet: () => (options.activeIsCopy ? copyBook : book),
+      openById: () => book,
+    },
     ContentService: {
       MimeType: { JSON: "json" },
       createTextOutput: (text: string) => ({
@@ -114,7 +148,7 @@ function loadScript(token = "test-token") {
   };
   vm.createContext(sandbox);
   vm.runInContext(source, sandbox);
-  return { sandbox: sandbox as Record<string, any>, sheets, book };
+  return { sandbox: sandbox as Record<string, any>, sheets, book, copySheets };
 }
 
 test("setup() sab tabs + headers + default settings banata hai", () => {
@@ -349,4 +383,41 @@ test("owner doc (apps-script-code.md) script ke saath sync hai", () => {
   const gs = fs.readFileSync(path.join(process.cwd(), "scripts/google-apps-script/liksha-sheets.gs"), "utf8").trimEnd();
   const doc = fs.readFileSync(path.join(process.cwd(), "docs/00-overview/apps-script-code.md"), "utf8");
   assert.ok(doc.includes(gs), "doc purani hai — `npm run apps-script:export` chalaiye");
+});
+
+test("SPREADSHEET_ID line delete ho jaye to bhi asli sheet me likhta hai (ReferenceError-proof)", () => {
+  // Owner ne paste karte waqt ye line delete kar di thi → live script crash ho rahi thi.
+  const { sandbox, sheets, copySheets } = loadScript("test-token", {
+    dropSpreadsheetId: true,
+    activeIsCopy: true,
+  });
+  sandbox.setup();
+
+  const response = sandbox.doPost({
+    postData: {
+      contents: JSON.stringify({
+        token: "test-token",
+        action: "append",
+        rows: [{ sheet: "Audit", row: { Actor: "test", Action: "fallback", Target: "sheet", Details: "ok" } }],
+      }),
+    },
+  });
+  assert.equal(response.getJson().ok, true, "append ok hona chahiye");
+
+  const audit = sheets.find((sheet) => sheet.getName() === "Audit");
+  assert.ok(audit, "asli sheet me Audit tab bana");
+  assert.equal(audit!.rows.length, 2, "header + 1 data row");
+  assert.ok(
+    copySheets.every((sheet) => sheet.rows.length <= 1),
+    "copy sheet me koi data row nahi gayi",
+  );
+});
+
+test("health response code version deta hai (pata chale naya code chal raha hai)", () => {
+  const { sandbox } = loadScript();
+  sandbox.setup();
+  const body = sandbox.doGet({ parameter: { token: "test-token", action: "health" } }).getJson();
+  assert.equal(body.ok, true);
+  assert.match(String(body.codeVersion), /^r\d+/);
+  assert.equal(body.spreadsheetId, "test-sheet-id");
 });
