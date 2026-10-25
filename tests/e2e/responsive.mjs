@@ -125,7 +125,11 @@ check("brand lockup uses <picture> with all three variants", headerPicture);
 // Pages export me base path + trailing slash aata hai — dono accept karo
 check("nav has SHOP link to /collections", /href="(?:\/tannu-product-)?\/collections\/?"[^>]*>SHOP/.test(home.text));
 check("no saree link in header/footer (0 products)", !home.text.includes("/collections/saree"));
-check("header grid keeps logo centred on phones", home.text.includes("grid-cols-[auto_1fr_auto]"));
+// mobile + desktop dono par logo exact center: dono jagah 1fr_auto_1fr grid
+check(
+  "header grid keeps logo centred on phones and desktop",
+  home.text.includes("grid-cols-[1fr_auto_1fr]"),
+);
 check("mobile menu is a 40px touch target", /aria-label="Open menu"[\s\S]{0,220}?h-10 w-10/.test(home.text));
 // 1024px par nav + 4 icons + logo ke saath overlap na ho: cart ka price sirf xl+ par
 check(
