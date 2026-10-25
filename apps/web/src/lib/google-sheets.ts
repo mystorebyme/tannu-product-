@@ -2,13 +2,16 @@ import "server-only";
 
 import type { Order } from "@liksha/types";
 import {
+  invoiceSheetRow,
   normaliseSheetSettings,
+  orderItemSheetRows,
   orderSheetRow,
   parseSettingsCsv,
+  shipmentSheetRow,
   type SheetSettings,
 } from "./sheet-format";
 
-export { normaliseSheetSettings, orderSheetRow, parseSettingsCsv };
+export { normaliseSheetSettings, orderItemSheetRows, orderSheetRow, parseSettingsCsv, shipmentSheetRow, invoiceSheetRow };
 export type { SheetSettings };
 
 /**
@@ -29,7 +32,20 @@ export type { SheetSettings };
  * (koi feature band nahi hota) — sirf owner edits sheet se nahi honge.
  */
 
-export type SheetName = "Orders" | "Payments" | "Messages" | "Newsletter" | "Checkout" | "Audit";
+export type SheetName =
+  | "Orders"
+  | "OrderItems"
+  | "Payments"
+  | "Invoices"
+  | "Shipments"
+  | "Messages"
+  | "Newsletter"
+  | "Checkout"
+  | "Reviews"
+  | "Coupons"
+  | "Inventory"
+  | "Audit"
+  | "Errors";
 
 export type SheetAppend = {
   sheet: SheetName;
@@ -328,13 +344,37 @@ export async function readSheetHealth(): Promise<SheetHealth | null> {
 
 const inr = (paise: number) => Math.round(paise) / 100;
 
-/** Fire-and-forget sync — caller `await` kare to bhi 6s max. */
+/**
+ * Fire-and-forget sync — caller `await` kare to bhi 6s max.
+ *
+ * `order.placed` par OrderItems tab bhi bharti hai (har item alag row) — isliye
+ * owner ko size/colour wise bikri ek nazar me dikhti hai. Baaki events sirf
+ * timeline row likhte hain (warna items 10 baar duplicate ho jaati).
+ */
 export async function syncOrderToSheet(
   order: Order,
   event: string,
   extra: Record<string, string | number | null> = {},
 ): Promise<boolean> {
-  return appendSheetRows([
+  const appends: SheetAppend[] = [
     { sheet: event.startsWith("payment") ? "Payments" : "Orders", row: orderSheetRow(order, event, extra) },
-  ]);
+  ];
+  if (event === "order.placed" || event === "order.created") {
+    orderItemSheetRows(order).forEach((row) => appends.push({ sheet: "OrderItems", row }));
+  }
+  return appendSheetRows(appends);
+}
+
+/** Tracking/courier update — Shipments tab me alag row (owner ko dispatch list) */
+export async function syncShipmentToSheet(order: Order, status = "updated"): Promise<boolean> {
+  return appendSheetRows([{ sheet: "Shipments", row: shipmentSheetRow(order, status) }]);
+}
+
+/** GST invoice banne par Invoices tab me row */
+export async function syncInvoiceToSheet(
+  invoice: Parameters<typeof invoiceSheetRow>[0],
+  order: Order,
+  type = "gst",
+): Promise<boolean> {
+  return appendSheetRows([{ sheet: "Invoices", row: invoiceSheetRow(invoice, order, type) }]);
 }

@@ -175,3 +175,82 @@ export function messageSheetRow(message: {
 export function subscriberSheetRow(email: string, at = new Date().toISOString()): Record<string, string> {
   return { Timestamp: at, Email: email };
 }
+
+/**
+ * Order ki har item alag row — owner ko size/colour wise bikri dikhti hai
+ * (OrderItems tab). Ek hi order ki saari items ek saath jaati hain.
+ */
+export function orderItemSheetRows(order: Order): Record<string, string | number>[] {
+  return order.items.map((item) => ({
+    Timestamp: new Date().toISOString(),
+    "Order number": order.orderNumber,
+    Product: item.title,
+    Handle: item.handle,
+    SKU: `${item.handle}-${item.size}`.toUpperCase(),
+    Size: item.size,
+    Colour: (item as { colour?: string }).colour ?? "",
+    Quantity: item.quantity,
+    Price: inr(item.price),
+    "Line total": inr(item.price * item.quantity),
+    Category: (item as { category?: string }).category ?? "",
+    "Image URL": item.image ?? "",
+    Status: order.status,
+  }));
+}
+
+/** Shipment row — courier/AWB/tracking update par (Shipments tab) */
+export function shipmentSheetRow(
+  order: Order,
+  status = "updated",
+): Record<string, string | number> {
+  return {
+    Timestamp: new Date().toISOString(),
+    "Order number": order.orderNumber,
+    Courier: order.tracking?.courier ?? "",
+    AWB: order.tracking?.awb ?? "",
+    "Tracking URL": order.tracking?.url ?? "",
+    Status: order.status || status,
+    "Expected delivery": "",
+    Note: "",
+    "Updated by": (order as { updatedBy?: string }).updatedBy ?? "system",
+  };
+}
+
+/**
+ * GST invoice row (Invoices tab). Amounts **rupees** me jaate hain (sheet me
+ * owner ko seedha padhne layak), paise nahi.
+ */
+export function invoiceSheetRow(
+  invoice: {
+    number: string;
+    issuedAt: string;
+    placeOfSupply?: string;
+    interState?: boolean;
+    buyer?: { name?: string; phone?: string; email?: string; address?: string; state?: string };
+    totals: { taxable: number; cgst: number; sgst: number; igst: number };
+  },
+  order: Order,
+  type = "gst",
+): Record<string, string | number> {
+  const buyer = invoice.buyer ?? {};
+  return {
+    Timestamp: invoice.issuedAt,
+    "Invoice number": invoice.number,
+    "Order number": order.orderNumber,
+    Type: type,
+    Customer: buyer.name ?? order.customerName,
+    Phone: buyer.phone ?? order.phone,
+    Email: buyer.email ?? order.email ?? "",
+    GSTIN: "",
+    Address: buyer.address ?? order.address,
+    State: buyer.state ?? order.state,
+    "Taxable value": inr(invoice.totals.taxable),
+    CGST: inr(invoice.totals.cgst),
+    SGST: inr(invoice.totals.sgst),
+    IGST: inr(invoice.totals.igst),
+    Shipping: inr(order.shipping),
+    Discount: inr(order.discount),
+    Total: inr(order.total),
+    Notes: invoice.interState ? "Inter-state (IGST)" : "Intra-state (CGST+SGST)",
+  };
+}

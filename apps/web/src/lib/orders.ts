@@ -16,7 +16,7 @@ import { dbEnabled } from "./db";
 import { checkPincode } from "./delivery";
 import { canonicalStateName, statesMatch } from "./state-match";
 import { products } from "./store";
-import { syncOrderToSheet } from "./google-sheets";
+import { syncOrderToSheet, syncShipmentToSheet } from "./google-sheets";
 
 type StoredOrder = Order;
 
@@ -424,6 +424,10 @@ export async function setTracking(
   all[index] = updated;
   await writeAll(all);
   await syncOrderToSheet(updated, "order.tracking_updated");
+  // Shipments tab — owner ko dispatch list (courier / AWB / status)
+  await syncShipmentToSheet(updated, updated.status).catch((error) =>
+    console.warn("[sheets] shipment sync failed", (error as Error).message),
+  );
   return updated;
 }
 

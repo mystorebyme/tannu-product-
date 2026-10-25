@@ -1,0 +1,179 @@
+# Apps Script v3 — setup steps (owner ke liye, 4 minute)
+
+Ye script website aur aapki Google Sheet ke beech ka pul hai. Isse **messages,
+orders, payment, invoice, tracking, reviews, coupon, stock** — sab sheet me aate hain
+aur Settings tab se site ki values (phone, UPI, announcement) control hoti hain.
+
+Code yahan hai: **[`apps-script-code.md`](./apps-script-code.md)** (poora copy karne layak)
+
+---
+
+## Step 0 — pehle purana code hatao (zaroori)
+
+1. Sheet kholein → **Extensions → Apps Script**.
+2. `Code.gs` me jo bhi likha hai, **Ctrl+A → Delete** (poora saaf).
+
+> Purana code rehne se `ReferenceError: SPREADSHEET_ID is not defined` aata hai —
+> yahi wajah thi ki sheet me data nahi ja raha tha.
+
+## Step 1 — naya code paste karo
+
+3. [`apps-script-code.md`](./apps-script-code.md) kholein → poora code **copy** karein →
+   `Code.gs` me **paste**.
+4. Code ke sabse upar ye do line dhoondho:
+
+```js
+var TOKEN = 'CHANGE-ME-liksha-token';
+var CODE_VERSION = 'r27-1';
+```
+
+`TOKEN` ki jagah apna lamba random word daalo (jaise `liksha-9f3k2m-2026`).
+**Yahi token Vercel me bhi daalna hai (Step 6)** — dono jagah bilkul same.
+
+5. **`SPREADSHEET_ID` line ko chhedna nahi:**
+```js
+var SPREADSHEET_ID = '1k8fsea04WpbrGjiyXuDrrS2Eewt9W7wx9X2lUQc5qMo';
+```
+(Agar galti se delete ho jaye to bhi script crash nahi hogi — andar fallback id hai.)
+
+## Step 2 — save
+
+6. **Ctrl + S** (ya 💾 icon). Tab band karne par bhi save rehta hai.
+
+## Step 3 — setup chalao (tabs banane ke liye)
+
+7. Upar toolbar me **function dropdown** (jahan "doGet" likha hota hai) → **`setup`** chuniye
+   (sabse upar wala function `setup` hai) → **▶ Run**.
+8. Pehli baar Google permission maangega:
+   - **Review permissions** → apna account chuniye
+   - "Google hasn't verified this app" → **Advanced** → **Go to … (unsafe)** → **Allow**
+   > Ye warning **har** personal Apps Script par aati hai (script aapka hi hai).
+   > Script sirf aapki sheet padhta/likhta hai — bahar kuch nahi bhejta.
+9. Sheet par wapas aayein — **16 tabs** ban chuke honge:
+
+| Tab | Kya aata hai |
+|---|---|
+| **Settings** | phone, WhatsApp, email, UPI ID, announcement, GSTIN — site 15 second me padh leti hai |
+| **Dashboard** | aaj ke orders, revenue, pending payment, naye messages (script khud bharta hai) |
+| **Orders** | har order + har status change (poori timeline) |
+| **OrderItems** | har item alag row (size, colour, qty, price) |
+| **Payments** | UTR submit / claimed / verified / failed |
+| **Invoices** | GST invoice (taxable, CGST/SGST/IGST, total) |
+| **Shipments** | courier, AWB, tracking URL, status |
+| **Checkout** | funnel: checkout khula → review → order placed → fail |
+| **Messages** | contact form ke messages (+ replied status) |
+| **Newsletter** | email subscribers (duplicate apne aap skip) |
+| **Reviews** | reviews (rating, verified, approve/pending) |
+| **Coupons** | coupon codes, uses, limit, active |
+| **Inventory** | stock ka har change (kisne, kitna, kyun) |
+| **Audit** | admin panel ki activity |
+| **Errors** | website/script ki error (debug ke liye) |
+| **Sync** | har sync call ka hisaab (kab, kya, kitni rows) |
+
+## Step 4 — deploy (asli kaam yahan hota hai)
+
+10. **Deploy → New deployment**
+11. Gear ⚙️ icon → **Web app** chuniye
+12. Settings:
+
+| Field | Value |
+|---|---|
+| Description | `liksha v3` |
+| **Execute as** | **Me (aapka email)** |
+| **Who has access** | **Anyone** ⚠️ |
+
+> ⚠️ "Anyone with a Google account" **nahi** chunna — us se website ko Google ka
+> login page milta hai aur data kabhi nahi jaata (aapke saath yahi hua tha).
+
+13. **Deploy** → **Web app URL** copy kariye. Wo `…/exec` par khatam hota hai.
+
+## Step 5 — test (30 second)
+
+14. Browser me kholein (apna token daal kar):
+```
+<Web app URL>?action=health&token=<TOKEN>
+```
+Jawab aisa aana chahiye:
+```json
+{"ok":true,"version":"r27-1","spreadsheet":"Designer Clothing — Store","sheets":[…]}
+```
+- `ok:true` = script chal rahi hai ✅
+- `version: r27-1` = naya code chal raha hai ✅ (purana version dikhe to Step 4 dobara
+  karein — sirf Ctrl+S se code **nahi** chalta)
+- `unauthorized` = token galat (dono jagah same karein)
+
+## Step 6 — Vercel me URL + token daalo
+
+15. Vercel → project **liksha-clothing** → **Settings → Environment Variables**
+16. Do variable (Production + Preview dono):
+
+| Name | Value |
+|---|---|
+| `GOOGLE_SHEETS_WEBAPP_URL` | aapka `…/exec` URL |
+| `GOOGLE_SHEETS_TOKEN` | wahi TOKEN jo script me hai |
+
+17. **Deployments → latest → ⋯ → Redeploy** (environment variable change ke baad
+    redeploy zaroori hai — warna purana URL hi chalta rahega)
+
+## Step 7 — asli test (website se)
+
+18. Website → **Contact** page → ek test message bhejein.
+19. Sheet → **Messages** tab → row wahan honi chahiye (Timestamp, Name, Email, Message…).
+20. Website par ek test order karein → **Orders** + **OrderItems** + **Payments** me rows.
+21. Ye link kholiye (30 second me poora sach):
+```
+https://liksha-clothing.vercel.app/api/sheet-selftest?key=lk-st-9f3k2m-7hq4rt-2026&v=check2
+```
+`sheetMirror: true` = sab chalu ✅
+
+## Step 8 (optional) — daily dashboard + backup
+
+22. Apps Script me function dropdown → **`installTriggers`** → **▶ Run**.
+    - roz raat **9 baje** Dashboard refresh
+    - har **Sunday 2 baje** Drive me sheet ka backup
+
+---
+
+## Website kya-kya bhejti hai (automatic)
+
+| Website ka event | Sheet tab |
+|---|---|
+| contact form submit | **Messages** |
+| footer email signup | **Newsletter** |
+| checkout start / review / fail | **Checkout** |
+| order place | **Orders** + **OrderItems** + **Payments** |
+| UTR submit / payment verify / reverse | **Payments** (Orders timeline bhi) |
+| courier / AWB update | **Shipments** (+ Orders) |
+| GST invoice download | **Invoices** |
+| admin panel ka edit | **Audit** |
+| website error | **Errors** |
+| har sync | **Sync** |
+
+Settings tab me jo value badlegi, site par **15 second** me live ho jayegi
+(phone, WhatsApp, email, UPI ID, announcement, GSTIN, free shipping, admin URL).
+
+---
+
+## Problem aaye to (troubleshooting)
+
+| Dikh raha hai | Matlab | Fix |
+|---|---|---|
+| `ReferenceError: SPREADSHEET_ID is not defined` | purana code chal raha hai | Step 1 se dobara paste + Step 4 (**New version**) |
+| Google ka **login page** (HTML) | access "Anyone" nahi | Deploy → Manage deployments → ✏️ → Who has access: **Anyone** → Deploy |
+| `unauthorized — token match nahi hua` | token alag hai | script ka TOKEN = Vercel ka `GOOGLE_SHEETS_TOKEN` |
+| `version` purana dikh raha hai | naya version deploy nahi hua | Manage deployments → ✏️ → Version: **New version** → Deploy |
+| Sheet me row nahi aa rahi | Vercel me purana URL | Step 6 (URL update + **Redeploy**) |
+| Data kisi **doosri (copy) sheet** me ja raha | script galat sheet se juda hai | `SPREADSHEET_ID` line check karein (Step 1) |
+| "Sheet khul nahi rahi" | account ko sheet par access nahi | Sheet → Share → Editor me wahi Google account add karein |
+| kuch samajh nahi aa raha | script khud check kare | Apps Script → function **`testSelf`** → Run → **Execution log** dekhein |
+| header kharab ho gaya | — | function **`repairHeaders`** → Run |
+
+---
+
+## Security (zaroori)
+
+- `/exec` URL aur **TOKEN kisi ko na dein** (WhatsApp par bhi nahi) — inse aapki
+  sheet me row daali ja sakti hai.
+- Ye script kisi bahar service ko data nahi bhejti, koi paid API nahi use karti.
+- Website ka admin token / UPI secret sheet me kabhi nahi jaata.
+- Sheet ka access sirf aapke Google account ke paas rakhein (Share → sirf aap).

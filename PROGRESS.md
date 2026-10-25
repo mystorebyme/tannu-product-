@@ -431,3 +431,21 @@ likhega). Uske baad `/api/sheet-selftest` + connector se row confirm karna hai.
 - **Naya (repo, deploy pending):** `lib/traffic.ts` + `app/api/track` +
   `components/page-view-tracker.tsx` + admin `/traffic` page (first-party
   page-view counter, koi dashboard toggle nahi), aur mobile header bhi exact center.
+
+### R27 (b) — Apps Script v3 (1387 lines, 16 tabs) + naye sheet mirrors
+
+- `scripts/google-apps-script/liksha-sheets.gs` poori dobara likhi gayi: 16 tabs
+  (Settings, Dashboard, Orders, OrderItems, Payments, Invoices, Shipments, Checkout,
+  Messages, Newsletter, Reviews, Coupons, Inventory, Audit, Errors, Sync), 10 GET +
+  11 POST endpoints, token/lock/header-repair/dedupe, batch `setValues` write,
+  `Errors`+`Sync` logging, owner functions (`setup`, `testSelf`, `testAppend`,
+  `repairHeaders`, `backupNow`, `installTriggers`).
+- Web: `sheet-format.ts` me `orderItemSheetRows` / `shipmentSheetRow` / `invoiceSheetRow`;
+  `google-sheets.ts` me SheetName union + `syncShipmentToSheet` + `syncInvoiceToSheet`;
+  `order.placed` par OrderItems rows, tracking update par Shipments, GST invoice par
+  Invoices — ye tabs bhi ab bhar rahe hain.
+- Docs: naya `docs/00-overview/apps-script-setup-steps.md` (step-by-step + troubleshooting
+  table), `apps-script-code.md` export se sync, purane doc me banner.
+- Tests: **137 pass / 0 fail** (16 naye: v3 tabs, column contract, order_update,
+  invoice_save, stock_update, coupon upsert, review/subscribe dedupe, message_status,
+  doGet stats/search/order, galat token par block).

@@ -152,3 +152,29 @@ payment step ki speed.
 
 **Bachne ka tareeka:** ek din me 2-3 se zyada deploy na karein — har push par naya
 deploy banta hai, aur limit cross hone par us din koi deploy nahi hota.
+
+---
+
+## 10. Apps Script v3 — poora naya code (1387 lines, 16 tabs)
+
+Owner ne kaha "naya code likho, sab kuch add karo" → script poori tarah dobara likhi gayi:
+
+- **16 tabs:** Settings, Dashboard, Orders, OrderItems, Payments, Invoices, Shipments,
+  Checkout, Messages, Newsletter, Reviews, Coupons, Inventory, Audit, Errors, Sync
+- **naye endpoints:** `health`, `ping`, `version`, `settings`, `recent`, `rows`,
+  `search`, `order` (ek order ki poori kahani), `stats`, `dashboard` (GET) aur
+  `append`, `settings_save`, `order_update`, `invoice_save`, `stock_update`,
+  `coupon_save`, `review_add`, `subscribe`, `message_status`, `setup`, `repair` (POST)
+- **safety:** token check, lock (do requests ek saath), header auto-repair,
+  duplicate email/review skip, error log `Errors` tab me, `Sync` tab me har sync ka hisaab
+- **speed:** ek sheet ki saari rows ek hi `setValues` call me (appendRow se ~10x tez)
+- **owner ke liye functions:** `setup`, `testSelf`, `testAppend`, `repairHeaders`,
+  `backupNow`, `installTriggers` (roz 9 PM dashboard + Sunday backup)
+- **website side bhi juda:** order place → `OrderItems`, courier/AWB → `Shipments`,
+  GST invoice → `Invoices` (ye tabs pehle khaali rehte the)
+
+Steps: **[`apps-script-setup-steps.md`](./apps-script-setup-steps.md)** ·
+Code: **[`apps-script-code.md`](./apps-script-code.md)**
+
+Tests: **137 pass / 0 fail** (16 naye test sirf script ke liye — galat token, duplicate
+review/coupon/newsletter, invoice/stock/tracking rows, stats/search/order, sab cover).

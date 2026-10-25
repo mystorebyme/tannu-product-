@@ -3,6 +3,8 @@ import { ensureInvoice, getOrder } from "@/lib/orders";
 import { buildInvoice, sellerFromSettings } from "@/lib/invoice";
 import { getStoreSettings } from "@/lib/store-settings";
 import { renderInvoicePdf } from "@/lib/invoice-pdf";
+import { syncInvoiceToSheet } from "@/lib/google-sheets";
+import { runInBackground } from "@/lib/background";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -34,6 +36,12 @@ export async function GET(request: NextRequest, context: { params: Promise<{ ord
   const { order: withInvoice, invoice } = await ensureInvoice(orderNumber);
   const settings = await getStoreSettings();
   const view = buildInvoice(withInvoice, invoice.number, invoice.issuedAt, sellerFromSettings(settings));
+  // Invoices tab me row (owner ko GST record sheet me bhi) — response ke baad
+  runInBackground(() =>
+    syncInvoiceToSheet(view, withInvoice).catch((error) =>
+      console.warn("[sheets] invoice sync failed", (error as Error).message),
+    ),
+  );
   const pdf = await renderInvoicePdf(view);
 
   return new Response(new Uint8Array(pdf), {

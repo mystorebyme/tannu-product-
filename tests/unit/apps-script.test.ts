@@ -10,7 +10,15 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import vm from "node:vm";
-import { checkoutEventSheetRow, messageSheetRow, orderSheetRow, subscriberSheetRow } from "../../apps/web/src/lib/sheet-format";
+import {
+  checkoutEventSheetRow,
+  invoiceSheetRow,
+  messageSheetRow,
+  orderItemSheetRows,
+  orderSheetRow,
+  shipmentSheetRow,
+  subscriberSheetRow,
+} from "../../apps/web/src/lib/sheet-format";
 import type { Order } from "@liksha/types";
 
 type Cell = string | number | boolean | null;
@@ -420,4 +428,218 @@ test("health response code version deta hai (pata chale naya code chal raha hai)
   assert.equal(body.ok, true);
   assert.match(String(body.codeVersion), /^r\d+/);
   assert.equal(body.spreadsheetId, "test-sheet-id");
+});
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * R27 v3 script — naye tabs (OrderItems / Shipments / Invoices / Reviews /
+ * Coupons / Inventory / Errors / Dashboard / Sync) aur naye endpoints.
+ * Owner ne kaha: "jo jo new db add ho vo bhi kaam kare".
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+test("v3: setup saare naye tabs banata hai", () => {
+  const { sandbox, sheets } = loadScript();
+  sandbox.setup();
+  const names = sheets.map((sheet) => sheet.getName());
+  for (const expected of [
+    "Settings", "Orders", "OrderItems", "Payments", "Invoices", "Shipments",
+    "Checkout", "Messages", "Newsletter", "Reviews", "Coupons", "Inventory",
+    "Audit", "Errors", "Dashboard", "Sync",
+  ]) {
+    assert.ok(names.includes(expected), `${expected} tab missing`);
+  }
+  assert.equal(String(sandbox.CODE_VERSION).startsWith("r"), true);
+});
+
+test("v3: web ke naye sheet rows ke saare columns HEADERS me hain", () => {
+  const { sandbox } = loadScript();
+  const items = orderItemSheetRows(sampleOrder);
+  assert.ok(items.length > 0);
+  for (const key of Object.keys(items[0]!)) {
+    assert.ok(headersOf(sandbox, "OrderItems").includes(key), `OrderItems me column nahi: ${key}`);
+  }
+  for (const key of Object.keys(shipmentSheetRow(sampleOrder))) {
+    assert.ok(headersOf(sandbox, "Shipments").includes(key), `Shipments me column nahi: ${key}`);
+  }
+  const invoice = invoiceSheetRow(
+    {
+      number: "INV-1",
+      issuedAt: "2026-10-25T10:00:00.000Z",
+      buyer: { name: "Tannu", phone: "9876500011" },
+      totals: { taxable: 49900, cgst: 0, sgst: 0, igst: 0 },
+    },
+    sampleOrder,
+  );
+  for (const key of Object.keys(invoice)) {
+    assert.ok(headersOf(sandbox, "Invoices").includes(key), `Invoices me column nahi: ${key}`);
+  }
+});
+
+test("v3: order_update timeline + Shipments + Payments likhta hai", () => {
+  const { sandbox, sheets } = loadScript();
+  sandbox.setup();
+  const response = sandbox.doPost({
+    postData: {
+      contents: JSON.stringify({
+        token: "test-token",
+        action: "order_update",
+        orderNumber: "LK-ABC123",
+        event: "order.tracking_updated",
+        status: "shipped",
+        paymentStatus: "paid",
+        courier: "Delhivery",
+        awb: "AWB9",
+        trackingUrl: "https://track/9",
+        note: "pickup ho gaya",
+      }),
+    },
+  });
+  const payload = response.getJson();
+  assert.equal(payload.ok, true, JSON.stringify(payload));
+  assert.equal(payload.written, 3, "Orders + Shipments + Payments");
+
+  const shipments = sheets.find((sheet) => sheet.getName() === "Shipments")!;
+  const header = shipments.rows[0];
+  const row = shipments.rows[1];
+  assert.equal(row[header.indexOf("AWB")], "AWB9");
+  assert.equal(row[header.indexOf("Courier")], "Delhivery");
+
+  const payments = sheets.find((sheet) => sheet.getName() === "Payments")!;
+  assert.equal(payments.rows[1][payments.rows[0].indexOf("Payment status")], "paid");
+});
+
+test("v3: invoice_save aur stock_update apne tab me likhte hain", () => {
+  const { sandbox, sheets } = loadScript();
+  sandbox.setup();
+  const invoice = sandbox.doPost({
+    postData: {
+      contents: JSON.stringify({
+        token: "test-token",
+        action: "invoice_save",
+        invoiceNumber: "INV-77",
+        orderNumber: "LK-ABC123",
+        taxable: 423,
+        cgst: 38,
+        sgst: 38,
+        total: 499,
+        customer: "Tannu",
+      }),
+    },
+  }).getJson();
+  assert.equal(invoice.ok, true);
+
+  const stock = sandbox.doPost({
+    postData: {
+      contents: JSON.stringify({
+        token: "test-token",
+        action: "stock_update",
+        handle: "anarkali",
+        size: "M",
+        stock: 2,
+        change: -1,
+        reason: "order LK-ABC123",
+      }),
+    },
+  }).getJson();
+  assert.equal(stock.ok, true);
+
+  const invoices = sheets.find((sheet) => sheet.getName() === "Invoices")!;
+  assert.equal(invoices.rows[1][invoices.rows[0].indexOf("Invoice number")], "INV-77");
+  const inventory = sheets.find((sheet) => sheet.getName() === "Inventory")!;
+  assert.equal(inventory.rows[1][inventory.rows[0].indexOf("Stock")], 2);
+  assert.equal(inventory.rows[1][inventory.rows[0].indexOf("Low stock alert")], "yes");
+});
+
+test("v3: newsletter duplicate email skip, review duplicate skip, coupon update", () => {
+  const { sandbox, sheets } = loadScript();
+  sandbox.setup();
+
+  const first = sandbox.doPost({ postData: { contents: JSON.stringify({ token: "test-token", action: "subscribe", email: "A@B.com" }) } }).getJson();
+  const second = sandbox.doPost({ postData: { contents: JSON.stringify({ token: "test-token", action: "subscribe", email: "a@b.com" }) } }).getJson();
+  assert.equal(first.ok, true);
+  assert.equal(first.written, 1);
+  assert.equal(second.duplicate, true);
+  assert.equal(second.written, 0);
+  const newsletter = sheets.find((sheet) => sheet.getName() === "Newsletter")!;
+  assert.equal(newsletter.rows.length, 2, "header + 1 row hi honi chahiye");
+
+  const reviewBody = { token: "test-token", action: "review_add", product: "Anarkali", customer: "Tannu", rating: 5, review: "Bahut accha", verified: true };
+  const r1 = sandbox.doPost({ postData: { contents: JSON.stringify(reviewBody) } }).getJson();
+  const r2 = sandbox.doPost({ postData: { contents: JSON.stringify(reviewBody) } }).getJson();
+  assert.equal(r1.written, 1);
+  assert.equal(r2.duplicate, true);
+  const reviews = sheets.find((sheet) => sheet.getName() === "Reviews")!;
+  assert.equal(reviews.rows[1][reviews.rows[0].indexOf("Verified")], "yes");
+
+  const add = sandbox.doPost({ postData: { contents: JSON.stringify({ token: "test-token", action: "coupon_save", code: "DIWALI10", value: 10 }) } }).getJson();
+  assert.equal(add.updated, false);
+  const update = sandbox.doPost({ postData: { contents: JSON.stringify({ token: "test-token", action: "coupon_save", code: "diwali10", value: 15 }) } }).getJson();
+  assert.equal(update.updated, true);
+  const coupons = sheets.find((sheet) => sheet.getName() === "Coupons")!;
+  assert.equal(coupons.rows.length, 2, "ek hi coupon row");
+  assert.equal(coupons.rows[1][coupons.rows[0].indexOf("Value")], 15);
+});
+
+test("v3: message_status reply mark karta hai", () => {
+  const { sandbox, sheets } = loadScript();
+  sandbox.setup();
+  sandbox.appendRows_([
+    { sheet: "Messages", row: { Timestamp: "t", Name: "A", Email: "a@b.c", Message: "hi", "Message ID": "msg-1" } },
+  ]);
+  const response = sandbox.doPost({
+    postData: { contents: JSON.stringify({ token: "test-token", action: "message_status", id: "msg-1", status: "replied" }) },
+  }).getJson();
+  assert.equal(response.ok, true);
+  assert.equal(response.updated, 1);
+  const messages = sheets.find((sheet) => sheet.getName() === "Messages")!;
+  const header = messages.rows[0];
+  assert.equal(messages.rows[1][header.indexOf("Status")], "replied");
+  assert.equal(messages.rows[1][header.indexOf("Replied")], "yes");
+});
+
+test("v3: doGet — stats, search aur poora order", () => {
+  const { sandbox } = loadScript();
+  sandbox.setup();
+  sandbox.appendRows_([
+    {
+      sheet: "Orders",
+      row: {
+        Timestamp: new Date().toISOString(),
+        Event: "order.placed",
+        "Order number": "LK-XYZ1",
+        "Payment status": "paid",
+        Total: 499,
+      },
+    },
+    { sheet: "OrderItems", row: { Timestamp: "t", "Order number": "LK-XYZ1", Product: "Anarkali", Quantity: 1 } },
+  ]);
+
+  const stats = sandbox.doGet({ parameter: { token: "test-token", action: "stats" } }).getJson();
+  assert.equal(stats.ok, true);
+  assert.equal(stats.stats.orders.paid, 1);
+  assert.equal(stats.stats.orders.revenue, 499);
+
+  const search = sandbox.doGet({
+    parameter: { token: "test-token", action: "search", sheet: "Orders", column: "Order number", value: "LK-XYZ1" },
+  }).getJson();
+  assert.equal(search.rows.length, 1);
+
+  const story = sandbox.doGet({ parameter: { token: "test-token", action: "order", orderNumber: "LK-XYZ1" } }).getJson();
+  assert.equal(story.ok, true);
+  assert.equal(story.order.rows.Orders.length, 1);
+  assert.equal(story.order.rows.OrderItems.length, 1);
+
+  const health = sandbox.doGet({ parameter: { token: "test-token", action: "health" } }).getJson();
+  assert.ok(health.sheets.some((sheet: { name: string }) => sheet.name === "Invoices"));
+  assert.equal(health.version, sandbox.CODE_VERSION);
+});
+
+test("v3: galat token par naye endpoints bhi block hain", () => {
+  const { sandbox, sheets } = loadScript();
+  sandbox.setup();
+  const response = sandbox.doPost({
+    postData: { contents: JSON.stringify({ token: "galat", action: "invoice_save", invoiceNumber: "HACK" }) },
+  }).getJson();
+  assert.equal(response.ok, false);
+  const invoices = sheets.find((sheet) => sheet.getName() === "Invoices")!;
+  assert.equal(invoices.rows.length, 1, "sirf header");
 });

@@ -1,5 +1,16 @@
 # Google Sheet setup — owner ke liye (naya account)
 
+> ## ⚡ Naya (R27): script v3 — 16 tabs, poora backend
+> Is doc ke steps purane hain. **Ab [`apps-script-setup-steps.md`](./apps-script-setup-steps.md)
+> follow kariye** — wahan naya 1000+ line ka code, 16 tabs (Orders, OrderItems,
+> Payments, Invoices, Shipments, Checkout, Messages, Newsletter, Reviews, Coupons,
+> Inventory, Audit, Errors, Dashboard, Sync, Settings), deploy steps aur
+> troubleshooting table sab hai.
+>
+> Naya code: [`apps-script-code.md`](./apps-script-code.md) ·
+> Check: `<webapp URL>?action=health&token=<TOKEN>` → `"version":"r27-1"`
+
+
 **Kyun:** website pehle purane Google account ki sheet me data bhej rahi thi. Aapne sheet
 account badal diya, aur naye sheet me website kuch likh nahi pa rahi thi. Isliye ek **naya
 Apps Script** banaya gaya hai — neeche ke 6 step follow kariye, bas ek baar karna hai
