@@ -5,6 +5,7 @@ import { randomUUID } from "node:crypto";
 import { dataFile } from "@/lib/data-dir";
 import { dbEnabled } from "@/lib/db";
 import { appendSheetRows } from "@/lib/google-sheets";
+import { messageSheetRow, subscriberSheetRow } from "@/lib/sheet-format";
 
 /**
  * Contact form ("Send us a message") ka store.
@@ -118,26 +119,11 @@ export async function saveMessage(
 
 /** Owner ki sheet me message (best-effort, message save kabhi fail nahi hota) */
 export async function mirrorMessageToSheet(message: ContactMessage): Promise<void> {
-  await appendSheetRows([
-    {
-      sheet: "Messages",
-      row: {
-        Timestamp: message.createdAt,
-        Name: message.name,
-        Email: message.email,
-        Phone: message.phone ?? "",
-        Subject: message.subject ?? "",
-        Message: message.message,
-        Status: message.replied ? "replied" : message.handled ? "handled" : "new",
-      },
-    },
-  ]);
+  await appendSheetRows([{ sheet: "Messages", row: messageSheetRow(message) }]);
 }
 
 export async function mirrorSubscriberToSheet(email: string): Promise<void> {
-  await appendSheetRows([
-    { sheet: "Newsletter", row: { Timestamp: new Date().toISOString(), Email: email } },
-  ]);
+  await appendSheetRows([{ sheet: "Newsletter", row: subscriberSheetRow(email) }]);
 }
 
 export async function listMessages(limit = 100): Promise<ContactMessage[]> {

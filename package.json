@@ -38,6 +38,8 @@
     "assets:brand": "node scripts/brand/build-responsive-assets.mjs",
     "assets:proof": "node scripts/brand/render-proof.mjs",
     "test:unit": "tsx --test tests/unit/*.test.ts",
+    "apps-script:export": "node scripts/export-apps-script.mjs",
+    "sheets:check": "node scripts/sheets-selfcheck.mjs",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test:audit": "node tests/e2e/round16.mjs && node tests/e2e/payments.mjs && node tests/e2e/links.mjs",
     "test:links": "node tests/e2e/links.mjs",

@@ -120,3 +120,58 @@ export function parseSettingsCsv(csv: string): SheetSettings | null {
   }
   return normaliseSheetSettings(rows);
 }
+
+/**
+ * Checkout funnel ki sheet row ("Checkout" tab).
+ * Apps Script header **naam** se column dhoondhta hai — isliye keys yahan aur
+ * `scripts/google-apps-script/liksha-sheets.gs` ke HEADERS me same hone chahiye
+ * (`tests/unit/apps-script.test.ts` isi contract ko check karta hai).
+ */
+export function checkoutEventSheetRow(event: {
+  createdAt: string;
+  event: string;
+  step?: string | null;
+  orderNumber?: string | null;
+  itemsCount: number;
+  subtotal: number;
+  reason?: string | null;
+  phone?: string | null;
+}): Record<string, string | number> {
+  return {
+    Timestamp: event.createdAt,
+    Event: event.event,
+    Step: event.step ?? "",
+    "Order number": event.orderNumber ?? "",
+    Items: event.itemsCount,
+    Subtotal: inr(event.subtotal),
+    Reason: event.reason ?? "",
+    Phone: event.phone ?? "",
+  };
+}
+
+/** Contact form ki row ("Messages" tab) */
+export function messageSheetRow(message: {
+  createdAt: string;
+  name: string;
+  email: string;
+  phone?: string | null;
+  subject?: string | null;
+  message: string;
+  handled?: boolean;
+  replied?: boolean;
+}): Record<string, string> {
+  return {
+    Timestamp: message.createdAt,
+    Name: message.name,
+    Email: message.email,
+    Phone: message.phone ?? "",
+    Subject: message.subject ?? "",
+    Message: message.message,
+    Status: message.replied ? "replied" : message.handled ? "handled" : "new",
+  };
+}
+
+/** Newsletter subscriber ki row ("Newsletter" tab) */
+export function subscriberSheetRow(email: string, at = new Date().toISOString()): Record<string, string> {
+  return { Timestamp: at, Email: email };
+}

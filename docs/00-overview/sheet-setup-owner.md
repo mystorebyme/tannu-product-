@@ -26,8 +26,9 @@ Sheet ke menu me: **Extensions → Apps Script**. Ek naya tab khulega (`Code.gs`
 ## Step 3 — Code paste kariye
 
 1. `Code.gs` me jo default code hai, wo poora **delete** kar dijiye.
-2. Repo ki file `scripts/google-apps-script/liksha-sheets.gs` ka **poora content** copy karke
-   paste kar dijiye.
+2. **`docs/00-overview/apps-script-code.md`** kholein — usme **poora code ek jagah** hai
+   (kuch dhoondhna nahi padega). Neeche wala code block copy karke paste kar dijiye.
+   *(Developer ke liye source: `scripts/google-apps-script/liksha-sheets.gs`.)
 3. Sabse upar is line ko dhoondhiye:
 
    ```js
@@ -97,6 +98,14 @@ Sahi jawab aisa aayega:
 
 Phir script editor me function **`testAppend`** chala kar **Run** kariye — Orders aur Checkout
 tab me ek test row aa jayegi.
+
+**Ek command me poora check** (Vercel env daalne ke baad):
+
+```bash
+node scripts/sheets-selfcheck.mjs "<Web app URL>" "<TOKEN>"
+```
+
+Ye health, Settings, aur write — teeno check karta hai, aur jo toota ho uska exact fix batata hai.
 
 ---
 

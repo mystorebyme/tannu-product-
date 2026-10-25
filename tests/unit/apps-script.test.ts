@@ -10,6 +10,8 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import vm from "node:vm";
+import { checkoutEventSheetRow, messageSheetRow, orderSheetRow, subscriberSheetRow } from "../../apps/web/src/lib/sheet-format";
+import type { Order } from "@liksha/types";
 
 type Cell = string | number | boolean | null;
 type Grid = Cell[][];
@@ -238,4 +240,111 @@ test("script me UPI brand naam ya secret hardcode nahi hai", () => {
   assert.ok(!/Google Pay|PhonePe|Paytm|BHIM/i.test(source), "UPI brand naam nahi hone chahiye");
   assert.ok(source.includes("CHANGE-ME-liksha-token"), "token placeholder rakha ho");
   assert.ok(!/AKfycb/.test(source), "koi asli deployment id hardcode nahi");
+});
+
+/**
+ * App ↔ script contract: website jo column bhejti hai, wo sheet ke HEADERS me
+ * hone chahiye. Warna row chup-chaap aadhi bhar jaati hai (owner ko "data nahi
+ * aa raha" hi dikhta hai).
+ */
+function headersOf(sandbox: Record<string, any>, name: string): string[] {
+  const headers = sandbox.HEADERS[name] as string[];
+  assert.ok(Array.isArray(headers) && headers.length > 0, `${name} headers missing`);
+  return headers;
+}
+
+const sampleOrder = {
+  id: "o1",
+  orderNumber: "LK-ABC123",
+  customerName: "Tannu",
+  email: "t@example.com",
+  phone: "9876500011",
+  address: "12 Test Street",
+  city: "Jaipur",
+  state: "Rajasthan",
+  pincode: "302001",
+  items: [{ title: "Anarkali", handle: "anarkali", size: "M", quantity: 1, price: 49900, image: "x.jpg" }],
+  subtotal: 49900,
+  discount: 0,
+  shipping: 0,
+  total: 49900,
+  status: "placed",
+  paymentStatus: "pending",
+  paymentMethod: "prepaid",
+  createdAt: "2026-10-25T10:00:00.000Z",
+  updatedAt: "2026-10-25T10:00:00.000Z",
+  audit: [],
+  tracking: { courier: "Delhivery", awb: "AWB1", url: "https://x" },
+} as unknown as Order;
+
+test("website jo column bhejti hai wo sab sheet HEADERS me maujood hain", () => {
+  const { sandbox } = loadScript();
+
+  const ordersKeys = Object.keys(orderSheetRow(sampleOrder, "order.placed", { "UPI ID": "dhakadgourav@fam" }));
+  for (const key of ordersKeys) {
+    assert.ok(headersOf(sandbox, "Orders").includes(key), `Orders me column nahi: ${key}`);
+    assert.ok(headersOf(sandbox, "Payments").includes(key), `Payments me column nahi: ${key}`);
+  }
+
+  const checkoutKeys = Object.keys(
+    checkoutEventSheetRow({
+      createdAt: "2026-10-25T10:00:00.000Z",
+      event: "checkout.review",
+      step: "review",
+      orderNumber: null,
+      itemsCount: 2,
+      subtotal: 99800,
+      reason: "state_mismatch",
+      phone: "9876500011",
+    }),
+  );
+  for (const key of checkoutKeys) {
+    assert.ok(headersOf(sandbox, "Checkout").includes(key), `Checkout me column nahi: ${key}`);
+  }
+
+  const messageKeys = Object.keys(
+    messageSheetRow({ createdAt: "t", name: "A", email: "a@b.c", message: "hi", phone: "9876500011" }),
+  );
+  for (const key of messageKeys) {
+    assert.ok(headersOf(sandbox, "Messages").includes(key), `Messages me column nahi: ${key}`);
+  }
+
+  const newsletterKeys = Object.keys(subscriberSheetRow("a@b.c", "t"));
+  for (const key of newsletterKeys) {
+    assert.ok(headersOf(sandbox, "Newsletter").includes(key), `Newsletter me column nahi: ${key}`);
+  }
+});
+
+test("row ke saare values asli sheet me land karte hain (order.placed)", () => {
+  const { sandbox, sheets } = loadScript();
+  sandbox.setup();
+  const row = orderSheetRow(sampleOrder, "order.placed", { "UPI ID": "dhakadgourav@fam" });
+  sandbox.appendRows_([{ sheet: "Orders", row }]);
+
+  const orders = sheets.find((sheet) => sheet.getName() === "Orders")!;
+  const header = orders.rows[0];
+  const written = orders.rows[1];
+  const column = (name: string) => written[header.indexOf(name)];
+  assert.equal(column("Order number"), "LK-ABC123");
+  assert.equal(column("State"), "Rajasthan");
+  assert.equal(column("Total"), 499);
+  assert.equal(column("UPI ID"), "dhakadgourav@fam");
+  assert.equal(column("Tracking courier"), "Delhivery");
+  assert.equal(column("Item details"), "Anarkali (M) x1");
+  // koi value drop nahi hui
+  const dropped = header
+    .map((name, index) => {
+      const value = row[name as string];
+      const expected = value === undefined || value === null || value === "" ? "" : String(value);
+      if (!expected) return null; // khaali field jaan-boojh kar khaali hai
+      return String(written[index]) === expected ? null : name;
+    })
+    .filter(Boolean);
+  assert.deepEqual(dropped, []);
+});
+
+test("owner doc (apps-script-code.md) script ke saath sync hai", () => {
+  const gs = fs.readFileSync(path.join(process.cwd(), "scripts/google-apps-script/liksha-sheets.gs"), "utf8").trimEnd();
+  const doc = fs.readFileSync(path.join(process.cwd(), "docs/00-overview/apps-script-code.md"), "utf8");
+  assert.ok(doc.includes(gs), "doc purani hai — `npm run apps-script:export` chalaiye");
 });

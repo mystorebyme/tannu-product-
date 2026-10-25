@@ -5,6 +5,7 @@ import { randomUUID } from "node:crypto";
 import { dataFile } from "@/lib/data-dir";
 import { dbEnabled } from "@/lib/db";
 import { appendSheetRows } from "@/lib/google-sheets";
+import { checkoutEventSheetRow } from "@/lib/sheet-format";
 
 /**
  * Checkout funnel ka record.
@@ -188,21 +189,7 @@ export async function saveCheckoutEvent(event: CheckoutEvent): Promise<CheckoutE
 
 /** Owner ki sheet — "Checkout" tab (funnel dekhne ke liye) */
 export async function mirrorCheckoutEventToSheet(event: CheckoutEvent): Promise<void> {
-  await appendSheetRows([
-    {
-      sheet: "Checkout",
-      row: {
-        Timestamp: event.createdAt,
-        Event: event.event,
-        Step: event.step ?? "",
-        "Order number": event.orderNumber ?? "",
-        Items: event.itemsCount,
-        Subtotal: Math.round(event.subtotal) / 100,
-        Reason: event.reason ?? "",
-        Phone: event.phone ?? "",
-      },
-    },
-  ]);
+  await appendSheetRows([{ sheet: "Checkout", row: checkoutEventSheetRow(event) }]);
 }
 
 /** Admin ke liye recent events (latest pehle) */
