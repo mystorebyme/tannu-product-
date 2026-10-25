@@ -239,7 +239,18 @@ export async function appendSheetRows(appends: SheetAppend[]): Promise<boolean> 
     } catch {
       payload = null;
     }
-    if (payload && payload.ok === false) {
+    if (!payload) {
+      /**
+       * JSON hi nahi aaya = script ne jawab nahi diya (Google ka HTML error page,
+       * ya galat URL). Pehle hum ise success maan lete the — isi wajah se
+       * "sheet mirror: true" dikhta tha jabki sheet me kuch nahi jaata.
+       */
+      console.warn(
+        `[sheets] append got non-JSON reply (${appends.map((a) => a.sheet).join(",")}) — script ka naya version deploy hua?`,
+      );
+      return false;
+    }
+    if (payload.ok === false) {
       console.warn(
         `[sheets] append rejected (${appends.map((a) => a.sheet).join(",")}): ${payload.error ?? "unknown error"}`,
       );
