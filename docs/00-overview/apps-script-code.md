@@ -83,7 +83,7 @@ Warna purana code hi chalta rehta hai — owner ke saath yahi hua tha.
 
 ---
 
-## Poora code (1710 lines)
+## Poora code (1723 lines)
 
 ```javascript
 /**
@@ -682,6 +682,13 @@ var COLUMN_WIDTHS = {
   Detail: 180, Total: 90,
 };
 
+/**
+ * Text columns — in par `@` (plain text) format lagta hai, warna phone/pincode
+ * number ban jaate hain (aage ka 0 gayab, `303325` me se sort me gadbad) aur
+ * owner ko manually dikkat hoti hai.
+ */
+var TEXT_COLUMNS = ['Phone', 'Pincode', 'AWB', 'Order number', 'Invoice number', 'SKU', 'Code', 'Message ID', 'GSTIN', 'UPI ID', 'Payment reference'];
+
 /** Wrap wale columns (lambe text) */
 var WRAP_COLUMNS = ['Item details', 'Notes', 'Message', 'Review', 'Address', 'Details', 'Payload', 'Note', 'Title'];
 
@@ -732,6 +739,12 @@ function applyFormatting_(sheet, name) {
     });
     var stamp = headers.indexOf(TIMESTAMP_COLUMN);
     if (stamp >= 0) sheet.getRange(2, stamp + 1, rows - 1, 1).setNumberFormat('dd-MMM-yyyy HH:mm');
+
+    // phone / pincode / AWB / order number — plain text (leading 0 aur bade number safe)
+    TEXT_COLUMNS.forEach(function (column) {
+      var index = headers.indexOf(column);
+      if (index >= 0) sheet.getRange(2, index + 1, rows - 1, 1).setNumberFormat('@');
+    });
 
     // lambe text wrap + top align (poori sheet ek hi call me — fast)
     var wrapRange = sheet.getRange(2, 1, rows - 1, headers.length);

@@ -178,3 +178,47 @@ Code: **[`apps-script-code.md`](./apps-script-code.md)**
 
 Tests: **137 pass / 0 fail** (16 naye test sirf script ke liye — galat token, duplicate
 review/coupon/newsletter, invoice/stock/tracking rows, stats/search/order, sab cover).
+
+---
+
+## 11. R27-2 — sheet CHALU ho gayi, payment page simple, columns fix
+
+### ✅ Messages ab sheet me aa rahe hain (live proof)
+
+Permission milne ke baad live test:
+
+```json
+"message": {"ok": true, "rowInDb": true, "dbCount": 5, "sheetMirror": true}
+```
+
+`Messages` tab me rows padi hain (Timestamp, Name, Email, Phone, Subject, Message, Status…).
+Saath me `Sync`, `Checkout`, `Newsletter`, `Audit` bhi bhar rahe hain.
+
+> Pehle jo messages nahi aate the, wo **permission** ki wajah se the — ab theek hai.
+
+### 🆕 Script v3.1 (owner ke liye naye buttons)
+
+| Function | Kaam |
+|---|---|
+| **`createOwnSheet`** | isi account (`prkigothwal@gmail.com`) me **nayi sheet** banao + 16 tabs + formatting (purani sheet ko chhedta nahi) |
+| **`formatAll`** | columns ki width / wrap / number format dobara set karo |
+| `whoAmI` / `doctor` | kaun sa account chal raha hai + poora health check |
+
+Ab agar sheet kisi doosre account ki ho (ya "Sorry, unable to open the file" aaye) to
+script **khud apni sheet bana leti hai** — koi Share ka jhanjhat nahi.
+
+### 📐 Columns fix (manually kaam karne me aasan)
+
+- header row **freeze** + bold + grey, **filter dropdown**
+- **fixed width** har column ki (Message 320px, Address 230px, Total 90px …)
+- **wrap** lambe columns me (Message, Review, Item details, Address)
+- **₹ format** money par, **date format** Timestamp par
+- **phone / pincode / AWB / order number = plain text** — aage ka 0 gayab nahi hota,
+  `303325` number ban kar sort me gadbad nahi karta
+
+### 💳 Payment page (UTR hata diya)
+
+- **sirf ek input:** "Mobile ke last 4 digit" + button **"Payment ho gaya — confirm kariye"**
+- UTR maangna **band**, lambe paragraphs hataye, screenshot link chhota
+- mobile par UPI app se wapas aane par order **khud confirm** (`payments/return`)
+- tests: **145 pass / 0 fail**, responsive 43/0, breakpoints 48/0
