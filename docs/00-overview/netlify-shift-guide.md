@@ -111,7 +111,19 @@ Scope: **All** (Production + Deploy previews + Branch deploys).
 > `SELLER_EMAIL` me kuch mat daalein (message DB + Sheet me jaata hai, customer ko
 > sirf WhatsApp dikhta hai).
 
-### 2.2 Ab deploy
+### 2.2 Sabse aasan tareeka — env ek file se import kar lein
+
+Repo me ready files hain (bas `<...>` wali values bharni hain):
+
+| Site | File |
+|---|---|
+| #1 storefront | `infra/netlify/web.env.example` |
+| #2 admin | `infra/netlify/admin.env.example` |
+
+Netlify → **Environment variables** → **Import from a .env file** → in file ka content
+paste → **Import** → phir jis value me `<…>` hai use bhar dein (ya import ke baad edit karein).
+
+### 2.3 Ab deploy
 
 **Deploys → Trigger deploy → Deploy site.**
 Build log me ye 3 cheezein dikhni chahiye:
@@ -443,6 +455,8 @@ DOMAIN ke baad: NEXT_PUBLIC_SITE_URL / STORE_API_URL badalna + redeploy
 |---|---|
 | `apps/web/netlify.toml` | storefront build + Next runtime + headers |
 | `apps/admin/netlify.toml` | admin build + noindex headers |
+| `infra/netlify/web.env.example` | site #1 ke 12 env (copy-paste import ke liye) |
+| `infra/netlify/admin.env.example` | site #2 ke 7 env |
 | `apps/web/src/lib/db.ts` | Postgres pool (serverless par 1 connection) + schema bootstrap |
 | `apps/web/src/lib/cors.ts` | Pages/Netlify origins allowlist (checkout/payment ke liye) |
 | `apps/web/src/lib/google-sheets.ts` | Sheet me row likhna/padhna |

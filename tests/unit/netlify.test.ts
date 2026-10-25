@@ -82,3 +82,34 @@ test("Netlify shift guide maujood hai — domain ke exact records ke saath", () 
   assert.match(guide, /apps\/web/);
   assert.match(guide, /apps\/admin/);
 });
+
+test("Netlify env templates maujood hain (2 sites, copy-paste import ke liye)", () => {
+  const web = read("infra/netlify/web.env.example");
+  for (const key of [
+    "NEXT_PUBLIC_SITE_URL",
+    "STORE_UPI_ID",
+    "STORE_UPI_NAME",
+    "ADMIN_API_TOKEN",
+    "GOOGLE_SHEETS_WEBAPP_URL",
+    "GOOGLE_SHEETS_TOKEN",
+    "DATABASE_URL",
+    "UPI_RETURN_SECRET",
+    "OTP_TOKEN_SECRET",
+  ]) {
+    assert.match(web, new RegExp(`^${key}=`, "m"), `${key} web template me hona chahiye`);
+  }
+  const admin = read("infra/netlify/admin.env.example");
+  for (const key of [
+    "ADMIN_EMAIL",
+    "ADMIN_PASSWORD",
+    "ADMIN_SESSION_SECRET",
+    "ADMIN_API_TOKEN",
+    "STORE_API_URL",
+    "NEXT_PUBLIC_STORE_URL",
+    "NEXT_PUBLIC_STOREFRONT_URL",
+  ]) {
+    assert.match(admin, new RegExp(`^${key}=`, "m"), `${key} admin template me hona chahiye`);
+  }
+  // koi asli secret template me nahi hona chahiye
+  assert.ok(!/adhakadgourav|eyJ2IjoidjIi/.test(web + admin), "template me secret nahi");
+});
