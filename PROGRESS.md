@@ -375,3 +375,16 @@ likhega). Uske baad `/api/sheet-selftest` + connector se row confirm karna hai.
   verify kare) + aaj ka exact test result.
 - Domain ka sach: `www.likshaclothing.com` = purana Shopify store (hamara nahi) — DNS
   chhua nahi. Vercel par apna domain add karne ke liye owner se naam chahiye.
+
+### R25 — owner report + admin production deploy
+
+- `docs/00-overview/owner-report-round25.md` — 5 sawaalon ka jawab (domain, message,
+  sheet, functions, free plan) + exact owner steps.
+- Admin production naye commit se deploy: `liksha-admin` (production alias
+  `liksha-admin.vercel.app`) — pehle 8c603243 par tha.
+- Live verify (cache-bust ke saath): `commit dd6ecb8`, contact page ke **8/8** WhatsApp
+  links `wa.me/918005900581`, `/api/sheet-selftest?...&stats=1` →
+  `orders 53 · paidOrders 0 · messages 3 · checkoutEvents 33`, `write` abhi bhi
+  `ReferenceError` (owner ka deploy pending).
+- Note: `fetch_page` same URL ka **purana response cache** karta hai — verify karte waqt
+  `?v=<sha>` lagayein, warna purana HTML dekhkar galat nateeja aata hai.
