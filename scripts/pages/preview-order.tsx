@@ -56,9 +56,18 @@ const TIMELINE = ["placed", "confirmed", "packed", "shipped", "delivered"];
  *
  * (API up ho to redirect nahi hota — page yahin render hota hai.)
  */
-function goToLiveStore(livePath: string) {
+function goToLiveStore(livePath: string): boolean {
   const search = window.location.search || "";
-  window.location.replace(`${LIVE_STORE_URL}${livePath}${search}`);
+  const target = `${LIVE_STORE_URL}${livePath}${search}`;
+  try {
+    // Safety: same origin par redirect = infinite reload loop. Aisa ho to ruk jao
+    // aur seedha "khul nahi paaya" screen dikhao.
+    if (new URL(target, window.location.href).origin === window.location.origin) return false;
+  } catch {
+    return false;
+  }
+  window.location.replace(target);
+  return true;
 }
 
 export default function PreviewOrderPage() {
@@ -81,8 +90,11 @@ export default function PreviewOrderPage() {
     /** API se jawab nahi aaya → live store ka wahi page (payment wahan chalta hai) */
     const fallbackToLiveStore = () => {
       if (cancelled) return;
-      setState("redirecting");
-      goToLiveStore(livePath);
+      if (goToLiveStore(livePath)) {
+        setState("redirecting");
+      } else {
+        setState("error");
+      }
     };
 
     // API hi configure nahi (build me base missing) — seedha live store
