@@ -226,3 +226,5 @@ R21 ke live verification ke baad teen cheezein tight kee gayin (koi naya feature
   pool 1 + idle release + transient retry.
 - Live verify: health `db: up` (`commit 69f9e58`), `/orders/LK-DOESNOTEXIST` → 404
   "Order nahi mila", live smoke **28/0**.
+- Owner report (Hinglish): `docs/00-overview/owner-report-round22.md`.
+- Admin production bhi `b83b07b` par deploy (funnel card + checkout events live).
