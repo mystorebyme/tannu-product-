@@ -323,7 +323,7 @@ Errors, Dashboard, Sync, Settings.
 
 **Guide:** `docs/00-overview/netlify-shift-guide.md` — jisme hai:
 2 sites ki exact settings, **12 + 7 env variables** (kaunsa Vercel se copy karna hai),
-**saare 38 API functions ka naksha** (kaun si env ke bina kya tootega), deploy ke baad
+**saare public + admin API functions ka naksha** (kaun si env ke bina kya tootega), deploy ke baad
 **15-point checklist**, domain ke **exact DNS records** (A `@` → `75.2.60.5`,
 CNAME `www` → `liksha-clothing.netlify.app`, CNAME `admin`), HTTPS, GSC + sitemap,
 rollback aur 14-row troubleshooting table.
