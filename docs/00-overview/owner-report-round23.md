@@ -18,7 +18,31 @@
 
 ---
 
-## 2. Sheet kyun nahi bhar rahi thi (asli wajah)
+## 2. Sheet — kaun si sheet, aur aaj kya ready kar diya
+
+**Sheet pehchaan (important).** Aapne jo `pub?output=csv` links bheje the
+(`2PACX-1vTLs42cuo-…`, gid 0 / 1135948941 / 1261780310 / 644814285 / 380856753) wo
+**purane account ki copy** ke hain — un gid ka koi tab naye file me nahi hai. Website se judne
+wala sheet **ye** hai:
+
+| | |
+| --- | --- |
+| Naam | **Designer Clothing — Store (Orders · Payments · Settings)** |
+| Sheet id | `1k8fsea04WpbrGjiyXuDrrS2Eewt9W7wx9X2lUQc5qMo` |
+| Account | `prakashgothwal370@gmail.com` (owner: James) |
+| Link | https://docs.google.com/spreadsheets/d/1k8fsea04WpbrGjiyXuDrrS2Eewt9W7wx9X2lUQc5qMo/edit |
+
+**Aaj maine is sheet me (bina aapke kuch kiye):**
+
+- `Checkout` tab banaya — 8 columns (Timestamp, Event, Step, Order number, Items, Subtotal, Reason, Phone).
+- `Audit` tab banaya — 5 columns (Timestamp, Actor, Action, Target, Details).
+- Baaki 5 tab (Settings / Orders / Payments / Messages / Newsletter) pehle se sahi header ke saath the — verify kiya.
+- Script ke andar isi sheet ke **asli tab-id** daal diye + `SPREADSHEET_ID` (standalone script bhi chalega).
+
+**Ab sirf ek cheez baaki hai (aapke 5 minute):** Apps Script deploy + 2 env var —
+`docs/00-overview/apps-script-code.md` (poora code) aur `docs/00-overview/sheet-setup-owner.md` (steps).
+
+## 2b. Sheet kyun nahi bhar rahi thi (asli wajah)
 
 Do cheezein ek saath thi:
 
