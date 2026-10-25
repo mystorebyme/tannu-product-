@@ -89,8 +89,7 @@ export async function GET(request: Request) {
       });
       let mirrored: boolean | string = false;
       try {
-        await mirrorMessageToSheet(saved);
-        mirrored = true;
+        mirrored = await mirrorMessageToSheet(saved);
       } catch (error) {
         mirrored = (error as Error).message;
       }

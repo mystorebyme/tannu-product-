@@ -218,6 +218,24 @@ export async function appendSheetRows(appends: SheetAppend[]): Promise<boolean> 
       signal: AbortSignal.timeout(WRITE_TIMEOUT_MS),
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    /**
+     * Apps Script kabhi HTTP 200 ke saath `{ok:false, error}` bhi bhejta hai
+     * (galat token, sheet access, ya script me ReferenceError). Pehle hum use
+     * success maan lete the — isliye "row nahi aayi" ka pata hi nahi chalta tha.
+     */
+    const text = await response.text();
+    let payload: { ok?: boolean; written?: number; error?: string } | null = null;
+    try {
+      payload = JSON.parse(text) as { ok?: boolean; written?: number; error?: string };
+    } catch {
+      payload = null;
+    }
+    if (payload && payload.ok === false) {
+      console.warn(
+        `[sheets] append rejected (${appends.map((a) => a.sheet).join(",")}): ${payload.error ?? "unknown error"}`,
+      );
+      return false;
+    }
     return true;
   } catch (error) {
     console.warn(`[sheets] append failed (${appends.map((a) => a.sheet).join(",")}): ${(error as Error).message}`);

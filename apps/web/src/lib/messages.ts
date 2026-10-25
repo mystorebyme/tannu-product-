@@ -118,8 +118,8 @@ export async function saveMessage(
 }
 
 /** Owner ki sheet me message (best-effort, message save kabhi fail nahi hota) */
-export async function mirrorMessageToSheet(message: ContactMessage): Promise<void> {
-  await appendSheetRows([{ sheet: "Messages", row: messageSheetRow(message) }]);
+export async function mirrorMessageToSheet(message: ContactMessage): Promise<boolean> {
+  return appendSheetRows([{ sheet: "Messages", row: messageSheetRow(message) }]);
 }
 
 export async function mirrorSubscriberToSheet(email: string): Promise<void> {
