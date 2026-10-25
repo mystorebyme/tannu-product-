@@ -122,8 +122,8 @@ export async function mirrorMessageToSheet(message: ContactMessage): Promise<boo
   return appendSheetRows([{ sheet: "Messages", row: messageSheetRow(message) }]);
 }
 
-export async function mirrorSubscriberToSheet(email: string): Promise<void> {
-  await appendSheetRows([{ sheet: "Newsletter", row: subscriberSheetRow(email) }]);
+export async function mirrorSubscriberToSheet(email: string): Promise<boolean> {
+  return appendSheetRows([{ sheet: "Newsletter", row: subscriberSheetRow(email) }]);
 }
 
 export async function listMessages(limit = 100): Promise<ContactMessage[]> {
