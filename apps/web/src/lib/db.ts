@@ -35,7 +35,17 @@ let pool: Pool | null = null;
  *     (6543)** par switch kar dete hain (wahan limit bahut zyada hai);
  *   - `DATABASE_URL_POOLED` set karein to wahi use hoga (owner ka control).
  */
-const IS_SERVERLESS = Boolean(process.env.VERCEL);
+/**
+ * Serverless? — Vercel **aur** Netlify dono par pool chhota rakhna padta hai.
+ * Netlify par `VERCEL` nahi hota, isliye Lambda ke nishaan bhi dekhte hain
+ * (Netlify Functions AWS Lambda par chalti hain).
+ */
+const IS_SERVERLESS = Boolean(
+  process.env.VERCEL ||
+    process.env.NETLIFY ||
+    process.env.AWS_LAMBDA_FUNCTION_NAME ||
+    process.env.LAMBDA_TASK_ROOT,
+);
 const POOL_MAX = Number(process.env.DB_POOL_MAX ?? (IS_SERVERLESS ? 1 : 5));
 
 /** Pooler URL — session mode (5432) ko transaction mode (6543) me badal dete hain. */

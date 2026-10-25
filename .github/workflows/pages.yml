@@ -43,15 +43,13 @@ jobs:
       - name: Build static preview
         env:
           PAGES_BASE_PATH: /${{ github.event.repository.name }}
-          # Live store (Render) ka URL — iske hone se Pages par checkout/payment/tracking
-          # seedha Render API par jaate hain. Khaali ho to WhatsApp order flow chalta hai.
-          # Repo → Settings → Variables → Actions me `STORE_API_URL` set kariye.
-          # Render service dead hai — preview ke order/payment/tracking calls
-          # seedha live Vercel store par jaate hain (CORS allowlist me Pages origin
-          # already hai). `vars.STORE_API_URL` purana Render URL ho sakta hai, isliye
-          # use override karne nahi dete.
-          NEXT_PUBLIC_API_BASE_URL: https://liksha-clothing.vercel.app
-          NEXT_PUBLIC_LIVE_STORE_URL: https://liksha-clothing.vercel.app
+          # Live store (Vercel ya Netlify) ka URL — iske hone se Pages par
+          # checkout/payment/tracking seedha live API par jaate hain.
+          # Live store ka URL. Netlify par shift karne ke baad sirf ek repo variable
+          # set karna hai (Settings → Variables → Actions → STORE_API_URL = Netlify URL)
+          # — koi code change nahi. Variable na ho to purana Vercel URL chalta hai.
+          NEXT_PUBLIC_API_BASE_URL: ${{ vars.STORE_API_URL || 'https://liksha-clothing.vercel.app' }}
+          NEXT_PUBLIC_LIVE_STORE_URL: ${{ vars.STORE_API_URL || 'https://liksha-clothing.vercel.app' }}
           # Canonical/OG isi deployment ke hain (preview ko live store ka duplicate na samjha jaye)
           NEXT_PUBLIC_SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
         run: node scripts/pages/build-preview.mjs

@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 
 /**
@@ -17,8 +18,16 @@ export function repoRoot(): string {
   return process.cwd();
 }
 
+/** Serverless (Vercel/Netlify) par bundle folder read-only — sirf /tmp likha ja sakta hai. */
+const IS_SERVERLESS = Boolean(
+  process.env.VERCEL ||
+    process.env.NETLIFY ||
+    process.env.AWS_LAMBDA_FUNCTION_NAME ||
+    process.env.LAMBDA_TASK_ROOT,
+);
+
 export function dataDir(): string {
-  const dir = process.env.DATA_DIR ?? path.join(repoRoot(), ".data");
+  const dir = process.env.DATA_DIR ?? path.join(IS_SERVERLESS ? os.tmpdir() : repoRoot(), ".data");
   fs.mkdirSync(dir, { recursive: true });
   return dir;
 }

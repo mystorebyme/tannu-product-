@@ -36,8 +36,18 @@ api       →  api.likshaclothing.com        (REST /api/v1 for partners, mobile,
 | Render (full app) | storefront + admin + Postgres + static preview | dashboard → New → Blueprint → repo → Apply (`render.yaml`), phir admin me `ADMIN_PASSWORD` set |
 | GitHub Pages | static preview (browse) | repo → Settings → Pages → Source = GitHub Actions (workflow ready) |
 | Vercel | storefront preview | project `liksha-clothing` (root `apps/web`) — Vercel GitHub App ko repo access chahiye |
+| **Netlify** | **storefront + admin (2 sites, functions ke saath)** | [`docs/00-overview/netlify-shift-guide.md`](docs/00-overview/netlify-shift-guide.md) — package directory `apps/web` / `apps/admin`, poora env list + domain ke DNS records |
 
-Detail: [`docs/10-deployment/render.md`](docs/10-deployment/render.md), [`docs/10-deployment/vercel.md`](docs/10-deployment/vercel.md).
+Detail: [`docs/10-deployment/render.md`](docs/10-deployment/render.md), [`docs/10-deployment/vercel.md`](docs/10-deployment/vercel.md),
+[`docs/00-overview/netlify-shift-guide.md`](docs/00-overview/netlify-shift-guide.md).
+
+### Netlify (storefront + admin)
+
+`apps/web/netlify.toml` aur `apps/admin/netlify.toml` repo me hain — Netlify UI me sirf
+**Package directory** (`apps/web` / `apps/admin`) set karni hai, **Base directory khaali**.
+Saari env values, saare functions ka naksha, domain ke exact DNS records (A `@` → `75.2.60.5`,
+CNAME `www` → `<site>.netlify.app`) aur verification checklist:
+[`docs/00-overview/netlify-shift-guide.md`](docs/00-overview/netlify-shift-guide.md).
 
 ### Render static site "Not Found" aa raha ho
 
@@ -252,7 +262,7 @@ Post-deploy health: `bash infra/monitoring/health.sh`.
 
 | Folder | Contents |
 | --- | --- |
-| `docs/00-overview` | vision, scope, glossary, reference-site analysis |
+| `docs/00-overview` | vision, scope, glossary, reference-site analysis, **Netlify shift guide**, owner reports |
 | `docs/01-requirements` | BRD, SRS, features, stories, use cases, NFRs, traceability |
 | `docs/02-planning` | roadmap, MVP scope, WBS, sprints, risks, estimates, roles |
 | `docs/03-architecture` | HLD/LLD, system, stack, sequences, payment flow, 10 ADRs |

@@ -303,3 +303,32 @@ Errors, Dashboard, Sync, Settings.
 3. **Vercel deploy** — free plan ka daily limit (`402 … free-per-day`) khatam hone
    par main khud kar dunga; tab tak GitHub Pages par purane link bhi live store par
    redirect ho kar payment kholte hain.
+
+---
+
+## 13. R28 — Netlify par shift (code taiyaar + poori guide)
+
+**Kya kiya:**
+
+| Cheez | Detail |
+|---|---|
+| `apps/web/netlify.toml` | `npm run build --workspace @liksha/web`, publish `apps/web/.next`, Next runtime plugin, Node 22 |
+| `apps/admin/netlify.toml` | admin ka build + `noindex` headers |
+| `db.ts` | Netlify/Lambda par bhi serverless mode (pool 1 connection — `EMAXCONNSESSION` se bachne ke liye) |
+| `data-dir.ts` | serverless par `/tmp` (bundle folder read-only hota hai) |
+| `cors.ts` | `*.netlify.app` (site + deploy previews) allowed |
+| `next.config.ts` | CSP se Razorpay hata — koi third-party gateway nahi |
+| `.env.example` | Razorpay/email nikal diya, `DATABASE_URL` + `SHEET_SELFTEST_KEY` jode |
+| `pages.yml` | GitHub Pages preview ka live URL ab repo variable `STORE_API_URL` se — Netlify URL ek jagah badalna |
+
+**Guide:** `docs/00-overview/netlify-shift-guide.md` — jisme hai:
+2 sites ki exact settings, **12 + 7 env variables** (kaunsa Vercel se copy karna hai),
+**saare 38 API functions ka naksha** (kaun si env ke bina kya tootega), deploy ke baad
+**15-point checklist**, domain ke **exact DNS records** (A `@` → `75.2.60.5`,
+CNAME `www` → `liksha-clothing.netlify.app`, CNAME `admin`), HTTPS, GSC + sitemap,
+rollback aur 14-row troubleshooting table.
+
+**Domain:** aaj `www.likshaclothing.com` aapka nahi hai, isliye abhi site
+`liksha-clothing.netlify.app` par chalegi. Domain milne par sirf 3 jagah URL badalna
+hai (site #1 ka `NEXT_PUBLIC_SITE_URL`, site #2 ke 3 URLs, Sheet ka `admin_url`).
+

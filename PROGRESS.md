@@ -471,3 +471,13 @@ likhega). Uske baad `/api/sheet-selftest` + connector se row confirm karna hai.
 - [x] `seedDemoData` → 16 tabs (Settings bhi), real-jaisa data, `clearDemoData`
 - [x] script v3.2 (`CODE_VERSION r27-2`), docs export, tests **151 pass / 0 fail**
 - [ ] Vercel production deploy (free-plan daily limit khatam — baad me)
+
+### R28 — Netlify shift (code + guide)
+- [x] `apps/web/netlify.toml` + `apps/admin/netlify.toml` (Next runtime, package dir setup, headers)
+- [x] `db.ts` / `data-dir.ts`: Netlify (Lambda) par bhi serverless mode — pool 1, data `/tmp`
+- [x] CORS: `*.netlify.app` (production + deploy previews) allowed
+- [x] CSP se Razorpay hata (koi gateway nahi), `.env.example` saaf (DB + sheet + UPI, koi email nahi)
+- [x] `pages.yml`: `vars.STORE_API_URL` (Netlify URL ek variable se switch)
+- [x] **`docs/00-overview/netlify-shift-guide.md`** — dono sites ki settings, 12+7 env, saare functions ka naksha, domain DNS, troubleshooting
+- [x] tests **159 pass / 0 fail**
+

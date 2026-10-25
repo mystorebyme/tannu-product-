@@ -51,11 +51,12 @@ const nextConfig: NextConfig = {
             value: [
               "default-src 'self'",
               "img-src 'self' https://cdn.shopify.com https://*.shopifycdn.com data: blob:",
-              "script-src 'self' 'unsafe-inline' https://checkout.razorpay.com",
+              // koi third-party payment gateway nahi (owner rule) — sirf apni site
+              "script-src 'self' 'unsafe-inline'",
               "style-src 'self' 'unsafe-inline'",
               "font-src 'self' data:",
-              "connect-src 'self' https://api.razorpay.com",
-              "frame-src https://api.razorpay.com https://checkout.razorpay.com",
+              "connect-src 'self'",
+              "frame-src 'none'",
               "form-action 'self'",
               "base-uri 'self'",
               "object-src 'none'",

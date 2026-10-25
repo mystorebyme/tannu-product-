@@ -10,10 +10,11 @@
  *
  * Allowlist hi chalti hai (koi `*` nahi), kyunki in routes me customer ka
  * phone/address aata hai:
- *   - apni site (`NEXT_PUBLIC_SITE_URL`)
+ *   - apni site (`NEXT_PUBLIC_SITE_URL`) — Netlify/custom domain yahin se aata hai
  *   - GitHub Pages origin (repo preview)
  *   - localhost (dev/preview)
- *   - apne `*.onrender.com` hosts
+ *   - apne `*.netlify.app` sites (production + deploy previews)
+ *   - purane `*.onrender.com` hosts
  */
 
 function extraOrigins(): string[] {
@@ -28,6 +29,8 @@ function allowlist(): string[] {
   return [
     ...(site ? [site, site.replace("://www.", "://")] : []),
     "https://mystorebyme.github.io",
+    // Netlify ka apna subdomain (jab tak custom domain na jude)
+    "https://liksha-clothing.netlify.app",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://localhost:3100",
@@ -39,7 +42,9 @@ function allowlist(): string[] {
 function originAllowed(origin: string): boolean {
   if (!origin) return false;
   if (allowlist().includes(origin)) return true;
-  // apne Render services (storefront + admin) — sirf onrender.com subdomains
+  // Netlify: main site + branch/deploy previews (`<deploy>--<site>.netlify.app`)
+  if (/^https:\/\/[a-z0-9-]+(\.[a-z0-9-]+)*\.netlify\.app$/.test(origin)) return true;
+  // apne purane Render services (storefront + admin) — sirf onrender.com subdomains
   return /^https:\/\/[a-z0-9-]+(\.[a-z0-9-]+)*\.onrender\.com$/.test(origin);
 }
 
