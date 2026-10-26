@@ -76,6 +76,9 @@ test("R33: checkout order place par snapshot save karta hai (back ke liye)", () 
   assert.match(form, /data-testid="review-continue-payment"/);
   // resume mode me dobara order nahi banta
   assert.match(form, /if \(resumed\) \{\s*goToPayment\(resumed\.orderNumber\);/);
+  // browser back bhi review par aaye
+  assert.match(form, /window\.history\.replaceState\(\{\}, "", reviewUrl\(result\.data\.orderNumber\)\)/);
+  assert.match(form, /data-testid="review-loading"/);
 });
 
 test("R33: checkout 3 step — delivery → review → payment", () => {

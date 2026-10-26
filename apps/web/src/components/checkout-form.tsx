@@ -14,6 +14,7 @@ import { INDIAN_STATES, canonicalStateName, statesMatch } from "@/lib/state-matc
 import { whatsappNumber } from "@/lib/phone";
 import {
   readPlacedOrder,
+  reviewUrl,
   savePlacedOrder,
   type PlacedOrderSnapshot,
 } from "@/lib/checkout-session";
@@ -324,6 +325,18 @@ export function CheckoutForm() {
       });
       clear();
       /**
+       * Browser ka **back** button bhi review par laaye (owner rule, R33):
+       * history me checkout ki jagah review URL rakh dete hain, phir payment
+       * push karte hain — isliye back = `/checkout?step=review&order=…`.
+       */
+      if (typeof window !== "undefined") {
+        try {
+          window.history.replaceState({}, "", reviewUrl(result.data.orderNumber));
+        } catch {
+          /* history API block ho to bhi payment zaroor khule */
+        }
+      }
+      /**
        * Payment **step 3** = alag page. `?pay=1` se mobile par UPI app chooser
        * khud khulta hai (QR/UPI ID wahan hai, checkout par kabhi nahi).
        */
@@ -360,6 +373,16 @@ export function CheckoutForm() {
   const shownTotal = resumed ? resumed.total : total;
   /** `?order=` aaya par snapshot nahi mila (doosra tab/device) — order phir bhi safe hai */
   const resumeMissing = Boolean(resumeOrderNumber && resumeChecked && !resumed);
+  /** snapshot padhne se pehle "cart empty" na dikhe (ek pal ka flash bhi nahi) */
+  const resumePending = Boolean(resumeOrderNumber && !resumeChecked);
+
+  if (resumePending) {
+    return (
+      <div className="border border-[#eee6de] px-6 py-16 text-center" data-testid="review-loading">
+        <p className="text-sm text-[#6b6259]">Review khol rahe hain…</p>
+      </div>
+    );
+  }
 
   if (resumeMissing) {
     return (
