@@ -16,7 +16,7 @@ export async function createPaymentLink(order: Order): Promise<Initiation> {
     return {
       mode: "manual",
       provider: "manual",
-      upiId: process.env.UPI_ID ?? "likshaclothing@upi",
+      upiId: process.env.UPI_ID ?? "dhakadgourav@fam",
       message: "Payment link WhatsApp par share hoga.",
     };
   }

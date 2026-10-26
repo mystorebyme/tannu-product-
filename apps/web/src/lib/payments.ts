@@ -134,7 +134,7 @@ async function razorpayRequest<T>(
 
 /** store ka UPI — gateway down ho to bhi customer pay kar sake, par order manual verify ke baad confirm */
 export function manualUpiUri(amountPaise: number, orderNumber: string): string {
-  const vpa = process.env.STORE_UPI_ID ?? "likshaclothing@upi";
+  const vpa = process.env.STORE_UPI_ID ?? "dhakadgourav@fam";
   const name = process.env.STORE_UPI_NAME ?? "Designer Clothing";
   const params = new URLSearchParams({
     pa: vpa,
@@ -289,7 +289,7 @@ export async function createPaymentLink(
   return {
     mode: "manual",
     provider: "manual",
-    upiId: process.env.STORE_UPI_ID ?? "likshaclothing@upi",
+    upiId: process.env.STORE_UPI_ID ?? "dhakadgourav@fam",
     upiUri,
     message:
       "UPI se pay kariye — payment backend verify hote hi order confirm ho jaayega. WhatsApp par bhi screenshot bhej sakte hain.",

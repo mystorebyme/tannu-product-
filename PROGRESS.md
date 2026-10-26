@@ -586,3 +586,40 @@ likhega). Uske baad `/api/sheet-selftest` + connector se row confirm karna hai.
       → **88/0** (`dev:vinext`) aur `BASE_URL=…:8787 npm run test:smoke` → **88/0**
       (`vite preview` = production bundle; local values `apps/web/.env` se)
 - [ ] **Preview deploy nahi hua** — Cloudflare credentials nahi the; DNS/Vercel production jaisa hi hai
+
+### R35 — "sheet me UPI badla, site par nahi aaya" (real-time settings fix)
+
+Owner: *"maine sheet mai upi change ki pr vo change nahi hui real time mai"*. Root cause
+teen the — teeno fix + test:
+
+- [x] **Key spelling**: sheet me `UPI ID` / `upi id` / `Upi-Id` / `upi_vpa` likhne par
+      website sirf exact `upi_id` dhoondhti thi → value chhoot jaati thi. Ab har key
+      canonical hoti hai (`canonicalSettingKey`) + aliases (`UPI`, `VPA`, `payee_vpa`,
+      `Support Phone`, `Free Shipping`, `Payee Name`…). Waise hi Apps Script (`readSettings_`,
+      `settingsKey_`) aur published-CSV parser.
+- [x] **Silent timeout**: Apps Script 1–2s leta hai par read timeout **900ms** tha — naya
+      UPI timeout me chhoot kar env/default (purana UPI) dikhta rehta tha. Ab 5s + cache-buster
+      (`_=<ts>`) + `redirect: follow`.
+- [x] **Fail par purani (env) value**: sheet fail hone par mode `stored/default` par gir jaata
+      tha. Ab **last-known-good sheet settings** (`sheet-settings-cache.ts` → Postgres
+      `store_settings id='sheet-cache'` / `.data/sheet-settings.json`) use hoti hai — sheet
+      down ho to bhi wahi UPI jo owner ne sheet me set kiya tha.
+- [x] **Sach dikhao**: `/api/settings` pehle hamesha `source: "google-sheet"` bolta tha.
+      Ab `source` asli hota hai + `sheet: { configured, readFrom, readAt, stale, error? }`
+      (HTML login page / token mismatch / key missing — asli wajah, koi token/URL nahi).
+      `/api/admin/settings` (Bearer) me `sheet` diagnostics.
+- [x] **Payment page** (`getStoreSettingsFast`): cold instance par hardcoded default nahi —
+      last-known-good, budget 350ms → 1200ms, 5s cache respect.
+- [x] **Admin save** ke baad sheet cache invalidate + last-good update (purana UPI wapas na aaye).
+- [x] Galat UPI (`bina @`) sheet me ho to ignore — site galat VPA par kabhi nahi jaati.
+- [x] Purana placeholder `likshaclothing@upi` hataya (`payments.ts` ×2, api service, `.env.example`) —
+      fallback ab `dhakadgourav@fam`.
+- [x] Apps Script `r35-1`: haath se likhi `UPI ID` row + `upi`/`upi_vpa`/`vpa` alias padhta hai;
+      `docs/00-overview/apps-script-code.md` regenerate.
+- [x] `/api/settings` default 15s cache (Apps Script quota), `?fresh=1` = live read.
+- [x] Tests: **`npm run test:runtime`** (naya, 11 checks — real code path, fetch stubbed:
+      sheet→site, last-known-good, HTML/token errors, CSV fallback, fast path, admin save,
+      quota cache) + `tests/unit/sheet-settings-keys.test.ts` (6) + apps-script sandbox (+1).
+      Unit **225/0**, integration **40/0**, runtime **11/0**, audit gates pass.
+- [x] Doc: `docs/09-devops/google-sheets.md` §7 — "Sheet me UPI badla, site par nahi aaya"
+      5-minute checklist (error → fix table).

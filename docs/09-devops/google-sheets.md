@@ -81,13 +81,22 @@ sirf server env + admin panel ke `/sheet` screen me.
 | `support_phone` | `8005900581` | footer, contact page, header |
 | `whatsapp` | `8005900581` | WhatsApp buttons (91 lagakar) |
 | `support_email` | `Info.likshaclothing@gmail.com` | footer, contact page, mailto |
-| `upi_id` | `dhakadgourav@fam` | checkout + order page QR |
+| `upi_id` | `dhakadgourav@fam` | checkout + order page QR (**`UPI ID`, `Upi-Id`, `upi_vpa`, `VPA` bhi chalte hain**) |
 | `upi_name` | `Designer Clothing` | UPI app me payee name |
 | `announcement` | `Diwali Sale — Flat 70% OFF` | top announcement bar |
 | `gstin` | `27AAAAA0000A1Z5` | invoice |
 | `free_shipping` | `true` / `false` | shipping text |
 
 Khaali cell = website apni default value use karti hai (kuch tootta nahi).
+
+**Key ki spelling:** R35 se website key ko normalise karti hai — `upi_id`, `UPI ID`,
+`upi id`, `Upi-Id`, `upi_vpa`, `VPA` sab ek hi cheez hain. Waise hi `Support Phone`,
+`Free Shipping`, `WhatsApp Number`, `Payee Name` bhi. (Pehle sirf exact `upi_id`
+padhi jaati thi, isliye haath se "UPI ID" likhne par change site par nahi aata tha.)
+
+**Value saaf hoti hai:** `UPI ID: x@y` ya extra spaces ho to bhi `x@y` hi liya
+jaata hai. Jo cheez valid UPI (kuch@handle) nahi hai wo **ignore** hoti hai —
+site galat UPI par kabhi nahi jaati.
 
 ## 3. Verification (curl)
 
@@ -111,9 +120,10 @@ curl -s -X POST "$SHEET_URL" \
 
 | File | Kaam |
 | --- | --- |
-| `apps/web/src/lib/google-sheets.ts` | settings read (15s cache) + rows append (6s timeout, best-effort) |
+| `apps/web/src/lib/google-sheets.ts` | settings read (15s cache, 5s timeout, Apps Script → published CSV fallback) + rows append (6s timeout, best-effort) |
+| `apps/web/src/lib/sheet-settings-cache.ts` | last-known-good sheet settings (Postgres `.data` me) — sheet fail par bhi sahi UPI |
 | `apps/web/src/lib/sheet-format.ts` | pure row/format helpers (unit tested) |
-| `apps/web/src/lib/store-settings.ts` | DB/file settings + sheet merge (sheet jeetti hai) |
+| `apps/web/src/lib/store-settings.ts` | DB/file settings + sheet merge (sheet jeetti hai, fail par last-known-good) |
 | `apps/web/src/lib/orders.ts` | `order.placed`, `order.status.*`, `payment.paid`, `payment.reference_submitted`, `order.tracking_updated` par append |
 | `apps/web/src/lib/messages.ts` | contact message + newsletter subscriber append |
 | `apps/web/src/app/api/settings/route.ts` | public settings (UPI, phone, email, announcement) no-store |
@@ -182,3 +192,49 @@ token Render ke environment me daalo, redeploy — data purani sheet me safe reh
 | `order.status_changed` / `order.tracking_updated` | `Orders` | admin status/courier update karta hai |
 
 Sab rows append-only hain — ek order ka poora payment timeline sheet me dikhta hai.
+
+## 7. "Sheet me UPI badla, site par nahi aaya" — 5 minute ka check (R35)
+
+Sabse pehle **yahi** dekho (koi token/URL share nahi hota):
+
+```bash
+curl -s https://designerclothing.fashion/api/settings | python3 -m json.tool
+# turant (cache bypass) — sheet save ke baad verify karne ke liye:
+curl -s "https://designerclothing.fashion/api/settings?fresh=1" | python3 -m json.tool
+```
+
+| `data.sheet` me kya dikha | Matlab | Kya karna hai |
+| --- | --- | --- |
+| `"readFrom": "apps-script"`, `stale: false` | Sheet se value aa rahi hai ✅ | UPI `data.upiId` me hi hai — customer ko wahi dikhega |
+| `"readFrom": "csv"` | Apps Script down hai, published CSV se chal raha hai | Apps Script ka naya version deploy karo (§1) |
+| `stale: true` + `error` | Sheet se value **nahi** aa rahi | Neeche wali table dekho |
+| `configured: false` | Sheet env hi set nahi | `GOOGLE_SHEETS_WEBAPP_URL` + `GOOGLE_SHEETS_TOKEN` set karo |
+
+`error` ka matlab:
+
+| Error | Wajah | Fix |
+| --- | --- | --- |
+| `... HTML page bheja (JSON nahi)` | Apps Script ka deployment "Anyone" par nahi hai (Google login page) | Script → Deploy → Manage deployments → **Who has access: Anyone** |
+| `Apps Script ne mana kiya: unauthorized — token match nahi hua` | `TOKEN` aur env ka token alag hain | Script ka token aur `GOOGLE_SHEETS_TOKEN` same karo |
+| `Settings sheet me koi recognised key nahi mili` | Settings tab khaali/keys galat | §2 wali keys likho (`upi_id`) |
+| `HTTP 404 / 500` | Purana deployment URL | Naya web app URL copy karke env update karo |
+
+Aur agar Apps Script ka deployment hi purana hai to **naya code** paste karke naya
+version deploy karo — is round me script `r35-1` hai (`?action=version&token=…` se check karo):
+`"UPI ID"` style rows aur `upi_vpa` bhi padhta hai.
+
+**Kitni der me live?** Website 15s cache karti hai; payment/order page turant
+(last-known-good value) dikhata hai. Browser tab ka client har 30s aur tab focus par
+`/api/settings` dobara padhta hai. Yaani sheet save → **~15–30 second** me site par.
+
+**Admin se diagnostics:**
+
+```bash
+curl -s -H "authorization: Bearer $ADMIN_API_TOKEN" \
+  https://designerclothing.fashion/api/admin/settings | python3 -m json.tool
+# → { data: {…}, sheet: { configured, appsScript, publishedCsv, readFrom, readAt, usingSheetValue, error? } }
+```
+
+Tests (yahi behaviour pin karte hain): `npm run test:runtime` (9 checks — sheet se
+UPI, sheet down par last-known-good, HTML/token errors, CSV fallback, fast path)
+aur `tests/unit/sheet-settings-keys.test.ts` (spelling roop).

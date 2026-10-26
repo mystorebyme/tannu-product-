@@ -33,26 +33,83 @@ function truthy(value: unknown): boolean | undefined {
   return undefined;
 }
 
+/**
+ * UPI VPA ko saaf karo: sheet me owner kabhi `UPI ID` label ke saath, space ke
+ * saath, ya bade harf me likh deta hai — wahi value site par jaani chahiye.
+ *
+ * R35 (owner: "sheet me UPI change ki par site par nahi aayi"): sirf exact key
+ * `upi_id` dhoondhne se `UPI ID` / `upi id` / `Upi-Id` wali row chhoot jaati thi.
+ */
+export function normaliseUpiId(value: unknown): string | undefined {
+  const raw = text(value, 120);
+  if (!raw) return undefined;
+  const cleaned = raw
+    .replace(/^(upi(\s*id)?|vpa|payee(\s*upi)?)\s*[:\-]\s*/i, "")
+    .replace(/\s+/g, "")
+    .trim();
+  // VPA: kuch@handle — dono taraf kuch hona chahiye, koi space nahi
+  if (!/^[A-Za-z0-9._-]{2,}@[A-Za-z][A-Za-z0-9._-]{1,}$/.test(cleaned)) return undefined;
+  return cleaned;
+}
+
+/** Sheet/CSS/JSON sab jagah key ka same roop: `UPI ID` → `upi_id` */
+export function canonicalSettingKey(key: string): string {
+  return key
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+/** Har field ke saare naam jo owner ki sheet me mil sakte hain */
+const SETTING_ALIASES = {
+  announcement: ["announcement", "announcement_text", "banner", "notice"],
+  supportPhone: ["support_phone", "supportphone", "phone", "helpline", "contact_number"],
+  supportEmail: ["support_email", "supportemail", "email"],
+  whatsapp: ["whatsapp", "whatsapp_number", "wa", "whatsapp_no"],
+  upiId: ["upi_id", "upiid", "upi", "upi_vpa", "upi_address", "payee_vpa", "vpa"],
+  upiName: ["upi_name", "upiname", "payee_name", "account_name"],
+  gstin: ["gstin", "gst_number", "gstno", "gst_no"],
+  freeShipping: ["free_shipping", "freeshipping"],
+  adminUrl: ["admin_url", "adminurl", "admin_panel", "admin_link"],
+} as const;
+
+/** Aliases ke hisaab se pehla non-empty value */
+function pick(source: Record<string, unknown>, keys: readonly string[]): unknown {
+  for (const key of keys) {
+    const value = source[key];
+    if (value !== undefined && value !== null && String(value).trim() !== "") return value;
+  }
+  return undefined;
+}
+
 /** Apps Script kai shapes bhej sakta hai — sabko ek hi shape me laao */
 export function normaliseSheetSettings(payload: unknown): SheetSettings | null {
   if (!payload || typeof payload !== "object") return null;
   const root = payload as Record<string, unknown>;
   if (root.ok === false) return null;
-  const source =
+  const nested =
     (root.settings as Record<string, unknown> | undefined) ??
     (root.data as Record<string, unknown> | undefined) ??
     root;
 
+  // keys normalise — `UPI ID`, `upi-id`, `Upi_Id` sab `upi_id` ban jaate hain
+  const source: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(nested)) {
+    const canonical = canonicalSettingKey(key);
+    if (canonical && !(canonical in source)) source[canonical] = value;
+  }
+
   const settings: SheetSettings = {
-    announcement: text(source.announcement ?? source.Announcement, 180),
-    supportPhone: text(source.supportPhone ?? source.support_phone ?? source.phone, 16),
-    supportEmail: text(source.supportEmail ?? source.support_email ?? source.email, 120),
-    whatsapp: text(source.whatsapp ?? source.whatsapp_number, 16),
-    upiId: text(source.upiId ?? source.upi_id ?? source.upi, 80),
-    upiName: text(source.upiName ?? source.upi_name ?? source.payee_name, 80),
-    gstin: text(source.gstin ?? source.GSTIN, 20),
-    freeShipping: truthy(source.freeShipping ?? source.free_shipping),
-    adminUrl: text(source.adminUrl ?? source.admin_url ?? source.admin_panel, 200),
+    announcement: text(pick(source, SETTING_ALIASES.announcement), 180),
+    supportPhone: text(pick(source, SETTING_ALIASES.supportPhone), 16),
+    supportEmail: text(pick(source, SETTING_ALIASES.supportEmail), 120),
+    whatsapp: text(pick(source, SETTING_ALIASES.whatsapp), 16),
+    upiId: normaliseUpiId(pick(source, SETTING_ALIASES.upiId)),
+    upiName: text(pick(source, SETTING_ALIASES.upiName), 80),
+    gstin: text(pick(source, SETTING_ALIASES.gstin), 20),
+    freeShipping: truthy(pick(source, SETTING_ALIASES.freeShipping)),
+    adminUrl: text(pick(source, SETTING_ALIASES.adminUrl), 200),
   };
 
   const hasValue = Object.values(settings).some((value) => value !== undefined);
@@ -113,7 +170,8 @@ export function parseSettingsCsv(csv: string): SheetSettings | null {
         .replace(/^"|"$/g, "")
         .replace(/""/g, '"')
         .trim();
-    const key = clean(cells[0]!).replace(/\s+/g, " ").toLowerCase().replace(/ /g, "_");
+    // R35: `UPI ID` / `upi-id` / `Upi Id` sab `upi_id` — warna CSV wali row chhoot jaati thi
+    const key = canonicalSettingKey(clean(cells[0]!));
     const value = clean(cells.slice(1).join(","));
     if (!key || key === "key" || !value) continue;
     rows[key] = value;

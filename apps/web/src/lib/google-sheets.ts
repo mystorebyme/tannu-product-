@@ -54,6 +54,12 @@ export type SheetAppend = {
 
 const READ_TIMEOUT_MS = 900;
 const WRITE_TIMEOUT_MS = 6_000;
+/**
+ * Settings read ka timeout. Pehle 900ms tha — Apps Script aksar 1–2s leta hai,
+ * isliye sheet ka naya UPI **timeout** ki wajah se chhoot jaata tha aur site purani
+ * (env) value dikhati rehti thi. Ab 5s: dheema ho to bhi sahi value aaye.
+ */
+const SETTINGS_TIMEOUT_MS = 5_000;
 /** Sheet page load ko kabhi block na kare — 2.5s ke baad defaults/DB hi chalega. */
 const CACHE_MS = 15_000;
 
@@ -106,66 +112,162 @@ export function settingsCsvUrl(): string | null {
 }
 
 
-let cache: { at: number; value: SheetSettings | null; failedAt: number } | null = null;
+let cache: {
+  at: number;
+  value: SheetSettings | null;
+  failedAt: number;
+  /** kahan se aaya — debug/diagnostics ke liye */
+  source: SheetSettingsSource | null;
+  error?: string;
+} | null = null;
 
 export function invalidateSheetSettings() {
   cache = null;
 }
 
-/** Owner ki Settings sheet padho. Fail ho to `null` (site defaults par chalti rehti hai). */
-export async function readSheetSettings(options: { fresh?: boolean } = {}): Promise<SheetSettings | null> {
-  const config = googleSheetsConfig();
-  if (!config) return readSettingsFromCsv(options);
-  const now = Date.now();
-  if (!options.fresh && cache && now - cache.at < CACHE_MS) return cache.value;
-  // network down hai to har page par 5s wait na karo
-  if (cache && now - cache.failedAt < CACHE_MS && cache.value === null) return null;
+export type SheetSettingsSource = "apps-script" | "csv";
 
-  try {
-    const endpoint = new URL(config.url);
-    endpoint.searchParams.set("action", "settings");
-    if (config.token) endpoint.searchParams.set("token", config.token);
-    const response = await fetch(endpoint, {
-      cache: "no-store",
-      headers: sheetHeaders(),
-      signal: AbortSignal.timeout(READ_TIMEOUT_MS),
-    });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const value = normaliseSheetSettings(await response.json());
-    cache = { at: now, value, failedAt: value ? 0 : now };
-    return value;
-  } catch (error) {
-    console.warn(`[sheets] settings read failed: ${(error as Error).message}`);
-    cache = { at: now, value: null, failedAt: now };
-    // Apps Script down/galat ho to bhi owner ki csv (publish to web) se padho
-    const csv = await readSettingsFromCsv({ fresh: true });
-    if (csv) cache = { at: now, value: csv, failedAt: 0 };
-    return csv;
-  }
+export type SheetSettingsRead = {
+  settings: SheetSettings | null;
+  source: SheetSettingsSource | null;
+  /** owner-facing wajah (token/URL kabhi nahi) */
+  error?: string;
+  at: string;
+};
+
+/** Sheet ka jawab JSON nahi (Google ka login/HTML page) — pehchanne ke liye */
+function looksLikeHtml(body: string): boolean {
+  const head = body.trimStart().slice(0, 40).toLowerCase();
+  return head.startsWith("<") || head.startsWith("<!doctype");
 }
 
-/** Public CSV se settings (Apps Script set na ho to bhi sheet padhi jaati hai). */
-async function readSettingsFromCsv(options: { fresh?: boolean } = {}): Promise<SheetSettings | null> {
-  const url = settingsCsvUrl();
-  if (!url) return null;
-  const now = Date.now();
-  if (!options.fresh && cache && now - cache.at < CACHE_MS) return cache.value;
-  if (cache && now - cache.failedAt < CACHE_MS && cache.value === null) return null;
-  try {
-    const response = await fetch(url, {
-      cache: "no-store",
-      headers: sheetHeaders({ accept: "text/csv" }),
-      signal: AbortSignal.timeout(READ_TIMEOUT_MS),
-    });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const value = parseSettingsCsv(await response.text());
-    cache = { at: now, value, failedAt: value ? 0 : now };
-    return value;
-  } catch (error) {
-    console.warn(`[sheets] settings CSV read failed: ${(error as Error).message}`);
-    cache = { at: now, value: null, failedAt: now };
-    return null;
+function describeJsonFailure(body: string): string {
+  if (looksLikeHtml(body)) {
+    return "Apps Script ne HTML page bheja (JSON nahi) — deployment 'Anyone' par publish karein";
   }
+  return `Apps Script ka jawab JSON nahi tha: ${body.slice(0, 80).replace(/\s+/g, " ") || "(khaali)"}`;
+}
+
+/** Apps Script se settings (token + browser UA ke saath) */
+async function readSettingsFromAppsScript(config: { url: string; token: string }): Promise<SheetSettings> {
+  const endpoint = new URL(config.url);
+  endpoint.searchParams.set("action", "settings");
+  if (config.token) endpoint.searchParams.set("token", config.token);
+  // cache-buster: Google/CDN kabhi purana jawab na de
+  endpoint.searchParams.set("_", String(Date.now()));
+
+  const response = await fetch(endpoint, {
+    cache: "no-store",
+    redirect: "follow",
+    headers: sheetHeaders(),
+    signal: AbortSignal.timeout(SETTINGS_TIMEOUT_MS),
+  });
+  if (!response.ok) throw new Error(`Apps Script HTTP ${response.status}`);
+
+  const body = await response.text();
+  if (looksLikeHtml(body)) throw new Error(describeJsonFailure(body));
+
+  let payload: unknown;
+  try {
+    payload = JSON.parse(body);
+  } catch {
+    throw new Error(describeJsonFailure(body));
+  }
+
+  const rejected = payload as { ok?: boolean; error?: string };
+  if (rejected && rejected.ok === false) {
+    throw new Error(`Apps Script ne mana kiya: ${String(rejected.error ?? "unknown").slice(0, 100)}`);
+  }
+  const value = normaliseSheetSettings(payload);
+  if (!value) throw new Error("Settings sheet me koi bhi recognised key nahi mili (key/value rows check karein)");
+  return value;
+}
+
+/** Published CSV (Apps Script down ho to bhi owner ki sheet padhi jaati hai) */
+async function readSettingsFromCsvUrl(url: string): Promise<SheetSettings> {
+  // cache-buster — Google ka published-CSV cache turant na badle to bhi request nayi jaaye
+  const endpoint = new URL(url);
+  endpoint.searchParams.set("_", String(Date.now()));
+  const response = await fetch(endpoint, {
+    cache: "no-store",
+    redirect: "follow",
+    headers: sheetHeaders({ accept: "text/csv,text/plain,*/*" }),
+    signal: AbortSignal.timeout(SETTINGS_TIMEOUT_MS),
+  });
+  if (!response.ok) throw new Error(`settings CSV HTTP ${response.status}`);
+  const body = await response.text();
+  if (looksLikeHtml(body)) throw new Error("CSV URL ne HTML page bheja — 'Publish to web' link dobara copy karein");
+  const value = parseSettingsCsv(body);
+  if (!value) throw new Error("settings CSV me koi recognised key nahi mili");
+  return value;
+}
+
+/**
+ * Sheet se settings — **detail ke saath** (source, error, time).
+ *
+ * Order: Apps Script → published CSV. Dono fail ho to `settings: null` aur
+ * `error` me asli wajah (owner/support ko pata chale kya theek karna hai).
+ */
+export async function readSheetSettingsDetailed(
+  options: { fresh?: boolean } = {},
+): Promise<SheetSettingsRead> {
+  const now = Date.now();
+  if (!options.fresh && cache && now - cache.at < CACHE_MS && cache.value) {
+    return { settings: cache.value, source: cache.source, at: new Date(cache.at).toISOString() };
+  }
+
+  const errors: string[] = [];
+  const config = googleSheetsConfig();
+  const csvUrl = settingsCsvUrl();
+
+  if (config) {
+    try {
+      const value = await readSettingsFromAppsScript(config);
+      cache = { at: now, value, failedAt: 0, source: "apps-script" };
+      return { settings: value, source: "apps-script", at: new Date(now).toISOString() };
+    } catch (error) {
+      errors.push((error as Error).message);
+      console.warn(`[sheets] settings read failed: ${(error as Error).message}`);
+    }
+  } else {
+    errors.push("GOOGLE_SHEETS_WEBAPP_URL set nahi hai");
+  }
+
+  if (csvUrl) {
+    try {
+      const value = await readSettingsFromCsvUrl(csvUrl);
+      cache = { at: now, value, failedAt: 0, source: "csv" };
+      if (errors.length) console.warn(`[sheets] CSV fallback chala: ${errors.join(" | ")}`);
+      return { settings: value, source: "csv", at: new Date(now).toISOString() };
+    } catch (error) {
+      errors.push((error as Error).message);
+      console.warn(`[sheets] settings CSV read failed: ${(error as Error).message}`);
+    }
+  } else if (!config) {
+    errors.push("GOOGLE_SHEETS_SETTINGS_CSV_URL set nahi hai");
+  }
+
+  const error = errors.join(" | ") || "sheet configured nahi hai";
+  cache = { at: now, value: null, failedAt: now, source: null, error };
+  return { settings: null, source: null, error, at: new Date(now).toISOString() };
+}
+
+/**
+ * Owner ki Settings sheet padho. Fail ho to `null`.
+ * (Detailed version `readSheetSettingsDetailed` — diagnostics ke liye.)
+ */
+export async function readSheetSettings(options: { fresh?: boolean } = {}): Promise<SheetSettings | null> {
+  return (await readSheetSettingsDetailed(options)).settings;
+}
+
+/** Aakhri read ka status — `/api/settings` / admin diagnostics isse dikhate hain. */
+export function sheetSettingsStatus(): { at: string | null; source: SheetSettingsSource | null; error?: string } {
+  if (!cache) return { at: null, source: null };
+  return {
+    at: new Date(cache.at).toISOString(),
+    source: cache.source,
+    ...(cache.error ? { error: cache.error } : {}),
+  };
 }
 
 /** Admin settings → Google Sheet (owner ki sheet hamesha latest rahe). */

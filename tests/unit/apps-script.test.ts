@@ -321,6 +321,21 @@ test("settings_save sirf di gayi keys update karta hai", () => {
   assert.ok(sheets.find((sheet) => sheet.getName() === "Settings")!.rows.length >= 3);
 });
 
+test("R35: owner haath se 'UPI ID' likhe to bhi settings.upi_id bane", () => {
+  const { sandbox, sheets } = loadScript();
+  sandbox.setup();
+
+  // owner ne seedha sheet me label type kiya (space + capital)
+  const settingsSheet = sheets.find((sheet) => sheet.getName() === "Settings")!;
+  const upiRow = settingsSheet.rows.findIndex((row) => String(row[0]) === "upi_id");
+  settingsSheet.rows[upiRow] = ["UPI ID", "naya@okaxis"];
+  settingsSheet.rows.push(["Upi-Id-2", "ignore@me"]);
+
+  const payload = sandbox.doGet({ parameter: { token: "test-token", action: "settings" } }).getJson();
+  assert.equal(payload.ok, true);
+  assert.equal(payload.settings.upi_id, "naya@okaxis", "haath se likhi UPI row padhi jaani chahiye");
+});
+
 test("doGet health/settings/recent — token ke bina kuch nahi", () => {
   const { sandbox } = loadScript();
   sandbox.setup();

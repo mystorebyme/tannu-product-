@@ -83,7 +83,7 @@ Warna purana code hi chalta rehta hai — owner ke saath yahi hua tha.
 
 ---
 
-## Poora code (2211 lines)
+## Poora code (2225 lines)
 
 ```javascript
 /**
@@ -158,7 +158,7 @@ Warna purana code hi chalta rehta hai — owner ke saath yahi hua tha.
 var TOKEN = 'CHANGE-ME-liksha-token';
 
 /** Code ka version — `?action=health` me dikhta hai. Code badle to isse badhaayein. */
-var CODE_VERSION = 'r31-1';
+var CODE_VERSION = 'r35-1';
 
 /**
  * Sheet ka id (URL me `/d/<ID>/edit`).
@@ -920,7 +920,8 @@ function readSettings_() {
   var values = sheet.getDataRange().getValues();
   var out = {};
   for (var i = 0; i < values.length; i += 1) {
-    var key = String(values[i][0] || '').trim().toLowerCase();
+    // R35: owner haath se "UPI ID" / "Upi-Id" likh de to bhi wahi key bane
+    var key = settingsKey_(values[i][0]);
     var raw = values[i][1];
     var value = String(raw === null || raw === undefined ? '' : raw).trim();
     if (!key || !value) continue;
@@ -930,7 +931,20 @@ function readSettings_() {
   // website in dono naam se bhi padh sakti hai
   if (out.whatsapp && !out.whatsapp_number) out.whatsapp_number = out.whatsapp;
   if (out.support_phone && !out.phone) out.phone = out.support_phone;
+  // UPI ke common naam — website `upi_id` padhti hai
+  if (out.upi && !out.upi_id) out.upi_id = out.upi;
+  if (out.upi_vpa && !out.upi_id) out.upi_id = out.upi_vpa;
+  if (out.vpa && !out.upi_id) out.upi_id = out.vpa;
   return out;
+}
+
+/** Settings key ka canonical roop: `UPI ID` / `upi-id` / ` Upi  Id ` → `upi_id` */
+function settingsKey_(raw) {
+  return String(raw === null || raw === undefined ? '' : raw)
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
 }
 
 /** Settings tab me values likho (purani key update, nayi key add). */

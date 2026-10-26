@@ -1,9 +1,16 @@
 import "server-only";
 
-import fs from "@/lib/fs-runtime";
+import fs from "./fs-runtime";
 import { dataFile } from "./data-dir";
 import { dbEnabled } from "./db";
-import { readSheetSettings, writeSheetSettings } from "./google-sheets";
+import {
+  invalidateSheetSettings,
+  readSheetSettingsDetailed,
+  sheetSettingsStatus,
+  writeSheetSettings,
+} from "./google-sheets";
+import type { SheetSettings } from "./sheet-format";
+import { readCachedSheetSettings, writeCachedSheetSettings } from "./sheet-settings-cache";
 
 /**
  * Store settings — source of truth storefront hai.
@@ -92,33 +99,54 @@ async function load(): Promise<StoreSettings> {
   }
 }
 
+/** Sheet me jo mila use stored settings par chadhao (sheet jeetti hai). */
+export function mergeSheetSettings(stored: StoreSettings, sheet: SheetSettings | null): StoreSettings {
+  if (!sheet) return stored;
+  return normalizeStoreSettings({
+    ...stored,
+    ...(sheet.announcement ? { announcement: sheet.announcement } : {}),
+    ...(sheet.supportPhone ? { supportPhone: sheet.supportPhone } : {}),
+    ...(sheet.supportEmail ? { supportEmail: sheet.supportEmail } : {}),
+    ...(sheet.whatsapp ? { whatsapp: sheet.whatsapp } : {}),
+    ...(sheet.upiId ? { upiId: sheet.upiId } : {}),
+    ...(sheet.upiName ? { upiName: sheet.upiName } : {}),
+    ...(sheet.gstin ? { gstin: sheet.gstin } : {}),
+    ...(typeof sheet.freeShipping === "boolean" ? { freeShipping: sheet.freeShipping } : {}),
+    ...(sheet.adminUrl ? { adminUrl: sheet.adminUrl } : {}),
+    ...(sheet.announcement || sheet.upiId || sheet.supportPhone
+      ? { updatedAt: new Date().toISOString(), updatedBy: "google-sheet" }
+      : {}),
+  });
+}
+
+/**
+ * Sheet fail ho to last-known-good par chalo — env/default par nahi.
+ *
+ * Owner ne sheet me UPI badla aur Apps Script ne ek baar timeout diya to pehle
+ * site purana UPI dikha deti thi. Ab: stored settings + aakhri sahi sheet value.
+ */
+async function storedWithLastGoodSheet(): Promise<StoreSettings> {
+  const stored = await load();
+  const cached = await readCachedSheetSettings();
+  return mergeSheetSettings(stored, cached?.settings ?? null);
+}
+
 /**
  * Settings = database/file ke defaults + owner ki Google Sheet (sheet jeetti hai).
- * Sheet me jo cell bhara hua hai wahi site par jaata hai, isliye owner ko redeploy
- * karne ki zaroorat nahi — 15 second me change live.
+ * Sheet me jo cell bhara hua hai wahi site par jaata hai — 15s cache.
+ * Sheet fail ho to aakhri sahi sheet value (stale) use hoti hai, env default nahi.
  */
 export async function getStoreSettings(options: { fresh?: boolean } = {}): Promise<StoreSettings> {
   if (!options.fresh && cache && Date.now() - cache.at < 5_000) return cache.value;
 
   const stored = await load();
-  const sheet = await readSheetSettings({ fresh: options.fresh });
-  const value = sheet
-    ? normalizeStoreSettings({
-        ...stored,
-        ...(sheet.announcement ? { announcement: sheet.announcement } : {}),
-        ...(sheet.supportPhone ? { supportPhone: sheet.supportPhone } : {}),
-        ...(sheet.supportEmail ? { supportEmail: sheet.supportEmail } : {}),
-        ...(sheet.whatsapp ? { whatsapp: sheet.whatsapp } : {}),
-        ...(sheet.upiId ? { upiId: sheet.upiId } : {}),
-        ...(sheet.upiName ? { upiName: sheet.upiName } : {}),
-        ...(sheet.gstin ? { gstin: sheet.gstin } : {}),
-        ...(typeof sheet.freeShipping === "boolean" ? { freeShipping: sheet.freeShipping } : {}),
-        ...(sheet.adminUrl ? { adminUrl: sheet.adminUrl } : {}),
-        ...(sheet.announcement || sheet.upiId || sheet.supportPhone
-          ? { updatedAt: new Date().toISOString(), updatedBy: "google-sheet" }
-          : {}),
-      })
-    : stored;
+  const read = await readSheetSettingsDetailed({ fresh: options.fresh });
+  const value = read.settings
+    ? mergeSheetSettings(stored, read.settings)
+    : mergeSheetSettings(stored, (await readCachedSheetSettings())?.settings ?? null);
+
+  // sheet se sahi value mili → agle fail ke liye sambhal ke rakho
+  if (read.settings) await writeCachedSheetSettings(read.settings);
 
   cache = { at: Date.now(), value };
   return value;
@@ -127,27 +155,43 @@ export async function getStoreSettings(options: { fresh?: boolean } = {}): Promi
 /**
  * Payment/tracking page ke liye settings — **time budget ke saath**.
  *
- * Owner ki Sheet (Apps Script) thodi slow ho sakti hai (Google ~0.3–2s). Payment
- * page ko us par intezaar nahi karana: cache garam ho to turant, warna max
- * `budgetMs` tak wait karke env/default par chala jaata hai — aur request
- * background me cache garam kar deti hai. Isliye step 3 kabhi "load ho raha hai"
- * par nahi atakta, UPI ID phir bhi sahi (env fallback) rehta hai.
+ * Sheet (Apps Script) 0.3–5s le sakti hai. Budget khatam ho to pehle jaisa
+ * hardcoded default nahi — ab **stored + last-known-good sheet** laut-ta hai
+ * (yaani wahi UPI jo owner ne sheet me set kiya tha), aur request background me
+ * cache garam kar deti hai.
  */
-export async function getStoreSettingsFast(budgetMs = 350): Promise<StoreSettings> {
-  if (cache) return cache.value;
-  const slow = getStoreSettings().catch(() => DEFAULT_STORE_SETTINGS);
+export async function getStoreSettingsFast(budgetMs = 1_200): Promise<StoreSettings> {
+  // 5s se purana cache payment page par nahi — sheet ka naya UPI turant dikhe
+  if (cache && Date.now() - cache.at < 5_000) return cache.value;
+
+  const slow = getStoreSettings({ fresh: true }).catch(() => DEFAULT_STORE_SETTINGS);
+  let timer: ReturnType<typeof setTimeout> | undefined;
   const timeout = new Promise<null>((resolve) => {
-    const timer = setTimeout(() => resolve(null), budgetMs);
-    // server process ko timer zinda na rakhe
+    timer = setTimeout(() => resolve(null), budgetMs);
     if (typeof timer === "object" && typeof (timer as { unref?: () => void }).unref === "function") {
       (timer as { unref: () => void }).unref();
     }
   });
   const fast = await Promise.race([slow, timeout]);
+  if (timer) clearTimeout(timer);
   if (fast) return fast;
-  // baaki kaam background me poora ho jaaye (agle request par cache ready milega)
+  // background me poora ho jaaye (agle request par cache ready milega)
   void slow;
-  return DEFAULT_STORE_SETTINGS;
+  try {
+    return await storedWithLastGoodSheet();
+  } catch {
+    return DEFAULT_STORE_SETTINGS;
+  }
+}
+
+/** Tests ke liye — memory cache saaf (5s TTL wala). */
+export function resetStoreSettingsCache(): void {
+  cache = null;
+}
+
+/** Owner/support diagnostics — sheet se aakhri read ka sach (koi secret nahi). */
+export function settingsSheetStatus(): ReturnType<typeof sheetSettingsStatus> {
+  return sheetSettingsStatus();
 }
 
 export async function saveStoreSettings(input: unknown, actor: string): Promise<StoreSettings> {
@@ -172,6 +216,23 @@ export async function saveStoreSettings(input: unknown, actor: string): Promise<
 
   // sheet configured hai to admin ka edit seedha sheet me bhi (owner ko wahi dikhe)
   await writeSheetSettings(next).catch(() => false);
+
+  /**
+   * R35: admin save ke baad purani sheet value 15s tak wapas na aaye, aur sheet
+   * fail ho to bhi owner ka **abhi ka** edit rahe (purana UPI na laute).
+   */
+  invalidateSheetSettings();
+  await writeCachedSheetSettings({
+    announcement: next.announcement,
+    supportPhone: next.supportPhone,
+    supportEmail: next.supportEmail,
+    whatsapp: next.whatsapp,
+    upiId: next.upiId,
+    upiName: next.upiName,
+    gstin: next.gstin,
+    freeShipping: next.freeShipping,
+    adminUrl: next.adminUrl,
+  });
 
   cache = { at: Date.now(), value: next };
   return next;

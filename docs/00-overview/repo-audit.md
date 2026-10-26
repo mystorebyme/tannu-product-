@@ -21,9 +21,9 @@
 | --- | --- |
 | products | 446 |
 | collections | 11 |
-| sourceFiles | 246 |
-| sourceLines | 25811 |
-| testFiles | 41 |
+| sourceFiles | 247 |
+| sourceLines | 26135 |
+| testFiles | 43 |
 | skills | 20 |
 | docsPages | 121 |
 
