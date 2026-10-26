@@ -98,6 +98,22 @@ check("payment page has a single 'Open UPI app' button", payHtml.includes('data-
 check("payment page has a UPI deep link (mobile app chooser)", /upi:\/\/pay/.test(payHtml));
 check("payment page names no UPI app brand", !/Google Pay|PhonePe|Paytm|BHIM/i.test(payHtml));
 
+// 3a. owner (R32): "payment ke baad aage badhne ke liye yahan click kariye" —
+// order details ka link highlight hai, aur invoice download abhi band hai.
+const callout = /<div[^>]*data-testid="order-details-callout"[^>]*>/.exec(payHtml)?.[0] ?? "";
+check("payment page highlights the order-details callout", callout.length > 0, callout.slice(0, 80));
+check(
+  "callout says payment ke baad aage badhne ke liye yahan click karein",
+  /yahin click kariye/i.test(payHtml) && /Payment confirm hone ke baad hi order confirm hota hai/i.test(payHtml),
+);
+const detailsLink = /<a[^>]*data-testid="order-details-link"[^>]*>/.exec(payHtml)?.[0] ?? "";
+check(
+  "callout link opens the order details page",
+  detailsLink.includes(`/orders/${number}`),
+  detailsLink.slice(0, 120),
+);
+check("payment page has no invoice download (R32)", !/Download invoice/i.test(payHtml));
+
 // ── 3b. tracking — order number se page khulta hai (lowercase bhi) ───────────
 const lower = await fetch(`${BASE}/orders/${number.toLowerCase()}`);
 const lowerHtml = await lower.text();

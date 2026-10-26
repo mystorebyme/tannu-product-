@@ -173,7 +173,12 @@ async function main() {
     check("order page 200", page.status === 200, `status ${page.status}`);
     check("order page shows number", page.text.includes(orderBody.orderNumber));
     check("order page has a tracking timeline", page.text.includes('data-testid="order-tracking"'));
-    check("order page links the GST invoice", page.text.includes(`/orders/${orderBody.orderNumber}/invoice`));
+    // R32 (owner): customer page se invoice download abhi band — sirf tracking.
+    check(
+      "order page has no invoice download (R32: only tracking)",
+      !page.text.includes(`/orders/${orderBody.orderNumber}/invoice`) && !page.text.includes("Download invoice"),
+    );
+    check("order page shows the tracking section", page.text.includes("Order tracking"));
 
     const invoiceBlocked = await fetch(`${BASE}/api/orders/${orderBody.orderNumber}/invoice`);
     check("invoice needs phone verification", invoiceBlocked.status === 403, `status ${invoiceBlocked.status}`);

@@ -314,6 +314,12 @@ apps/admin/src/app/(admin)/invoices/page.tsx + actions.ts → createManualInvoic
 Seller block (naam, address, GSTIN) → `apps/web/src/lib/invoice.ts` → `sellerFromSettings()` + `sellerDetails()`
 GSTIN sheet `Settings` tab ke `gstin` key se aata hai (public API me nahi jaata).
 
+**R32 switch:** customer ke order page se invoice download **abhi band** hai —
+`apps/web/src/lib/features.ts` → `customerFeatures.invoice = false` (owner ne kaha
+"abhi sirf tracking"). PDF/API aur admin ka button pehle jaise chalte hain; wapas
+dikhana ho to bas `invoice: true`. Customer ke payment page par "Order details
+dekhein" ab highlight button hai (`data-testid="order-details-callout"`).
+
 ---
 
 ## 9. Reviews (daily auto-update, verified)

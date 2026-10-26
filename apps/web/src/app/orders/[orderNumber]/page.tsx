@@ -17,6 +17,7 @@ import {
   trackingTimeLabel,
   trackingUpdates,
 } from "@/lib/tracking";
+import { customerFeatures } from "@/lib/features";
 
 export const dynamic = "force-dynamic";
 /**
@@ -226,6 +227,13 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
           )}
         </div>
 
+        {/*
+          Invoice download abhi customer ke liye band hai (owner, R32):
+          "sirf tracking chahiye". Block hi render nahi hota, isliye kahin
+          aadha-adhoora invoice text nahi bachta. Chalu karna ho to
+          `apps/web/src/lib/features.ts` me `invoice: true` kar dein.
+        */}
+        {customerFeatures.invoice ? (
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border border-[#eee6de] p-5">
           <div>
             <h2 className="text-[11px] font-semibold tracking-[.16em] uppercase">GST invoice</h2>
@@ -242,6 +250,7 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
             Download invoice
           </Link>
         </div>
+        ) : null}
 
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <div className="border border-[#eee6de] p-5">

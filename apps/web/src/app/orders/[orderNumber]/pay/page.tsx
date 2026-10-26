@@ -141,12 +141,31 @@ export default async function PaymentPage({ params }: { params: Promise<{ orderN
           </div>
         </div>
 
-        <p className="mt-4 text-center text-[11.5px] text-[#8a8078]">
-          Payment confirm hone ke baad hi order confirm hota hai.{" "}
-          <Link href={`/orders/${order.orderNumber}`} className="text-[#862222] underline">
+        {/*
+          Owner (R32): yahi wo link hai jahan se customer aage badhta hai, isliye
+          ise highlight kiya gaya hai — pehle chhota grey text tha, customer
+          miss kar deta tha. Button + neeche ek line "yahin click kariye".
+        */}
+        <div
+          data-testid="order-details-callout"
+          className="mt-5 border border-[#862222]/25 bg-[#fdf6f3] px-5 py-4 text-center"
+        >
+          <p className="text-[12px] font-semibold text-[#862222]">
+            Payment confirm hone ke baad hi order confirm hota hai.
+          </p>
+          <Link
+            href={`/orders/${order.orderNumber}`}
+            data-testid="order-details-link"
+            className="mt-3 inline-flex items-center gap-2 border border-[#862222] bg-[#862222] px-6 py-3 text-[11px] font-semibold tracking-[.14em] text-white uppercase transition-colors hover:bg-[#6d1b1b]"
+          >
             Order details dekhein
+            <span aria-hidden="true">→</span>
           </Link>
-        </p>
+          <p className="mt-2.5 text-[11px] leading-relaxed text-[#8a8078]">
+            Payment ke baad aage badhne ke liye <strong className="text-[#862222]">yahin click kariye</strong> —
+            tracking, order status aur delivery date isi page par milegi.
+          </p>
+        </div>
       </div>
     </div>
   );

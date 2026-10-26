@@ -528,3 +528,11 @@ likhega). Uske baad `/api/sheet-selftest` + connector se row confirm karna hai.
       padha — report: `docs/00-overview/owner-report-round31.md`
 - [x] Tests **189 pass / 0 fail** (14 tracking + 1 sheet timeline), payments e2e **53/0**,
       smoke **84/0**, round16 **39/0**, responsive **43/0**, breakpoints **48/0**
+
+### R32 — payment page callout highlight + invoice download band (sirf tracking)
+- [x] Payment page: "Order details dekhein" ab **highlight button** (`order-details-callout`),
+      saaf line "payment ke baad aage badhne ke liye **yahin click kariye**"
+- [x] Customer order page se GST invoice block hata diya (`apps/web/src/lib/features.ts`
+      → `customerFeatures.invoice = false`); PDF/API + admin button jaisa tha waisa
+- [x] Tests: `tests/unit/features.test.ts` (7) + payments e2e 4 naye checks (57),
+      smoke 85 (invoice-link check ulta ho gaya); round16 39, responsive 43, breakpoints 48, links 45
