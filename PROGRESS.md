@@ -547,3 +547,7 @@ likhega). Uske baad `/api/sheet-selftest` + connector se row confirm karna hai.
       link (`back-to-review`), snapshot se review wapas dikhta hai (cart khali hone par bhi)
 - [x] Tests: `tests/unit/round33.test.ts` (13), payments e2e 59 → back-link check,
       **209 unit pass / 0 fail**
+- [x] Payment se back → review (browser back bhi), snapshot se items/address/total, "Continue to payment"
+- [x] Deploy: storefront `dpl_BcgUzFCWmtbxAWER6VE5zPDwXKym` @ `9704b3b`, admin `dpl_DqLMhTYqfsL52gpGvgokFP4bqdYK`;
+      domain + www + admin subdomain Vercel me added — **DNS records owner ko add karne hain**
+      (`docs/00-overview/owner-report-round33.md`)
