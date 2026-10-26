@@ -536,3 +536,14 @@ likhega). Uske baad `/api/sheet-selftest` + connector se row confirm karna hai.
       → `customerFeatures.invoice = false`); PDF/API + admin button jaisa tha waisa
 - [x] Tests: `tests/unit/features.test.ts` (7) + payments e2e 4 naye checks (57),
       smoke 85 (invoice-link check ulta ho gaya); round16 39, responsive 43, breakpoints 48, links 45
+
+### R33 — domain `designerclothing.fashion` + checkout back → review
+- [x] Naya domain: `apps/web/src/lib/domain.ts` (`CANONICAL_ORIGIN`), `site.ts` +
+      `api-base.ts` fallback, traffic internal pehchan, policies, sheet demo images
+- [x] Vercel: domain + `www` (308) storefront par, `admin.` subdomain admin par;
+      envs (`NEXT_PUBLIC_SITE_URL`, `CORS_ALLOWED_ORIGINS`, admin ke 3 URLs) update
+- [x] Admin login: `ADMIN_EMAIL` comma-list (naya + purana email dono chalte hain)
+- [x] Checkout: address → review → payment (wahi), payment page par **← Review order**
+      link (`back-to-review`), snapshot se review wapas dikhta hai (cart khali hone par bhi)
+- [x] Tests: `tests/unit/round33.test.ts` (13), payments e2e 59 → back-link check,
+      **209 unit pass / 0 fail**

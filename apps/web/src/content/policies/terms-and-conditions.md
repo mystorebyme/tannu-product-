@@ -2,7 +2,7 @@
 
 Last updated: 24 October 2026
 
-These terms govern your use of likshaclothing.com and any order you place with Designer Clothing. By placing an order you accept these terms.
+These terms govern your use of designerclothing.fashion and any order you place with Designer Clothing. By placing an order you accept these terms.
 
 ## 1. Who we are
 

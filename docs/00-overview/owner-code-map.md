@@ -12,8 +12,8 @@ Repo me **do Next.js apps** hain (ek hi repo, do deploy):
 
 | App | Folder | Kaam | Live URL |
 | --- | --- | --- | --- |
-| Storefront (customer) | `apps/web/` | website, products, cart, checkout, payment, tracking | `liksha-clothing.vercel.app` |
-| Admin (aapka panel) | `apps/admin/` | orders, payment verify, invoice, products, pincode block | `liksha-admin.vercel.app` |
+| Storefront (customer) | `apps/web/` | website, products, cart, checkout, payment, tracking | **`designerclothing.fashion`** |
+| Admin (aapka panel) | `apps/admin/` | orders, payment verify, invoice, products, pincode block | **`admin.designerclothing.fashion`** |
 | Shared types | `packages/types/` | `Product`, `Order` wagairah ka TypeScript shape | — |
 | Catalog data | `database/seeds/**` → build par `apps/web/src/data/catalog.json` | saare 446 products + collections + prices | — |
 | Google Sheet script | `scripts/google-apps-script/liksha-sheets.gs` | sheet me row likhne wala Apps Script | aapke Google account me |
@@ -390,9 +390,10 @@ Order par double check: `lib/orders.ts` → `createOrder()` (pincode serviceable
 
 | Cheez | Abhi | Hona chahiye |
 | --- | --- | --- |
-| `liksha-clothing.vercel.app` | ✅ naya site (`/api/health` → `db: up`) | — |
-| `www.likshaclothing.com` | ❌ abhi **purana Shopify** | DNS me `www` → `cname.vercel-dns.com`, `@` → `76.76.21.21` |
-| `liksha-admin.vercel.app` | ✅ admin | — |
+| `designerclothing.fashion` | ✅ naya site (`/api/health` → `db: up`) | Cloudflare DNS records (doc: `docs/09-devops/domain-and-brand.md`) |
+| `www.designerclothing.fashion` | ⏳ apex par 308 redirect (Vercel me set) | Cloudflare me `CNAME www` record |
+| `admin.designerclothing.fashion` | ⏳ Vercel me set | Cloudflare me `CNAME admin` record |
+| `liksha-clothing.vercel.app` / `liksha-admin.vercel.app` | ✅ backup URLs | chalta rahega (canonical nahi) |
 | GitHub Pages preview | `mystorebyme.github.io/tannu-product-/` | static preview |
 
 Deploy steps: `docs/00-overview/sheet-setup-owner.md` ke aakhir me **Deploy** section, aur `README.md` ka deployment block.

@@ -42,7 +42,9 @@ test("checkout step 1 continues to review, order is placed only from review", ()
   assert.match(checkout, /data-testid="checkout-review"/);
   assert.match(checkout, /setStep\("review"\)/);
   // submit button sirf review step me dikhta hai
-  assert.match(checkout, /step === "details" \? \(\s*<button\s+type="button"/);
+  // (R33: `showDetails` = !resumed && step === "details" — payment se back par review)
+  assert.match(checkout, /const showDetails = !resumed && step === "details"/);
+  assert.match(checkout, /\)\s*:\s*showDetails \? \(\s*<button\s+type="button"/);
 });
 
 test("checkout me UPI ID / QR / 'pay here' bilkul nahi — wo sirf payment page par", () => {

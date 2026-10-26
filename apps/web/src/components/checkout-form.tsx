@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/components/cart-provider";
 import { formatPrice, imageUrl } from "@/lib/format";
@@ -12,6 +12,11 @@ import { postJson, readJson } from "@/lib/http-json";
 import { checkPincodeOffline } from "@/lib/pincode-offline";
 import { INDIAN_STATES, canonicalStateName, statesMatch } from "@/lib/state-match";
 import { whatsappNumber } from "@/lib/phone";
+import {
+  readPlacedOrder,
+  savePlacedOrder,
+  type PlacedOrderSnapshot,
+} from "@/lib/checkout-session";
 
 const indianStates = INDIAN_STATES;
 
@@ -35,6 +40,16 @@ export function CheckoutForm() {
    * page (alag URL). Address aur payment kabhi ek hi screen par nahi aate.
    */
   const [step, setStep] = useState<"details" | "review">("details");
+  /**
+   * R33 (owner): payment page se **back** karne par customer ko seedha review
+   * (step 2) par laana hai — address form dobara nahi. Order place hote hi cart
+   * khali hota hai, isliye order ka snapshot `sessionStorage` se padhte hain.
+   */
+  const searchParams = useSearchParams();
+  const resumeOrderNumber = searchParams.get("order");
+  const wantsReview = searchParams.get("step") === "review";
+  const [resumed, setResumed] = useState<PlacedOrderSnapshot | null>(null);
+  const [resumeChecked, setResumeChecked] = useState(false);
   // OTP step hata diya gaya hai (owner request) — order sirf details par
   const [error, setError] = useState<string | null>(null);
   // delivery check — admin ke rules + India Post data se
@@ -56,6 +71,21 @@ export function CheckoutForm() {
   useEffect(() => {
     if (isOpen) closeCart();
   }, [isOpen, closeCart]);
+
+  /**
+   * `?order=LK-…&step=review` — payment page ka "back". Snapshot mil gaya to
+   * review seedha dikhta hai (cart khali hone par bhi).
+   */
+  useEffect(() => {
+    if (!resumeOrderNumber) {
+      setResumeChecked(true);
+      return;
+    }
+    const snapshot = readPlacedOrder(resumeOrderNumber);
+    setResumed(snapshot);
+    setResumeChecked(true);
+    if (snapshot && wantsReview) setStep("review");
+  }, [resumeOrderNumber, wantsReview]);
 
   // 6 digit poore hone par apne aap check — galat/blocked pincode par aage nahi jaane dete
   useEffect(() => {
@@ -202,8 +232,17 @@ export function CheckoutForm() {
     return `https://wa.me/${whatsappNumber(whatsapp.replace(/\D/g, "").slice(-10))}?text=${encodeURIComponent(text)}`;
   }
 
+  /** payment page se aaye hain — order pehle hi ban chuka hai, dobara mat banao */
+  function goToPayment(orderNumber: string) {
+    router.push(`/orders/${encodeURIComponent(orderNumber)}/pay`);
+  }
+
   async function submit(event: React.FormEvent) {
     event.preventDefault();
+    if (resumed) {
+      goToPayment(resumed.orderNumber);
+      return;
+    }
     if (lines.length === 0) return;
     if (!pinStatus) {
       setError("Please check your delivery pincode first — we only ship to verified pincodes.");
@@ -256,6 +295,33 @@ export function CheckoutForm() {
         return;
       }
       trackCheckout("order.placed", { orderNumber: result.data.orderNumber, total });
+      /**
+       * Snapshot pehle save — `clear()` ke baad bhi payment page se "back" par
+       * review dikh sake (owner rule, R33). Koi payment detail isme nahi jaati.
+       */
+      savePlacedOrder({
+        orderNumber: result.data.orderNumber,
+        total,
+        placedAt: new Date().toISOString(),
+        items: lines.map((line) => ({
+          title: line.title,
+          image: line.image,
+          size: line.size,
+          colour: line.colour,
+          quantity: line.quantity,
+          price: line.price,
+        })),
+        customer: {
+          name: form.customerName,
+          phone: form.phone,
+          email: form.email,
+          address: form.address,
+          city: form.city,
+          state: form.state,
+          pincode: form.pincode,
+          notes: form.notes || undefined,
+        },
+      });
       clear();
       /**
        * Payment **step 3** = alag page. `?pay=1` se mobile par UPI app chooser
@@ -272,7 +338,55 @@ export function CheckoutForm() {
     }
   }
 
-  if (lines.length === 0) {
+  /**
+   * Review par jo dikhta hai: normal checkout me cart, "back from payment" me
+   * order ka snapshot. Dono jagah same layout, isliye customer ko farq nahi padta.
+   */
+  const shownItems = resumed
+    ? resumed.items.map((item, index) => ({ key: `placed-${index}`, ...item }))
+    : lines.map((line) => ({
+        key: line.key,
+        title: line.title,
+        image: line.image,
+        size: line.size,
+        colour: line.colour,
+        quantity: line.quantity,
+        price: line.price,
+      }));
+  const shownCount = resumed ? resumed.items.reduce((sum, item) => sum + item.quantity, 0) : count;
+  /** back-from-payment me hamesha review dikhta hai (details form kabhi nahi) */
+  const showDetails = !resumed && step === "details";
+  const shownSubtotal = resumed ? resumed.total : subtotal;
+  const shownTotal = resumed ? resumed.total : total;
+  /** `?order=` aaya par snapshot nahi mila (doosra tab/device) — order phir bhi safe hai */
+  const resumeMissing = Boolean(resumeOrderNumber && resumeChecked && !resumed);
+
+  if (resumeMissing) {
+    return (
+      <div className="border border-[#eee6de] px-6 py-16 text-center" data-testid="review-unavailable">
+        <p className="text-sm text-[#4a423b]">
+          Order <strong className="text-[#862222]">{resumeOrderNumber}</strong> place ho chuka hai — payment
+          wale page se aage badhiye.
+        </p>
+        <Link
+          href={`/orders/${encodeURIComponent(resumeOrderNumber ?? "")}/pay`}
+          data-testid="review-open-payment"
+          className="mt-5 inline-block bg-[#862222] px-7 py-3 text-[11px] font-semibold tracking-[.16em] text-white uppercase"
+        >
+          Payment page kholein
+        </Link>
+        <p className="mt-3 text-[11.5px] text-[#8a8078]">
+          Details dekhni hain to{" "}
+          <Link href={`/orders/${encodeURIComponent(resumeOrderNumber ?? "")}`} className="text-[#862222] underline">
+            order page
+          </Link>{" "}
+          kholein.
+        </p>
+      </div>
+    );
+  }
+
+  if (lines.length === 0 && !resumed) {
     return (
       <div className="border border-[#eee6de] px-6 py-20 text-center">
         <p className="text-sm text-[#6b6259]">Your cart is empty — add a suit set to checkout.</p>
@@ -292,8 +406,8 @@ export function CheckoutForm() {
         {/* 3-step indicator — payment apne page par (step 3) */}
         <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] tracking-[.14em] uppercase" data-testid="checkout-steps">
           {[
-            { n: 1, label: "Delivery", active: step === "details", href: null },
-            { n: 2, label: "Review", active: step === "review", href: null },
+            { n: 1, label: "Delivery", active: showDetails, href: null },
+            { n: 2, label: "Review", active: !showDetails, href: null },
             { n: 3, label: "Payment", active: false, href: null },
           ].map((item, index) => (
             <li key={item.n} className="flex items-center gap-2">
@@ -311,7 +425,7 @@ export function CheckoutForm() {
           ))}
         </ol>
 
-        {step === "details" ? (
+        {showDetails ? (
         <>
         <section>
           <h2 className="text-[11px] font-semibold tracking-[.16em] text-[#862222] uppercase">Contact</h2>
@@ -436,34 +550,49 @@ export function CheckoutForm() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="text-[10.5px] tracking-[.12em] text-[#9a8f85] uppercase">Deliver to</p>
-                    <p className="mt-1 text-[13px] font-medium text-[#2f2a25]">{form.customerName}</p>
-                    <p className="mt-0.5 text-[12px] leading-relaxed text-[#5c534b]">
-                      {form.address}, {form.city}, {form.state} — {form.pincode}
+                    <p className="mt-1 text-[13px] font-medium text-[#2f2a25]" data-testid="review-name">
+                      {resumed ? resumed.customer.name : form.customerName}
+                    </p>
+                    <p className="mt-0.5 text-[12px] leading-relaxed text-[#5c534b]" data-testid="review-address">
+                      {(resumed ? resumed.customer.address : form.address)},{" "}
+                      {resumed ? resumed.customer.city : form.city},{" "}
+                      {resumed ? resumed.customer.state : form.state} —{" "}
+                      {resumed ? resumed.customer.pincode : form.pincode}
                     </p>
                     <p className="mt-1 text-[12px] text-[#5c534b]">
-                      {form.phone} · {form.email}
+                      {resumed ? resumed.customer.phone : form.phone} ·{" "}
+                      {resumed ? resumed.customer.email : form.email}
                     </p>
-                    {form.notes ? (
-                      <p className="mt-1 text-[11.5px] text-[#8a8078]">Note: {form.notes}</p>
+                    {(resumed ? resumed.customer.notes : form.notes) ? (
+                      <p className="mt-1 text-[11.5px] text-[#8a8078]">
+                        Note: {resumed ? resumed.customer.notes : form.notes}
+                      </p>
                     ) : null}
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setStep("details")}
-                    className="shrink-0 border border-[#862222] px-3 py-1.5 text-[10px] font-semibold tracking-[.12em] text-[#862222] uppercase"
-                  >
-                    Edit
-                  </button>
+                  {resumed ? (
+                    <span className="shrink-0 border border-[#e0d6ca] px-3 py-1.5 text-[10px] font-semibold tracking-[.12em] text-[#9a8f85] uppercase">
+                      Placed
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setStep("details")}
+                      data-testid="review-edit"
+                      className="shrink-0 border border-[#862222] px-3 py-1.5 text-[10px] font-semibold tracking-[.12em] text-[#862222] uppercase"
+                    >
+                      Edit
+                    </button>
+                  )}
                 </div>
               </div>
             </section>
 
             <section>
               <h2 className="text-[11px] font-semibold tracking-[.16em] text-[#862222] uppercase">
-                Items ({count})
+                Items ({shownCount})
               </h2>
-              <ul className="mt-3 divide-y divide-[#eee6de] border border-[#eee6de] bg-white">
-                {lines.map((line) => (
+              <ul className="mt-3 divide-y divide-[#eee6de] border border-[#eee6de] bg-white" data-testid="review-items">
+                {shownItems.map((line) => (
                   <li key={line.key} className="flex gap-3 p-3">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <SafeImage src={imageUrl(line.image, 160)} alt={line.title} className="h-16 w-12 shrink-0 object-cover" />
@@ -498,9 +627,9 @@ export function CheckoutForm() {
       </div>
 
       <aside className="h-fit border border-[#eee6de] bg-[#faf8f5] p-5 lg:sticky lg:top-[92px]">
-        <h2 className="text-[11px] font-semibold tracking-[.16em] uppercase">Order summary ({count})</h2>
+        <h2 className="text-[11px] font-semibold tracking-[.16em] uppercase">Order summary ({shownCount})</h2>
         <ul className="mt-3 divide-y divide-[#eee6de]">
-          {lines.map((line) => (
+          {shownItems.map((line) => (
             <li key={line.key} className="flex gap-2.5 py-2.5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <SafeImage src={imageUrl(line.image, 200)} alt={line.title} className="h-16 w-12 shrink-0 object-cover" />
@@ -510,15 +639,17 @@ export function CheckoutForm() {
                   {line.size}
                   {line.colour ? ` · ${line.colour}` : ""} · Qty {line.quantity}
                 </p>
-                <button
-                  type="button"
-                  onClick={() => removeLine(line.key)}
-                  data-testid="summary-remove"
-                  aria-label={`Remove ${line.title} from order`}
-                  className="mt-1 text-[10px] tracking-[.06em] text-[#9a8f85] uppercase underline transition hover:text-[#862222]"
-                >
-                  Remove
-                </button>
+                {resumed ? null : (
+                  <button
+                    type="button"
+                    onClick={() => removeLine(line.key)}
+                    data-testid="summary-remove"
+                    aria-label={`Remove ${line.title} from order`}
+                    className="mt-1 text-[10px] tracking-[.06em] text-[#9a8f85] uppercase underline transition hover:text-[#862222]"
+                  >
+                    Remove
+                  </button>
+                )}
               </div>
               <span className="text-[11.5px] font-medium">{formatPrice(line.price * line.quantity)}</span>
             </li>
@@ -528,7 +659,7 @@ export function CheckoutForm() {
         <div className="mt-4 space-y-2 border-t border-[#e7ddd2] pt-3 text-[12.5px]">
           <div className="flex justify-between">
             <span className="text-[#6b6259]">Subtotal</span>
-            <span>{formatPrice(subtotal)}</span>
+            <span>{formatPrice(shownSubtotal)}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-[#6b6259]">Shipping</span>
@@ -536,7 +667,7 @@ export function CheckoutForm() {
           </div>
           <div className="flex items-center justify-between border-t border-[#e7ddd2] pt-2.5 text-[14.5px] font-semibold">
             <span>Total</span>
-            <span className="text-[#862222]">{formatPrice(total)}</span>
+            <span className="text-[#862222]">{formatPrice(shownTotal)}</span>
           </div>
         </div>
 
@@ -594,7 +725,23 @@ export function CheckoutForm() {
           </div>
         ) : null}
 
-        {step === "details" ? (
+        {resumed ? (
+          <>
+            {/* Payment page se wapas aaye hain — sirf review confirm karke aage */}
+            <button
+              type="button"
+              onClick={() => goToPayment(resumed.orderNumber)}
+              data-testid="review-continue-payment"
+              className="mt-4 w-full bg-[#862222] py-3 text-[11.5px] font-semibold tracking-[.16em] text-white uppercase"
+            >
+              Continue to payment · {formatPrice(shownTotal)}
+            </button>
+            <p className="mt-2 text-center text-[10.5px] leading-relaxed text-[#8a8078]">
+              Order <strong className="text-[#862222]">{resumed.orderNumber}</strong> already place ho chuka hai.
+              Address badalna ho to WhatsApp par likhiye.
+            </p>
+          </>
+        ) : showDetails ? (
           <button
             type="button"
             onClick={goToReview}

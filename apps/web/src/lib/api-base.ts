@@ -6,6 +6,8 @@
  * hai; nahi set ho to preview par hum galat host par request bhej kar "Network error"
  * nahi dikhate — seedha WhatsApp order flow dikha dete hain.
  */
+import { CANONICAL_ORIGIN } from "./domain";
+
 export const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL ?? "").replace(/\/+$/, "");
 
 /** Static export (GitHub Pages) build */
@@ -13,10 +15,12 @@ export const IS_STATIC_PREVIEW = process.env.NEXT_PUBLIC_PREVIEW === "1";
 
 /** Live store (server wala hissa: order, payment, tracking) */
 export const LIVE_STORE_URL = (
-  process.env.NEXT_PUBLIC_LIVE_STORE_URL ??
-  API_BASE ??
-  // purge: Render service dead hai — tracking/orders live Vercel store par hain
-  "https://liksha-clothing.vercel.app"
+  process.env.NEXT_PUBLIC_LIVE_STORE_URL ||
+  // `||` zaroori hai: env set na ho to `API_BASE` khaali string hai, aur
+  // `??` khaali string ko hi pakad leta (pehle fallback kabhi lagta hi nahi tha).
+  API_BASE ||
+  // R33: owner ka domain — tracking/orders yahin hain
+  CANONICAL_ORIGIN
 ).replace(/\/+$/, "");
 
 /** API available hai ya nahi — preview par base ke bina koi call nahi */

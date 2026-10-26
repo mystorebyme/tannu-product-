@@ -1485,11 +1485,11 @@ var DEMO_CUSTOMERS = [
 ];
 
 var DEMO_PRODUCTS = [
-  { title: 'Creme Coloured Organza Suit', handle: 'creme-coloured-organza-suit', sku: 'ORGANZA-CREME-M', size: 'M', colour: 'Creme', price: 599, category: 'anarkali', image: 'https://liksha-clothing.vercel.app/images/brand/logo-desktop.png' },
-  { title: 'Wine Silk Anarkali Set', handle: 'wine-silk-anarkali-set', sku: 'ANARK-WINE-L', size: 'L', colour: 'Wine', price: 649, category: 'anarkali', image: 'https://liksha-clothing.vercel.app/images/brand/logo-desktop.png' },
-  { title: 'Sea Green Lehenga Choli', handle: 'sea-green-lehenga-choli', sku: 'LEH-SEAGREEN-XL', size: 'XL', colour: 'Sea Green', price: 699, category: 'lehenga', image: 'https://liksha-clothing.vercel.app/images/brand/logo-desktop.png' },
-  { title: 'Rani Pink Sharara Set', handle: 'rani-pink-sharara-set', sku: 'SHARARA-PINK-S', size: 'S', colour: 'Rani Pink', price: 549, category: 'sharara', image: 'https://liksha-clothing.vercel.app/images/brand/logo-desktop.png' },
-  { title: 'Ivory Chikankari Kurta Set', handle: 'ivory-chikankari-kurta-set', sku: 'CHIKAN-IVORY-XS', size: 'XS', colour: 'Ivory', price: 499, category: 'kurta', image: 'https://liksha-clothing.vercel.app/images/brand/logo-desktop.png' },
+  { title: 'Creme Coloured Organza Suit', handle: 'creme-coloured-organza-suit', sku: 'ORGANZA-CREME-M', size: 'M', colour: 'Creme', price: 599, category: 'anarkali', image: 'https://designerclothing.fashion/images/brand/logo-desktop.png' },
+  { title: 'Wine Silk Anarkali Set', handle: 'wine-silk-anarkali-set', sku: 'ANARK-WINE-L', size: 'L', colour: 'Wine', price: 649, category: 'anarkali', image: 'https://designerclothing.fashion/images/brand/logo-desktop.png' },
+  { title: 'Sea Green Lehenga Choli', handle: 'sea-green-lehenga-choli', sku: 'LEH-SEAGREEN-XL', size: 'XL', colour: 'Sea Green', price: 699, category: 'lehenga', image: 'https://designerclothing.fashion/images/brand/logo-desktop.png' },
+  { title: 'Rani Pink Sharara Set', handle: 'rani-pink-sharara-set', sku: 'SHARARA-PINK-S', size: 'S', colour: 'Rani Pink', price: 549, category: 'sharara', image: 'https://designerclothing.fashion/images/brand/logo-desktop.png' },
+  { title: 'Ivory Chikankari Kurta Set', handle: 'ivory-chikankari-kurta-set', sku: 'CHIKAN-IVORY-XS', size: 'XS', colour: 'Ivory', price: 499, category: 'kurta', image: 'https://designerclothing.fashion/images/brand/logo-desktop.png' },
 ];
 
 var DEMO_MESSAGES = [

@@ -1,3 +1,5 @@
+import { isOwnHost } from "./domain";
+
 /**
  * Traffic helpers — **pure** (koi DB/net import nahi, isliye unit test aasan).
  *
@@ -39,7 +41,8 @@ export function normaliseReferrer(raw: unknown): string {
   if (/bing\./.test(host)) return "bing";
   if (/pinterest\./.test(host)) return "pinterest";
   if (/youtube\./.test(host)) return "youtube";
-  if (/(likshaclothing|liksha-clothing)/.test(host)) return "internal";
+  // apne hosts (naya domain + purana Vercel URL) internal mane jaate hain
+  if (isOwnHost(host)) return "internal";
   return "other";
 }
 

@@ -114,6 +114,16 @@ check(
 );
 check("payment page has no invoice download (R32)", !/Download invoice/i.test(payHtml));
 
+// 3b. R33: payment se back → review (step 2), address form dobara nahi
+const backLink = /<a[^>]*data-testid="back-to-review"[^>]*>/.exec(payHtml)?.[0] ?? "";
+check(
+  "payment page has a back-to-review link",
+  // HTML me `&` → `&amp;` ho jaata hai
+  backLink.includes(`/checkout?step=review`) && backLink.includes(`order=${number}`),
+  backLink.slice(0, 140),
+);
+check("payment page back link says Review order", /Review order/.test(payHtml));
+
 // ── 3b. tracking — order number se page khulta hai (lowercase bhi) ───────────
 const lower = await fetch(`${BASE}/orders/${number.toLowerCase()}`);
 const lowerHtml = await lower.text();

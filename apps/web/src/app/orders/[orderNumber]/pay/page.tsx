@@ -10,6 +10,7 @@ import { getStoreSettingsFast } from "@/lib/store-settings";
 import { UpiPayment } from "@/components/upi-payment";
 import { signUpiReturn } from "@/lib/upi-return";
 import { PaymentStatusWatcher } from "@/components/payment-status-watcher";
+import { reviewUrl } from "@/lib/checkout-session";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Complete payment", robots: { index: false, follow: false } };
@@ -60,6 +61,19 @@ export default async function PaymentPage({ params }: { params: Promise<{ orderN
           </Link>{" "}
           / <span className="text-[#5c534b]">Payment</span>
         </nav>
+
+        {/*
+          Owner rule (R33): payment se **back** karne par customer review (step 2)
+          par jaaye — address form dobara nahi. Review me order ki items + address
+          snapshot se dikhte hain (cart already khali ho chuka hota hai).
+        */}
+        <Link
+          href={reviewUrl(order.orderNumber)}
+          data-testid="back-to-review"
+          className="mb-3 inline-flex items-center gap-1.5 border border-[#e0d6ca] bg-white px-3 py-2 text-[10.5px] font-semibold tracking-[.12em] text-[#6b6259] uppercase transition-colors hover:border-[#862222] hover:text-[#862222]"
+        >
+          <span aria-hidden="true">←</span> Review order
+        </Link>
 
         <div className="border border-[#e9dfd4] bg-white p-5 sm:p-7">
           <p className="text-[10.5px] tracking-[.18em] text-[#9c8f82] uppercase">Step 2 of 2 — payment</p>

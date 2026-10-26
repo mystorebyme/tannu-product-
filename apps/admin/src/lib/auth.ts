@@ -10,7 +10,15 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 const SECRET =
   process.env.ADMIN_SESSION_SECRET || process.env.ADMIN_API_TOKEN || "dev-only-secret-change-me";
 const PASSWORD = process.env.ADMIN_PASSWORD ?? "liksha2026";
-const EMAIL = process.env.ADMIN_EMAIL ?? "admin@likshaclothing.com";
+/**
+ * R33: naya domain `designerclothing.fashion`. Login email ek se zyada ho sakta
+ * hai (comma-separated) — purana email bhi chalega, taaki owner lock-out na ho.
+ * Example: `admin@designerclothing.fashion,admin@likshaclothing.com`
+ */
+const EMAILS = (process.env.ADMIN_EMAIL || "admin@designerclothing.fashion,admin@likshaclothing.com")
+  .split(",")
+  .map((value) => value.trim().toLowerCase())
+  .filter(Boolean);
 export const SESSION_COOKIE = "liksha_admin";
 /** 30 din — roz login karne ki zaroorat nahi. Har request par (middleware) sliding renew hota hai. */
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
@@ -50,7 +58,7 @@ export function verifySessionToken(token: string | undefined): Session | null {
 export function checkCredentials(email: string, password: string): boolean {
   // Production me default password se login bilkul band — pehle ADMIN_PASSWORD set karo
   if (process.env.NODE_ENV === "production" && !process.env.ADMIN_PASSWORD) return false;
-  const emailOk = email.trim().toLowerCase() === EMAIL.toLowerCase();
+  const emailOk = EMAILS.includes(email.trim().toLowerCase());
   const a = Buffer.from(password);
   const b = Buffer.from(PASSWORD);
   const passwordOk = a.length === b.length && timingSafeEqual(a, b);
@@ -58,7 +66,7 @@ export function checkCredentials(email: string, password: string): boolean {
 }
 
 export const SESSION_MAX_AGE = MAX_AGE_SECONDS;
-export const ADMIN_EMAIL_HINT = EMAIL;
+export const ADMIN_EMAIL_HINT = EMAILS[0];
 
 /** Login/session ke liye production me koi default secret nahi chalega. */
 export function secretIsDefault(): boolean {

@@ -33,7 +33,8 @@ test("traffic: referrer chhote label me badalta hai", () => {
   assert.equal(normaliseReferrer("https://www.google.com/search?q=anarkali"), "google");
   assert.equal(normaliseReferrer("https://l.instagram.com/?u=x"), "instagram");
   assert.equal(normaliseReferrer("https://wa.me/918005900581"), "whatsapp");
-  assert.equal(normaliseReferrer("https://likshaclothing.com/"), "internal");
+  // R33: apna domain designerclothing.fashion (purana likshaclothing.com ab sirf reference)
+  assert.equal(normaliseReferrer("https://designerclothing.fashion/"), "internal");
   assert.equal(normaliseReferrer(""), "direct");
   assert.equal(normaliseReferrer("kuch bhi"), "direct");
   assert.equal(normaliseReferrer("https://example.com/x"), "other");
