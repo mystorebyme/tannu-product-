@@ -23,6 +23,23 @@ const STOREFRONT_BASE = (
   ""
 ).replace(/\/$/, "");
 
+/** Wahi courier jinke tracking link hum AWB se bana sakte hain (lib/tracking.ts) */
+const COURIERS = [
+  "Delhivery",
+  "Blue Dart",
+  "DTDC",
+  "India Post",
+  "Ekart",
+  "XpressBees",
+  "Shadowfax",
+  "Ecom Express",
+  "Shiprocket",
+  "The Professional Couriers",
+  "Amazon",
+  "FedEx",
+  "DHL",
+];
+
 const NEXT_STATUS: Record<string, string[]> = {
   placed: ["confirmed", "cancelled"],
   confirmed: ["packed", "cancelled"],
@@ -330,9 +347,16 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                   <input
                     id="courier"
                     name="courier"
+                    list="courier-list"
                     defaultValue={order.tracking?.courier ?? ""}
-                    placeholder="Delhivery / Bluedart / India Post"
+                    placeholder="Delhivery / Blue Dart / India Post"
                   />
+                  <datalist id="courier-list">
+                    {COURIERS.map((name) => (
+                      <option key={name} value={name} />
+                    ))}
+                  </datalist>
+                  <p className="small muted">List me se chuniye — tracking link khud ban jaata hai.</p>
                 </div>
                 <div className="field">
                   <label htmlFor="awb">AWB / tracking number</label>
@@ -344,7 +368,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                     id="url"
                     name="url"
                     defaultValue={order.tracking?.url ?? ""}
-                    placeholder="https://www.delhivery.com/track/package/…"
+                    placeholder="Khaali chhodiye — courier + AWB se link khud ban jaayega"
                   />
                 </div>
                 <button className="btn btn-primary" type="submit">

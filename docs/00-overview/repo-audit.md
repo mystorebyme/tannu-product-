@@ -21,11 +21,11 @@
 | --- | --- |
 | products | 446 |
 | collections | 11 |
-| sourceFiles | 237 |
-| sourceLines | 24763 |
-| testFiles | 37 |
+| sourceFiles | 238 |
+| sourceLines | 25123 |
+| testFiles | 38 |
 | skills | 20 |
-| docsPages | 118 |
+| docsPages | 119 |
 
 ## Skills (20/20 pass)
 

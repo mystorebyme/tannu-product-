@@ -17,6 +17,7 @@ import { checkPincode } from "./delivery";
 import { canonicalStateName, statesMatch } from "./state-match";
 import { products } from "./store";
 import { syncOrderToSheet, syncShipmentToSheet } from "./google-sheets";
+import { cleanAwb, courierTrackingUrl } from "./tracking";
 
 type StoredOrder = Order;
 
@@ -395,8 +396,10 @@ export async function setTracking(
   const order = all[index]!;
   const now = new Date().toISOString();
   const courier = input.courier?.trim() || null;
-  const awb = input.awb?.trim() || null;
-  const url = input.url?.trim() || null;
+  // AWB hamesha saaf (spaces/underscore hata ke uppercase) — courier link isi se banta hai
+  const awb = cleanAwb(input.awb) || null;
+  // admin URL khaali chhode to courier + AWB se link khud ban jaata hai (customer ko dead-end nahi)
+  const url = input.url?.trim() || courierTrackingUrl(courier, awb);
 
   const tracking: Tracking = {
     courier,

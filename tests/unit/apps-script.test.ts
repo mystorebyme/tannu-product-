@@ -412,6 +412,54 @@ test("website jo column bhejti hai wo sab sheet HEADERS me maujood hain", () => 
   }
 });
 
+test("timeline action — order + phone se 5 step tracking", () => {
+  const { sandbox } = loadScript();
+  sandbox.setup();
+  const phone = "9876543210";
+  const base = { "Order number": "LK-TRACK01", Phone: phone, Customer: "Riya" };
+  sandbox.appendRows_([
+    { sheet: "Orders", row: { ...base, Timestamp: "2026-10-20T05:00:00.000Z", Event: "order.placed", "Order status": "placed" } },
+    { sheet: "Orders", row: { ...base, Timestamp: "2026-10-20T06:00:00.000Z", Event: "payment.verified", "Payment status": "paid" } },
+    {
+      sheet: "Orders",
+      row: {
+        ...base,
+        Timestamp: "2026-10-21T07:00:00.000Z",
+        Event: "order.status.shipped",
+        "Order status": "shipped",
+        "Tracking courier": "Delhivery",
+        AWB: "1abc2345",
+      },
+    },
+  ]);
+
+  const ok = sandbox.doGet({ parameter: { action: "timeline", token: "test-token", order: "lk-track01", phone } }).getJson();
+  assert.equal(ok.ok, true);
+  assert.equal(ok.status, "shipped");
+  assert.equal(ok.step, 3);
+  assert.equal(ok.courier, "Delhivery");
+  assert.match(String(ok.trackingUrl), /delhivery\.com\/track\/package\/1ABC2345$/);
+  assert.equal(ok.steps.filter((step: { done: boolean }) => step.done).length, 4);
+  assert.ok(ok.updates.length >= 3);
+  assert.equal(ok.updates[0].message.length > 0, true, "latest update ka message hona chahiye");
+  assert.equal(ok.updates[0].event, "order.status.shipped", "newest pehle");
+
+  const noPhone = sandbox.doGet({ parameter: { action: "timeline", token: "test-token", order: "LK-TRACK01" } }).getJson();
+  assert.equal(noPhone.ok, false);
+  assert.equal(noPhone.code, "phone_required");
+
+  const wrongPhone = sandbox.doGet({ parameter: { action: "timeline", token: "test-token", order: "LK-TRACK01", phone: "9000000000" } }).getJson();
+  assert.equal(wrongPhone.ok, false);
+  assert.equal(wrongPhone.code, "phone_mismatch");
+
+  const missing = sandbox.doGet({ parameter: { action: "timeline", token: "test-token", order: "LK-NOPE99", phone } }).getJson();
+  assert.equal(missing.ok, false);
+  assert.equal(missing.code, "order_not_found");
+
+  const noToken = sandbox.doGet({ parameter: { action: "timeline", order: "LK-TRACK01", phone } }).getJson();
+  assert.equal(noToken.ok, false);
+});
+
 test("row ke saare values asli sheet me land karte hain (order.placed)", () => {
   const { sandbox, sheets } = loadScript();
   sandbox.setup();

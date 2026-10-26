@@ -513,3 +513,18 @@ likhega). Uske baad `/api/sheet-selftest` + connector se row confirm karna hai.
       sitemap me duplicate URL zero (467 loc, pehle `new-arrivals` do baar tha)
 - [x] Admin production owner ke account se live @ `33afaea` — `NEXT_PUBLIC_STOREFRONT_URL`
       env add kiya (invoice button pehle localhost par jaata tha)
+
+### R31 — Tracking perfect + `manoj-Product` sheet script analysis
+- [x] `apps/web/src/lib/tracking.ts` — 5-step timeline (har step ki date), update history,
+      **courier link khud** (13 courier: Delhivery/Blue Dart/DTDC/India Post/Ekart/XpressBees/
+      Shadowfax/Ecom/Shiprocket/Professional/Amazon/FedEx/DHL), AWB cleaning
+- [x] Order page: per-step dates + `tracking-updates` history + `tracking-stopped` banner
+      (cancelled/returned) + phone/email **masked** + "Track with courier" (admin URL optional)
+- [x] `setTracking()` — AWB saaf + URL khaali ho to khud bane (sheet/Shipments tak wahi link)
+- [x] Admin: courier dropdown (13) + "link khud ban jaayega" hint
+- [x] Sheet script **`r31-1`**: `?action=timeline` (order + phone gate), `seed`/`clear-demo`,
+      courier link helper, `updateMessageFor_`; doc export + setup guide sync
+- [x] `manoj-Product` (`arena/e13f4af5-manoj-product`) ka `trends-sheets.gs` (5,892 lines)
+      padha — report: `docs/00-overview/owner-report-round31.md`
+- [x] Tests **189 pass / 0 fail** (14 tracking + 1 sheet timeline), payments e2e **53/0**,
+      smoke **84/0**, round16 **39/0**, responsive **43/0**, breakpoints **48/0**

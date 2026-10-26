@@ -53,6 +53,17 @@ Ye doc Round 8 me bane parity work ka contract hai.
 
 Customer page par courier + AWB + direct tracking link.
 
+R31 se:
+- `awb` server par saaf hota hai (space/dash hata kar uppercase) — `" 1abc 2345 "` → `1ABC2345`.
+- `url` khaali chhodne par link **khud ban jaata hai** (`apps/web/src/lib/tracking.ts`):
+  Delhivery, Blue Dart, DTDC, India Post, Ekart, XpressBees, Shadowfax, Ecom Express,
+  Shiprocket, The Professional Couriers, Amazon, FedEx, DHL.
+- Customer page par ab **per-step dates + poora update history** dikhta hai
+  (`data-testid="tracking-updates"`), cancelled/returned par red banner
+  (`data-testid="tracking-stopped"`), aur phone/email mask rehte hain.
+- Sheet me bhi wahi link jaata hai (`Shipments` tab ka `Tracking URL`), isliye owner
+  ke WhatsApp/email me bhi clickable link hota hai.
+
 ## 5. Manual invoices (admin ke apne naam/address par)
 
 | Method | Path | Kaam |
@@ -73,6 +84,10 @@ Admin panel remote mode me `STORE_API_URL` + `ADMIN_API_TOKEN` se hi in routes k
 
 ## Tests
 
+- `tests/unit/tracking.test.ts` — courier link (13 courier), AWB cleaning, 5-step timeline,
+  cancel/return, update history.
+- `tests/e2e/payments.mjs` — paid → packed → courier/AWB → shipped, page par AWB +
+  courier link + history + cancelled banner.
 - `tests/e2e/smoke.mjs` — note save → customer page par text, payment verify → `paid` + UTR customer page par,
   invoice create/list, aur token ke bina `401`.
 - `tests/db/postgres.test.ts` — `status_note` jsonb round-trip, note clear, manual invoice series + persistence.

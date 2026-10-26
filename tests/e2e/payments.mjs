@@ -198,8 +198,79 @@ if (CAN_ADMIN) {
 
   const payAfter = await fetch(`${BASE}/orders/${number}/pay`, { redirect: "manual" });
   check("paid order skips the payment page", payAfter.status === 307 || payAfter.status === 308, String(payAfter.status));
+
+  // ── 8b. tracking lifecycle: packed → courier/AWB → shipped ────────────────
+  const packed = await adminPatch(`/api/admin/orders/${number}`, { action: "status", status: "packed" });
+  check("paid order can be packed", packed.ok, String(packed.status));
+  // AWB gandagi (spaces + lowercase) bhej rahe hain — server saaf karta hai
+  const trackingSave = await adminPatch(`/api/admin/orders/${number}`, {
+    action: "tracking",
+    courier: "Delhivery",
+    awb: " 1abc 2345 678 ",
+  });
+  const trackingBody = await trackingSave.json();
+  const savedTracking = trackingBody.order?.tracking ?? {};
+  check("courier + AWB save hota hai", trackingSave.ok && savedTracking.courier === "Delhivery", String(trackingSave.status));
+  check("AWB clean + uppercase hota hai", savedTracking.awb === "1ABC2345678", String(savedTracking.awb));
+  check(
+    "tracking link khud ban jaata hai (admin URL ke bina)",
+    /delhivery\.com\/track\/package\/1ABC2345678/.test(String(savedTracking.url)),
+    String(savedTracking.url),
+  );
+
+  const shipped = await adminPatch(`/api/admin/orders/${number}`, { action: "status", status: "shipped" });
+  check("packed order can be shipped", shipped.ok, String(shipped.status));
+
+  const trackPage = await fetch(`${BASE}/orders/${number}`);
+  const trackHtml = await trackPage.text();
+  check("tracking page shows the courier", /data-testid="tracking-courier"[^>]*>Delhivery/.test(trackHtml));
+  check("tracking page shows the AWB", /data-testid="tracking-awb"[^>]*>1ABC2345678/.test(trackHtml));
+  const courierLink = /<a[^>]*data-testid="track-courier"[^>]*>/.exec(trackHtml)?.[0] ?? "";
+  check(
+    "tracking page has a working courier link",
+    courierLink.includes("https://www.delhivery.com/track/package/1ABC2345678"),
+    courierLink.slice(0, 120),
+  );
+  check("tracking page lists the update history", trackHtml.includes('data-testid="tracking-updates"'));
+  check("tracking page shows the shipped step", /data-testid="tracking-status"[^>]*>Shipped/.test(trackHtml));
+  check("customer phone is masked on the tracking page", !trackHtml.includes(`+91 ${phone}`));
 } else {
   console.log("  skip admin-only checks (no ADMIN_API_TOKEN)");
+}
+
+// ── 8c. cancelled order par saaf banner (aadha timeline nahi) ───────────────
+if (CAN_ADMIN) {
+  const cancelPhone = "9876500011";
+  const cancelCreate = await fetch(`${BASE}/api/orders`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      customerName: "Cancel Test",
+      email: "cancel-test@example.com",
+      phone: cancelPhone,
+      address: "4 Cancel Street",
+      city: "Jaipur",
+      state: "Rajasthan",
+      pincode: "302001",
+      paymentMethod: "prepaid",
+      items: [{ handle: candidate.handle, size, quantity: 1 }],
+    }),
+  });
+  const cancelOrder = await cancelCreate.json();
+  const cancelNumber = cancelOrder.orderNumber;
+  check("cancel-test order bana", cancelCreate.status === 201 && Boolean(cancelNumber), String(cancelCreate.status));
+
+  const cancelled = await adminPatch(`/api/admin/orders/${cancelNumber}`, { action: "status", status: "cancelled" });
+  const cancelBody = await cancelled.json();
+  check("placed → cancelled allowed hai", cancelled.ok && cancelBody.order?.status === "cancelled", String(cancelled.status));
+
+  const cancelPage = await fetch(`${BASE}/orders/${cancelNumber}`);
+  const cancelHtml = await cancelPage.text();
+  check("cancelled order par stop banner dikhta hai", cancelHtml.includes('data-testid="tracking-stopped"'));
+  check("cancelled order par galat progress steps nahi", !/data-testid="tracking-status"[^>]*>Shipped/.test(cancelHtml));
+
+  const badTransition = await adminPatch(`/api/admin/orders/${cancelNumber}`, { action: "status", status: "shipped" });
+  check("cancelled order aage nahi badh sakta (409)", badTransition.status === 409, String(badTransition.status));
 }
 
 // ── 9. order page = tracking, same status ───────────────────────────────────

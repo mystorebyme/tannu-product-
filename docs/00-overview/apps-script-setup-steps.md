@@ -7,6 +7,20 @@ aur Settings tab se site ki values (phone, UPI, announcement) control hoti hain.
 Code yahan hai: **[`apps-script-code.md`](./apps-script-code.md)** (poora copy karne layak)
 
 
+
+## Naya kya hai — `r31-1` (tracking)
+
+- `?action=timeline&order=LK-XXXX&phone=98XXXXXXXX` — sheet se hi poora tracking:
+  5 step, har update ki history, courier + AWB + **courier tracking link**.
+  Phone match na ho to jawab nahi milta (kisi doosre ka data safe).
+- `?action=seed` — demo/test data (Settings ko chhod kar har tab me).
+- `?action=clear-demo` — wahi demo data hata deta hai.
+- Courier link khud banta hai (Delhivery, Blue Dart, DTDC, India Post, Ekart, XpressBees,
+  Shadowfax, Ecom Express, Shiprocket, Professional, Amazon, FedEx, DHL).
+
+> Sheet script update karne ke baad **New version** deploy karna zaroori hai, warna
+> `?action=health` me purana version hi dikhega.
+
 ---
 
 ## ⚠️ SABSE PEHLE — sheet ka access (yahi asli problem hai)
@@ -39,7 +53,7 @@ You do not have permission to access the requested document.
 | Layer | Test | Result |
 |---|---|---|
 | Deployment public hai? | galat token ke saath `/exec` call | ✅ JSON aaya (`unauthorized`) — yaani anonymous call script tak pahunch rahi hai |
-| Version naya hai? | jawab me `version` | ✅ `r27-2` |
+| Version naya hai? | jawab me `version` | ✅ `r31-1` |
 | Token Vercel se match? | `CHANGE-ME-liksha-token` ke saath call | ✅ token pass hua (aage badha) |
 | Sheet khul rahi hai? | usi call ka agla step | ❌ **"You do not have permission to access the requested document"** |
 
@@ -56,7 +70,7 @@ karni hain (dono ek hi baar me):
 <webapp URL>?action=health&token=CHANGE-ME-liksha-token
 ```
 - ❌ "You do not have permission…" = upar ke 2 step abhi baaki hain
-- ✅ `{"ok":true,"version":"r27-2","sheets":[...]}` = ho gaya, website bhi chal jayegi
+- ✅ `{"ok":true,"version":"r31-1","sheets":[...]}` = ho gaya, website bhi chal jayegi
 
 
 ---
@@ -109,7 +123,7 @@ Formatting kabhi bigad jaye to function **`formatAll`** → Run (sab dobara set 
 
 ```js
 var TOKEN = 'CHANGE-ME-liksha-token';
-var CODE_VERSION = 'r27-2';
+var CODE_VERSION = 'r31-1';
 ```
 
 `TOKEN` ki jagah apna lamba random word daalo (jaise `liksha-9f3k2m-2026`).
@@ -180,10 +194,10 @@ var SPREADSHEET_ID = '1k8fsea04WpbrGjiyXuDrrS2Eewt9W7wx9X2lUQc5qMo';
 ```
 Jawab aisa aana chahiye:
 ```json
-{"ok":true,"version":"r27-2","spreadsheet":"Designer Clothing — Store","sheets":[…]}
+{"ok":true,"version":"r31-1","spreadsheet":"Designer Clothing — Store","sheets":[…]}
 ```
 - `ok:true` = script chal rahi hai ✅
-- `version: r27-2` = naya code chal raha hai ✅ (purana version dikhe to Step 4 dobara
+- `version: r31-1` = naya code chal raha hai ✅ (purana version dikhe to Step 4 dobara
   karein — sirf Ctrl+S se code **nahi** chalta)
 - `unauthorized` = token galat (dono jagah same karein)
 

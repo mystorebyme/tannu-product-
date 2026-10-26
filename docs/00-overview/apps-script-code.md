@@ -83,7 +83,7 @@ Warna purana code hi chalta rehta hai — owner ke saath yahi hua tha.
 
 ---
 
-## Poora code (2062 lines)
+## Poora code (2211 lines)
 
 ```javascript
 /**
@@ -136,7 +136,7 @@ Warna purana code hi chalta rehta hai — owner ke saath yahi hua tha.
  *     → Save → Deployments → latest → ⋯ → **Redeploy**.
  *  9. Test: browser me kholein (TOKEN apna):
  *       <webapp URL>?action=health&token=<TOKEN>
- *     Jawab: {"ok":true,"version":"r27-2","sheets":[…]}
+ *     Jawab: {"ok":true,"version":"r31-1","sheets":[…]}
  *     Phir website par ek test message bhejiye → Messages tab me row aa jayegi.
  *
  * ── ZAROORI BAATEIN ───────────────────────────────────────────────────────────
@@ -158,7 +158,7 @@ Warna purana code hi chalta rehta hai — owner ke saath yahi hua tha.
 var TOKEN = 'CHANGE-ME-liksha-token';
 
 /** Code ka version — `?action=health` me dikhta hai. Code badle to isse badhaayein. */
-var CODE_VERSION = 'r27-2';
+var CODE_VERSION = 'r31-1';
 
 /**
  * Sheet ka id (URL me `/d/<ID>/edit`).
@@ -1013,6 +1013,145 @@ function orderStory_(orderNumber) {
     if (rows.length) found = true;
   });
   return found ? story : null;
+}
+
+/* ───────────────────────────── TRACKING TIMELINE ─────────────────────────────
+ * 5 step + har update ki history. Site wala same logic (apps/web/src/lib/tracking.ts)
+ * yahan bhi hai — sheet se seedha jawab mil jaata hai, site down ho to bhi.
+ */
+
+var TIMELINE_STEPS = ['placed', 'confirmed', 'packed', 'shipped', 'delivered'];
+
+/** kisi bhi status text ko 5-step me baant deta hai (purane/hindi text bhi) */
+function timelineStepFor_(status) {
+  var value = String(status || '').toLowerCase();
+  if (!value) return -1;
+  if (/cancel|return|refund|rto/.test(value)) return -1;
+  if (/out for deliver/.test(value)) return 3;
+  if (/deliver|complete|handover/.test(value)) return 4;
+  if (/ship|dispatch|transit|courier|awb/.test(value)) return 3;
+  if (/pack|ready|label/.test(value)) return 2;
+  if (/confirm|process|accept|prepar/.test(value)) return 1;
+  return 0;
+}
+
+/** courier + AWB se tracking link (admin URL na ho to bhi customer atke nahi) */
+function trackingUrlFor_(courier, awb) {
+  var number = String(awb || '').replace(/[^A-Za-z0-9-]/g, '').toUpperCase();
+  if (!number) return '';
+  var name = String(courier || '');
+  if (/delhivery/i.test(name)) return 'https://www.delhivery.com/track/package/' + number;
+  if (/blue\s*dart|bluedart/i.test(name)) {
+    return 'https://www.bluedart.com/web/guest/trackdartresultthirdparty?trackFor=0&trackNo=' + number;
+  }
+  if (/dtdc/i.test(name)) return 'https://www.dtdc.in/tracking/tracking_results.asp?strCnno=' + number + '&TrkType=1';
+  if (/india\s*post|speed\s*post|registered\s*post/i.test(name)) {
+    return 'https://www.indiapost.gov.in/_layouts/15/dop.portal.tracking/trackconsignment?consignmentno=' + number;
+  }
+  if (/ekart|flipkart/i.test(name)) return 'https://ekartlogistics.com/track/' + number;
+  if (/xpress\s*bees|xpressbees/i.test(name)) return 'https://www.xpressbees.com/shipment/tracking?awbNo=' + number;
+  if (/shadowfax/i.test(name)) return 'https://tracker.shadowfax.in/#/track/' + number;
+  if (/ecom/i.test(name)) return 'https://ecomexpress.in/tracking/?awb_field=' + number;
+  if (/shiprocket/i.test(name)) return 'https://shiprocket.co/tracking/' + number;
+  if (/professional/i.test(name)) return 'https://www.tpcindia.com/Tracking.aspx?type=0&id=' + number;
+  if (/amazon|ats/i.test(name)) return 'https://track.amazon.in/tracking/' + number;
+  if (/fedex/i.test(name)) return 'https://www.fedex.com/fedextrack/?trknbr=' + number;
+  if (/dhl/i.test(name)) return 'https://www.dhl.com/in-en/home/tracking.html?tracking-id=' + number;
+  return '';
+}
+
+/** event/status se customer-friendly message (sheet me Notes khaali ho to) */
+function updateMessageFor_(event, status) {
+  var value = (String(event || '') + ' ' + String(status || '')).toLowerCase();
+  if (/payment\.claim/.test(value)) return 'Payment confirm request mili — team UPI statement se verify kar rahi hai.';
+  if (/payment\.(verified|confirmed|paid)/.test(value)) return 'Payment confirm ho gaya — order confirm.';
+  if (/deliver/.test(value)) return 'Parcel deliver ho gaya.';
+  if (/return/.test(value)) return 'Return mark ho gaya.';
+  if (/cancel/.test(value)) return 'Order cancel ho gaya.';
+  if (/tracking/.test(value)) return 'Courier details update hui.';
+  if (/ship/.test(value)) return 'Parcel courier ko de diya — AWB se track kariye.';
+  if (/pack/.test(value)) return 'Packing ho gayi — jaldi courier ko jaayega.';
+  if (/confirm/.test(value)) return 'Order confirm ho gaya — packing shuru.';
+  if (/placed|created/.test(value)) return 'Order mil gaya — payment ka intezaar hai.';
+  return '';
+}
+
+/**
+ * Sheet se poora timeline.
+ * Phone lazmi hai (jis order ka phone match kare wahi jawab) — warna order number
+ * jaan lene se kisi ka data nahi khulta.
+ */
+function timeline_(orderNumber, phone) {
+  var wanted = String(orderNumber || '').trim().toUpperCase();
+  if (!wanted) return { ok: false, error: 'order chahiye', code: 'order_required' };
+  var rows = findRows_('Orders', 'Order number', wanted, 300);
+  if (!rows.length) return { ok: false, error: 'order nahi mila', code: 'order_not_found', orderNumber: wanted };
+
+  rows.sort(function (a, b) {
+    return String(a.Timestamp || '').localeCompare(String(b.Timestamp || ''));
+  });
+
+  var storedPhone = '';
+  var status = '';
+  var paymentStatus = '';
+  var courier = '';
+  var awb = '';
+  var url = '';
+  var note = '';
+  var updates = [];
+  for (var i = 0; i < rows.length; i += 1) {
+    var row = rows[i];
+    var rowPhone = String(row.Phone || '').replace(/[^0-9]/g, '').slice(-10);
+    if (!storedPhone && rowPhone) storedPhone = rowPhone;
+    if (text_(row['Order status'])) status = text_(row['Order status']);
+    if (text_(row['Payment status'])) paymentStatus = text_(row['Payment status']);
+    if (text_(row['Tracking courier'])) courier = text_(row['Tracking courier']);
+    if (text_(row.AWB)) awb = text_(row.AWB);
+    if (text_(row['Tracking URL'])) url = text_(row['Tracking URL']);
+    if (text_(row.Notes)) note = text_(row.Notes);
+    var event = text_(row.Event);
+    var message = text_(row.Notes, 300) || updateMessageFor_(event, text_(row['Order status']));
+    updates.push({
+      at: text_(row.Timestamp),
+      status: text_(row['Order status']),
+      event: event,
+      message: message,
+    });
+  }
+
+  var digits = String(phone || '').replace(/[^0-9]/g, '').slice(-10);
+  if (!digits) {
+    return { ok: false, error: 'phone chahiye', code: 'phone_required', orderNumber: wanted };
+  }
+  if (storedPhone && digits !== storedPhone) {
+    return { ok: false, error: 'phone match nahi hua', code: 'phone_mismatch', orderNumber: wanted };
+  }
+  if (!storedPhone) {
+    return { ok: false, error: 'is order ka phone sheet me nahi hai', code: 'phone_missing', orderNumber: wanted };
+  }
+
+  var steps = TIMELINE_STEPS.map(function (step) {
+    var index = TIMELINE_STEPS.indexOf(step);
+    var current = timelineStepFor_(status);
+    var stopped = /cancel|return/.test(String(status).toLowerCase());
+    return { step: step, done: stopped ? false : index <= current };
+  });
+
+  return {
+    ok: true,
+    version: CODE_VERSION,
+    orderNumber: wanted,
+    status: status || 'placed',
+    step: timelineStepFor_(status),
+    steps: steps,
+    paymentStatus: paymentStatus,
+    courier: courier,
+    awb: awb,
+    trackingUrl: url || trackingUrlFor_(courier, awb),
+    note: note,
+    updates: updates.slice(-12).reverse(),
+    time: now_(),
+  };
 }
 
 /** Har tab kitni rows — health/stats me (Settings sabse pehle). */
@@ -1945,6 +2084,16 @@ function doGet(e) {
       var story = orderStory_(params.orderNumber || params.order || '');
       if (!story) return json_({ ok: false, error: 'order nahi mila' });
       return json_({ ok: true, order: story });
+    }
+
+    /**
+     * Tracking timeline — order number + registered mobile se.
+     *   ?action=timeline&order=LK-XXXX&phone=98XXXXXXXX
+     * (site ka tracking DB se chalta hai; ye sheet se hi jawab deta hai — owner
+     *  ke self-test aur DB-down fallback ke liye.)
+     */
+    if (action === 'timeline' || action === 'order_status' || action === 'tracking') {
+      return json_(timeline_(params.order || params.orderNumber || '', params.phone || params.mobile || ''));
     }
 
     if (action === 'stats') {

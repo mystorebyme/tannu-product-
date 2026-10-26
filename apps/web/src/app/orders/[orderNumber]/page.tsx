@@ -9,6 +9,14 @@ import { SafeImage } from "@/components/safe-image";
 import { orderWhatsAppLink } from "@/lib/whatsapp";
 import { getStoreSettingsFast } from "@/lib/store-settings";
 import { PaymentStatusWatcher } from "@/components/payment-status-watcher";
+import {
+  estimatedDelivery,
+  orderTrackingUrl,
+  statusLabel,
+  trackingSteps,
+  trackingTimeLabel,
+  trackingUpdates,
+} from "@/lib/tracking";
 
 export const dynamic = "force-dynamic";
 /**
@@ -49,11 +57,12 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
   const siteUrl = `${proto}://${host}`;
   if (!order) notFound();
 
-  const eta = new Date(order.createdAt);
-  eta.setDate(eta.getDate() + 6);
-  const etaLabel = eta.toLocaleDateString("en-IN", { day: "numeric", month: "long" });
-  const timeline = ["placed", "confirmed", "packed", "shipped", "delivered"] as const;
-  const currentStep = timeline.indexOf(order.status as (typeof timeline)[number]);
+  const etaLabel = estimatedDelivery(order.createdAt);
+  /** 5 step + har step ki asli date + cancelled/returned handle (lib/tracking.ts) */
+  const { steps, stopped } = trackingSteps(order);
+  const updates = trackingUpdates(order);
+  /** admin ne URL na diya ho to courier + AWB se link khud ban jaata hai */
+  const courierUrl = orderTrackingUrl(order);
 
   return (
     <div className="container-liksha py-10 lg:py-14">
@@ -131,72 +140,88 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-[11px] font-semibold tracking-[.16em] uppercase">Order tracking</h2>
             <span className="text-[11px] text-[#8a8078]">
-              Status: <strong className="text-[#862222]">{ORDER_STATUS_COPY[order.status] ?? order.status}</strong>
+              Status: <strong className="text-[#862222]" data-testid="tracking-status">{statusLabel(order.status)}</strong>
             </span>
           </div>
-          <ol className="mt-4 grid grid-cols-5 gap-1.5 text-center">
-            {timeline.map((step, index) => {
-              const done = currentStep >= index && currentStep !== -1;
-              const eventFor = [...order.audit].reverse().find((entry) => entry.action === `order.status.${step}`);
-              return (
-                <li key={step} className="flex flex-col items-center gap-1.5">
+
+          {stopped ? (
+            <p
+              className="mt-3 border border-[#e7c9c4] bg-[#fdf2f0] px-4 py-3 text-[12.5px] leading-relaxed text-[#8c2f22]"
+              data-testid="tracking-stopped"
+            >
+              {stopped === "cancelled"
+                ? "Ye order cancel ho gaya hai. Paise kat gaye hon to refund 5–7 working days me wapas aa jaata hai — koi sawaal ho to WhatsApp par likh dijiye."
+                : "Ye order return ho gaya hai. Replacement ke liye WhatsApp par likh dijiye — team aage badha degi."}
+            </p>
+          ) : (
+            <ol className="mt-4 grid grid-cols-5 gap-1.5 text-center">
+              {steps.map((step, index) => (
+                <li key={step.step} className="flex flex-col items-center gap-1.5">
                   <span
                     className={`flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold ${
-                      done ? "bg-[#862222] text-white" : "bg-[#efe7dd] text-[#a49a90]"
+                      step.done ? "bg-[#862222] text-white" : "bg-[#efe7dd] text-[#a49a90]"
                     }`}
                   >
-                    {done ? "✓" : index + 1}
+                    {step.done ? "✓" : index + 1}
                   </span>
-                  <span className="text-[10px] tracking-[.08em] uppercase text-[#6b6259]">
-                    {ORDER_STATUS_COPY[step]}
-                  </span>
-                  {eventFor ? (
-                    <span className="text-[9.5px] text-[#a49a90]">{formatDate(eventFor.at)}</span>
+                  <span className="text-[10px] tracking-[.08em] uppercase text-[#6b6259]">{step.label}</span>
+                  {step.at ? (
+                    <span className="text-[9.5px] text-[#a49a90]">{trackingTimeLabel(step.at)}</span>
                   ) : null}
                 </li>
-              );
-            })}
-          </ol>
+              ))}
+            </ol>
+          )}
 
-          {order.statusNote?.text ? (
-            <div className="mt-4 border-l-2 border-[#862222] bg-[#faf6f2] px-4 py-3" data-testid="order-note">
-              <p className="text-[10.5px] font-semibold tracking-[.14em] text-[#862222] uppercase">
-                Update from our team
-              </p>
-              <p className="mt-1 text-[12.5px] leading-relaxed text-[#4a423b]">{order.statusNote.text}</p>
-              <p className="mt-1 text-[10.5px] text-[#9c8f82]">
-                {formatDate(order.statusNote.at)} · {ORDER_STATUS_COPY[order.statusNote.status] ?? order.statusNote.status}
-              </p>
-            </div>
+          {updates.length ? (
+            <ul className="mt-4 space-y-2 border-t border-[#f1ebe5] pt-3" data-testid="tracking-updates">
+              {updates.map((update) => (
+                <li
+                  key={`${update.at}-${update.kind}-${update.text ?? ""}`}
+                  data-testid={update.kind === "note" ? "order-note" : "order-update"}
+                  className="text-[12px] text-[#4a423b]"
+                >
+                  <span className="text-[10px] font-semibold tracking-[.1em] text-[#9c8f82] uppercase">
+                    {update.label} · {trackingTimeLabel(update.at)}
+                  </span>
+                  {update.text ? <span className="mt-0.5 block leading-relaxed">{update.text}</span> : null}
+                </li>
+              ))}
+            </ul>
           ) : null}
 
           {order.tracking?.awb ? (
             <div className="mt-4 border-t border-[#f1ebe5] pt-3 text-[12.5px] text-[#5c534b]">
               <p>
-                Courier: <strong>{order.tracking.courier ?? "—"}</strong>
+                Courier: <strong data-testid="tracking-courier">{order.tracking.courier ?? "—"}</strong>
                 <br />
-                AWB / Tracking no: <strong>{order.tracking.awb}</strong>
+                AWB / Tracking no: <strong data-testid="tracking-awb">{order.tracking.awb}</strong>
                 {order.tracking.shippedAt ? (
                   <>
                     <br />
-                    Shipped: {formatDate(order.tracking.shippedAt)}
+                    Shipped: {trackingTimeLabel(order.tracking.shippedAt)}
                   </>
                 ) : null}
               </p>
-              {order.tracking.url ? (
+              {courierUrl ? (
                 <a
-                  href={order.tracking.url}
+                  href={courierUrl}
                   target="_blank"
                   rel="noreferrer"
+                  data-testid="track-courier"
                   className="mt-2 inline-block border border-[#862222] px-4 py-2 text-[10.5px] font-semibold tracking-[.14em] text-[#862222] uppercase"
                 >
                   Track with courier
                 </a>
-              ) : null}
+              ) : (
+                <p className="mt-1.5 text-[11px] text-[#8a8078]">
+                  Is AWB se track karne ke liye courier ki website par number daal dijiye.
+                </p>
+              )}
             </div>
           ) : (
             <p className="mt-3 border-t border-[#f1ebe5] pt-3 text-[11.5px] text-[#8a8078]">
-              The AWB number appears here and on WhatsApp as soon as the parcel is dispatched.
+              AWB number yahan aur WhatsApp par turant dikh jaayega jaise hi parcel courier ko jaayega.
             </p>
           )}
         </div>
@@ -228,9 +253,9 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
               <br />
               {order.city}, {order.state} — {order.pincode}
               <br />
-              +91 {order.phone}
+              +91 {maskPhone(order.phone)}
               <br />
-              {order.email}
+              {maskEmail(order.email)}
             </p>
           </div>
           <div className="border border-[#eee6de] p-5">
@@ -321,4 +346,17 @@ function Row({ label, value, strong = false }: { label: string; value: string; s
       <span>{value}</span>
     </div>
   );
+}
+
+/** Tracking page link-only hota hai — phone/email mask rehte hain (PII leak nahi) */
+function maskPhone(phone: string): string {
+  const digits = String(phone ?? "").replace(/\D/g, "");
+  if (digits.length < 4) return "••••";
+  return `${"•".repeat(Math.max(0, digits.length - 4))}${digits.slice(-4)}`;
+}
+
+function maskEmail(email: string): string {
+  const [user, domain] = String(email ?? "").split("@");
+  if (!user || !domain) return "••••";
+  return `${user.slice(0, 2)}${"•".repeat(Math.max(1, user.length - 2))}@${domain}`;
 }
