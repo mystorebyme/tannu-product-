@@ -187,9 +187,22 @@ check(
   !/Google Pay|PhonePe|Paytm|BHIM/i.test(paymentSource) && !/GPay|PhonePe|Paytm/.test(checkoutSource),
 );
 check("payment page keeps the QR + UPI ID", paymentSource.includes("UpiQr") && paymentSource.includes("upi-id"));
+/**
+ * R36 (owner): "payment page par jaate hi UPI par redirect na kare, Pay on UPI
+ * kare tab jaakar UPI detect ho". Isliye purana `?pay=1` auto-open effect (jo
+ * mobile par page khulte hi UPI app launch kar deta tha) **nahi** hona chahiye —
+ * intent sirf `upi-open` button ke asli click/tap se chalta hai.
+ */
 check(
-  "order page auto-opens the UPI app after placing the order",
-  /get\("pay"\) !== "1"/.test(paymentSource) && /window\.location\.href = upiUri/.test(paymentSource),
+  "UPI app page load par khud nahi khulti (auto-open effect gaya)",
+  !/get\("pay"\) !== "1"/.test(paymentSource) &&
+    !/window\.location\.href\s*=\s*upiUri/.test(paymentSource) &&
+    !/appOpened/.test(paymentSource) &&
+    !/\?pay=1/.test(checkoutSource),
+);
+check(
+  "UPI intent sirf button ke href se (asli user gesture)",
+  /href=\{upiUri\}/.test(paymentSource) && /data-testid="upi-open"/.test(paymentSource),
 );
 
 /* 8. responsive CSS rules exist in the built stylesheet -------------------- */

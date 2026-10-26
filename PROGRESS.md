@@ -683,6 +683,11 @@ step me kaam kare, back jaane par bhi, aur wapis usi order me payment par jaane 
       ke minified bundle lint ho rahe the (`vite build` ke baad 27 rules-of-hooks **error**
       + lint 4.5 minute leta tha). Ab `ignores` alag object me + `.cloudflare`/`.vinext`/`out`
       add ⇒ **0 errors / 35 warnings, 9 second**
+- [x] **CI ka stale guard fix**: `tests/e2e/responsive.mjs` me purana check
+      "order page auto-opens the UPI app" `?pay=1` + `window.location.href = upiUri` ko
+      **zaroori** maanta tha — R36 me wahi code hataya, isliye CI ka `production-build smoke`
+      job fail hua. Ab guard ulta hai (auto-open code **nahi** hona chahiye + intent sirf
+      `upi-open` ke href se), aur `round36.test.ts` isi ko pin karta hai
 - [x] Tests: naya **`tests/unit/round36.test.ts` (17)**; `checkout-flow` + `round33` +
       `round27` guards naye flow ke hisaab se; `tests/e2e/smoke.mjs` me payment-context
       (200/404, live UPI, return token, privacy, `no-store`) + pay-page deep-link checks
@@ -691,6 +696,9 @@ step me kaam kare, back jaane par bhi, aur wapis usi order me payment par jaane 
       `/api/orders/[orderNumber]/payment-context` ƒ); `vite build` (vinext) ✓;
       workerd preview par **smoke 100/0** (pehle 88), `payments.mjs` 59/0, `round23.mjs` 23/0;
       lint 0 errors
+- [x] **CI-parity verify** (Next production build + `next start` :3000, jaise CI karta hai):
+      smoke **100/0**, responsive **44/0**, breakpoints **48/0**, round16 **39/0**,
+      payments **59/0**, links **45 pages/0**
 - [x] Docs: **`docs/00-overview/owner-report-round36.md`**, `docs/09-devops/google-sheets.md`
       **§4c (Vercel config + "vapis configure" ke 5 step + Vercel `after()` fix)**,
       `docs/00-overview/owner-code-map.md`

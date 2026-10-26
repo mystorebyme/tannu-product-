@@ -183,6 +183,13 @@ Deploy ke do raaste:
 | workerd preview par smoke | ✅ **100/0** (pehle 88) |
 | `tests/e2e/payments.mjs` (live payment flow) | ✅ 59/0 |
 | `tests/e2e/round23.mjs` (live tracking) | ✅ 23/0 |
+| **CI-parity** (`next build` + `next start` :3000, jaise GitHub Actions karta hai) | ✅ smoke 100/0 · responsive 44/0 · breakpoints 48/0 · round16 39/0 · payments 59/0 · links 45 pages/0 |
+
+**CI ka ek stale guard bhi pakda:** `tests/e2e/responsive.mjs` me purana check tha —
+"order page auto-opens the UPI app after placing the order" (yani `?pay=1` par UPI khud khule).
+R36 me wahi behaviour aapke kehne par hataya, isliye GitHub ka `production-build smoke` job
+fail hua. Guard ab ulta hai: **auto-open code present hona hi fail hai**, aur intent sirf
+`upi-open` button ke `href` se chalega. `round36.test.ts` ise pin karta hai taaki dobara na aaye.
 
 **Lint ka bonus fix:** `apps/web/eslint.config.mjs` me `ignores` us object me tha jisme `rules`
 bhi hain — flat config me aisa ignore *global* nahi hota. Natija: `.next`/`.cloudflare` ka

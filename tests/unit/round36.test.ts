@@ -212,6 +212,23 @@ test("R36: payment khulte hi UPI par redirect nahi (auto-open code hata)", () =>
   assert.match(upi, /Pay on UPI/, "ek button — tap par hi intent");
   assert.match(upi, /href=\{upiUri\}/, "wahi button upi:// intent hai");
   assert.doesNotMatch(upi, /Google Pay|PhonePe|Paytm|BHIM/i, "koi app brand nahi (owner rule)");
+
+  /**
+   * CI ka `production-build smoke` job `tests/e2e/responsive.mjs` bhi chalata hai —
+   * wahan purana guard `?pay=1` auto-open ko **zaroori** maanta tha, isliye R36 ke
+   * baad wo job fail hua. Guard ab ulta hai: auto-open code **nahi** hona chahiye.
+   */
+  const responsive = read("tests/e2e/responsive.mjs");
+  assert.doesNotMatch(
+    responsive,
+    /check\([^)]*auto-opens the UPI app/,
+    "responsive.mjs ab auto-open expect nahi karta",
+  );
+  assert.match(
+    responsive,
+    /khud nahi khulti/,
+    "responsive.mjs me R36 ka naya guard hai (page load par UPI khud na khule)",
+  );
 });
 
 test("R36: UPI return callback us page par aata hai jo UpiPayment render karta hai", () => {
