@@ -586,3 +586,53 @@ likhega). Uske baad `/api/sheet-selftest` + connector se row confirm karna hai.
       → **88/0** (`dev:vinext`) aur `BASE_URL=…:8787 npm run test:smoke` → **88/0**
       (`vite preview` = production bundle; local values `apps/web/.env` se)
 - [ ] **Preview deploy nahi hua** — Cloudflare credentials nahi the; DNS/Vercel production jaisa hi hai
+
+### R35 — Sheet settings **real-time** (UPI fix) + Cloudflare Worker deploy steps
+
+Owner (26 Oct 2026): "sheet me UPI change kiya par real time me change nahi hui … jo cheez
+sheet se data dekh kar turant change hoti hai wo honi chahiye" + Cloudflare build
+`✘ Could not detect a directory containing static files`.
+
+**Teen asli wajah mili (guess-patch nahi):**
+1. `READ_TIMEOUT_MS = 900` jabki Apps Script `doGet` cold start par 1–4s leta hai →
+   read **hamesha** timeout → site defaults par.
+2. Read fail par cache `value: null` → **last good UPI bhi gayab**.
+3. Payment page `getStoreSettingsFast(350)` → 350ms baad **hardcoded default UPI**
+   (paisa purane VPA par jaane ka risk). Plus: cache garam ho to TTL check hi nahi tha
+   (stale-forever), aur UPI ID server-render par atka tha (client refresh ka asar nahi).
+
+- [x] `google-sheets.ts`: timeout **4s** (env `SHEET_READ_TIMEOUT_MS`), TTL **10s**
+      (`SHEET_SETTINGS_TTL_MS`), stale window 10 min (`SHEET_SETTINGS_STALE_MS`),
+      **stale-while-revalidate** + single-flight, fail par **last good** value,
+      cache-buster `_ts`, aur Workers ke liye **Cloudflare Cache API** (cold isolate
+      default par na jaaye; Node par no-op feature-detect)
+- [x] `store-settings.ts`: SWR merge, DB/fail-safe, `getStoreSettingsFast(3_000)` —
+      cache ho to turant (purani **sahi** value > default), cold ho to budget tak asli read;
+      naya `storeSettingsInfo()` diagnostics
+- [x] `/api/settings`: `?fresh=1` (sheet se abhi padho) + `meta` (sheetSource / ageMs /
+      stale / lastError / ttl / timeout) — koi secret nahi; `no-store` waisa hi
+- [x] Client: provider 30s → **15s** poll + `live` flag + `refresh({fresh})`;
+      **payment page ka UPI ID/QR/copy/WhatsApp text live sheet se** (page pehle se khula
+      ho tab bhi naya UPI aa jaata hai, hydration-safe)
+- [x] Legacy payment routes (`/api/payments`, `/api/payments/intent`) + `manualUpiUri()`
+      ab sheet ka live UPI use karte hain (pehle sirf env `STORE_UPI_ID`)
+- [x] Admin: `/api/admin/sheet` → `liveRead`; **Google Sheet screen** par naya notice
+      (Apps Script ✅ / CSV ⚠️ ~5min Google cache / fail ⚠️ + last error), purana "15s" copy hata
+- [x] Cloudflare: `scripts/deploy-cloudflare.sh` + `npm run deploy:worker`,
+      `.github/workflows/cloudflare-worker.yml` (manual), `cloudflare.config.ts` me
+      `SHEET_READ_TIMEOUT_MS` + `SHEET_SETTINGS_TTL_MS` declared (Workers par
+      `process.env` sirf declared vars padhta hai)
+- [x] Tests: naya suite **`tests/sheets/settings-realtime.test.ts` (10)** — asli code +
+      stub network (1.5s slow read chalta hai, fail par last good, TTL me 1 call, SWR,
+      CSV fallback, cold-start payment page default par nahi) + `npm run test:sheets`
+      (`--conditions=react-server`) `test:all` me juda; guards **`tests/unit/round35.test.ts` (12)**
+- [x] Verify: unit **229/0** (pehle 217), integration **40/0**, db **9/0**, typecheck ✓ (web+admin),
+      lint **0 errors / 33 warnings** (baseline same), `npm run audit -- --check` ✅ (A·A·A·A·A),
+      `vite build` (vinext) ✓, **workerd preview par smoke 88/0**, payment page ~25ms 200,
+      `/api/settings` → `sheetTtlMs 10000 · sheetReadTimeoutMs 4000`
+- [x] Docs: `docs/09-devops/google-sheets.md` §4b (real-time table + 3-minute troubleshooting),
+      `docs/09-devops/cloudflare-workers.md` §7.0–7.6 (error ki wajah + dashboard ki 3 settings +
+      token + secrets + verify), `agent-guides/troubleshoot-storefront.md` (2 naye section),
+      `.env.example`, **`docs/00-overview/owner-report-round35.md`** (owner ke liye poori guide)
+- [ ] **Deploy baaki** — Vercel (production) par ye code jaana zaroori hai, warna sheet wala
+      UPI live nahi hoga; Cloudflare Worker chahiye to §5.2 ki 3 settings + secrets

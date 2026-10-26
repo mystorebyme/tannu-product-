@@ -19,8 +19,9 @@ export type { SheetSettings };
  *
  * Do kaam:
  *   1. READ  — owner ki "Settings" sheet se phone, email, UPI ID, announcement,
- *              GSTIN, free shipping — website runtime par padhti hai (15s cache,
- *              `no-store` fetch), isliye sheet me value badalte hi site par badal jaati hai.
+ *              GSTIN, free shipping — website runtime par padhti hai (10s TTL +
+ *              stale-while-revalidate, `no-store` fetch, 4s timeout), isliye sheet
+ *              me value badalte hi site par badal jaati hai — redeploy ki zaroorat nahi.
  *   2. WRITE — har order / payment / message / subscriber ek row ban ke owner ki
  *              "Orders" / "Payments" / "Messages" sheet me chala jaata hai. Append-only
  *              log hai, isliye owner ko poora history + latest status dono dikhte hain.
@@ -52,10 +53,29 @@ export type SheetAppend = {
   row: Record<string, string | number | boolean | null | undefined>;
 };
 
-const READ_TIMEOUT_MS = 900;
+function envNumber(name: string, fallback: number): number {
+  const raw = Number(process.env[name]);
+  return Number.isFinite(raw) && raw > 0 ? Math.round(raw) : fallback;
+}
+
+/**
+ * Apps Script read timeout — **4 second** (pehle 900ms tha).
+ *
+ * Asli wajah (26 Oct 2026): Apps Script ka `doGet` cold start par 1–4 second leta
+ * hai. 900ms par read **hamesha** timeout hota tha, `readSheetSettings()` `null`
+ * deta tha, aur site chup-chaap default UPI ID par chali jaati thi — owner sheet me
+ * value badalta tha, site par kuch nahi hota tha. Timeout env se tunable hai.
+ */
+const READ_TIMEOUT_MS = envNumber("SHEET_READ_TIMEOUT_MS", 4_000);
 const WRITE_TIMEOUT_MS = 6_000;
-/** Sheet page load ko kabhi block na kare — 2.5s ke baad defaults/DB hi chalega. */
-const CACHE_MS = 15_000;
+/**
+ * Settings kitni der "fresh" maani jaayengi (owner ka sheet edit itni der me live).
+ * Page load ko kabhi block nahi karti — stale value turant jaati hai aur refresh
+ * background me hota hai (stale-while-revalidate).
+ */
+const SETTINGS_TTL_MS = envNumber("SHEET_SETTINGS_TTL_MS", 10_000);
+/** Apps Script/CSV down ho tab bhi **last good** value itni der tak chalegi (defaults par nahi jaayenge). */
+const STALE_MAX_MS = envNumber("SHEET_SETTINGS_STALE_MS", 10 * 60_000);
 
 /**
  * Google Apps Script ko browser jaisi request chahiye.
@@ -106,66 +126,252 @@ export function settingsCsvUrl(): string | null {
 }
 
 
-let cache: { at: number; value: SheetSettings | null; failedAt: number } | null = null;
+type SheetSettingsSource = "apps-script" | "csv" | null;
 
-export function invalidateSheetSettings() {
-  cache = null;
+type SheetSettingsCache = {
+  /** last good value — read fail hone par bhi yahi zinda rehta hai */
+  value: SheetSettings | null;
+  /** last successful read (epoch ms) */
+  at: number;
+  /** last failed read (epoch ms, 0 = kabhi fail nahi hua) */
+  failedAt: number;
+  /** last read ki latency (diagnostics) */
+  ms: number;
+  source: SheetSettingsSource;
+  error: string | null;
+};
+
+let cache: SheetSettingsCache | null = null;
+/** concurrent requests ek hi network read share karein (Apps Script quota bachta hai) */
+let inflight: Promise<SheetSettings | null> | null = null;
+let lastBackgroundAt = 0;
+
+export type SheetSettingsInfo = {
+  configured: boolean;
+  source: SheetSettingsSource;
+  /** last good read kitni purani hai (null = kabhi nahi padhi gayi) */
+  ageMs: number | null;
+  stale: boolean;
+  lastReadMs: number;
+  lastError: string | null;
+  ttlMs: number;
+  readTimeoutMs: number;
+};
+
+/** Admin panel / self-test ke liye: sheet settings abhi kahan se aa rahi hain. */
+export function sheetSettingsInfo(): SheetSettingsInfo {
+  const now = Date.now();
+  const ageMs = cache?.value ? now - cache.at : null;
+  return {
+    configured: Boolean(googleSheetsConfig()) || Boolean(settingsCsvUrl()),
+    source: cache?.value ? cache.source : null,
+    ageMs,
+    stale: ageMs === null ? true : ageMs >= SETTINGS_TTL_MS,
+    lastReadMs: cache?.ms ?? 0,
+    lastError: cache?.error ?? null,
+    ttlMs: SETTINGS_TTL_MS,
+    readTimeoutMs: READ_TIMEOUT_MS,
+  };
 }
 
-/** Owner ki Settings sheet padho. Fail ho to `null` (site defaults par chalti rehti hai). */
-export async function readSheetSettings(options: { fresh?: boolean } = {}): Promise<SheetSettings | null> {
-  const config = googleSheetsConfig();
-  if (!config) return readSettingsFromCsv(options);
-  const now = Date.now();
-  if (!options.fresh && cache && now - cache.at < CACHE_MS) return cache.value;
-  // network down hai to har page par 5s wait na karo
-  if (cache && now - cache.failedAt < CACHE_MS && cache.value === null) return null;
+/* ───────────────────────── edge cache (Cloudflare Workers) ───────────────────────── */
 
-  try {
-    const endpoint = new URL(config.url);
-    endpoint.searchParams.set("action", "settings");
-    if (config.token) endpoint.searchParams.set("token", config.token);
-    const response = await fetch(endpoint, {
-      cache: "no-store",
-      headers: sheetHeaders(),
-      signal: AbortSignal.timeout(READ_TIMEOUT_MS),
-    });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const value = normaliseSheetSettings(await response.json());
-    cache = { at: now, value, failedAt: value ? 0 : now };
-    return value;
-  } catch (error) {
-    console.warn(`[sheets] settings read failed: ${(error as Error).message}`);
-    cache = { at: now, value: null, failedAt: now };
-    // Apps Script down/galat ho to bhi owner ki csv (publish to web) se padho
-    const csv = await readSettingsFromCsv({ fresh: true });
-    if (csv) cache = { at: now, value: csv, failedAt: 0 };
-    return csv;
-  }
-}
+/**
+ * Workers par module-level cache **isolate** ke saath marta hai — har cold start par
+ * site hardcoded defaults par chali jaati thi (payment page par purana UPI ID).
+ * Isliye last good value Cloudflare ke Cache API me bhi rakhte hain: naya isolate
+ * use 1–5ms me padh leta hai aur sheet ka intezaar kiye bina sahi UPI dikha deta hai.
+ * Node (Vercel/Render) par `caches` hota hi nahi — wahan ye poora block no-op hai.
+ */
+const EDGE_CACHE_KEY = "https://sheet-settings.liksha.internal/store-settings.json";
 
-/** Public CSV se settings (Apps Script set na ho to bhi sheet padhi jaati hai). */
-async function readSettingsFromCsv(options: { fresh?: boolean } = {}): Promise<SheetSettings | null> {
-  const url = settingsCsvUrl();
-  if (!url) return null;
-  const now = Date.now();
-  if (!options.fresh && cache && now - cache.at < CACHE_MS) return cache.value;
-  if (cache && now - cache.failedAt < CACHE_MS && cache.value === null) return null;
+function edgeCache(): Cache | null {
   try {
-    const response = await fetch(url, {
-      cache: "no-store",
-      headers: sheetHeaders({ accept: "text/csv" }),
-      signal: AbortSignal.timeout(READ_TIMEOUT_MS),
-    });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const value = parseSettingsCsv(await response.text());
-    cache = { at: now, value, failedAt: value ? 0 : now };
-    return value;
-  } catch (error) {
-    console.warn(`[sheets] settings CSV read failed: ${(error as Error).message}`);
-    cache = { at: now, value: null, failedAt: now };
+    const api = (globalThis as unknown as { caches?: { default?: Cache } }).caches;
+    return api && typeof api.default?.match === "function" ? api.default : null;
+  } catch {
     return null;
   }
+}
+
+async function edgeRead(): Promise<SheetSettingsCache | null> {
+  const store = edgeCache();
+  if (!store) return null;
+  try {
+    const response = await store.match(EDGE_CACHE_KEY, { ignoreMethod: true });
+    if (!response) return null;
+    const payload = (await response.json()) as { value?: SheetSettings; at?: number; source?: SheetSettingsSource };
+    const value = normaliseSheetSettings(payload?.value);
+    if (!value || typeof payload?.at !== "number") return null;
+    if (Date.now() - payload.at > STALE_MAX_MS) return null;
+    return { value, at: payload.at, failedAt: 0, ms: 0, source: payload.source ?? "apps-script", error: null };
+  } catch {
+    return null;
+  }
+}
+
+function edgeWrite(value: SheetSettings, source: SheetSettingsSource) {
+  const store = edgeCache();
+  if (!store) return;
+  void (async () => {
+    try {
+      await store.put(
+        EDGE_CACHE_KEY,
+        new Response(JSON.stringify({ value, at: Date.now(), source }), {
+          headers: {
+            "content-type": "application/json",
+            "cache-control": `public, s-maxage=${Math.round(STALE_MAX_MS / 1000)}`,
+          },
+        }),
+      );
+    } catch {
+      /* local workerd / dev par Cache API likhne nahi deti — ignore */
+    }
+  })();
+}
+
+function edgeDelete() {
+  const store = edgeCache();
+  if (!store) return;
+  try {
+    void store.delete(EDGE_CACHE_KEY, { ignoreMethod: true }).catch(() => undefined);
+  } catch {
+    /* Cache API available nahi — memory cache hi kaafi hai */
+  }
+}
+
+/** Admin ne settings save ki / owner ne "abhi refresh karo" dabaya → cache poora hatao. */
+export function invalidateSheetSettings() {
+  cache = null;
+  edgeDelete();
+}
+
+/**
+ * Owner ki Settings sheet padho. Fail ho to **last good** value (site defaults par
+ * nahi jaati); kuch bhi configured nahi to `null`.
+ *
+ * Real-time contract:
+ *   • value TTL (10s) ke andar hai → turant wapas (koi network nahi)
+ *   • value purani hai → purani turant jaati hai + refresh **background** me
+ *   • `fresh: true` → hamesha network (payment page / admin / self-test)
+ */
+export async function readSheetSettings(options: { fresh?: boolean } = {}): Promise<SheetSettings | null> {
+  // cold isolate (Workers) — pehle edge cache se last good value utha lo
+  if (!cache) cache = await edgeRead();
+  const now = Date.now();
+
+  if (!options.fresh && cache) {
+    if (cache.value && now - cache.at < SETTINGS_TTL_MS) return cache.value;
+    // haal hi me fail hua hai → TTL tak dobara network nahi (warna har page 4s atkega)
+    if (cache.failedAt && now - cache.failedAt < SETTINGS_TTL_MS) return cache.value;
+    if (cache.value && now - cache.at < STALE_MAX_MS) {
+      revalidateInBackground();
+      return cache.value;
+    }
+  }
+
+  if (!googleSheetsConfig() && !settingsCsvUrl()) return null;
+  return readNow();
+}
+
+/** stale-while-revalidate: page ruke bina background me nayi value laao. */
+function revalidateInBackground() {
+  const now = Date.now();
+  if (inflight || now - lastBackgroundAt < 1_000) return;
+  lastBackgroundAt = now;
+  void readNow().catch(() => undefined);
+}
+
+/** Ek hi network read — concurrent callers wahi promise share karte hain. */
+function readNow(): Promise<SheetSettings | null> {
+  if (inflight) return inflight;
+  const run = fetchSheetSettings().finally(() => {
+    inflight = null;
+  });
+  inflight = run;
+  return run;
+}
+
+function commit(value: SheetSettings, source: SheetSettingsSource, startedAt: number): SheetSettings {
+  cache = { value, at: Date.now(), failedAt: 0, ms: Date.now() - startedAt, source, error: null };
+  edgeWrite(value, source);
+  return value;
+}
+
+/** Read fail — par last good value **rakhte hain** (pehle use null kar dete the). */
+function failRead(message: string, startedAt: number): SheetSettings | null {
+  const previous = cache?.value ?? null;
+  cache = {
+    value: previous,
+    at: previous ? cache?.at ?? 0 : 0,
+    failedAt: Date.now(),
+    ms: Date.now() - startedAt,
+    source: previous ? cache?.source ?? null : null,
+    error: message,
+  };
+  return previous;
+}
+
+async function fetchSheetSettings(): Promise<SheetSettings | null> {
+  const startedAt = Date.now();
+  const config = googleSheetsConfig();
+
+  if (config) {
+    try {
+      const endpoint = new URL(config.url);
+      endpoint.searchParams.set("action", "settings");
+      if (config.token) endpoint.searchParams.set("token", config.token);
+      // cache-buster — beech ka koi bhi proxy/CDN purani value na de
+      endpoint.searchParams.set("_ts", String(startedAt));
+      const response = await fetch(endpoint, {
+        cache: "no-store",
+        headers: sheetHeaders(),
+        signal: AbortSignal.timeout(READ_TIMEOUT_MS),
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const value = normaliseSheetSettings(await response.json());
+      if (!value) throw new Error("response me koi setting value nahi");
+      return commit(value, "apps-script", startedAt);
+    } catch (error) {
+      const message = (error as Error).message;
+      console.warn(`[sheets] settings read failed (${Date.now() - startedAt}ms): ${message}`);
+      // Apps Script down/galat ho to bhi owner ki published CSV se padh lo
+      const csv = await readSettingsFromCsv().catch((csvError: Error) => {
+        console.warn(`[sheets] settings CSV read failed: ${csvError.message}`);
+        return null;
+      });
+      if (csv) return commit(csv, "csv", startedAt);
+      return failRead(message, startedAt);
+    }
+  }
+
+  try {
+    const csv = await readSettingsFromCsv();
+    if (csv) return commit(csv, "csv", startedAt);
+    return failRead("CSV me koi setting nahi mili", startedAt);
+  } catch (error) {
+    return failRead((error as Error).message, startedAt);
+  }
+}
+
+/**
+ * Public CSV se settings (Apps Script set na ho to bhi sheet padhi jaati hai).
+ *
+ * Note: "Publish to web" CSV ko Google ~5 minute cache karta hai — isliye ye sirf
+ * **fallback** hai. Real-time chahiye to Apps Script wala `/exec` URL hi bharein.
+ */
+async function readSettingsFromCsv(): Promise<SheetSettings | null> {
+  const url = settingsCsvUrl();
+  if (!url) return null;
+  const response = await fetch(url, {
+    cache: "no-store",
+    headers: sheetHeaders({ accept: "text/csv" }),
+    signal: AbortSignal.timeout(READ_TIMEOUT_MS),
+  });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const value = parseSettingsCsv(await response.text());
+  if (!value) throw new Error("CSV me koi setting nahi mili");
+  return value;
 }
 
 /** Admin settings → Google Sheet (owner ki sheet hamesha latest rahe). */

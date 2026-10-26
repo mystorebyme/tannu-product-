@@ -3,7 +3,7 @@ import "server-only";
 import fs from "@/lib/fs-runtime";
 import { dataFile } from "./data-dir";
 import { dbEnabled } from "./db";
-import { readSheetSettings, writeSheetSettings } from "./google-sheets";
+import { readSheetSettings, sheetSettingsInfo, writeSheetSettings } from "./google-sheets";
 
 /**
  * Store settings — source of truth storefront hai.
@@ -50,6 +50,12 @@ export const DEFAULT_STORE_SETTINGS: StoreSettings = {
 };
 
 let cache: { at: number; value: StoreSettings } | null = null;
+/** concurrent requests ek hi merge share karein (sheet + DB dobara nahi padhe jaate) */
+let inflight: { promise: Promise<StoreSettings> } | null = null;
+let inflightFresh = false;
+let lastBackgroundAt = 0;
+/** merged settings kitni der fresh maani jaayengi (sheet ka apna TTL alag hai) */
+const CACHE_TTL_MS = 5_000;
 
 export function normalizeStoreSettings(input: unknown): StoreSettings {
   const base = DEFAULT_STORE_SETTINGS;
@@ -93,15 +99,58 @@ async function load(): Promise<StoreSettings> {
 }
 
 /**
- * Settings = database/file ke defaults + owner ki Google Sheet (sheet jeetti hai).
+ * Settings = database/file ke defaults + owner ki Google Sheet (sheet jeeti hai).
  * Sheet me jo cell bhara hua hai wahi site par jaata hai, isliye owner ko redeploy
- * karne ki zaroorat nahi — 15 second me change live.
+ * karne ki zaroorat nahi — sheet TTL (10s) ke andar change live.
+ *
+ * **stale-while-revalidate**: cache purana ho to bhi wahi value turant jaati hai aur
+ * nayi value background me aa jaati hai. Page kabhi sheet ka intezaar nahi karta, aur
+ * Apps Script down ho to bhi **last good** value chalti rehti hai (hardcoded default nahi).
  */
 export async function getStoreSettings(options: { fresh?: boolean } = {}): Promise<StoreSettings> {
-  if (!options.fresh && cache && Date.now() - cache.at < 5_000) return cache.value;
+  if (!options.fresh && cache) {
+    if (Date.now() - cache.at < CACHE_TTL_MS) return cache.value;
+    revalidateInBackground();
+    return cache.value;
+  }
+  return mergeNow(options.fresh === true);
+}
 
-  const stored = await load();
-  const sheet = await readSheetSettings({ fresh: options.fresh });
+function mergeNow(fresh: boolean): Promise<StoreSettings> {
+  // fresh request ko non-fresh in-flight promise par mat thoko
+  if (inflight && (inflightFresh || !fresh)) return inflight.promise;
+  const promise = merge({ fresh }).finally(() => {
+    if (inflight?.promise === promise) inflight = null;
+  });
+  inflight = { promise };
+  inflightFresh = fresh;
+  return promise;
+}
+
+/** stale value dete waqt background refresh — ek second me ek se zyada nahi. */
+function revalidateInBackground() {
+  const now = Date.now();
+  if (inflight || now - lastBackgroundAt < 1_000) return;
+  lastBackgroundAt = now;
+  void merge({ fresh: false }).catch(() => undefined);
+}
+
+async function merge(options: { fresh?: boolean }): Promise<StoreSettings> {
+  // DB/file padhna fail ho to pichli value chalti rahe — page 500 nahi hota
+  let stored = cache?.value ?? DEFAULT_STORE_SETTINGS;
+  try {
+    stored = await load();
+  } catch (error) {
+    console.warn(`[settings] stored settings load failed: ${(error as Error).message}`);
+  }
+
+  let sheet: Awaited<ReturnType<typeof readSheetSettings>> = null;
+  try {
+    sheet = await readSheetSettings({ fresh: options.fresh });
+  } catch (error) {
+    console.warn(`[settings] sheet read failed: ${(error as Error).message}`);
+  }
+
   const value = sheet
     ? normalizeStoreSettings({
         ...stored,
@@ -127,15 +176,21 @@ export async function getStoreSettings(options: { fresh?: boolean } = {}): Promi
 /**
  * Payment/tracking page ke liye settings — **time budget ke saath**.
  *
- * Owner ki Sheet (Apps Script) thodi slow ho sakti hai (Google ~0.3–2s). Payment
- * page ko us par intezaar nahi karana: cache garam ho to turant, warna max
- * `budgetMs` tak wait karke env/default par chala jaata hai — aur request
- * background me cache garam kar deti hai. Isliye step 3 kabhi "load ho raha hai"
- * par nahi atakta, UPI ID phir bhi sahi (env fallback) rehta hai.
+ * Order (owner rule: sheet ki value hi sach hai):
+ *   1. koi bhi cache hai (fresh ya purana) → turant wahi, refresh background me.
+ *      Purani **sahi** value hamesha hardcoded default se behtar hai — pehle yahi
+ *      bug tha: 350ms baad payment page default UPI ID dikha deta tha.
+ *   2. cache bilkul nahi (cold start) → max `budgetMs` tak asli read ka intezaar.
+ *      Workers par last good value Cloudflare Cache API me rehti hai
+ *      (`google-sheets.ts`), isliye ye raasta almost hamesha instant hota hai.
+ *   3. tab bhi kuch na mile → defaults, aur read background me poora hota rehta hai.
  */
-export async function getStoreSettingsFast(budgetMs = 350): Promise<StoreSettings> {
-  if (cache) return cache.value;
-  const slow = getStoreSettings().catch(() => DEFAULT_STORE_SETTINGS);
+export async function getStoreSettingsFast(budgetMs = 3_000): Promise<StoreSettings> {
+  if (cache) {
+    if (Date.now() - cache.at >= CACHE_TTL_MS) revalidateInBackground();
+    return cache.value;
+  }
+  const slow = mergeNow(false).catch(() => null);
   const timeout = new Promise<null>((resolve) => {
     const timer = setTimeout(() => resolve(null), budgetMs);
     // server process ko timer zinda na rakhe
@@ -148,6 +203,21 @@ export async function getStoreSettingsFast(budgetMs = 350): Promise<StoreSetting
   // baaki kaam background me poora ho jaaye (agle request par cache ready milega)
   void slow;
   return DEFAULT_STORE_SETTINGS;
+}
+
+/**
+ * Live diagnostics — admin panel ka "Google Sheet" screen isi se batata hai ki
+ * settings sheet se aa rahi hain ya defaults se, aur last read kitna purana hai.
+ */
+export function storeSettingsInfo() {
+  const sheet = sheetSettingsInfo();
+  return {
+    ...sheet,
+    cachedAt: cache?.at ?? null,
+    cacheAgeMs: cache ? Date.now() - cache.at : null,
+    updatedBy: cache?.value.updatedBy ?? null,
+    upiId: cache?.value.upiId ?? null,
+  };
 }
 
 export async function saveStoreSettings(input: unknown, actor: string): Promise<StoreSettings> {

@@ -48,6 +48,9 @@ npm run start:vinext --workspace @liksha/web -- --host 0.0.0.0 --port 8787
 
 # Cloudflare par deploy (Wrangler login / CLOUDFLARE_API_TOKEN chahiye)
 npm run deploy:vinext --workspace @liksha/web
+
+# repo root se ek command — install + build + deploy (§7 me yahi dashboard/CI me chalti hai)
+npm run deploy:worker
 ```
 
 `build`/`build:vinext` dono pehle `policies:build` aur `assets:invoice-logo`
@@ -94,6 +97,12 @@ Worker → Settings → Variables and Secrets).
 | `SHEET_SELFTEST_KEY` | secret | `/api/sheet-selftest` key-gate |
 | `RESEND_API_KEY` | secret | order/contact email |
 | `NEXT_PUBLIC_SITE_URL` | var | `https://designerclothing.fashion` (config me already set) |
+| `SHEET_READ_TIMEOUT_MS` | var | Apps Script read timeout — **4000** (R35; 900ms par read hamesha timeout hota tha, isliye sheet ka UPI site par nahi aata tha) |
+| `SHEET_SETTINGS_TTL_MS` | var | sheet settings kitni der fresh maani jaayein — **10000** (10s; payment page `?fresh=1` se turant padhta hai) |
+
+> `STORE_UPI_ID` / `STORE_UPI_NAME` config me **jaan-boojh kar declare nahi** kiye —
+> UPI ka source of truth owner ki Google Sheet hai (`Settings → upi_id`). Env sirf
+> fallback hai; Workers par chahiye to `npx wrangler secret put STORE_UPI_ID`.
 
 Aur (optional, code me default hai): `STORE_UPI_ID`, `STORE_UPI_NAME`, `SELLER_*`,
 `GST_HSN`, `OTP_DEV_MODE=off`, `EMAIL_FROM`, `ORDER_NOTIFICATION_EMAIL`,
@@ -165,35 +174,110 @@ chahiye.
 
 ---
 
-## 7. Preview deploy — exact steps (jab Cloudflare credentials hon)
+## 7. Deploy — exact steps
+
+### 7.0 Pehle ye galti theek kariye (build fail ho raha tha)
+
+Cloudflare Workers Builds me deploy command `npx wrangler deploy` thi aur build ye
+error dekar ruk jaata tha:
+
+```
+✘ [ERROR] Could not detect a directory containing static files (e.g. html, css and js) for the project
+```
+
+**Wajah:** ye command **repo root** par chalti hai, aur root par koi `wrangler.toml` /
+`wrangler.jsonc` hai hi nahi (jaan-boojh kar nahi hai). Isliye wrangler ko lagta hai
+"ye ek plain static site hai" aur wo `public/`/`dist/` dhoondhne lagta hai — milta nahi.
+Storefront Next.js app hai: uska Worker **vinext** build karta hai aur config
+`apps/web/cloudflare.config.ts` me hai. Deploy isi liye `apps/web` se chalti hai.
+
+### 7.1 Cloudflare dashboard (Workers Builds) — 3 settings
+
+Workers & Pages → `liksha-storefront` → **Settings → Build** me:
+
+| Setting | Value |
+| --- | --- |
+| Root directory | `/` (repo root — **`apps/web` nahi**, warna `npm ci` workspace deps nahi la pata) |
+| Build command | `npm ci --no-audit --no-fund` |
+| Deploy command | `bash scripts/deploy-cloudflare.sh` |
+
+`scripts/deploy-cloudflare.sh` wahi karta hai jo local par karte hain: root par
+`npm ci` (agar Build command me pehle hi ho chuka ho to `SKIP_INSTALL=1`), phir
+`npm run deploy:vinext --workspace @liksha/web` → vinext vite build → `cf deploy`
+(`cloudflare.config.ts` padh kar). Deploy command me **kabhi** `npx wrangler deploy`
+mat likhiye.
+
+> Build command + deploy command dono me `npm ci` ho to dobara install hota hai —
+> isliye deploy command `SKIP_INSTALL=1 bash scripts/deploy-cloudflare.sh` bhi chalega.
+
+### 7.2 Credentials (ek baar)
+
+Cloudflare dashboard → **My Profile → API Tokens → Create Token** → template
+"Edit Cloudflare Workers" (account: Workers Scripts = Edit) → token copy.
+Phir Worker build ke env me:
+
+```
+CLOUDFLARE_API_TOKEN = <token>
+CLOUDFLARE_ACCOUNT_ID = <dashboard → account home → right side "Account ID">
+```
+
+(Workers Builds me account usually apne aap mil jaata hai — token zaroori hai.)
+Ye tokens **repo me kabhi nahi** — sirf Cloudflare dashboard / GitHub Actions secrets me.
+
+### 7.3 Worker ke secrets (ek baar, deploy ke baad)
 
 ```bash
 cd apps/web
 npx wrangler login                       # ya CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID env
 
-# 1) secrets (ek-ek karke; value paste karein, repo me kabhi nahi)
-npx wrangler secret put DATABASE_URL
+npx wrangler secret put DATABASE_URL             # zaroori — warna orders memory me
 npx wrangler secret put ADMIN_API_TOKEN
 npx wrangler secret put UPI_RETURN_SECRET
 npx wrangler secret put OTP_TOKEN_SECRET
-# optional: GOOGLE_SHEETS_*, SHEET_SELFTEST_KEY, RESEND_API_KEY
-
-# 2) build + deploy
-npm run build:vinext --workspace @liksha/web
-npm run deploy:vinext --workspace @liksha/web
-
-# 3) smoke (deployed URL par)
-curl -s https://<worker>.workers.dev/api/health          # storage=postgres, durable=true chahiye
-curl -s -o /dev/null -w '%{http_code}\n' https://<worker>.workers.dev/
-curl -s -o /dev/null -w '%{http_code}\n' https://<worker>.workers.dev/api/admin/orders   # 401
+# sheet = owner ka control panel (UPI/phone/announcement real-time inhi se aate hain)
+npx wrangler secret put GOOGLE_SHEETS_WEBAPP_URL
+npx wrangler secret put GOOGLE_SHEETS_TOKEN
+npx wrangler secret put SHEET_SELFTEST_KEY
+# optional
+npx wrangler secret put GOOGLE_SHEETS_SETTINGS_CSV_URL
+npx wrangler secret put RESEND_API_KEY
 ```
 
-**`/api/health` me `durable:true` na dikhe to deploy rok dein** — us haal me orders
-durable nahi hain.
+Ya dashboard → Worker → **Settings → Variables and Secrets** → type *Secret* → add.
+Har `secret put` ke baad Worker apne aap redeploy hota hai.
 
-GitHub integration (optional): Cloudflare dashboard → Workers & Pages → Create →
-Connect to Git → repo `mystorebyme/tannu-product-`, root `apps/web`,
-build command `npm run build:vinext`, deploy command `npx vinext-cloudflare deploy`.
+### 7.4 Local se deploy (dashboard se jhanjhat nahi)
+
+```bash
+cd apps/web && npx wrangler login && cd ..
+npm run deploy:worker          # = bash scripts/deploy-cloudflare.sh
+```
+
+### 7.5 Deploy ke baad verify (3 curl)
+
+```bash
+W=https://liksha-storefront.<subdomain>.workers.dev
+
+# 1) runtime + durable storage — "storage":"postgres","durable":true chahiye
+curl -s $W/api/health
+
+# 2) sheet live hai? meta.sheetSource = "apps-script" aur data.upiId = sheet wala UPI
+curl -s $W/api/settings
+
+# 3) admin APIs token ke bina band hain (401 chahiye)
+curl -s -o /dev/null -w '%{http_code}\n' $W/api/admin/orders
+```
+
+**`durable:true` na dikhe to deploy rok dein** — us haal me orders memory me jaate
+hain (isolate restart par gayab). Aur `meta.sheetSource: null` dikhe to sheet
+connect nahi hui: `docs/09-devops/google-sheets.md` §1 (Apps Script deploy) kariye.
+
+### 7.6 GitHub Actions se deploy (optional)
+
+`.github/workflows/cloudflare-worker.yml` — repo → **Actions → Cloudflare Worker
+(storefront) → Run workflow**. Secrets `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID`
+GitHub repo me daalne padte hain. Manual trigger hai (production DNS abhi Vercel par
+hai, isliye har push par Worker deploy nahi hota).
 
 Custom domain (baad me, owner approval ke baad): Worker → Settings → Domains &
 Routes → add `www.designerclothing.fashion` **sirf tab** jab apex/Vercel ka faisla
@@ -231,4 +315,6 @@ version, ya Worker delete. **Vercel production par koi asar nahi** — DNS wahin
 | Postgres TCP from Workers | sandbox me verify nahi hua | preview deploy par health check; Hyperdrive recommended |
 | `pdfkit` bundle ~1 MB | Worker size badhta hai (limits ke andar) | chaho to invoice PDF ko alag service par le jaayein |
 | `.cloudflare/` build output | audit me na aaye | `scripts/repo-audit.mjs` aur `.gitignore` me excluded |
+| Root par wrangler config nahi | `npx wrangler deploy` (root) → `Could not detect a directory containing static files` | deploy command `bash scripts/deploy-cloudflare.sh` rakhein (§7.1); `tests/unit/round35.test.ts` ise pin karta hai |
+| Workers par `process.env` sirf declared vars | sheet timeout/TTL knobs na chalte | `cloudflare.config.ts` me `SHEET_READ_TIMEOUT_MS` + `SHEET_SETTINGS_TTL_MS` declare |
 | `cf@1.0.0-beta.23` engine warning (node ^22.23) | sirf warning, build chalti hai | Node minor bump (alag decision) |

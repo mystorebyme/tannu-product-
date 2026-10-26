@@ -152,7 +152,7 @@ var SPREADSHEET_ID = '1k8fsea04WpbrGjiyXuDrrS2Eewt9W7wx9X2lUQc5qMo';
 
 | Tab | Kya aata hai |
 |---|---|
-| **Settings** | phone, WhatsApp, email, UPI ID, announcement, GSTIN — site 15 second me padh leti hai |
+| **Settings** | phone, WhatsApp, email, UPI ID, announcement, GSTIN — site 10 second me padh leti hai (payment page turant) |
 | **Dashboard** | aaj ke orders, revenue, pending payment, naye messages (script khud bharta hai) |
 | **Orders** | har order + har status change (poori timeline) |
 | **OrderItems** | har item alag row (size, colour, qty, price) |
@@ -248,8 +248,12 @@ https://liksha-clothing.vercel.app/api/sheet-selftest?key=lk-st-9f3k2m-7hq4rt-20
 | website error | **Errors** |
 | har sync | **Sync** |
 
-Settings tab me jo value badlegi, site par **15 second** me live ho jayegi
-(phone, WhatsApp, email, UPI ID, announcement, GSTIN, free shipping, admin URL).
+Settings tab me jo value badlegi, site par **10 second** me live ho jayegi
+(phone, WhatsApp, email, UPI ID, announcement, GSTIN, free shipping, admin URL) —
+payment page ka UPI ID/QR **turant** badalta hai. Redeploy karne ki zaroorat nahi.
+Check: browser me `https://<aapki-site>/api/settings` kholein → `data.upiId` wahi hona
+chahiye jo sheet me hai, aur `meta.sheetSource` = `"apps-script"`.
+(Detail: `docs/09-devops/google-sheets.md` §4b.)
 
 ---
 

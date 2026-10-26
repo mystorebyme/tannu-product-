@@ -9,8 +9,9 @@ import { API_AVAILABLE, apiUrl } from "@/lib/api-base";
  * Owner-editable store details (phone, WhatsApp, email, UPI ID, announcement).
  *
  * Source: admin settings (Postgres/JSON) + owner ki Google Sheet — server
- * `/api/settings` par merge karke deta hai. Client har 30s me, tab focus par
- * turant refresh karta hai — sheet me badla number site par bina reload dikhta hai.
+ * `/api/settings` par merge karke deta hai. Client har **15s** me, tab focus par
+ * turant, aur payment page par `fresh=1` ke saath refresh karta hai — sheet me
+ * badla number/UPI site par bina reload dikhta hai.
  *
  * API na ho (GitHub Pages static preview) to niche wale defaults dikhte hain —
  * layout tootta nahi, koi error toast nahi.
@@ -36,30 +37,40 @@ export const DEFAULT_PUBLIC_SETTINGS: PublicSettings = {
   freeShipping: true,
 };
 
+/** Sheet ka change kitni der me browser tak pahunche (tab focus par turant hota hi hai). */
+const POLL_MS = 15_000;
+
 type ContextValue = {
   settings: PublicSettings;
-  refresh: () => Promise<void>;
-  /** pehli fetch ho chuki (defaults vs live farq batane ke liye) */
+  /** `fresh: true` → server sheet se abhi padh kar jawab deta hai (payment page) */
+  refresh: (options?: { fresh?: boolean }) => Promise<void>;
+  /** pehli fetch poori ho chuki (defaults vs live farq batane ke liye) */
   ready: boolean;
+  /** server se asli value mil chuki hai (false = abhi bhi defaults dikh rahe hain) */
+  live: boolean;
 };
 
 const StoreSettingsContext = createContext<ContextValue>({
   settings: DEFAULT_PUBLIC_SETTINGS,
   refresh: async () => undefined,
   ready: false,
+  live: false,
 });
 
 export function StoreSettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<PublicSettings>(DEFAULT_PUBLIC_SETTINGS);
   const [ready, setReady] = useState(false);
+  const [live, setLive] = useState(false);
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (options?: { fresh?: boolean }) => {
     if (!API_AVAILABLE) {
       setReady(true);
       return;
     }
     try {
-      const response = await fetch(apiUrl("/api/settings"), { cache: "no-store" });
+      const response = await fetch(apiUrl(options?.fresh ? "/api/settings?fresh=1" : "/api/settings"), {
+        cache: "no-store",
+      });
       if (!response.ok) return;
       const parsed = await readJson<{ data?: Partial<PublicSettings> }>(response);
       const data = parsed.data?.data;
@@ -68,6 +79,7 @@ export function StoreSettingsProvider({ children }: { children: ReactNode }) {
         ...current,
         ...Object.fromEntries(Object.entries(data).filter(([, value]) => value !== undefined && value !== "")),
       }) as PublicSettings);
+      setLive(true);
     } catch {
       // offline / API down — defaults hi rehne do
     } finally {
@@ -78,14 +90,14 @@ export function StoreSettingsProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     void refresh();
     if (!API_AVAILABLE) return;
-    // sheet change → site: tab wapas focus par turant, warna 30s me
+    // sheet change → site: tab wapas focus par turant, warna har POLL_MS me
     const onFocus = () => void refresh();
     const onVisible = () => {
       if (document.visibilityState === "visible") void refresh();
     };
     window.addEventListener("focus", onFocus);
     document.addEventListener("visibilitychange", onVisible);
-    const timer = window.setInterval(onVisible, 30_000);
+    const timer = window.setInterval(onVisible, POLL_MS);
     return () => {
       window.removeEventListener("focus", onFocus);
       document.removeEventListener("visibilitychange", onVisible);
@@ -94,7 +106,7 @@ export function StoreSettingsProvider({ children }: { children: ReactNode }) {
   }, [refresh]);
 
   return (
-    <StoreSettingsContext.Provider value={{ settings, refresh, ready }}>{children}</StoreSettingsContext.Provider>
+    <StoreSettingsContext.Provider value={{ settings, refresh, ready, live }}>{children}</StoreSettingsContext.Provider>
   );
 }
 

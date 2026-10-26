@@ -1,4 +1,4 @@
-import { getStoreSettings } from "@/lib/store-settings";
+import { getStoreSettings, storeSettingsInfo } from "@/lib/store-settings";
 import {
   EXPECTED_SHEET_ID,
   readSheetHealth,
@@ -25,6 +25,7 @@ export async function GET(request: Request) {
     return Response.json({
       configured: false,
       settings: current,
+      liveRead: storeSettingsInfo(),
       sheet: null,
       recent: { orders: [], payments: [], messages: [] },
       hint: "GOOGLE_SHEETS_WEBAPP_URL + GOOGLE_SHEETS_TOKEN set kariye (docs/09-devops/google-sheets.md).",
@@ -44,6 +45,12 @@ export async function GET(request: Request) {
     reachable: Boolean(sheetSettings),
     settings: sheetSettings ?? current,
     live: current,
+    /**
+     * Read path ka **sach** — owner yahi se dekhta hai ki UPI/phone sheet se aa raha
+     * hai ya defaults se, last read kitna purana hai, aur Apps Script kitna time le
+     * raha hai (`lastReadMs` > `readTimeoutMs` = timeout ho raha tha).
+     */
+    liveRead: storeSettingsInfo(),
     /**
      * Script kaun si sheet pakde hue hai — mismatch ho to admin panel me
      * warning aata hai (warna data chup-chaap kisi copy me chala jaata hai).

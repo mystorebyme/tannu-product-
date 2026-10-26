@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 import { postJson } from "@/lib/http-json";
 import { API_AVAILABLE, apiUrl } from "@/lib/api-base";
 import { formatPrice } from "@/lib/format";
-import { buildUpiUri } from "@/lib/upi";
+import { buildUpiUri, normaliseUpiId } from "@/lib/upi";
 import { UpiQr } from "@/components/upi-qr";
 import { whatsappNumber } from "@/lib/phone";
+import { useStoreSettingsState } from "@/components/store-settings-provider";
 
 /**
  * UPI payment card — seedha owner ke UPI account me paisa.
@@ -20,6 +21,10 @@ import { whatsappNumber } from "@/lib/phone";
  *
  * GitHub Pages (static) par API nahi hota — wahan last-4 form ki jagah WhatsApp
  * button dikhta hai, taaki customer atak na jaye.
+ *
+ * UPI ID **sheet se live** hai: page khulte hi `/api/settings?fresh=1` call hota hai,
+ * isliye owner ne sheet me UPI badla ho to QR + UPI ID apne aap naye par chale jaate
+ * hain (page pehle se khula ho tab bhi). Server-rendered value sirf pehla paint hai.
  */
 export function UpiPayment({
   orderNumber,
@@ -55,6 +60,20 @@ export function UpiPayment({
   const router = useRouter();
   const autoRan = useRef(false);
   const appOpened = useRef(false);
+  const { settings: liveSettings, refresh, live } = useStoreSettingsState();
+
+  /**
+   * Sheet → site **real time**: payment page khulte hi fresh settings maango.
+   * `live` false rahe (API down / static preview) to server-rendered value hi chalti
+   * hai — hydration mismatch nahi hota, kyunki pehla paint dono jagah same hai.
+   */
+  useEffect(() => {
+    void refresh({ fresh: true });
+  }, [refresh]);
+
+  const payeeVpa = (live ? normaliseUpiId(liveSettings.upiId) : null) ?? upiId;
+  const payeeName = (live && liveSettings.upiName.trim()) || upiName;
+  const helpWhatsapp = (live && liveSettings.whatsapp.trim()) || whatsapp;
 
   const callbackUrl = useMemo(() => {
     if (!returnToken) return undefined;
@@ -94,20 +113,20 @@ export function UpiPayment({
   const upiUri = useMemo(
     () =>
       buildUpiUri({
-        vpa: upiId,
-        name: upiName,
+        vpa: payeeVpa,
+        name: payeeName,
         amountPaise: amount,
         note: `Order ${orderNumber}`,
         txnRef: orderNumber.replace(/[^A-Za-z0-9]/g, "").slice(0, 35),
         callbackUrl,
       }),
-    [upiId, upiName, amount, orderNumber, callbackUrl],
+    [payeeVpa, payeeName, amount, orderNumber, callbackUrl],
   );
 
 
   async function copyUpiId() {
     try {
-      await navigator.clipboard.writeText(upiId);
+      await navigator.clipboard.writeText(payeeVpa);
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -198,9 +217,9 @@ export function UpiPayment({
     setFailed(true);
   }
 
-  const wa = whatsapp.replace(/\D/g, "").slice(-10);
+  const wa = helpWhatsapp.replace(/\D/g, "").slice(-10);
   const waText = encodeURIComponent(
-    `Hi Designer Clothing, I have paid ${formatPrice(amount)} for order ${orderNumber} via UPI (${upiId}). Ye payment ka screenshot hai:`,
+    `Hi Designer Clothing, I have paid ${formatPrice(amount)} for order ${orderNumber} via UPI (${payeeVpa}). Ye payment ka screenshot hai:`,
   );
   const paid = paymentStatus === "paid";
 
@@ -263,11 +282,11 @@ export function UpiPayment({
             <p className="text-[10.5px] tracking-[.12em] text-[#8a6a1f] uppercase">Pay to</p>
             <div className="mt-1 flex flex-wrap items-center gap-2">
               <span className="break-all text-[14px] font-semibold text-[#5c1010]" data-testid="upi-id">
-                {upiId}
+                {payeeVpa}
               </span>
             </div>
             <p className="mt-1 break-words text-[11.5px] text-[#6b6259]">
-              {upiName} · Amount <strong>{formatPrice(amount)}</strong> (exact — no extra charges)
+              {payeeName} · Amount <strong>{formatPrice(amount)}</strong> (exact — no extra charges)
             </p>
 
             <div className="mt-2 flex flex-wrap items-center gap-2">

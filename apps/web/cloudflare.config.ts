@@ -46,6 +46,21 @@ export default defineConfig({
       ...Object.fromEntries(SECRETS.map((name) => [name, bindings.secret()])),
       // public var — koi secret nahi, owner-facing domain
       NEXT_PUBLIC_SITE_URL: bindings.text("https://designerclothing.fashion"),
+      /**
+       * Sheet → site **real-time** knobs (R35).
+       *
+       * Workers par `process.env` sirf wahi padh sakta hai jo yahan declare ho,
+       * isliye ye do values config me hain. UPI ID khud **sheet se** aata hai
+       * (`GOOGLE_SHEETS_WEBAPP_URL`) — env sirf fallback hai, isliye yahan nahi.
+       *
+       *   SHEET_READ_TIMEOUT_MS  Apps Script `doGet` cold start par 1–4s leta hai;
+       *                          900ms par read hamesha timeout hota tha aur site
+       *                          default UPI dikha deti thi.
+       *   SHEET_SETTINGS_TTL_MS  owner ka sheet edit itni der me site par (payment
+       *                          page `?fresh=1` se turant padhta hai).
+       */
+      SHEET_READ_TIMEOUT_MS: bindings.text("4000"),
+      SHEET_SETTINGS_TTL_MS: bindings.text("10000"),
     },
   }),
 });

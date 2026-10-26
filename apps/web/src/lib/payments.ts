@@ -132,10 +132,19 @@ async function razorpayRequest<T>(
   return (await response.json()) as T;
 }
 
-/** store ka UPI — gateway down ho to bhi customer pay kar sake, par order manual verify ke baad confirm */
-export function manualUpiUri(amountPaise: number, orderNumber: string): string {
-  const vpa = process.env.STORE_UPI_ID ?? "likshaclothing@upi";
-  const name = process.env.STORE_UPI_NAME ?? "Designer Clothing";
+/**
+ * Store ka UPI — gateway down ho to bhi customer pay kar sake, par order manual
+ * verify ke baad confirm.
+ *
+ * `target` = owner ki Google Sheet / admin settings se aaya hua live UPI (caller
+ * `getStoreSettings*()` se bhejta hai). Na mile to hi env/default — warna sheet me
+ * UPI badalne par ye purana env wala QR bana deta tha.
+ */
+export type ManualUpiTarget = { vpa?: string; name?: string };
+
+export function manualUpiUri(amountPaise: number, orderNumber: string, target?: ManualUpiTarget): string {
+  const vpa = target?.vpa?.trim() || process.env.STORE_UPI_ID || "likshaclothing@upi";
+  const name = target?.name?.trim() || process.env.STORE_UPI_NAME || "Designer Clothing";
   const params = new URLSearchParams({
     pa: vpa,
     pn: name,
@@ -156,6 +165,8 @@ export async function createIntent(input: {
   customerName: string;
   email: string;
   phone: string;
+  /** sheet/admin settings ka live UPI (route bhejta hai) */
+  upi?: ManualUpiTarget;
 }): Promise<PaymentIntentResult> {
   const expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
   const accounts = orderedAccounts();
@@ -178,7 +189,7 @@ export async function createIntent(input: {
         gateway: account.id,
         reference: created.id,
         amount: input.amount,
-        upiUri: manualUpiUri(input.amount, input.orderNumber),
+        upiUri: manualUpiUri(input.amount, input.orderNumber, input.upi),
         publicKey: account.keyId,
         expiresAt,
       };
@@ -192,7 +203,7 @@ export async function createIntent(input: {
     gateway: "manual-upi",
     reference: null,
     amount: input.amount,
-    upiUri: manualUpiUri(input.amount, input.orderNumber),
+    upiUri: manualUpiUri(input.amount, input.orderNumber, input.upi),
     expiresAt,
   };
 }
@@ -257,6 +268,7 @@ export type PaymentInitiation =
  */
 export async function createPaymentLink(
   order: { orderNumber: string; total: number; customerName: string; email: string; phone: string },
+  upi?: ManualUpiTarget,
 ): Promise<PaymentInitiation> {
   const callback = `${siteConfig.url}/orders/${order.orderNumber}`;
   for (const account of orderedAccounts()) {
@@ -285,11 +297,11 @@ export async function createPaymentLink(
     }
   }
 
-  const upiUri = manualUpiUri(order.total, order.orderNumber);
+  const upiUri = manualUpiUri(order.total, order.orderNumber, upi);
   return {
     mode: "manual",
     provider: "manual",
-    upiId: process.env.STORE_UPI_ID ?? "likshaclothing@upi",
+    upiId: upi?.vpa?.trim() || process.env.STORE_UPI_ID || "likshaclothing@upi",
     upiUri,
     message:
       "UPI se pay kariye — payment backend verify hote hi order confirm ho jaayega. WhatsApp par bhi screenshot bhej sakte hain.",
