@@ -47,7 +47,14 @@ npm run build:vinext --workspace @liksha/web
 npm run start:vinext --workspace @liksha/web -- --host 0.0.0.0 --port 8787
 
 # Cloudflare par deploy (Wrangler login / CLOUDFLARE_API_TOKEN chahiye)
-npm run deploy:vinext --workspace @liksha/web
+npm run deploy:vinext --workspace @liksha/web          # vinext deployer (build + deploy)
+
+# ya seedha wrangler (build ke baad) — dashboard bhi yahi command chalata hai:
+npm run build:vinext --workspace @liksha/web
+npx wrangler deploy --config apps/web/wrangler.jsonc
+
+# deploy se pehle: wahi config local workerd par
+cd apps/web && npx wrangler dev --config wrangler.jsonc --port 8788
 ```
 
 `build`/`build:vinext` dono pehle `policies:build` aur `assets:invoice-logo`
@@ -68,6 +75,14 @@ patches (sirf is build ke liye, `next build` par asar nahi):
    Warna Workers par `No such module "#standard-fonts/Helvetica"` → invoice 500.
 4. `preview.allowedHosts: true` — sirf local `vite preview` ke liye (tunnel/preview
    host). Deploy par koi asar nahi.
+
+**`apps/web/wrangler.jsonc`** — `wrangler deploy` wala config (Cloudflare dashboard /
+CLI isi ko padhta hai): `main` = build output ka `index.js`,
+`assets.directory` = build output ke assets, `assets.binding: "ASSETS"`,
+`run_worker_first` (HTML worker se, `/_next/static/*` assets se),
+`compatibility_flags: ["nodejs_compat"]`, aur public var `NEXT_PUBLIC_SITE_URL`.
+Isi ke bina Cloudflare ka default `npx wrangler deploy` static-site maan kar
+*"Could not detect a directory containing static files"* error deta hai (§7.0).
 
 **`apps/web/cloudflare.config.ts`** — worker `liksha-storefront`,
 entrypoint `vinext/server/fetch-handler`, `compatibilityDate 2026-10-26`,
@@ -93,7 +108,11 @@ Worker → Settings → Variables and Secrets).
 | `GOOGLE_SHEETS_SETTINGS_CSV_URL` | secret | Settings sheet ka CSV URL |
 | `SHEET_SELFTEST_KEY` | secret | `/api/sheet-selftest` key-gate |
 | `RESEND_API_KEY` | secret | order/contact email |
-| `NEXT_PUBLIC_SITE_URL` | var | `https://designerclothing.fashion` (config me already set) |
+| `NEXT_PUBLIC_SITE_URL` | var | `https://designerclothing.fashion` (`wrangler.jsonc` me already set) |
+
+> **Sheet ↔ site:** `GOOGLE_SHEETS_WEBAPP_URL` + `GOOGLE_SHEETS_TOKEN` set na hon to
+> `/api/settings` me `sheet.configured: false` aata hai aur sheet ka UPI kabhi site
+> par nahi pahunchta. Set karne ke baad `?fresh=1` par check karein (§ google-sheets.md §7).
 
 Aur (optional, code me default hai): `STORE_UPI_ID`, `STORE_UPI_NAME`, `SELLER_*`,
 `GST_HSN`, `OTP_DEV_MODE=off`, `EMAIL_FROM`, `ORDER_NOTIFICATION_EMAIL`,
@@ -165,39 +184,130 @@ chahiye.
 
 ---
 
-## 7. Preview deploy — exact steps (jab Cloudflare credentials hon)
+## 7. Deploy — step by step (dashboard se, ya CLI se)
+
+### 7.0 Pehle: "Could not detect a directory containing static files" kyun aaya?
+
+Agar Cloudflare dashboard (Workers Builds / Git connected) me deploy command
+`npx wrangler deploy` chala aur error aaya:
+
+```
+✘ [ERROR] Could not detect a directory containing static files (e.g. html, css and js)
+```
+
+Matlab: **repo me koi wrangler config nahi tha**, isliye wrangler ne socha ki ye
+ek static-assets project hai (jinme build output `dist/` me hota hai). Hamari site
+static nahi hai — ye ek **Next.js Worker** (vinext) hai, jise pehle **build** karna
+padta hai aur phir `main` entrypoint + assets ke saath deploy karna hota hai.
+
+Fix do hisson me hai (dono is repo me ho gaye):
+
+1. **`apps/web/wrangler.jsonc`** (committed) — Worker ka `main`, `compatibility_flags: ["nodejs_compat"]`,
+   assets (`binding: ASSETS`, `run_worker_first`), aur public var `NEXT_PUBLIC_SITE_URL`.
+2. **Deploy se pehle build** — `npm run build:vinext --workspace @liksha/web`
+   (output: `apps/web/.cloudflare/output/v0/workers/default/{bundle,assets}`).
+
+Yaani deploy command ko sirf `npx wrangler deploy` nahi rehna chahiye — neeche exact
+fields hain.
+
+### 7.1 Cloudflare dashboard (Git connected) — exact fields
+
+Workers & Pages → apna Worker (`liksha-storefront`) → **Settings → Build**:
+
+| Field | Value |
+| --- | --- |
+| **Git repository** | `mystorebyme/tannu-product-` |
+| **Production branch** | `arena/f713eef1-tannu-product` (ya `main`, jab merge ho jaye) |
+| **Root directory** | *(khaali chhod dein — repo root)* |
+| **Build command** | `npm ci && npm run build:vinext --workspace @liksha/web` |
+| **Deploy command** | `npx wrangler deploy --config apps/web/wrangler.jsonc` |
+| **Node version** | `22` (`NODE_VERSION=22` build env var) |
+
+> Root directory `apps/web` **na** rakhein — npm workspaces ka install repo root se
+> hota hai (`@liksha/types` etc. wahin resolve hote hain).
+
+Worker name config me `liksha-storefront` hai — dashboard ka Worker naam bhi wahi
+rakhein, warna deploy **naya** Worker bana dega.
+
+### 7.2 Secrets / env (dashboard)
+
+Worker → **Settings → Variables and Secrets** (production) — ye names exactly:
+
+| Name | Type | Value kahan se |
+| --- | --- | --- |
+| `DATABASE_URL` | Secret | Postgres (Supabase/Neon) connection string — **iske bina orders memory me** |
+| `ADMIN_API_TOKEN` | Secret | wahi token jo admin panel use karta hai |
+| `GOOGLE_SHEETS_WEBAPP_URL` | Secret | Apps Script `/exec` URL (`?action=settings` wala) |
+| `GOOGLE_SHEETS_TOKEN` | Secret | Apps Script ka `TOKEN` |
+| `GOOGLE_SHEETS_SETTINGS_CSV_URL` | Secret (optional) | published Settings CSV — Apps Script down ho to fallback |
+| `UPI_RETURN_SECRET` | Secret | random string (`openssl rand -hex 24`) |
+| `OTP_TOKEN_SECRET` | Secret | random string |
+| `SHEET_SELFTEST_KEY` | Secret (optional) | `/api/sheet-selftest` gate |
+| `RESEND_API_KEY` | Secret (optional) | email |
+| `NEXT_PUBLIC_SITE_URL` | Var (already config me) | `https://designerclothing.fashion` |
+
+**Sheet wala UPI/diagnostics tabhi kaam karega jab `GOOGLE_SHEETS_WEBAPP_URL` (+ token)
+set ho.** Set na ho to `/api/settings` me `sheet.configured: false` dikhega —
+yahi wajah hoti hai ki "sheet me UPI badla par site par nahi aaya".
+
+### 7.3 CLI se deploy (laptop / sandbox / CI)
 
 ```bash
-cd apps/web
-npx wrangler login                       # ya CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID env
+# ek baar login (ya CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID env me)
+npx wrangler login
 
-# 1) secrets (ek-ek karke; value paste karein, repo me kabhi nahi)
-npx wrangler secret put DATABASE_URL
-npx wrangler secret put ADMIN_API_TOKEN
-npx wrangler secret put UPI_RETURN_SECRET
-npx wrangler secret put OTP_TOKEN_SECRET
-# optional: GOOGLE_SHEETS_*, SHEET_SELFTEST_KEY, RESEND_API_KEY
+# 1) secrets (ek-ek; value paste, repo me kabhi nahi)
+npx wrangler secret put DATABASE_URL      --config apps/web/wrangler.jsonc
+npx wrangler secret put ADMIN_API_TOKEN   --config apps/web/wrangler.jsonc
+npx wrangler secret put GOOGLE_SHEETS_WEBAPP_URL --config apps/web/wrangler.jsonc
+npx wrangler secret put GOOGLE_SHEETS_TOKEN      --config apps/web/wrangler.jsonc
+npx wrangler secret put UPI_RETURN_SECRET --config apps/web/wrangler.jsonc
+npx wrangler secret put OTP_TOKEN_SECRET  --config apps/web/wrangler.jsonc
 
 # 2) build + deploy
 npm run build:vinext --workspace @liksha/web
-npm run deploy:vinext --workspace @liksha/web
+npx wrangler deploy --config apps/web/wrangler.jsonc
 
-# 3) smoke (deployed URL par)
-curl -s https://<worker>.workers.dev/api/health          # storage=postgres, durable=true chahiye
-curl -s -o /dev/null -w '%{http_code}\n' https://<worker>.workers.dev/
-curl -s -o /dev/null -w '%{http_code}\n' https://<worker>.workers.dev/api/admin/orders   # 401
+# (vikalp) vinext ka apna deployer — build bhi khud karta hai:
+npm run deploy:vinext --workspace @liksha/web
 ```
 
-**`/api/health` me `durable:true` na dikhe to deploy rok dein** — us haal me orders
-durable nahi hain.
+`apps/web` ke andar se chalane par `--config` ki zaroorat nahi (config wahin hai).
 
-GitHub integration (optional): Cloudflare dashboard → Workers & Pages → Create →
-Connect to Git → repo `mystorebyme/tannu-product-`, root `apps/web`,
-build command `npm run build:vinext`, deploy command `npx vinext-cloudflare deploy`.
+### 7.4 Deploy se pehle local pe wahi config test karein
 
-Custom domain (baad me, owner approval ke baad): Worker → Settings → Domains &
-Routes → add `www.designerclothing.fashion` **sirf tab** jab apex/Vercel ka faisla
-ho jaye. `www.likshaclothing.com` par kuch nahi.
+```bash
+npm run build:vinext --workspace @liksha/web
+cd apps/web && npx wrangler dev --config wrangler.jsonc --port 8788
+# teesre terminal me:
+BASE_URL=http://127.0.0.1:8788 npm run test:smoke      # R35: 85 pass / 0 fail
+```
+
+`wrangler deploy --dry-run` bhi useful hai (upload ke bina config check):
+
+```bash
+npx wrangler deploy --config apps/web/wrangler.jsonc --dry-run
+# → Read 78 files from the assets directory … / Total Upload: ~6.7 MiB / gzip ~1.5 MiB
+```
+
+### 7.5 Deploy ke baad smoke (asli domain/worker URL par)
+
+```bash
+BASE=https://liksha-storefront.<account>.workers.dev
+curl -s $BASE/api/health | python3 -m json.tool          # storage=postgres, durable=true chahiye
+curl -s $BASE/api/settings | python3 -m json.tool        # sheet.configured/readFrom dekho
+curl -s -o /dev/null -w '%{http_code}\n' $BASE/          # 200
+curl -s -o /dev/null -w '%{http_code}\n' $BASE/api/admin/orders   # 401
+```
+
+**`/api/health` me `durable:true` na dikhe to us Worker par orders durable nahi** —
+pehle `DATABASE_URL` set karein, phir traffic badhayein.
+
+### 7.6 Custom domain (abhi nahi)
+
+`www.designerclothing.fashion` / apex ko Cloudflare Worker par **sirf tab** le jaayein
+jab owner Vercel se cutover ka faisla kare (Worker → Settings → Domains & Routes).
+Domain abhi Vercel par hai — is doc ka koi step DNS nahi badalta.
 
 ---
 

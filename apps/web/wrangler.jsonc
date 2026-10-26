@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "liksha-storefront",
+  "main": ".cloudflare/output/v0/workers/default/bundle/index.js",
+  "compatibility_date": "2026-10-26",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".cloudflare/output/v0/workers/default/assets",
+    "binding": "ASSETS",
+    "run_worker_first": ["/*", "!/_next/static/*", "!/*/_next/static/*"]
+  },
+  "vars": {
+    // public value (secret nahi) — canonical/OG/sitemap isi se bante hain
+    "NEXT_PUBLIC_SITE_URL": "https://designerclothing.fashion"
+  },
+  "observability": { "enabled": true }
+}

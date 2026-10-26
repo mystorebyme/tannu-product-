@@ -623,3 +623,30 @@ teen the — teeno fix + test:
       Unit **225/0**, integration **40/0**, runtime **11/0**, audit gates pass.
 - [x] Doc: `docs/09-devops/google-sheets.md` §7 — "Sheet me UPI badla, site par nahi aaya"
       5-minute checklist (error → fix table).
+
+### R35b — Cloudflare Worker deploy steps (owner ka failed build)
+
+Owner ka build log: `npx wrangler deploy` → *"Could not detect a directory containing
+static files (e.g. html, css and js)"*.
+
+- [x] **Wajah**: repo me koi wrangler config nahi tha, isliye wrangler ne static-site
+      samajh kar `dist/`/`public/` dhoondha. Hamari site static nahi — Next.js Worker
+      (vinext) hai, jise pehle build karna padta hai.
+- [x] **`apps/web/wrangler.jsonc`** (naya, committed): `name: liksha-storefront`,
+      `main: .cloudflare/output/v0/workers/default/bundle/index.js`,
+      `assets.directory: …/assets` + `binding: ASSETS` + `run_worker_first`
+      (`/_next/static/*` assets se), `compatibility_date 2026-10-26`,
+      `compatibility_flags: ["nodejs_compat"]`, public var `NEXT_PUBLIC_SITE_URL`,
+      `observability.enabled`.
+- [x] **Verify**: `npx wrangler@4 deploy --config apps/web/wrangler.jsonc --dry-run` →
+      *Read 78 files from the assets directory*, upload 6871.10 KiB / gzip 1462.22 KiB,
+      binding `env.ASSETS` (koi static-detect error nahi).
+- [x] **Verify (runtime)**: `npx wrangler dev --config apps/web/wrangler.jsonc --port 8788`
+      par wahi built bundle → `/` 200, `/api/health` **446 products**, `/api/settings` R35
+      diagnostics ke saath, `BASE_URL=…:8788 npm run test:smoke` → **85/0**.
+- [x] **Doc**: `docs/09-devops/cloudflare-workers.md` §7 rewrite — 7.0 error ka matlab,
+      7.1 dashboard ke exact fields (root dir `/`, build `npm ci && npm run build:vinext
+      --workspace @liksha/web`, deploy `npx wrangler deploy --config apps/web/wrangler.jsonc`,
+      Node 22), 7.2 secrets table, 7.3 CLI, 7.4 local `wrangler dev`, 7.5 post-deploy smoke.
+- [ ] **Asli deploy nahi hua** — Cloudflare credentials is sandbox me nahi hain; owner apne
+      dashboard se upar ke steps chalaye. DNS/Vercel production bilkul unchanged.
