@@ -2,6 +2,18 @@
 
 Read this first. Then `STRUCTURE.md`, then `PROGRESS.md`, then the matching skill in `.claude/skills/`.
 
+## The loop (order badalna nahi)
+
+| # | Step | Skill | Kya matlab |
+| --- | --- | --- | --- |
+| 1 | **Plan** | `brainstorm-plan` | Pehle sawaal (kaun user, kaun edge case), phir 3-line plan: kaun file, kaun test, kaun doc. Chhoti cheez ho to seedha 3. |
+| 2 | **Minimal diff** | `minimal-diff` | Sabse chhota badlav jo kaam kare. Naya dependency, naya abstraction, naya config — default **nahi**. |
+| 3 | **Implement + test** | `testing` | Test usi commit me. "Baad me test likhenge" = test kabhi nahi likha jaata. |
+| 4 | **Debug** | `systematic-debugging` | Toofa to pehle **asli wajah** dhoondo (log/repro), phir 1 fix. Guess-patch nahi, `try/catch` se symptom chhupana nahi. |
+| 5 | **Verify + doc** | `testing` + `deploy-ops` | `npm run typecheck && npm run test:all && npm run audit`, phir `PROGRESS.md` line. |
+
+> Rule: jo cheez naapi nahi ja sakti, wo "ho gaya" nahi kehlati. `npm run audit` wahi naapta hai.
+
 ## The 10 rules
 
 1. **Money = integer paise.** No floats, no rupees in storage. `formatPrice()` only at render time.
@@ -23,6 +35,8 @@ Read this first. Then `STRUCTURE.md`, then `PROGRESS.md`, then the matching skil
 ```bash
 npm run typecheck                 # must be clean before you stop
 npm run test:all                  # unit + integration
+npm run audit                     # scorecard: skills, instruction files, hygiene, route→test map
+npm run audit -- --check          # CI gate (regression par fail)
 npm run catalog:verify            # if catalogue touched
 npm run build:web                 # if storefront touched
 cd apps/admin && npx next build   # admin root se build nahi hoti
@@ -42,6 +56,9 @@ npm run dev / dev:admin / dev:api # ports 3000 / 3001 / 4000
 
 | Symptom | Where to look |
 | --- | --- |
+| "Kaam kyun nahi kar raha, pata nahi" | `.claude/skills/systematic-debugging` (pehle repro, phir fix) |
+| Kaam bahut bada lag raha hai | `.claude/skills/brainstorm-plan` (chhota karo) + `.claude/skills/minimal-diff` |
+| Netlify/Vercel deploy | `.claude/skills/deploy-ops` + `.claude/skills/netlify-deploy` |
 | Build oddities | `docs/08-testing` + `agent-guides/troubleshoot-storefront.md` |
 | Order/money bug | `.claude/skills/order-lifecycle` |
 | API shape change | `.claude/skills/api-module` + `docs/06-api` |
@@ -51,5 +68,8 @@ npm run dev / dev:admin / dev:api # ports 3000 / 3001 / 4000
 
 ## Definition of done
 
-Typecheck clean · tests pass · mobile 360px checked · empty/error states handled · docs updated ·
-`PROGRESS.md` line added.
+Typecheck clean · `npm run test:all` pass · `npm run audit -- --check` pass · mobile 360px checked ·
+empty/error states handled · docs updated · `PROGRESS.md` line added.
+
+**"Ho gaya" ka proof:** ek command ka output, ek test ka naam, ya ek live URL — zubani dawa nahi.
+

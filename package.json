@@ -44,7 +44,9 @@
     "test:audit": "node tests/e2e/round16.mjs && node tests/e2e/payments.mjs && node tests/e2e/links.mjs",
     "test:links": "node tests/e2e/links.mjs",
     "test:payments": "node tests/e2e/payments.mjs",
-    "schema:embed": "node scripts/db/embed-schema.mjs"
+    "schema:embed": "node scripts/db/embed-schema.mjs",
+    "audit": "node scripts/repo-audit.mjs",
+    "audit:check": "node scripts/repo-audit.mjs --check"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.11",

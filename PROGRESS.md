@@ -481,3 +481,15 @@ likhega). Uske baad `/api/sheet-selftest` + connector se row confirm karna hai.
 - [x] **`docs/00-overview/netlify-shift-guide.md`** — dono sites ki settings, 12+7 env, saare functions ka naksha, domain DNS, troubleshooting
 - [x] tests **159 pass / 0 fail**
 
+### R29 — top skill repos ke hisaab se audit (Superpowers / Karpathy / Ponytail / Graphify / Agent Skills)
+- [x] `scripts/repo-audit.mjs` — measurable scorecard: skills format, instruction files ka sach,
+      hygiene (any/TODO/console/secret/email/gateway), API route → test map, CI gates
+- [x] 5 nayi skills: `brainstorm-plan`, `systematic-debugging`, `minimal-diff`,
+      `typescript-discipline`, `netlify-deploy` (total 20)
+- [x] `CLAUDE.md` sachcha: 446 products / 11 collections, UPI only (Razorpay claim hataya), 20 skills
+- [x] `AGENTS.md`: 5-step loop (plan → minimal diff → implement+test → debug → verify)
+- [x] `tests/unit/api-contracts.test.ts` (7 routes ka security contract) + `tests/unit/repo-audit.test.ts`
+- [x] route map 28/35 → **35/35**; tests 160 → **174 pass / 0 fail**
+- [x] CI me `npm run audit -- --check` gate
+- [x] Report: `docs/00-overview/skill-repos-benchmark.md`, generated: `docs/00-overview/repo-audit.md`
+
