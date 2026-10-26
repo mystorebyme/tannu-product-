@@ -32,6 +32,11 @@ jobs:
       - name: Typecheck (web · admin · api)
         run: npm run typecheck
 
+      # Lint bhi gate hai — pehle ye eslint 9 par crash karta tha (FlatCompat),
+      # isliye chup-chaap band pada tha. Ab native flat config + CI gate.
+      - name: Lint (storefront)
+        run: npm run lint --workspace @liksha/web -- --max-warnings=40
+
       - name: Unit + integration tests
         run: npm run test:all
 

@@ -14,10 +14,11 @@ import { whatsappNumber } from "@/lib/phone";
  *
  * 1. Order place karte hi ye page khulta hai; mobile par UPI app khud khul jaati
  *    hai (`upi://pay` intent, amount bhara hua), desktop par QR scan hota hai.
- * 2. Pay karne ke baad UTR / reference daalta hai.
- * 3. Admin verify karke order confirm karta hai.
+ * 2. Pay karne ke baad **sirf mobile ke last 4 digit** daal kar "Payment ho gaya —
+ *    confirm kariye" dabata hai (UTR kabhi nahi maanga jaata).
+ * 3. Admin UPI statement se verify karke order confirm karta hai.
  *
- * GitHub Pages (static) par API nahi hota — wahan UTR form ki jagah WhatsApp
+ * GitHub Pages (static) par API nahi hota — wahan last-4 form ki jagah WhatsApp
  * button dikhta hai, taaki customer atak na jaye.
  */
 export function UpiPayment({
@@ -385,7 +386,7 @@ export function UpiPayment({
                   Send payment screenshot on WhatsApp
                 </a>
                 <p className="mt-1.5 text-[11px] leading-relaxed text-[#8a7a5f]">
-                  Send the screenshot and our team confirms the order (you can include the UTR too).
+                  Screenshot bhej dijiye — team UPI statement se match karke order confirm kar degi.
                 </p>
               </div>
             )}

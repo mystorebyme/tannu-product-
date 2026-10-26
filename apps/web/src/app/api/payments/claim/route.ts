@@ -7,8 +7,9 @@ export const dynamic = "force-dynamic";
 /**
  * POST /api/payments/claim  { orderNumber, phoneLast4?, phoneToken?, note? }
  *
- * Owner request: "customer UTR daalega, last 4 digit daalega … ya agar UTR nahi
- * mila to payment ho gaya to submit kar de, ya WhatsApp par screenshot bhej de."
+ * Owner rule (R27): customer **sirf mobile ke last 4 digit** daalta hai aur
+ * "Payment ho gaya — confirm kariye" dabata hai. UTR kabhi nahi maanga jaata;
+ * screenshot chahiye ho to WhatsApp ka rasta alag se dikhta hai.
  *
  * Yahan paisa **confirm nahi** hota — order `payment_status = processing`
  * (verify hona baaki) ho jaata hai, reference khaali. Admin UPI statement se

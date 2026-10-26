@@ -10,12 +10,12 @@ export type PaymentState = "pending" | "processing" | "paid" | "failed" | string
 const COPY: Record<string, { label: string; note: string; tone: string }> = {
   pending: {
     label: "Payment pending",
-    note: "Payment abhi baaki hai — UPI se pay karke reference daaliye.",
+    note: "Payment abhi baaki hai — UPI se pay kariye, phir mobile ke last 4 digit se confirm kar dijiye.",
     tone: "border-[#e6d3a8] bg-[#fdf9ee] text-[#8a6a1f]",
   },
   processing: {
     label: "Payment submitted",
-    note: "Aapka UTR hum tak pahunch gaya hai. Team verify karke order confirm karegi (usually 10–30 min).",
+    note: "Aapki payment confirm request mil gayi hai. Team UPI statement se verify karke order confirm karegi (usually 10–30 min).",
     tone: "border-[#c9d9ea] bg-[#f4f8fd] text-[#2f5d8a]",
   },
   paid: {
@@ -70,7 +70,7 @@ export function PaymentStatusWatcher({
       } catch {
         /* offline — agle poll par try */
       }
-      // pending → 6s, processing (UTR mil gaya) → 5s: customer ko jaldi pata chale
+      // pending → 6s, processing (confirm request mili) → 5s: customer ko jaldi pata chale
       if (!cancelled) timer = window.setTimeout(poll, statusRef.current === "processing" ? 5_000 : 6_000);
     };
 

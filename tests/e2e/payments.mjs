@@ -3,7 +3,8 @@
  * Payment flow e2e — owner ka exact flow:
  *
  *   place order → payment page (alag) → order number wahan → pending
- *   → UTR submit → processing → payment confirm → paid + order confirmed
+ *   → customer mobile ke last 4 digit se claim → processing
+ *   → admin UPI statement se verify → paid + order confirmed
  *   → tracking page par wahi status
  *
  * Server chahiye:  PORT=3100 ADMIN_API_TOKEN=dev-admin-token npm run start --workspace @liksha/web
@@ -145,19 +146,30 @@ if (CAN_ADMIN) {
 const status1 = await getJson(`/api/orders/${number}/payment`);
 check("payment status API returns pending first", status1.body?.paymentStatus === "pending", status1.body?.paymentStatus);
 
-// ── 5. reference submit → processing ────────────────────────────────────────
-// UTR har run par naya — purana fixed number pichle run ke order se takra jaata tha.
-const utr = String(Date.now()).slice(-12);
-const manual = await fetch(`${BASE}/api/payments/manual`, {
-  method: "POST",
-  headers: { "content-type": "application/json" },
-  body: JSON.stringify({ orderNumber: number, reference: utr, phoneLast4: phone.slice(-4) }),
-});
-const manualBody = await manual.json();
-check("UTR submit is accepted", manual.ok && manualBody.ok === true, JSON.stringify(manualBody).slice(0, 120));
+// ── 5. customer claim (last 4 digit) → processing ───────────────────────────
+// Owner rule: customer sirf mobile ke last 4 digit deta hai, UTR kabhi nahi.
+const claimPost = (last4) =>
+  fetch(`${BASE}/api/payments/claim`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ orderNumber: number, phoneLast4: last4 }),
+  });
+
+const wrongClaim = await claimPost("0000");
+const wrongBody = await wrongClaim.json();
+check("wrong last-4 is rejected (403)", wrongClaim.status === 403, `${wrongClaim.status} ${JSON.stringify(wrongBody).slice(0, 80)}`);
+
+const claim = await claimPost(phone.slice(-4));
+const claimBody = await claim.json();
+check("correct last-4 claim is accepted", claim.status === 202 && claimBody.ok === true, `${claim.status} ${JSON.stringify(claimBody).slice(0, 120)}`);
+check("claim response asks for no UTR", !/utr|reference/i.test(JSON.stringify(claimBody)));
+
 const status2 = await getJson(`/api/orders/${number}/payment`);
 check("status becomes processing (awaiting verification)", status2.body?.paymentStatus === "processing", status2.body?.paymentStatus);
 check("order still not confirmed while payment is processing", status2.body?.status === "placed", status2.body?.status);
+
+// admin verify ke liye reference: claim me UTR nahi aata, isliye synthetic
+const utr = String(Date.now()).slice(-12);
 
 // ── 6-8. admin wale steps (token chahiye) ───────────────────────────────────
 let paidOk = false;

@@ -5,9 +5,6 @@ import { amountInWords } from "@/lib/amount-in-words";
 import { invoiceLogoImage } from "@/lib/invoice-logo";
 import type { InvoiceLine, InvoiceView } from "@/lib/invoice";
 
-const rupee = (paise: number) =>
-  `Rs. ${((paise ?? 0) / 100).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
 const money = (paise: number) =>
   ((paise ?? 0) / 100).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 

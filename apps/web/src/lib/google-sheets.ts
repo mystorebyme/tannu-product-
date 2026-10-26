@@ -363,8 +363,6 @@ export async function readSheetHealth(): Promise<SheetHealth | null> {
   }
 }
 
-const inr = (paise: number) => Math.round(paise) / 100;
-
 /**
  * Fire-and-forget sync — caller `await` kare to bhi 6s max.
  *

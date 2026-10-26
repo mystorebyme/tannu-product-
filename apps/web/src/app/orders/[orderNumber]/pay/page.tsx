@@ -20,7 +20,7 @@ export const metadata: Metadata = { title: "Complete payment", robots: { index: 
  * Flow (owner rule):
  *   checkout → "Place order" (validation + stock + pincode sab server par) →
  *   order DB me `pending` + unique order number (`LK-…`) →
- *   yahan redirect → UPI se pay → UTR submit (`processing`) →
+ *   yahan redirect → UPI se pay → last-4 digit confirm (`processing`) →
  *   admin/UPI-return verify (`paid`) → order `confirmed`.
  *
  * Is page par order number, poora amount, items aur live payment status dikhta

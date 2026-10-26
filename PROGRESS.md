@@ -493,3 +493,18 @@ likhega). Uske baad `/api/sheet-selftest` + connector se row confirm karna hai.
 - [x] CI me `npm run audit -- --check` gate
 - [x] Report: `docs/00-overview/skill-repos-benchmark.md`, generated: `docs/00-overview/repo-audit.md`
 
+
+### R30 — Vercel live + payment (last-4) + lint fix
+- [x] Vercel **production deploy** owner ke apne account se (`liksha-clothing`, alias
+      `liksha-clothing.vercel.app`) — `dpl_3gg9…` @ `275d3c6`, `/api/health` → `db: up`, 446 products
+- [x] Payment copy: customer-facing text se **UTR poora hata** (sirf mobile ke last 4 digit +
+      "Payment ho gaya — confirm kariye"); WhatsApp note = screenshot → team UPI statement se match
+- [x] `tests/e2e/payments.mjs` ab asli customer raasta test karta hai: galat last-4 → **403**,
+      sahi last-4 → **202 claim_submitted**, status `processing`, order `placed` (paid nahi)
+- [x] **eslint crash fix**: `eslint.config.mjs` FlatCompat (`Converting circular structure to JSON`)
+      → native `eslint-config-next` 16 flat config; lint **0 errors** (30 warnings) + CI gate
+- [x] `product-grid-client.tsx`: render ke andar ref write (`react-hooks/refs`) → `useEffect` sync
+- [x] 3 dead helpers hatae (`inr`, `rupee`, `TOKEN_SECRET`) — dead code zero
+- [x] Local prod build par verify: unit **174/174**, typecheck ✓, build ✓, payments e2e **37/37**,
+      smoke **84/84**, round16 **37/37**, breakpoints **48/48**, links 45 pages 0 fail
+- [ ] Vercel par `OTP_DEV_MODE=off` + redeploy (last-4 patch live karne ke liye)

@@ -29,7 +29,11 @@ export function ProductGridWithMore({
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const loadingRef = useRef(false);
   const productsRef = useRef(initial);
-  productsRef.current = products;
+  // render ke andar ref likhna React 19 lint (react-hooks/refs) me galat hai —
+  // isliye state ke saath effect me sync karte hain.
+  useEffect(() => {
+    productsRef.current = products;
+  }, [products]);
 
   const gridClass =
     columns === 2
