@@ -13,19 +13,44 @@ import { checkPincodeOffline } from "@/lib/pincode-offline";
 import { INDIAN_STATES, canonicalStateName, statesMatch } from "@/lib/state-match";
 import { whatsappNumber } from "@/lib/phone";
 import {
+  paymentUrl,
   readPlacedOrder,
   reviewUrl,
   savePlacedOrder,
   type PlacedOrderSnapshot,
 } from "@/lib/checkout-session";
+import {
+  clearCheckoutDetails,
+  phoneLast4,
+  readCheckoutDetails,
+  saveCheckoutDetails,
+} from "@/lib/checkout-details";
+import { CheckoutPaymentStep } from "@/components/checkout-payment-step";
 
 const indianStates = INDIAN_STATES;
+
+/**
+ * `GET /api/orders/<n>/payment-context` ka jawab — checkout ka step 3 isi se chalta
+ * hai (amount, sheet se live UPI, payment status, UPI-return token).
+ */
+type PaymentContext = {
+  orderNumber: string;
+  total: number;
+  status: string;
+  paymentStatus: string;
+  reference: string | null;
+  upi: { id: string; name: string };
+  whatsapp: string;
+  returnToken: string | null;
+  items: { title: string; handle: string; image: string | null; size: string; quantity: number; price: number }[];
+  customer: { name: string; city: string; state: string; pincode: string; phoneMasked: string };
+};
 
 export function CheckoutForm() {
   const { lines, subtotal, count, clear, isOpen, closeCart, removeLine } = useCart();
   const router = useRouter();
   // festive sale me final price already 499–699 hai — koi extra coupon nahi
-  const { whatsapp } = useStoreSettings();
+  const { whatsapp, upiId: settingsUpiId, upiName: settingsUpiName } = useStoreSettings();
   /**
    * Sirf tab set hota hai jab order **server par save na ho** (static preview ya
    * network/API fail). Checkout par UPI ID / QR / "pay here" **kabhi nahi** —
@@ -37,10 +62,12 @@ export function CheckoutForm() {
   const payment = "prepaid" as const;
   const [submitting, setSubmitting] = useState(false);
   /**
-   * 3-step checkout (owner request): 1) delivery details → 2) review → 3) payment
-   * page (alag URL). Address aur payment kabhi ek hi screen par nahi aate.
+   * 3-step checkout: 1) delivery details → 2) review → 3) **payment (isi page par)**.
+   * Owner (R36): payment ka alag page nahi khulta — step 3 yahin chalta hai, browser
+   * ka back review par jaata hai, aur wahi order dobara kholne par (`?step=payment&
+   * order=LK-…`) payment phir se chal jaata hai.
    */
-  const [step, setStep] = useState<"details" | "review">("details");
+  const [step, setStep] = useState<"details" | "review" | "payment">("details");
   /**
    * R33 (owner): payment page se **back** karne par customer ko seedha review
    * (step 2) par laana hai — address form dobara nahi. Order place hote hi cart
@@ -49,8 +76,22 @@ export function CheckoutForm() {
   const searchParams = useSearchParams();
   const resumeOrderNumber = searchParams.get("order");
   const wantsReview = searchParams.get("step") === "review";
-  const [resumed, setResumed] = useState<PlacedOrderSnapshot | null>(null);
+  const wantsPayment = searchParams.get("step") === "payment";
+  const [resumedSnapshot, setResumed] = useState<PlacedOrderSnapshot | null>(null);
   const [resumeChecked, setResumeChecked] = useState(false);
+  /** order abhi place hua — URL sync na bhi ho to step 3 chalta rahe */
+  const [placedOrderNumber, setPlacedOrderNumber] = useState<string | null>(null);
+  /** `/api/orders/<n>/payment-context` — amount, live UPI, status, return token */
+  const [context, setContext] = useState<PaymentContext | null>(null);
+  const [contextLoading, setContextLoading] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<string>("pending");
+  /** step 3 khud push kiya tha (back button se review par jaane ke liye) */
+  const pushedPayment = useRef(false);
+  /** pichhli baar bhari details localStorage se aa gayi — customer ko batate hain */
+  const [usedSavedDetails, setUsedSavedDetails] = useState(false);
+  const [savedPhone, setSavedPhone] = useState("");
+  /** jis order ka payment chal raha hai */
+  const orderNumber = placedOrderNumber ?? resumeOrderNumber;
   // OTP step hata diya gaya hai (owner request) — order sirf details par
   const [error, setError] = useState<string | null>(null);
   // delivery check — admin ke rules + India Post data se
@@ -82,11 +123,82 @@ export function CheckoutForm() {
       setResumeChecked(true);
       return;
     }
-    const snapshot = readPlacedOrder(resumeOrderNumber);
-    setResumed(snapshot);
+    setResumed(readPlacedOrder(resumeOrderNumber));
     setResumeChecked(true);
-    if (snapshot && wantsReview) setStep("review");
-  }, [resumeOrderNumber, wantsReview]);
+  }, [resumeOrderNumber]);
+
+  /**
+   * URL hi step batata hai (refresh / share / back-forward): `?step=review` → step 2,
+   * warna `?order=` ke saath seedha step 3 (order place ho chuka hai).
+   */
+  useEffect(() => {
+    if (!resumeOrderNumber) return;
+    setStep(wantsReview ? "review" : "payment");
+  }, [resumeOrderNumber, wantsReview, wantsPayment]);
+
+  /**
+   * History hum khud `pushState` karte hain (server round-trip nahi), isliye
+   * back/forward par step URL se dobara sync karte hain.
+   */
+  useEffect(() => {
+    const syncFromUrl = () => {
+      const params = new URLSearchParams(window.location.search);
+      const order = params.get("order");
+      if (!order) return;
+      setPlacedOrderNumber((current) => current ?? order);
+      setStep(params.get("step") === "review" ? "review" : "payment");
+    };
+    window.addEventListener("popstate", syncFromUrl);
+    return () => window.removeEventListener("popstate", syncFromUrl);
+  }, []);
+
+  /**
+   * Step 3 ka data — amount, **sheet se live UPI**, payment status aur UPI-return
+   * ka signed token. Order place hote hi, ya `?order=` ke saath page khulte hi.
+   */
+  useEffect(() => {
+    const target = orderNumber;
+    if (!target || !API_AVAILABLE) return;
+    let active = true;
+    setContextLoading(true);
+    fetch(apiUrl(`/api/orders/${encodeURIComponent(target)}/payment-context`), { cache: "no-store" })
+      .then((response) => readJson<{ data?: PaymentContext }>(response))
+      .then((parsed) => {
+        const data = parsed.data?.data;
+        if (!active || !data) return;
+        setContext(data);
+        setPaymentStatus(data.paymentStatus);
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        if (active) setContextLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [orderNumber]);
+
+  /**
+   * Owner (R36): "ek baar address card ki detail bhar de to agli baar direct
+   * recommend ho jaaye". Saved details `localStorage` se aati hain aur sirf tab
+   * bhari jaati hain jab form khali ho (abhi likha hua kabhi override nahi hota).
+   */
+  useEffect(() => {
+    const saved = readCheckoutDetails();
+    if (!saved) return;
+    setForm({
+      customerName: saved.customerName,
+      email: saved.email,
+      phone: saved.phone,
+      address: saved.address,
+      city: saved.city,
+      state: (indianStates as readonly string[]).includes(saved.state) ? saved.state : "Gujarat",
+      pincode: saved.pincode,
+      notes: saved.notes,
+    });
+    setSavedPhone(saved.phone);
+    setUsedSavedDetails(true);
+  }, []);
 
   // 6 digit poore hone par apne aap check — galat/blocked pincode par aage nahi jaane dete
   useEffect(() => {
@@ -173,6 +285,8 @@ export function CheckoutForm() {
       return;
     }
     setError(null);
+    /** ek baar bhari details yaad — agle order me pehle se bhari aayengi (owner, R36) */
+    saveCheckoutDetails(form);
     setStep("review");
     trackCheckout("checkout.review");
     if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
@@ -233,9 +347,52 @@ export function CheckoutForm() {
     return `https://wa.me/${whatsappNumber(whatsapp.replace(/\D/g, "").slice(-10))}?text=${encodeURIComponent(text)}`;
   }
 
-  /** payment page se aaye hain — order pehle hi ban chuka hai, dobara mat banao */
-  function goToPayment(orderNumber: string) {
-    router.push(`/orders/${encodeURIComponent(orderNumber)}/pay`);
+  /**
+   * Step 3 (payment) — **isi page par**, alag payment page nahi (owner, R36).
+   * Order pehle hi ban chuka ho (back / revisit / doosra tab) to dobara banta nahi.
+   *
+   * History: pehle review URL `replaceState` (cart khali ho chuka hai, isliye back
+   * par review snapshot se dikhega), phir payment URL `pushState` — isliye browser
+   * ka **back** = review, aur payment URL refresh/share karne par bhi step 3 khulta hai.
+   */
+  function goToPayment(target: string) {
+    pushedPayment.current = true;
+    setPlacedOrderNumber((current) => current ?? target);
+    setStep("payment");
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+    if (typeof window === "undefined") return;
+    try {
+      window.history.replaceState({}, "", reviewUrl(target));
+      window.history.pushState({}, "", paymentUrl(target));
+    } catch {
+      // history block ho to router se hi sahi — step 3 khulna zaroori hai
+      router.push(paymentUrl(target));
+    }
+  }
+
+  /** Step 3 → step 2 (review). Direct link par history entry nahi hoti → replaceState. */
+  function backToReview() {
+    setStep("review");
+    if (typeof window === "undefined") return;
+    if (pushedPayment.current) {
+      window.history.back();
+      return;
+    }
+    if (!orderNumber) return;
+    try {
+      window.history.replaceState({}, "", reviewUrl(orderNumber));
+    } catch {
+      /* URL update fail ho to bhi review dikhta hai */
+    }
+  }
+
+  /** "Naya address bharein" — saved details hata kar form khali (owner, R36) */
+  function resetSavedDetails() {
+    clearCheckoutDetails();
+    setUsedSavedDetails(false);
+    setSavedPhone("");
+    setPinStatus(null);
+    setForm({ customerName: "", email: "", phone: "", address: "", city: "", state: "Gujarat", pincode: "", notes: "" });
   }
 
   async function submit(event: React.FormEvent) {
@@ -323,24 +480,15 @@ export function CheckoutForm() {
           notes: form.notes || undefined,
         },
       });
+      /** address yaad — agle order me pehle se bhara aayega (owner, R36) */
+      saveCheckoutDetails(form);
       clear();
       /**
-       * Browser ka **back** button bhi review par laaye (owner rule, R33):
-       * history me checkout ki jagah review URL rakh dete hain, phir payment
-       * push karte hain — isliye back = `/checkout?step=review&order=…`.
+       * Payment **step 3** ab checkout ke andar hi khulta hai (owner, R36) —
+       * alag page nahi, aur UPI app apne aap nahi khulti ("Pay on UPI" dabane par
+       * hi intent chalta hai). Back = review (step 2).
        */
-      if (typeof window !== "undefined") {
-        try {
-          window.history.replaceState({}, "", reviewUrl(result.data.orderNumber));
-        } catch {
-          /* history API block ho to bhi payment zaroor khule */
-        }
-      }
-      /**
-       * Payment **step 3** = alag page. `?pay=1` se mobile par UPI app chooser
-       * khud khulta hai (QR/UPI ID wahan hai, checkout par kabhi nahi).
-       */
-      router.push(`/orders/${encodeURIComponent(result.data.orderNumber)}/pay?pay=1`);
+      goToPayment(result.data.orderNumber);
     } catch (error) {
       console.warn("order submit failed", error);
       setError("Order server tak nahi pahuncha. Dobara try kariye, ya WhatsApp par order bhej dijiye — wahan hum turant confirm karte hain.");
@@ -350,6 +498,42 @@ export function CheckoutForm() {
       setSubmitting(false);
     }
   }
+
+  /**
+   * Snapshot (sessionStorage) na ho — doosra tab/device, ya purana link — to
+   * payment-context se hi review/summary ban jaati hai. Poora address/email isme
+   * nahi hote (public API privacy ke liye wahi nahi bhejta), isliye sirf
+   * naam + sheher + pincode dikhta hai.
+   */
+  const resumed: PlacedOrderSnapshot | null =
+    resumedSnapshot ??
+    (context
+      ? {
+          orderNumber: context.orderNumber,
+          total: context.total,
+          placedAt: "",
+          items: context.items.map((item) => ({
+            title: item.title,
+            image: item.image ?? "",
+            size: item.size,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+          customer: {
+            name: context.customer.name,
+            phone: "",
+            email: "",
+            address: "",
+            city: context.customer.city,
+            state: context.customer.state,
+            pincode: context.customer.pincode,
+            notes: undefined,
+          },
+        }
+      : null);
+
+  /** step 3 = payment, checkout ke andar hi */
+  const isPayment = step === "payment" && Boolean(orderNumber);
 
   /**
    * Review par jo dikhta hai: normal checkout me cart, "back from payment" me
@@ -367,14 +551,26 @@ export function CheckoutForm() {
         price: line.price,
       }));
   const shownCount = resumed ? resumed.items.reduce((sum, item) => sum + item.quantity, 0) : count;
-  /** back-from-payment me hamesha review dikhta hai (details form kabhi nahi) */
-  const showDetails = !resumed && step === "details";
+  /** back-from-payment me review dikhta hai (details form kabhi nahi) */
+  const showDetails = !isPayment && !resumed && step === "details";
+  /** review ki address/contact line — context-only case me address khaali hota hai */
+  const shownAddress = resumed
+    ? [resumed.customer.address, `${resumed.customer.city}, ${resumed.customer.state} — ${resumed.customer.pincode}`]
+        .filter(Boolean)
+        .join(", ")
+    : `${form.address}, ${form.city}, ${form.state} — ${form.pincode}`;
+  const shownContact = resumed
+    ? [resumed.customer.phone, resumed.customer.email].filter(Boolean).join(" · ")
+    : `${form.phone} · ${form.email}`;
   const shownSubtotal = resumed ? resumed.total : subtotal;
   const shownTotal = resumed ? resumed.total : total;
-  /** `?order=` aaya par snapshot nahi mila (doosra tab/device) — order phir bhi safe hai */
-  const resumeMissing = Boolean(resumeOrderNumber && resumeChecked && !resumed);
-  /** snapshot padhne se pehle "cart empty" na dikhe (ek pal ka flash bhi nahi) */
-  const resumePending = Boolean(resumeOrderNumber && !resumeChecked);
+  /**
+   * `?order=` aaya par na snapshot mila na context (doosra tab/device + API/DB down)
+   * — order phir bhi safe hai, payment page se pay ho jaata hai.
+   */
+  const resumeMissing = Boolean(orderNumber && resumeChecked && !resumed && !contextLoading);
+  /** snapshot/context padhne se pehle "cart empty" na dikhe (ek pal ka flash bhi nahi) */
+  const resumePending = Boolean(orderNumber && !resumed && (!resumeChecked || contextLoading));
 
   if (resumePending) {
     return (
@@ -389,7 +585,7 @@ export function CheckoutForm() {
       <div className="border border-[#eee6de] px-6 py-16 text-center" data-testid="review-unavailable">
         <p className="text-sm text-[#4a423b]">
           Order <strong className="text-[#862222]">{resumeOrderNumber}</strong> place ho chuka hai — payment
-          wale page se aage badhiye.
+          page se aage badhiye (step 3 yahan load nahi ho paaya).
         </p>
         <Link
           href={`/orders/${encodeURIComponent(resumeOrderNumber ?? "")}/pay`}
@@ -423,15 +619,14 @@ export function CheckoutForm() {
     );
   }
 
-  return (
-    <form onSubmit={submit} className="grid gap-8 lg:grid-cols-[1.5fr_1fr]">
+  const leftColumn = (
       <div className="space-y-6">
-        {/* 3-step indicator — payment apne page par (step 3) */}
+        {/* 3-step indicator — payment step 3, isi page par (owner, R36) */}
         <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] tracking-[.14em] uppercase" data-testid="checkout-steps">
           {[
-            { n: 1, label: "Delivery", active: showDetails, href: null },
-            { n: 2, label: "Review", active: !showDetails, href: null },
-            { n: 3, label: "Payment", active: false, href: null },
+            { n: 1, label: "Delivery", active: showDetails },
+            { n: 2, label: "Review", active: !showDetails && !isPayment },
+            { n: 3, label: "Payment", active: isPayment },
           ].map((item, index) => (
             <li key={item.n} className="flex items-center gap-2">
               {index > 0 ? <span className="text-[#c9bfb4]">→</span> : null}
@@ -448,17 +643,52 @@ export function CheckoutForm() {
           ))}
         </ol>
 
-        {showDetails ? (
+        {isPayment ? (
+          /* Step 3 — payment yahin, alag page nahi (owner, R36) */
+          <CheckoutPaymentStep
+            orderNumber={orderNumber ?? ""}
+            total={shownTotal}
+            paymentStatus={context?.paymentStatus ?? paymentStatus}
+            reference={context?.reference ?? null}
+            upiId={context?.upi.id || settingsUpiId}
+            upiName={context?.upi.name || settingsUpiName}
+            whatsapp={context?.whatsapp || whatsapp}
+            returnToken={context?.returnToken ?? null}
+            last4Hint={phoneLast4(form.phone || savedPhone)}
+            loading={contextLoading && !context}
+            onStatusChange={setPaymentStatus}
+            onBackToReview={backToReview}
+          />
+        ) : showDetails ? (
         <>
+        {usedSavedDetails ? (
+          <div
+            className="flex flex-wrap items-center justify-between gap-2 border border-[#cfe0d2] bg-[#f4faf5] px-3 py-2.5"
+            data-testid="saved-address"
+          >
+            <p className="text-[11.5px] leading-relaxed text-[#2f6b3f]">
+              Aapka pichhla address pehle se bhara hua hai — badalna ho to edit kar lijiye.
+            </p>
+            <button
+              type="button"
+              onClick={resetSavedDetails}
+              data-testid="saved-address-clear"
+              className="border border-[#2f6b3f] bg-white px-2.5 py-1.5 text-[10px] font-semibold tracking-[.08em] text-[#2f6b3f] uppercase"
+            >
+              Naya address bharein
+            </button>
+          </div>
+        ) : null}
         <section>
           <h2 className="text-[11px] font-semibold tracking-[.16em] text-[#862222] uppercase">Contact</h2>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            <Field label="Full name" required value={form.customerName} onChange={(v) => update("customerName", v)} />
+            <Field label="Full name" required autoComplete="name" value={form.customerName} onChange={(v) => update("customerName", v)} />
             <Field
               label="Mobile number"
               required
               type="tel"
               inputMode="numeric"
+              autoComplete="tel"
               value={form.phone}
               onChange={(v) => update("phone", v)}
             />
@@ -467,6 +697,7 @@ export function CheckoutForm() {
               required
               type="email"
               className="sm:col-span-2"
+              autoComplete="email"
               value={form.email}
               onChange={(v) => update("email", v)}
             />
@@ -480,14 +711,16 @@ export function CheckoutForm() {
               label="Address (house, street, area)"
               required
               className="sm:col-span-2"
+              autoComplete="street-address"
               value={form.address}
               onChange={(v) => update("address", v)}
             />
-            <Field label="City" required value={form.city} onChange={(v) => update("city", v)} />
+            <Field label="City" required autoComplete="address-level2" value={form.city} onChange={(v) => update("city", v)} />
             <div>
               <label className="text-[10.5px] tracking-[.12em] text-[#6b6259] uppercase">State</label>
               <select
                 value={form.state}
+                autoComplete="address-level1"
                 onChange={(event) => update("state", event.target.value)}
                 className="mt-1 h-11 w-full border border-[#ddd2c6] bg-white px-3 text-[13px] outline-none focus:border-[#862222]"
               >
@@ -503,6 +736,7 @@ export function CheckoutForm() {
                 label="Pincode"
                 required
                 inputMode="numeric"
+                autoComplete="postal-code"
                 value={form.pincode}
                 onChange={(v) => update("pincode", v.replace(/\D/g, "").slice(0, 6))}
               />
@@ -542,7 +776,7 @@ export function CheckoutForm() {
                 </div>
               ) : null}
             </div>
-            <Field label="Order notes (optional)" value={form.notes} onChange={(v) => update("notes", v)} />
+            <Field label="Order notes (optional)" autoComplete="off" value={form.notes} onChange={(v) => update("notes", v)} />
           </div>
         </section>
 
@@ -556,8 +790,9 @@ export function CheckoutForm() {
               <path d="M9 12l2 2 4-4" />
             </svg>
             <p className="text-[12.5px] leading-relaxed text-[#4a423b]" data-testid="prepaid-note">
-              Prepaid order. Order place karte hi payment ka alag page khulega — payment wahan
-              karni hai. Payment seedha store account me jaata hai, koi gateway charge nahi.
+              Prepaid order. <strong>Place order</strong> dabate hi step 3 (payment) isi page par
+              khulega — UPI QR, &quot;Pay on UPI&quot; button aur confirm. Payment seedha store
+              account me jaata hai, koi gateway charge nahi.
             </p>
           </div>
         </section>
@@ -577,15 +812,9 @@ export function CheckoutForm() {
                       {resumed ? resumed.customer.name : form.customerName}
                     </p>
                     <p className="mt-0.5 text-[12px] leading-relaxed text-[#5c534b]" data-testid="review-address">
-                      {(resumed ? resumed.customer.address : form.address)},{" "}
-                      {resumed ? resumed.customer.city : form.city},{" "}
-                      {resumed ? resumed.customer.state : form.state} —{" "}
-                      {resumed ? resumed.customer.pincode : form.pincode}
+                      {shownAddress}
                     </p>
-                    <p className="mt-1 text-[12px] text-[#5c534b]">
-                      {resumed ? resumed.customer.phone : form.phone} ·{" "}
-                      {resumed ? resumed.customer.email : form.email}
-                    </p>
+                    {shownContact ? <p className="mt-1 text-[12px] text-[#5c534b]">{shownContact}</p> : null}
                     {(resumed ? resumed.customer.notes : form.notes) ? (
                       <p className="mt-1 text-[11.5px] text-[#8a8078]">
                         Note: {resumed ? resumed.customer.notes : form.notes}
@@ -617,7 +846,6 @@ export function CheckoutForm() {
               <ul className="mt-3 divide-y divide-[#eee6de] border border-[#eee6de] bg-white" data-testid="review-items">
                 {shownItems.map((line) => (
                   <li key={line.key} className="flex gap-3 p-3">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <SafeImage src={imageUrl(line.image, 160)} alt={line.title} className="h-16 w-12 shrink-0 object-cover" />
                     <div className="min-w-0 flex-1">
                       <p className="line-clamp-2 text-[12px] leading-snug">{line.title}</p>
@@ -640,21 +868,24 @@ export function CheckoutForm() {
                   <path d="M9 12l2 2 4-4" />
                 </svg>
                 <p className="text-[12.5px] leading-relaxed text-[#4a423b]" data-testid="prepaid-note">
-                  Prepaid order. <strong>Place order</strong> dabate hi order number banega aur payment ka
-                  alag page khulega. Payment confirm hone par hi order confirm hoga.
+                  Prepaid order. <strong>Place order</strong> dabate hi order number banega aur
+                  payment step 3 isi page par khulega (alag page nahi). UPI app tab hi khulti hai
+                  jab aap &quot;Pay on UPI&quot; dabate hain. Payment confirm hone par hi order
+                  confirm hoga.
                 </p>
               </div>
             </section>
           </>
         )}
       </div>
+  );
 
+  const summaryAside = (
       <aside className="h-fit border border-[#eee6de] bg-[#faf8f5] p-5 lg:sticky lg:top-[92px]">
         <h2 className="text-[11px] font-semibold tracking-[.16em] uppercase">Order summary ({shownCount})</h2>
         <ul className="mt-3 divide-y divide-[#eee6de]">
           {shownItems.map((line) => (
             <li key={line.key} className="flex gap-2.5 py-2.5">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <SafeImage src={imageUrl(line.image, 200)} alt={line.title} className="h-16 w-12 shrink-0 object-cover" />
               <div className="flex-1">
                 <p className="line-clamp-2 text-[11.5px] leading-snug">{line.title}</p>
@@ -748,9 +979,32 @@ export function CheckoutForm() {
           </div>
         ) : null}
 
-        {resumed ? (
+        {isPayment ? (
           <>
-            {/* Payment page se wapas aaye hain — sirf review confirm karke aage */}
+            {/* Step 3: order ban chuka hai — ab sirf payment + order details */}
+            <Link
+              href={`/orders/${encodeURIComponent(orderNumber ?? "")}`}
+              data-testid="payment-order-details"
+              className="mt-4 w-full bg-[#862222] px-4 py-3 text-center text-[11.5px] font-semibold tracking-[.16em] text-white uppercase"
+            >
+              Order details dekhein
+            </Link>
+            <button
+              type="button"
+              onClick={backToReview}
+              data-testid="payment-back-review-aside"
+              className="mt-2 w-full border border-[#ddd2c6] py-2.5 text-[10.5px] font-semibold tracking-[.14em] text-[#6b6259] uppercase"
+            >
+              ← Review order
+            </button>
+            <p className="mt-2 text-center text-[10.5px] leading-relaxed text-[#8a8078]">
+              Order <strong className="text-[#862222]">{orderNumber}</strong> place ho chuka hai — payment
+              upar UPI se kariye. Page band karne par bhi ye link dobara kholne se payment chal jaayega.
+            </p>
+          </>
+        ) : resumed ? (
+          <>
+            {/* Review se aage — payment step 3, isi page par */}
             <button
               type="button"
               onClick={() => goToPayment(resumed.orderNumber)}
@@ -808,6 +1062,26 @@ export function CheckoutForm() {
           policies.
         </p>
       </aside>
+  );
+
+  /**
+   * Step 3 par shell `<div>` hai: UPI card ke andar apna `<form>` (last-4 confirm)
+   * hota hai, aur nested form invalid HTML hai — outer submit bhi trigger ho jaata
+   * (doosra order ban jaata). Isliye payment step par `<form>` render hi nahi hota.
+   */
+  if (isPayment) {
+    return (
+      <div className="grid gap-8 lg:grid-cols-[1.5fr_1fr]" data-testid="checkout-payment-step">
+        {leftColumn}
+        {summaryAside}
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={submit} className="grid gap-8 lg:grid-cols-[1.5fr_1fr]">
+      {leftColumn}
+      {summaryAside}
     </form>
   );
 }
@@ -820,6 +1094,7 @@ function Field({
   type = "text",
   className = "",
   inputMode,
+  autoComplete,
 }: {
   label: string;
   value: string;
@@ -828,6 +1103,11 @@ function Field({
   type?: string;
   className?: string;
   inputMode?: "numeric" | "text" | "tel" | "email";
+  /**
+   * Browser ka apna autofill bhi kaam kare (owner, R36) — saved details ke saath
+   * mil kar customer ko dobara type nahi karna padta.
+   */
+  autoComplete?: string;
 }) {
   return (
     <div className={className}>
@@ -838,6 +1118,7 @@ function Field({
         required={required}
         type={type}
         inputMode={inputMode}
+        autoComplete={autoComplete}
         className="mt-1 h-11 w-full border border-[#ddd2c6] bg-white px-3 text-[13px] outline-none focus:border-[#862222]"
       />
     </div>

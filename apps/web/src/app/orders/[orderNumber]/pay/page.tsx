@@ -16,7 +16,9 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Complete payment", robots: { index: false, follow: false } };
 
 /**
- * Payment page — **alag page**, sirf order place hone ke baad khulta hai.
+ * Payment page — deep links (WhatsApp/email/QR) ke liye. Checkout me payment ab
+ * **step 3** par usi page ke andar hota hai (`/checkout?step=payment&order=LK-…`);
+ * ye route wahi `UpiPayment` render karta hai, isliye dono jagah ek jaisa flow hai.
  *
  * Flow (owner rule):
  *   checkout → "Place order" (validation + stock + pincode sab server par) →
@@ -76,7 +78,7 @@ export default async function PaymentPage({ params }: { params: Promise<{ orderN
         </Link>
 
         <div className="border border-[#e9dfd4] bg-white p-5 sm:p-7">
-          <p className="text-[10.5px] tracking-[.18em] text-[#9c8f82] uppercase">Step 2 of 2 — payment</p>
+          <p className="text-[10.5px] tracking-[.18em] text-[#9c8f82] uppercase">Step 3 of 3 — payment</p>
           <h1 className="mt-1 font-display text-[26px] leading-tight font-medium sm:text-[32px]">
             Pay {formatPrice(order.total)}
           </h1>
@@ -120,6 +122,14 @@ export default async function PaymentPage({ params }: { params: Promise<{ orderN
             whatsapp={settings.whatsapp}
             returnToken={signUpiReturn(order.orderNumber)}
             siteUrl={siteUrl}
+            /**
+             * UPI app se wapas **isi page** par aana hai — pehle callback
+             * `/orders/<n>` par jaata tha jahan ye component render hi nahi hota,
+             * isliye `upi=return` koi nahi padhta tha (auto-confirm bekaar).
+             */
+            returnPath={`/orders/${encodeURIComponent(order.orderNumber)}/pay`}
+            /** mobile ke last 4 digit pehle se — confirm ek tap me (owner, R36) */
+            defaultLast4={order.phone.replace(/\D/g, "").slice(-4)}
           />
 
           <div className="mt-6 border-t border-[#eee6de] pt-4">

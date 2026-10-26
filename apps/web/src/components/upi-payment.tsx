@@ -13,8 +13,9 @@ import { useStoreSettingsState } from "@/components/store-settings-provider";
 /**
  * UPI payment card — seedha owner ke UPI account me paisa.
  *
- * 1. Order place karte hi ye page khulta hai; mobile par UPI app khud khul jaati
- *    hai (`upi://pay` intent, amount bhara hua), desktop par QR scan hota hai.
+ * 1. Step 3 par QR + ek **"Pay on UPI"** button. UPI app **apne aap nahi khulti**
+ *    (owner rule, R36) — button dabane par hi `upi://pay` intent chalta hai, warna
+ *    customer ko bina bataye app jump lagti thi. Desktop par QR scan hota hai.
  * 2. Pay karne ke baad **sirf mobile ke last 4 digit** daal kar "Payment ho gaya —
  *    confirm kariye" dabata hai (UTR kabhi nahi maanga jaata).
  * 3. Admin UPI statement se verify karke order confirm karta hai.
@@ -22,7 +23,7 @@ import { useStoreSettingsState } from "@/components/store-settings-provider";
  * GitHub Pages (static) par API nahi hota — wahan last-4 form ki jagah WhatsApp
  * button dikhta hai, taaki customer atak na jaye.
  *
- * UPI ID **sheet se live** hai: page khulte hi `/api/settings?fresh=1` call hota hai,
+ * UPI ID **sheet se live** hai: step 3 khulte hi `/api/settings?fresh=1` call hota hai,
  * isliye owner ne sheet me UPI badla ho to QR + UPI ID apne aap naye par chale jaate
  * hain (page pehle se khula ho tab bhi). Server-rendered value sirf pehla paint hai.
  */
@@ -36,6 +37,9 @@ export function UpiPayment({
   whatsapp,
   returnToken,
   siteUrl,
+  returnPath,
+  defaultLast4,
+  onConfirmed,
 }: {
   orderNumber: string;
   amount: number;
@@ -48,8 +52,26 @@ export function UpiPayment({
   returnToken?: string;
   /** apni site ka URL — callback isi par wapas aata hai */
   siteUrl?: string;
+  /**
+   * UPI app se wapas kis path par aana hai (default `/orders/<n>`). Checkout ke
+   * step 3 se `/checkout?step=payment&order=<n>` bheja jaata hai, taaki customer
+   * wahi step 3 par lauthe aur order **auto-confirm** hota dikhe.
+   */
+  returnPath?: string;
+  /** mobile ke last 4 digit pehle se bhare (form/saved details se) */
+  defaultLast4?: string;
+  /** UPI return se payment confirm ho gaya — parent ko status batane ke liye */
+  onConfirmed?: () => void;
 }) {
   const [last4, setLast4] = useState("");
+  /**
+   * Owner (R36): customer wahi mobile deta hai jis par order hai — last 4 digit
+   * pehle se bhare, taaki "payment ho gaya" confirm ek tap me ho jaaye.
+   */
+  useEffect(() => {
+    const hint = (defaultLast4 ?? "").replace(/\D/g, "").slice(-4);
+    if (hint.length === 4) setLast4((current) => (current ? current : hint));
+  }, [defaultLast4]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
@@ -59,7 +81,6 @@ export function UpiPayment({
   const [statusNote, setStatusNote] = useState<string | null>(null);
   const router = useRouter();
   const autoRan = useRef(false);
-  const appOpened = useRef(false);
   const { settings: liveSettings, refresh, live } = useStoreSettingsState();
 
   /**
@@ -79,8 +100,21 @@ export function UpiPayment({
     if (!returnToken) return undefined;
     const base = (siteUrl ?? (typeof window !== "undefined" ? window.location.origin : "")).replace(/\/+$/, "");
     if (!base) return undefined;
-    return `${base}/orders/${encodeURIComponent(orderNumber)}?${new URLSearchParams({ upi: "return", t: returnToken })}`;
-  }, [orderNumber, returnToken, siteUrl]);
+    /**
+     * `returnPath` zaroori hai: UPI app jis page par wapas bhejta hai, wahan ye
+     * component render hona chahiye — warna `upi=return` koi padhta hi nahi aur
+     * auto-confirm chup-chaap bekaar jaata hai (pehle `/orders/<n>` par yahi hua).
+     */
+    const path = (returnPath ?? `/orders/${encodeURIComponent(orderNumber)}`).trim() || "/";
+    try {
+      const url = new URL(path, base);
+      url.searchParams.set("upi", "return");
+      url.searchParams.set("t", returnToken);
+      return url.toString();
+    } catch {
+      return `${base}${path.startsWith("/") ? path : `/${path}`}?${new URLSearchParams({ upi: "return", t: returnToken })}`;
+    }
+  }, [orderNumber, returnToken, returnPath, siteUrl]);
 
   /**
    * UPI app se wapas aane par (deep link ka `url` callback) order **auto-confirm**.
@@ -105,9 +139,12 @@ export function UpiPayment({
         url.searchParams.delete("upi");
         url.searchParams.delete("t");
         window.history.replaceState({}, "", url.toString());
+        // step 3 (checkout) par server prop nahi hota — parent ko status batao
+        onConfirmed?.();
         router.refresh();
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderNumber, paymentStatus, returnToken, router]);
 
   const upiUri = useMemo(
@@ -224,23 +261,11 @@ export function UpiPayment({
   const paid = paymentStatus === "paid";
 
   /**
-   * "Place order" ke turant baad payment page: mobile par pehli baar apne aap
-   * UPI app (chooser) khulti hai. Browser gesture ke bina bhi intent usually
-   * chalta hai; na chale to QR/UPI ID neeche maujood hai.
+   * Owner (R36): payment step khulte hi UPI app par **redirect nahi**. Pehle
+   * `?pay=1` dekh kar mobile me 250ms baad intent khud chal jaata tha — customer
+   * ko bina chhue app chooser khul jaata tha. Ab sirf neeche wala "Pay on UPI"
+   * button (asli user gesture) wahi intent kholta hai.
    */
-  useEffect(() => {
-    if (appOpened.current || typeof window === "undefined" || paid) return;
-    if (new URLSearchParams(window.location.search).get("pay") !== "1") return;
-    if (!/android|iphone|ipad|ipod/i.test(navigator.userAgent)) return;
-    appOpened.current = true;
-    const timer = window.setTimeout(() => {
-      window.location.href = upiUri;
-    }, 250);
-    return () => window.clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-
 
   return (
     <div className="mt-4 overflow-hidden border border-[#e6d3a8] bg-[#fdf9ee]" data-testid="upi-payment">
@@ -310,20 +335,19 @@ export function UpiPayment({
 
             {/*
               Owner rule: koi app-brand list nahi — sirf ek generic UPI button.
-              Ek hi "Open UPI app" button — phone par chooser khud khulta hai, amount
-              aur order note pehle se bhare hue. Payment page place order ke turant
-              baad khud khulta hai (`?pay=1`).
+              "Pay on UPI" **dabane par hi** phone ka UPI app chooser khulta hai
+              (amount + order note pehle se bhare). Page khulte hi khud nahi khulta.
             */}
             <div className="mt-3" data-testid="upi-open-block">
               <a
                 href={upiUri}
                 data-testid="upi-open"
-                className="inline-flex h-10 w-full items-center justify-center bg-[#5c1010] px-4 text-[11px] font-semibold tracking-[.12em] text-white uppercase sm:w-auto"
+                className="inline-flex h-11 w-full items-center justify-center bg-[#5c1010] px-5 text-[12px] font-semibold tracking-[.12em] text-white uppercase sm:w-auto"
               >
-                Open UPI app to pay {formatPrice(amount)}
+                Pay on UPI · {formatPrice(amount)}
               </a>
               <p className="mt-1.5 text-[10.5px] text-[#8a7a5f]">
-                Button se UPI app khulegi (amount bhara hua). Na khule to QR scan kariye.
+                Button dabate hi UPI app khulegi (amount bhara hua). Na khule to QR scan kariye.
               </p>
             </div>
 

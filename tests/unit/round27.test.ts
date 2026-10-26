@@ -88,7 +88,8 @@ test("payment page: UTR nahi maangta — sirf last 4 digit + ek confirm button",
   assert.match(pay, /data-testid="upi-claim"/);
   assert.match(pay, /Mobile ke last 4 digit/);
   // page par lambi text wall na ho (owner ne kam karne ko kaha)
-  assert.ok(pay.split("\n").length < 420, "payment card compact ho gaya");
+  // R36: returnPath / defaultLast4 / onConfirmed props add hue — budget 470 line
+  assert.ok(pay.split("\n").length < 470, "payment card compact ho gaya");
 });
 
 test("payment page par 'payment ho gaya' confirm ka saaf message", () => {

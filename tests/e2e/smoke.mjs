@@ -188,6 +188,49 @@ async function main() {
     const pdfMagic = String.fromCharCode(...pdfBytes.slice(0, 5));
     check("GST invoice PDF downloads", invoice.status === 200 && pdfMagic === "%PDF-", `${invoice.status} ${pdfMagic}`);
     check("invoice PDF has content", pdfBytes.length > 1500, `${pdfBytes.length} bytes`);
+
+    // R36 (owner): payment ab checkout ke **step 3** par hai, alag page nahi —
+    // client ko amount/live UPI/status/return token isi API se milta hai.
+    const payContext = await get(`/api/orders/${orderBody.orderNumber}/payment-context`);
+    const payContextBody = JSON.parse(payContext.text);
+    check("payment-context 200", payContext.status === 200, `status ${payContext.status}`);
+    check(
+      "payment-context carries the live UPI (sheet-first, not env default)",
+      typeof payContextBody.data?.upi?.id === "string" && payContextBody.data.upi.id.includes("@"),
+      JSON.stringify(payContextBody.data?.upi),
+    );
+    check("payment-context has a signed UPI return token", Boolean(payContextBody.data?.returnToken));
+    check(
+      "payment-context keeps email/address/full phone out (privacy)",
+      !("email" in (payContextBody.data?.customer ?? {})) &&
+        !("address" in (payContextBody.data?.customer ?? {})) &&
+        typeof payContextBody.data?.customer?.phoneMasked === "string",
+      JSON.stringify(payContextBody.data?.customer),
+    );
+    check("payment-context is never cached", /no-store/.test(payContext.headers.get("cache-control") ?? ""));
+    const unknownContext = await get("/api/orders/LK-NOTREAL1/payment-context");
+    check("payment-context 404 for an unknown order", unknownContext.status === 404, `status ${unknownContext.status}`);
+
+    // step 3 ka URL — wahi order dobara kholne par payment yahin chalta hai.
+    // (Checkout ka form client-side hai: server HTML me sirf Suspense fallback aata
+    // hai, steps client par render hote hain — isliye yahan status check kaafi hai.)
+    const stepThree = await get(`/checkout?step=payment&order=${orderBody.orderNumber}`);
+    check("checkout step 3 URL renders", stepThree.status === 200, `status ${stepThree.status}`);
+    check("checkout plain URL bhi 200", (await get("/checkout")).status === 200);
+
+    // purane deep links (WhatsApp/email/QR) safe — wahi UPI card, par auto-redirect nahi
+    const payPage = await get(`/orders/${orderBody.orderNumber}/pay`);
+    check("payment deep link still works", payPage.status === 200, `status ${payPage.status}`);
+    check(
+      "payment card ek 'Pay on UPI' button dikhata hai",
+      payPage.text.includes("Pay on UPI") && payPage.text.includes('data-testid="upi-open"'),
+    );
+    check("payment page par auto-redirect flag nahi (?pay=1 hata)", !payPage.text.includes("?pay=1"));
+    check(
+      "payment deep link par back-to-review + UPI return token hai",
+      // callback URL encoded hota hai: `upi%3Dreturn`
+      payPage.text.includes('data-testid="back-to-review"') && /upi(%3D|=)return/i.test(payPage.text),
+    );
   }
 
   // admin → customer parity: status note aur payment verification

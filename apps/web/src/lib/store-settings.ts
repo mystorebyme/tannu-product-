@@ -1,6 +1,7 @@
 import "server-only";
 
 import fs from "@/lib/fs-runtime";
+import { runInBackground } from "./background";
 import { dataFile } from "./data-dir";
 import { dbEnabled } from "./db";
 import { readSheetSettings, sheetSettingsInfo, writeSheetSettings } from "./google-sheets";
@@ -128,11 +129,16 @@ function mergeNow(fresh: boolean): Promise<StoreSettings> {
 }
 
 /** stale value dete waqt background refresh — ek second me ek se zyada nahi. */
+/**
+ * Vercel par response ke baad function freeze ho sakta hai — isliye `after()`
+ * (`runInBackground`), warna sheet ka fresh value background me kabhi commit hi
+ * nahi hoti aur TTL khatam hone tak purani settings chalti rehti hain.
+ */
 function revalidateInBackground() {
   const now = Date.now();
   if (inflight || now - lastBackgroundAt < 1_000) return;
   lastBackgroundAt = now;
-  void merge({ fresh: false }).catch(() => undefined);
+  runInBackground(() => merge({ fresh: false }).catch(() => undefined));
 }
 
 async function merge(options: { fresh?: boolean }): Promise<StoreSettings> {

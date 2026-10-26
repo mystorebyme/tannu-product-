@@ -62,9 +62,11 @@ Repo me **do Next.js apps** hain (ek hi repo, do deploy):
 | Product listing `/collections/[handle]` | `apps/web/src/app/collections/[handle]/page.tsx` |
 | Product detail `/products/[handle]` | `apps/web/src/app/products/[handle]/page.tsx` |
 | Cart `/cart` | `apps/web/src/app/cart/page.tsx` + `components/cart-provider.tsx` |
-| Checkout (step 1–2) `/checkout` | `apps/web/src/app/checkout/page.tsx` + `components/checkout-form.tsx` |
+| Checkout (step 1–3: delivery → review → **payment**) `/checkout` | `apps/web/src/app/checkout/page.tsx` + `components/checkout-form.tsx` + `components/checkout-payment-step.tsx` |
+| Saved delivery details (browser cache) | `apps/web/src/lib/checkout-details.ts` |
+| Step 3 ka data API | `apps/web/src/app/api/orders/[orderNumber]/payment-context/route.ts` |
 | Order confirm / tracking `/orders/[orderNumber]` | `apps/web/src/app/orders/[orderNumber]/page.tsx` |
-| **Payment (step 3)** `/orders/[orderNumber]/pay` | `apps/web/src/app/orders/[orderNumber]/pay/page.tsx` + `components/upi-payment.tsx` |
+| Payment deep link (WhatsApp/email/QR) `/orders/[orderNumber]/pay` | `apps/web/src/app/orders/[orderNumber]/pay/page.tsx` + `components/upi-payment.tsx` |
 | Track order form `/track-order` | `apps/web/src/app/track-order/page.tsx` + `components/track-order-form.tsx` |
 | Wishlist / Compare | `apps/web/src/app/wishlist/`, `apps/web/src/app/compare/` |
 | Account `/account` | `apps/web/src/app/account/page.tsx` |

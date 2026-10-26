@@ -76,8 +76,8 @@ test("R33: checkout order place par snapshot save karta hai (back ke liye)", () 
   assert.match(form, /data-testid="review-continue-payment"/);
   // resume mode me dobara order nahi banta
   assert.match(form, /if \(resumed\) \{\s*goToPayment\(resumed\.orderNumber\);/);
-  // browser back bhi review par aaye
-  assert.match(form, /window\.history\.replaceState\(\{\}, "", reviewUrl\(result\.data\.orderNumber\)\)/);
+  // browser back bhi review par aaye (R36: goToPayment me replaceState + pushState)
+  assert.match(form, /window\.history\.replaceState\(\{\}, "", reviewUrl\(target\)\)/);
   assert.match(form, /data-testid="review-loading"/);
 });
 
@@ -87,7 +87,10 @@ test("R33: checkout 3 step — delivery → review → payment", () => {
   const review = form.indexOf('label: "Review"');
   const payment = form.indexOf('label: "Payment"');
   assert.ok(delivery > 0 && review > delivery && payment > review, "step order delivery → review → payment");
-  assert.match(form, /router\.push\(`\/orders\/\$\{encodeURIComponent\(result\.data\.orderNumber\)\}\/pay\?pay=1`\)/);
+  // R36: payment step 3 checkout ke **andar** hai — alag page par redirect nahi
+  assert.match(form, /paymentUrl\(target\)/);
+  assert.match(form, /data-testid="checkout-payment-step"/);
+  assert.doesNotMatch(form, /\?pay=1/);
 });
 
 test("R33: snapshot sessionStorage me chalta hai (permanent nahi)", () => {

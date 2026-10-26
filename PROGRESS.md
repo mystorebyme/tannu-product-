@@ -636,3 +636,63 @@ sheet se data dekh kar turant change hoti hai wo honi chahiye" + Cloudflare buil
       `.env.example`, **`docs/00-overview/owner-report-round35.md`** (owner ke liye poori guide)
 - [ ] **Deploy baaki** — Vercel (production) par ye code jaana zaroori hai, warna sheet wala
       UPI live nahi hoga; Cloudflare Worker chahiye to §5.2 ki 3 settings + secrets
+
+### R36 — Address yaad (recommend) + payment **step 3 par yahin** + UPI auto-redirect band
+
+Owner (27 Oct 2026): "ek baar address card ki detail fill kare to sab cache me save kar lena,
+next time direct recommend ho jaaye"; "payment ka alag se page nahi khulna chahiye — wahi 3rd
+step me kaam kare, back jaane par bhi, aur wapis usi order me payment par jaane par bhi";
+"payment page par jaate hi UPI par redirect na kare, Pay on UPI kare tab jaakar UPI detect ho";
+"sheet ko vapis se configure karo — vaise abhi Vercel par deploy hai, fix karo".
+
+- [x] **Saved delivery details** — naya `lib/checkout-details.ts` (localStorage, 6 mahine,
+      pure `normaliseCheckoutDetails`: country-code/leading-0 → 10 digit, HTML/length clip,
+      adhoori details save nahi). Checkout mount par prefill + green notice
+      (`saved-address`) + "Naya address bharein" (`saved-address-clear`); save `goToReview`
+      aur order place par. Browser autofill ke liye `autocomplete` attrs
+      (name/tel/email/street-address/address-level2/address-level1/postal-code)
+- [x] **Payment step 3 = checkout ke andar** (alag page nahi): naya
+      `components/checkout-payment-step.tsx` + naya API
+      `GET /api/orders/[orderNumber]/payment-context` (amount, **sheet-first live UPI**,
+      status, reference, signed UPI-return token, items, name/city/state/pincode +
+      `phoneMasked` — poora address/email/phone **nahi**). URL `/checkout?step=payment&order=LK-…`
+- [x] History: order place par `replaceState(reviewUrl)` → `pushState(paymentUrl)` ⇒ browser
+      **back** = review; `popstate` listener se step URL-sync (refresh/share/doosra tab par bhi
+      step 3 chalta hai; snapshot na ho to context se review/summary ban jaati hai)
+- [x] Step 3 par outer `<form>` render nahi hota (UPI card ke andar apna form hai — nested form
+      invalid HTML + outer submit se doosra order ban jaata)
+- [x] **UPI auto-redirect hata**: `?pay=1` + `appOpened` + `window.location.href = upiUri`
+      effect delete; button ab **"Pay on UPI · ₹…"** (tap = asli gesture)
+- [x] **Auto-confirm bug fix**: UPI callback pehle `/orders/<n>` par jaata tha (jahan
+      `UpiPayment` render hi nahi hota) → `upi=return` koi nahi padhta tha. Ab `returnPath`
+      prop: step 3 → `/checkout?step=payment&order=<n>`, pay page → `/orders/<n>/pay`;
+      confirm hote hi `onConfirmed()` → status "paid"
+- [x] Last-4 prefill: `defaultLast4` (pay page: order ke phone se, step 3: form/saved phone se)
+      — "payment ho gaya" ek tap me
+- [x] `PaymentStatusWatcher` me `onStatusChange` (step 3 client-side hai, server prop nahi)
+- [x] **Vercel fix**: `google-sheets.ts` + `store-settings.ts` ka background refresh ab
+      `runInBackground()` (Next `after()`) se — pehle `void promise` tha aur Vercel par
+      response ke baad function freeze hone se sheet refresh adhoora reh jaata
+- [x] Vercel config verify (API se): project **`liksha-clothing`** (root `apps/web`,
+      domains designerclothing.fashion + www) me `GOOGLE_SHEETS_WEBAPP_URL`,
+      `GOOGLE_SHEETS_TOKEN`, `SHEET_SELFTEST_KEY`, `DATABASE_URL`, `UPI_RETURN_SECRET`,
+      `STORE_UPI_ID=dhakadgourav@fam` **set hain**; CSV URL nahi (optional). Production
+      deployment commit `9704b3b` ka tha ⇒ **R35/R36 ka code live nahi tha** (asli wajah)
+- [x] **Lint fix (bonus)**: `apps/web/eslint.config.mjs` me `ignores` rules wale object ke
+      andar tha — flat config me wo *global* ignore nahi hota, isliye `.next`/`.cloudflare`
+      ke minified bundle lint ho rahe the (`vite build` ke baad 27 rules-of-hooks **error**
+      + lint 4.5 minute leta tha). Ab `ignores` alag object me + `.cloudflare`/`.vinext`/`out`
+      add ⇒ **0 errors / 35 warnings, 9 second**
+- [x] Tests: naya **`tests/unit/round36.test.ts` (17)**; `checkout-flow` + `round33` +
+      `round27` guards naye flow ke hisaab se; `tests/e2e/smoke.mjs` me payment-context
+      (200/404, live UPI, return token, privacy, `no-store`) + pay-page deep-link checks
+- [x] Verify: unit **245/0** (pehle 229), integration 40/0, sheets 10/10, db 9/0 ⇒
+      **304/0**; typecheck ✓ (web); `next build` ✓ (`/checkout` static hi raha,
+      `/api/orders/[orderNumber]/payment-context` ƒ); `vite build` (vinext) ✓;
+      workerd preview par **smoke 100/0** (pehle 88), `payments.mjs` 59/0, `round23.mjs` 23/0;
+      lint 0 errors
+- [x] Docs: **`docs/00-overview/owner-report-round36.md`**, `docs/09-devops/google-sheets.md`
+      **§4c (Vercel config + "vapis configure" ke 5 step + Vercel `after()` fix)**,
+      `docs/00-overview/owner-code-map.md`
+- [ ] **Deploy baaki** — Vercel `liksha-clothing` production par ye code jaana zaroori hai
+      ( warna na address recommend hoga, na step-3 payment, na sheet ka live UPI)

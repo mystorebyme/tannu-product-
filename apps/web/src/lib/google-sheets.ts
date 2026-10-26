@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { Order } from "@liksha/types";
+import { runInBackground } from "./background";
 import {
   invoiceSheetRow,
   normaliseSheetSettings,
@@ -274,12 +275,19 @@ export async function readSheetSettings(options: { fresh?: boolean } = {}): Prom
   return readNow();
 }
 
-/** stale-while-revalidate: page ruke bina background me nayi value laao. */
+/**
+ * stale-while-revalidate: page ruke bina background me nayi value laao.
+ *
+ * `runInBackground` (Next `after()`) isliye zaroori hai: **Vercel** par response
+ * jaate hi function freeze ho sakta hai, aur `void promise` wala refresh kabhi
+ * poora hi nahi hota — sheet ka naya UPI agle request tak purana rehta. Workers
+ * par `after()` fallback fire-and-forget hi chalta hai (pehle jaisa).
+ */
 function revalidateInBackground() {
   const now = Date.now();
   if (inflight || now - lastBackgroundAt < 1_000) return;
   lastBackgroundAt = now;
-  void readNow().catch(() => undefined);
+  runInBackground(() => readNow().catch(() => undefined));
 }
 
 /** Ek hi network read — concurrent callers wahi promise share karte hain. */

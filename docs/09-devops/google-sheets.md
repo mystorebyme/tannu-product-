@@ -162,6 +162,56 @@ Tuning (env): `SHEET_READ_TIMEOUT_MS` (default 4000), `SHEET_SETTINGS_TTL_MS` (d
 > Payment page to 350ms baad hi default par chala jaata tha. Teeno wajah ab fix hain
 > (`tests/sheets/settings-realtime.test.ts` inhe naapta hai).
 
+## 4c. Vercel par sheet config (`designerclothing.fashion`) — kya set hai, dobara kaise karein
+
+Storefront Vercel project **`liksha-clothing`** par chalta hai (root directory `apps/web`,
+build command `cd ../.. && npm run build --workspace @liksha/web`, domains
+`designerclothing.fashion` + `www.`). Admin panel alag project **`liksha-admin`** (root
+`apps/admin`) par hai. 27 Oct 2026 ko Vercel API se verify kiya — `liksha-clothing` me ye set hai:
+
+| Env variable | Status | Kaam |
+| --- | --- | --- |
+| `GOOGLE_SHEETS_WEBAPP_URL` | ✅ set (`script.google.com/macros/s/…/exec`) | Apps Script web app (settings + rows) |
+| `GOOGLE_SHEETS_TOKEN` | ✅ set (encrypted) | Apps Script ka `TOKEN` |
+| `SHEET_SELFTEST_KEY` | ✅ set (encrypted) | `/api/sheet-selftest?key=…` debugging |
+| `DATABASE_URL`, `ADMIN_API_TOKEN`, `OTP_TOKEN_SECRET`, `UPI_RETURN_SECRET` | ✅ set | order DB + payment confirm |
+| `STORE_UPI_ID` / `STORE_UPI_NAME` | ✅ `dhakadgourav@fam` / `Designer Clothing` | **sirf fallback** — sheet na chale tab |
+| `GOOGLE_SHEETS_SETTINGS_CSV_URL` | ❌ nahi | optional fallback (~5 min Google cache) — real-time ke liye zaroori nahi |
+| `SHEET_READ_TIMEOUT_MS` / `SHEET_SETTINGS_TTL_MS` | ❌ nahi (default 4000 / 10000) | tuning chahiye tabhi add karein |
+
+### Sheet "vapis configure" karni ho (script badla / naya deployment banaya)
+
+1. Apps Script editor → **Deploy → Manage deployments** → ✏️ Edit → Version: **New version** →
+   Execute as **Me** → Who has access **Anyone** → **Deploy**.
+   ⚠️ Script edit karke sirf *Save* karne se `/exec` URL **update nahi hota** — new version
+   deploy karna zaroori hai. **Naya** deployment banaya to URL hi badal jaata hai.
+2. Apps Script ka `TOKEN` aur Vercel ka `GOOGLE_SHEETS_TOKEN` same hona chahiye.
+3. Vercel → project **`liksha-clothing`** → Settings → Environment Variables →
+   `GOOGLE_SHEETS_WEBAPP_URL` (aur zaroorat ho to `GOOGLE_SHEETS_TOKEN`) → **Save**.
+4. **Redeploy** zaroori: Deployments → latest → ⋯ → **Redeploy** (env change existing
+   deployment par apply nahi hota).
+5. Verify:
+   ```bash
+   curl -s "https://designerclothing.fashion/api/settings?fresh=1"     # meta.sheetSource + data.upiId
+   curl -s "https://designerclothing.fashion/api/sheet-selftest?key=<SHEET_SELFTEST_KEY>"
+   ```
+
+> **Vercel-specific fix (R36):** background sheet refresh pehle `void promise` tha — Vercel par
+> response jaate hi function freeze ho sakta hai, isliye refresh adhoora reh jaata tha. Ab
+> `runInBackground()` (Next `after()`) chalta hai: response ke baad bhi platform task poora
+> karta hai. Cloudflare Workers par wahi fire-and-forget fallback chalta rehta hai.
+
+> **Pehle production par purana code tha:** R35 ka sheet fix merge/deploy na hone ki wajah se
+> live site 900ms-timeout wala reader chala rahi thi (sheet ka UPI ignore → default UPI).
+> Sheet ka asar dikhne ke liye **deploy zaroori** hai — `docs/00-overview/owner-report-round36.md` §5.
+
+### Checkout ka step 3 aur sheet
+
+Payment ab checkout ke **andar step 3** par hai (`/checkout?step=payment&order=LK-…`, R36 se).
+Wo UPI `/api/orders/<n>/payment-context` se leta hai, jo `getStoreSettingsFast()` se
+**sheet-first** UPI deta hai — sheet me UPI badalte hi naya order naye VPA par banta hai
+(deploy/restart ki zaroorat nahi).
+
 ## 5. Security
 
 - Apps Script URL + token dono **server-side env** me hain, browser bundle me nahi.

@@ -21,11 +21,11 @@
 | --- | --- |
 | products | 446 |
 | collections | 11 |
-| sourceFiles | 246 |
-| sourceLines | 26269 |
-| testFiles | 43 |
+| sourceFiles | 249 |
+| sourceLines | 26962 |
+| testFiles | 44 |
 | skills | 20 |
-| docsPages | 122 |
+| docsPages | 123 |
 
 ## Skills (20/20 pass)
 
@@ -52,7 +52,7 @@
 | testing | 61 | ✅ |
 | typescript-discipline | 58 | ✅ |
 
-## API → test map (35/35 active routes covered)
+## API → test map (36/36 active routes covered)
 
 Sab active routes ka test hai ✅
 
