@@ -154,10 +154,10 @@ chahiye.
 
 - `BASE_URL=http://127.0.0.1:3001 npm run test:smoke` → **88 passed, 0 failed**
   (`dev:vinext` = asli workerd + `.dev.vars`).
-- `BASE_URL=http://127.0.0.1:8787 npm run test:smoke` → **77 passed, 10 failed** — saare 10
-  admin-token wale checks. Wajah: `vite preview` production bundle local secrets load **nahi**
-  karta (by design) — usi liye admin-authed checks `dev:vinext` se verify hue. Deploy par ye
-  secrets `wrangler secret put` se aate hain.
+- `BASE_URL=http://127.0.0.1:8787 npm run test:smoke` → **88 passed, 0 failed**
+  (`vite preview` = production bundle, local values `apps/web/.env` se).
+  Note: secrets ke bina preview me admin-token wale checks 401 dete hain (10 checks) —
+  isliye local `.env`/`.dev.vars` me dev values zaroori hain; deploy par `wrangler secret put`.
 - `dev:vinext` start par warning aati hai:
   `Missing required secrets for Worker "liksha-storefront": …` — local dev me jinke paas value
   nahi, unke liye. Production me sab set hone chahiye (§4).

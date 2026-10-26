@@ -582,7 +582,7 @@ likhega). Uske baad `/api/sheet-selftest` + connector se row confirm karna hai.
       `catalog:verify` ok, `next build` ok, `vite build` ok
 - [x] Doc: `docs/09-devops/cloudflare-workers.md` (commands, config, secrets, feature matrix,
       preview deploy steps, rollback, limitations)
-- [x] Repo ka apna smoke suite workerd par: `BASE_URL=http://127.0.0.1:3001 npm run test:smoke`
-      → **88 pass / 0 fail** (`dev:vinext`, `.dev.vars`); `vite preview` (8787) par 77/10 — saare
-      10 admin-token wale (preview local secrets nahi leta, deploy par `wrangler secret put`)
+- [x] Repo ka apna smoke suite workerd par dono tarah: `BASE_URL=…:3001 npm run test:smoke`
+      → **88/0** (`dev:vinext`) aur `BASE_URL=…:8787 npm run test:smoke` → **88/0**
+      (`vite preview` = production bundle; local values `apps/web/.env` se)
 - [ ] **Preview deploy nahi hua** — Cloudflare credentials nahi the; DNS/Vercel production jaisa hi hai
