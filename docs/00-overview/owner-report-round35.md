@@ -105,10 +105,16 @@ Executing user deploy command: npx wrangler deploy
 ```
 
 `npx wrangler deploy` **repo root** par chala. Root par koi `wrangler.toml` / `wrangler.jsonc`
-**hai hi nahi** (jaan-boojh kar nahi hai), isliye wrangler ko laga "ye plain HTML/CSS site hai"
-aur wo static folder dhoondhne laga — mila nahi → error. Aapka storefront Next.js app hai:
-uska Worker **vinext** banata hai aur uski config `apps/web/cloudflare.config.ts` me hai.
-Isliye deploy **`apps/web` se** chalti hai — root se `wrangler deploy` kabhi nahi.
+**hai hi nahi** (jaan-boojh kar nahi hai). Config na milne par Cloudflare "automatic
+configuration" chalata hai — wo static site ka folder (`public/`, `dist/`) dhoondhta hai,
+milta nahi → error. Aapka storefront Next.js app hai: uska Worker **vinext** banata hai aur
+uski config `apps/web/cloudflare.config.ts` me hai. Isliye deploy **`apps/web` se** chalti
+hai — root se `wrangler deploy` kabhi nahi.
+
+> **Aapka Cloudflare worker ka naam `designer` hai** (GitHub PR ke check se dikha:
+> "Workers Builds: designer → fail"). Neeche `WORKER_NAME=designer` isliye zaroori hai —
+> warna deploy ek **naya** worker bana dega aur `designer` (jisme aapka domain/routes hain)
+> purana/stale reh jaayega.
 
 ### 5.2 Cloudflare dashboard me sirf 3 settings badalni hain
 
@@ -116,23 +122,39 @@ Cloudflare → **Workers & Pages** → aapka Worker (`liksha-storefront`) → **
 
 | Setting | Value |
 |---|---|
+| **Git branch** | `main` |
 | **Root directory** | `/` (repo root — `apps/web` mat likhiye, warna dependencies install nahi hongi) |
 | **Build command** | `npm ci --no-audit --no-fund` |
 | **Deploy command** | `bash scripts/deploy-cloudflare.sh` |
 
-Save → **Retry deployment** (ya naya push). Bas.
+Usi screen par **Build variables and secrets** me do variable add kariye:
+
+| Variable | Value | Kyun |
+|---|---|---|
+| `WORKER_NAME` | `designer` | aapka worker isi naam se hai — naya worker banne se rokta hai |
+| `NODE_VERSION` | `22` | repo ko Node 22 chahiye (purane Node par build fail hoti hai) |
+
+Save → **Retry deployment** (ya naya push). Bas. Deploy command me
+**`npx wrangler deploy` mat rakhiye** — wahi purani galti hai.
 
 > `scripts/deploy-cloudflare.sh` naya file hai is round me — wahi karta hai jo aap local par
 > karte: root par `npm ci` (monorepo workspaces) → `npm run deploy:vinext --workspace @liksha/web`
 > → vinext build → `cf deploy` (`apps/web/cloudflare.config.ts` padh kar).
 > Deploy command me **`npx wrangler deploy` mat rakhiye** — wahi purani galti hai.
 
-### 5.3 Cloudflare ka token (ek baar, 2 minute)
+### 5.3 Cloudflare ka token (Workers Builds me zaroori **nahi**)
+
+Workers Builds apna API token **khud** lagata hai — Worker → **Settings → Build → API token**
+(wahan "Create new token" default hai: Workers Scripts edit + routes edit permission).
+Yaani §5.2 ki settings kaafi hain.
+
+Token sirf tab chahiye jab aap **GitHub Actions** ya **apne laptop** se deploy karein:
 
 1. Cloudflare dashboard → **My Profile → API Tokens → Create Token**.
 2. Template: **Edit Cloudflare Workers** → Account Resources: *Workers Scripts = Edit* →
    **Continue to summary → Create Token** → token copy.
-3. Worker → **Settings → Environment variables** (ya Build settings) me daalein:
+3. Jahan se deploy karte hain wahan daalein — GitHub repo → **Settings → Secrets and
+   variables → Actions**, ya Cloudflare → Build variables:
 
    ```
    CLOUDFLARE_API_TOKEN  = <paste token>
@@ -143,11 +165,13 @@ Save → **Retry deployment** (ya naya push). Bas.
 
 ### 5.4 Worker ke secrets (ek baar — ye sabse zaroori step hai)
 
-Deploy ke baad, Worker ke andar ke secrets daalein (dashboard → Worker → **Settings →
-Variables and Secrets** → *Add* → type **Secret**), ya local se:
+Deploy ke baad, Worker ke andar ke secrets daalein. Sabse aasaan: dashboard → Worker
+(`designer`) → **Settings → Variables and Secrets** → *Add* → type **Secret**.
+CLI se karna ho to:
 
 ```bash
 cd apps/web
+export WORKER_NAME=designer      # aapka existing worker
 npx wrangler login
 
 npx wrangler secret put DATABASE_URL              # ⚠️ zaroori — warna order memory me, restart par gayab
@@ -187,7 +211,7 @@ Manual button hai — har push par apne aap deploy nahi hota (production abhi Ve
 
 ```bash
 cd apps/web && npx wrangler login && cd ../..
-npm run deploy:worker        # install + build + deploy
+WORKER_NAME=designer npm run deploy:worker     # install + build + deploy
 ```
 
 ---

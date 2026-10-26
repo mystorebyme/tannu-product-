@@ -30,9 +30,20 @@ const SECRETS = [
   "RESEND_API_KEY",
 ] as const;
 
+/**
+ * Worker ka naam — default `liksha-storefront`, par **`WORKER_NAME` env se override**.
+ *
+ * Kyun: owner ka Cloudflare worker pehle se **`designer`** naam se bana hua hai (Git
+ * integration usi par hai, domain/routes usi par lage hain). Naam override na ho to
+ * `cf deploy` ek **naya** worker bana deta aur `designer` purana/stale reh jaata.
+ * Cloudflare dashboard → Worker → Settings → Build → **Build variables** me
+ * `WORKER_NAME=designer` daal dein (ya local par `WORKER_NAME=designer npm run deploy:worker`).
+ */
+const WORKER_NAME = process.env.WORKER_NAME?.trim() || "liksha-storefront";
+
 export default defineConfig({
   worker: defineWorker({
-    name: "liksha-storefront",
+    name: WORKER_NAME,
     entrypoint: "vinext/server/fetch-handler",
     compatibilityDate: "2026-10-26",
     compatibilityFlags: ["nodejs_compat"],

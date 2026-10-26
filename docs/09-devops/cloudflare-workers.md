@@ -186,20 +186,36 @@ error dekar ruk jaata tha:
 ```
 
 **Wajah:** ye command **repo root** par chalti hai, aur root par koi `wrangler.toml` /
-`wrangler.jsonc` hai hi nahi (jaan-boojh kar nahi hai). Isliye wrangler ko lagta hai
-"ye ek plain static site hai" aur wo `public/`/`dist/` dhoondhne lagta hai — milta nahi.
+`wrangler.jsonc` hai hi nahi (jaan-boojh kar nahi hai). Wrangler config na milne par
+Cloudflare "automatic project configuration" chalata hai — wo framework detect karte waqt
+static files ka folder (`public/`, `dist/`) dhoondhta hai, milta nahi → error.
 Storefront Next.js app hai: uska Worker **vinext** build karta hai aur config
-`apps/web/cloudflare.config.ts` me hai. Deploy isi liye `apps/web` se chalti hai.
+`apps/web/cloudflare.config.ts` me hai. Deploy isi liye `apps/web` se chalti hai
+(`vinext-cloudflare deploy` → vite build → `cf deploy`).
 
-### 7.1 Cloudflare dashboard (Workers Builds) — 3 settings
+> Owner ka worker pehle se **`designer`** naam se hai (GitHub PR check me
+> "Workers Builds: designer → fail" dikha). Isliye §7.1 me `WORKER_NAME=designer`
+> build variable zaroori hai — warna deploy ek **naya** worker `liksha-storefront`
+> bana dega aur `designer` (domain/routes ke saath) stale reh jaayega.
 
-Workers & Pages → `liksha-storefront` → **Settings → Build** me:
+### 7.1 Cloudflare dashboard (Workers Builds) — settings
+
+Workers & Pages → **`designer`** → **Settings → Build** me:
 
 | Setting | Value |
 | --- | --- |
-| Root directory | `/` (repo root — **`apps/web` nahi**, warna `npm ci` workspace deps nahi la pata) |
+| Git branch | `main` |
+| Root directory | `/` (repo root — **`apps/web` nahi**: script khud `apps/web` me chali jaati hai, aur `npm ci` ko workspace root chahiye) |
 | Build command | `npm ci --no-audit --no-fund` |
 | Deploy command | `bash scripts/deploy-cloudflare.sh` |
+| Preview command | khaali/band (preview builds chahiye to `SKIP_INSTALL=1 bash scripts/deploy-cloudflare.sh`) |
+
+Aur usi screen par **Build variables and secrets** me do variable:
+
+| Variable | Value | Kyun |
+| --- | --- | --- |
+| `WORKER_NAME` | `designer` | existing worker update ho, naya na bane (`cloudflare.config.ts` isi env ko padhta hai) |
+| `NODE_VERSION` | `22` | repo ko Node ≥ 20.9 chahiye (`cf` ko ^22.23); root `.nvmrc` me bhi `22` hai |
 
 `scripts/deploy-cloudflare.sh` wahi karta hai jo local par karte hain: root par
 `npm ci` (agar Build command me pehle hi ho chuka ho to `SKIP_INSTALL=1`), phir
@@ -221,13 +237,20 @@ CLOUDFLARE_API_TOKEN = <token>
 CLOUDFLARE_ACCOUNT_ID = <dashboard → account home → right side "Account ID">
 ```
 
-(Workers Builds me account usually apne aap mil jaata hai — token zaroori hai.)
-Ye tokens **repo me kabhi nahi** — sirf Cloudflare dashboard / GitHub Actions secrets me.
+**Workers Builds me ye step zaroori nahi**: Cloudflare apna build token khud lagata hai
+(Settings → Build → *API token* → "Create new token" = Workers Scripts edit + routes edit).
+Token tab chahiye jab GitHub Actions ya laptop se deploy karein. Ye tokens **repo me kabhi
+nahi** — sirf Cloudflare dashboard / GitHub Actions secrets me.
 
 ### 7.3 Worker ke secrets (ek baar, deploy ke baad)
 
+> Naam `WORKER_NAME` se badalta hai — owner ka worker `designer` hai, isliye har command se
+> pehle `export WORKER_NAME=designer`. Ya seedha dashboard → Worker → **Settings →
+> Variables and Secrets** se daal dein (CLI ki zaroorat nahi).
+
 ```bash
 cd apps/web
+export WORKER_NAME=designer              # aapka existing worker
 npx wrangler login                       # ya CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID env
 
 npx wrangler secret put DATABASE_URL             # zaroori — warna orders memory me
@@ -250,7 +273,7 @@ Har `secret put` ke baad Worker apne aap redeploy hota hai.
 
 ```bash
 cd apps/web && npx wrangler login && cd ..
-npm run deploy:worker          # = bash scripts/deploy-cloudflare.sh
+WORKER_NAME=designer npm run deploy:worker     # = bash scripts/deploy-cloudflare.sh
 ```
 
 ### 7.5 Deploy ke baad verify (3 curl)

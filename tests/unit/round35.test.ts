@@ -121,6 +121,9 @@ test("R35: Cloudflare deploy ek command se hota hai (apps/web se, root par wrang
   assert.ok(fs.existsSync(path.join(process.cwd(), "scripts/deploy-cloudflare.sh")), "deploy script hai");
   const script = read("scripts/deploy-cloudflare.sh");
   assert.match(script, /set -euo pipefail/, "fail-fast");
+  // Workers Builds apna token khud lagata hai — isliye missing token par script ruk-ti nahi
+  assert.doesNotMatch(script, /exit 1/, "token missing par hard fail nahi (Workers Builds khud auth karta hai)");
+  assert.match(script, /WORKER_NAME/, "worker naam dikhata hai");
   assert.match(script, /npm run deploy:vinext --workspace @liksha\/web/, "vinext deploy (apps/web cwd)");
   assert.match(script, /CLOUDFLARE_API_TOKEN/, "credentials env se, repo me nahi");
   assert.match(script, /npm ci/, "deps repo root se install hote hain (workspaces)");
@@ -134,8 +137,14 @@ test("R35: Cloudflare deploy ek command se hota hai (apps/web se, root par wrang
     assert.ok(!fs.existsSync(path.join(process.cwd(), file)), `${file} root par nahi hona chahiye`);
   }
   const workerConfig = read("apps/web/cloudflare.config.ts");
-  assert.match(workerConfig, /liksha-storefront/, "worker ka naam");
+  assert.match(workerConfig, /liksha-storefront/, "worker ka default naam");
+  // owner ka Cloudflare worker pehle se `designer` naam se hai — naam env se override ho
+  // warna deploy ek naya worker bana deta aur `designer` (domain/routes) stale reh jaata
+  assert.match(workerConfig, /process\.env\.WORKER_NAME/, "WORKER_NAME override");
   assert.match(workerConfig, /vinext\/server\/fetch-handler/, "vinext entrypoint");
+  // sheet → site real-time knobs Workers par declared hon (process.env sirf declared vars padhta hai)
+  assert.match(workerConfig, /SHEET_READ_TIMEOUT_MS: bindings\.text\("4000"\)/);
+  assert.match(workerConfig, /SHEET_SETTINGS_TTL_MS: bindings\.text\("10000"\)/);
 });
 
 test("R35: GitHub Actions se Worker deploy (manual) — secrets repo me nahi", () => {
@@ -152,4 +161,6 @@ test("R35: docs me Workers Builds ki sahi settings likhi hain", () => {
   assert.match(doc, /Could not detect a directory containing static files/, "error + wajah documented");
   assert.match(doc, /npm run deploy:vinext --workspace @liksha\/web|scripts\/deploy-cloudflare\.sh/, "deploy command");
   assert.match(doc, /bash scripts\/deploy-cloudflare\.sh/, "dashboard me yahi command");
+  assert.match(doc, /WORKER_NAME/, "existing worker (`designer`) par deploy karne ka tarika");
+  assert.match(doc, /NODE_VERSION/, "Node 22 build variable");
 });

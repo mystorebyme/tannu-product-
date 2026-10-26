@@ -29,12 +29,16 @@ cd "$(dirname "$0")/.."
 
 echo "→ node $(node -v) · npm $(npm -v) · cwd $(pwd)"
 
+# Cloudflare credential: Workers Builds apna token khud inject karta hai, isliye
+# missing hone par **rok-te nahi** — sirf batate hain (asli error CLI dega).
 if [[ -z "${CLOUDFLARE_API_TOKEN:-}" && -z "${CLOUDFLARE_OAUTH_TOKEN:-}" ]]; then
-  echo "!! Cloudflare credential nahi mila." >&2
-  echo "   Local par:  cd apps/web && npx wrangler login" >&2
-  echo "   CI/Builds:  CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID set kariye." >&2
-  exit 1
+  echo "→ CLOUDFLARE_API_TOKEN env me nahi mila."
+  echo "  Local par:  cd apps/web && npx wrangler login"
+  echo "  CI par:     CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID secrets daalein."
+  echo "  (Cloudflare Workers Builds apna token khud lagata hai — wahan ye normal hai.)"
 fi
+
+echo "→ worker naam: ${WORKER_NAME:-liksha-storefront}  (badalna ho to WORKER_NAME env set kariye)"
 
 if [[ "${SKIP_INSTALL:-0}" != "1" ]]; then
   echo "→ npm ci (repo root — workspaces)"
