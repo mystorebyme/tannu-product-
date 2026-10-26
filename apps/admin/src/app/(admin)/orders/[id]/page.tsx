@@ -15,6 +15,14 @@ import { PhoneLinks, whatsappHref } from "@/components/contact-links";
 
 export const dynamic = "force-dynamic";
 
+/** Invoice storefront par banti hai — admin ke env se uska base URL (localhost fallback nahi). */
+const STOREFRONT_BASE = (
+  process.env.NEXT_PUBLIC_STOREFRONT_URL ??
+  process.env.NEXT_PUBLIC_STORE_URL ??
+  process.env.STORE_API_URL ??
+  ""
+).replace(/\/$/, "");
+
 const NEXT_STATUS: Record<string, string[]> = {
   placed: ["confirmed", "cancelled"],
   confirmed: ["packed", "cancelled"],
@@ -348,18 +356,18 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                   Last updated {dateTime(order.tracking.updatedAt)} by {order.tracking.updatedBy}
                 </p>
               ) : null}
-              <p className="small" style={{ marginBottom: 0 }}>
-                <a
-                  className="btn btn-sm"
-                  href={`${process.env.NEXT_PUBLIC_STOREFRONT_URL ?? "http://localhost:3000"}/api/orders/${
-                    order.orderNumber
-                  }/invoice?phone=${order.phone}`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Download GST invoice (PDF)
-                </a>
-              </p>
+              {STOREFRONT_BASE ? (
+                <p className="small" style={{ marginBottom: 0 }}>
+                  <a
+                    className="btn btn-sm"
+                    href={`${STOREFRONT_BASE}/api/orders/${order.orderNumber}/invoice?phone=${order.phone}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Download GST invoice (PDF)
+                  </a>
+                </p>
+              ) : null}
             </div>
           </div>
 
