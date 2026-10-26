@@ -1,9 +1,19 @@
 import type { MetadataRoute } from "next";
-import { collections, products } from "@/lib/store";
+import { canonicalCollectionHandle, collections, products } from "@/lib/store";
 import { siteConfig } from "@/config/site";
 
 // GitHub Pages preview (output: export) me static rehna chahiye
 export const dynamic = "force-static";
+
+/** ek hi URL do baar na jaaye (Google duplicate entries ko galti samajhta hai) */
+function dedupe<T extends { url: string }>(entries: T[]): T[] {
+  const seen = new Set<string>();
+  return entries.filter((entry) => {
+    if (seen.has(entry.url)) return false;
+    seen.add(entry.url);
+    return true;
+  });
+}
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = siteConfig.url.replace(/\/$/, "");
@@ -12,7 +22,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const staticRoutes = [
     { path: "", priority: 1 },
     { path: "/collections", priority: 0.9 },
-    { path: "/collections/new-arrivals", priority: 0.9 },
     { path: "/search", priority: 0.4 },
     { path: "/pages/about-us", priority: 0.5 },
     { path: "/pages/contact", priority: 0.5 },
@@ -31,15 +40,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly" as const,
       priority: route.priority,
     })),
-    // khaali collection (jaise saree) par products nahi hain — thin page ko sitemap me na bhejein
-    ...collections
-      .filter((collection) => products.some((product) => product.collections.includes(collection.handle)))
-      .map((collection) => ({
-      url: `${base}/collections/${collection.handle}`,
-      lastModified: now,
-      changeFrequency: "daily" as const,
-        priority: 0.8,
-      })),
+    // khaali collection (jaise saree) par products nahi hain — thin page ko sitemap me na bhejein.
+    // Canonical (clean) handle use hota hai aur duplicate URL ek hi baar jaata hai.
+    ...dedupe(
+      collections
+        .filter((collection) => products.some((product) => product.collections.includes(collection.handle)))
+        .map((collection) => ({
+          url: `${base}/collections/${canonicalCollectionHandle(collection.handle)}`,
+          lastModified: now,
+          changeFrequency: "daily" as const,
+          priority: 0.8,
+        })),
+    ),
     ...products.map((product) => ({
       url: `${base}/products/${product.handle}`,
       lastModified: now,

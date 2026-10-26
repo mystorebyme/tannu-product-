@@ -508,3 +508,8 @@ likhega). Uske baad `/api/sheet-selftest` + connector se row confirm karna hai.
 - [x] Local prod build par verify: unit **174/174**, typecheck ✓, build ✓, payments e2e **37/37**,
       smoke **84/84**, round16 **37/37**, breakpoints **48/48**, links 45 pages 0 fail
 - [ ] Vercel par `OTP_DEV_MODE=off` + redeploy (last-4 patch live karne ke liye)
+- [x] SEO: wedding collection ka canonical clean URL (`/collections/wedding-collection`),
+      typo URL (`/collections/weddin-collection`) bhi khulta hai par canonical ek hi;
+      sitemap me duplicate URL zero (467 loc, pehle `new-arrivals` do baar tha)
+- [x] Admin production owner ke account se live @ `33afaea` — `NEXT_PUBLIC_STOREFRONT_URL`
+      env add kiya (invoice button pehle localhost par jaata tha)

@@ -52,10 +52,20 @@ async function main() {
   check("clean wedding URL 200", wedding.status === 200, `status ${wedding.status}`);
   check("legacy weddin-collection URL still 200", legacyWedding.status === 200, `status ${legacyWedding.status}`);
   check(
-    "clean wedding URL canonicalises to the canonical handle",
-    /rel="canonical"[^>]*\/collections\/weddin-collection/.test(wedding.text),
+    "clean wedding URL is canonical (typo URL canonicalises to it)",
+    /rel="canonical"[^>]*\/collections\/wedding-collection/.test(wedding.text) &&
+      /rel="canonical"[^>]*\/collections\/wedding-collection/.test(legacyWedding.text),
   );
   check("wedding collection has products", /\/products\/[a-z0-9-]+/.test(wedding.text));
+
+  const sitemap = await get("/sitemap.xml");
+  const sitemapUrls = [...sitemap.text.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
+  check("sitemap has no duplicate URL", new Set(sitemapUrls).size === sitemapUrls.length, `${sitemapUrls.length} urls`);
+  check(
+    "sitemap lists the clean wedding URL only",
+    sitemapUrls.some((url) => url.endsWith("/collections/wedding-collection")) &&
+      !sitemapUrls.some((url) => url.endsWith("/collections/weddin-collection")),
+  );
 
   const saree = await get("/collections/saree");
   check("empty saree collection renders (not crash)", saree.status === 200, `status ${saree.status}`);

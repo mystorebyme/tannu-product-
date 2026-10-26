@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { CollectionBrowser } from "@/components/collection-browser";
 import {
+  canonicalCollectionHandle,
   COLLECTION_ALIASES,
   getCollection,
   getCollections,
@@ -29,7 +30,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   return {
     title: `${collection.title} — ${products.length} styles`,
     description: `${collection.title}: ${collection.subtitle}. ${products.length} designer pieces at Designer Clothing, free shipping across India and secure prepaid checkout.`,
-    alternates: { canonical: `/collections/${collection.handle}` },
+    alternates: { canonical: `/collections/${canonicalCollectionHandle(collection.handle)}` },
     // khaali collection par thin content — index mat karo (par page accessible rahe)
     robots: products.length === 0 ? { index: false, follow: true } : undefined,
   };

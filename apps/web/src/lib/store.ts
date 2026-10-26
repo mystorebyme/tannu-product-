@@ -64,6 +64,20 @@ export function resolveCollectionHandle(handle: string): string {
   return COLLECTION_ALIASES[handle] ?? handle;
 }
 
+/**
+ * Catalog me purana typo handle (`weddin-collection`) hai kyunki live store ne
+ * wahi use kiya. Public/canonical URL clean spelling par rehta hai, taaki
+ * Google ko ek hi page na do baar mile (duplicate content nahi).
+ */
+export const COLLECTION_CANONICAL: Record<string, string> = {
+  "weddin-collection": "wedding-collection",
+};
+
+/** Canonical (clean) handle — dono spellings par page khulta hai, canonical ek. */
+export function canonicalCollectionHandle(handle: string): string {
+  return COLLECTION_CANONICAL[handle] ?? handle;
+}
+
 export async function getCollection(handle: string): Promise<Collection | undefined> {
   const canonical = resolveCollectionHandle(handle);
   return collections.find((collection) => collection.handle === canonical);
