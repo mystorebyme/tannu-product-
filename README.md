@@ -191,6 +191,10 @@ Docker alternative: `docker compose up --build` (web 3000, admin 3001, api 4000,
 | `npm run catalog:build` | regenerate catalogue JSON from source data |
 | `npm run catalog:verify` | sanity gate: 287 products, paise prices, sizes, collections |
 | `npm run catalog:sync` | live store se snapshot pull + rebuild (galleries, descriptions, prices, sizes) |
+| `npm run policies:build` | policy markdown → `src/content/policies.generated.ts` (Workers par fs nahi) |
+| `npm run assets:invoice-logo` | invoice logo → base64 TS module (Workers par `public/` padha nahi ja sakta) |
+| `npm run dev:vinext --workspace @liksha/web` | storefront local workerd par (Cloudflare Workers runtime, port 3001) |
+| `npm run build:vinext --workspace @liksha/web` | Cloudflare Worker bundle (`.cloudflare/…`) — `docs/09-devops/cloudflare-workers.md` |
 | `npm run setup` | first-run bootstrap |
 
 ---

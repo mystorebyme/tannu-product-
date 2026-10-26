@@ -21,11 +21,11 @@
 | --- | --- |
 | products | 446 |
 | collections | 11 |
-| sourceFiles | 241 |
-| sourceLines | 25508 |
-| testFiles | 40 |
+| sourceFiles | 246 |
+| sourceLines | 25811 |
+| testFiles | 41 |
 | skills | 20 |
-| docsPages | 119 |
+| docsPages | 121 |
 
 ## Skills (20/20 pass)
 
@@ -78,7 +78,7 @@ Dormant (jaan-boojh kar bina test — third-party gateway nahi, owner rule):
 | Check | Value |
 | --- | --- |
 | CLAUDE.md lines | 53 |
-| AGENTS.md lines | 76 |
+| AGENTS.md lines | 79 |
 | CLAUDE.md product count sach? | ✅ |
 | CLAUDE.md collection count sach? | ✅ |
 | Razorpay claim (owner: nahi) | ✅ |

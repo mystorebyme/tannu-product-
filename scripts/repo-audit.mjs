@@ -32,7 +32,13 @@ function walk(dir, filter, out = []) {
   const abs = path.join(ROOT, dir);
   if (!fs.existsSync(abs)) return out;
   for (const entry of fs.readdirSync(abs, { withFileTypes: true })) {
-    if (["node_modules", ".next", "dist", ".git", "out", ".turbo", ".data"].includes(entry.name)) continue;
+    // build outputs (`.cloudflare` = vinext/Workers, `.wrangler` = local workerd state)
+    if (
+      ["node_modules", ".next", "dist", ".git", "out", ".turbo", ".data", ".cloudflare", ".wrangler"].includes(
+        entry.name,
+      )
+    )
+      continue;
     const rel = path.join(dir, entry.name);
     if (entry.isDirectory()) walk(rel, filter, out);
     else if (filter(rel)) out.push(rel);

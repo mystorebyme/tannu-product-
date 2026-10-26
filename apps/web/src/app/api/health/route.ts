@@ -1,5 +1,6 @@
 import { catalogMeta } from "@/lib/store";
 import { dbEnabled, ensureSchema, query } from "@/lib/db";
+import { isCloudflareWorkers, isEphemeralStorage } from "@/lib/fs-runtime";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -38,6 +39,14 @@ export async function GET() {
         ordersStore: dbEnabled() ? "postgres" : "json",
         db,
         dbError,
+        /**
+         * R34 — Cloudflare Workers check. Workers par file system read-only hai,
+         * isliye durable data **Postgres** me hi jaana chahiye. `storage` =
+         * "memory" ka matlab: orders sirf us isolate me hain (preview only).
+         */
+        runtime: isCloudflareWorkers() ? "cloudflare-workers" : "node",
+        storage: dbEnabled() ? "postgres" : isEphemeralStorage() ? "memory" : "file",
+        durable: dbEnabled() || !isEphemeralStorage(),
         time: new Date().toISOString(),
       },
     },

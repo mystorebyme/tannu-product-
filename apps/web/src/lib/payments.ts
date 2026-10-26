@@ -1,7 +1,7 @@
 import "server-only";
 
 import crypto from "node:crypto";
-import fs from "node:fs";
+import fs from "@/lib/fs-runtime";
 import path from "node:path";
 import { dataFile } from "@/lib/data-dir";
 import { siteConfig } from "@/config/site";

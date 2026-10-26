@@ -1,4 +1,4 @@
-import fs from "node:fs";
+import fs from "@/lib/fs-runtime";
 import os from "node:os";
 import path from "node:path";
 

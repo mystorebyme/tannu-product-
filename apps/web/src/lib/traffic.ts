@@ -1,7 +1,7 @@
 import "server-only";
 
 import crypto from "node:crypto";
-import fs from "node:fs";
+import fs from "@/lib/fs-runtime";
 import { dataFile } from "./data-dir";
 import { dbEnabled, query } from "./db";
 

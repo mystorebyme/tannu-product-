@@ -1,12 +1,9 @@
-import fs from "node:fs";
-import path from "node:path";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { renderMarkdown } from "@/lib/markdown";
 import { SupportChannels } from "@/components/contact-details";
-
-const POLICY_DIR = path.join(process.cwd(), "src/content/policies");
+import { policyMarkdown } from "@/content/policies.generated";
 
 const policyMeta: Record<string, { title: string; description: string }> = {
   "privacy-policy": {
@@ -45,9 +42,13 @@ export default async function PolicyPage({ params }: { params: Promise<{ slug: s
   const meta = policyMeta[slug];
   if (!meta) notFound();
 
-  const file = path.join(POLICY_DIR, `${slug}.md`);
-  if (!fs.existsSync(file)) notFound();
-  const content = fs.readFileSync(file, "utf8");
+  /**
+   * Policy text bundle me hai (`policies.generated.ts`) — runtime file system
+   * par depend nahi karta, isliye Cloudflare Workers par bhi policy page chalta hai.
+   * Source markdown: `apps/web/src/content/policies/*.md`.
+   */
+  const content = policyMarkdown[slug];
+  if (!content) notFound();
 
   return (
     <div className="container-liksha py-10 lg:py-14">

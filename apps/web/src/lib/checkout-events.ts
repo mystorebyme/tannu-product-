@@ -1,6 +1,6 @@
 import "server-only";
 
-import fs from "node:fs";
+import fs from "@/lib/fs-runtime";
 import { randomUUID } from "node:crypto";
 import { dataFile } from "@/lib/data-dir";
 import { dbEnabled } from "@/lib/db";

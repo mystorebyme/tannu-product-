@@ -1,6 +1,6 @@
 import "server-only";
 
-import fs from "node:fs";
+import fs from "@/lib/fs-runtime";
 import { randomUUID } from "node:crypto";
 import type { AuditEntry, InvoiceMeta, Order, OrderStatus, PaymentMethod, Tracking } from "@liksha/types";
 import {

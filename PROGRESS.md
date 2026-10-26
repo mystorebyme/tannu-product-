@@ -551,3 +551,38 @@ likhega). Uske baad `/api/sheet-selftest` + connector se row confirm karna hai.
 - [x] Deploy: storefront `dpl_BcgUzFCWmtbxAWER6VE5zPDwXKym` @ `9704b3b`, admin `dpl_DqLMhTYqfsL52gpGvgokFP4bqdYK`;
       domain + www + admin subdomain Vercel me added — **DNS records owner ko add karne hain**
       (`docs/00-overview/owner-report-round33.md`)
+
+### R34 — Cloudflare Workers (vinext) compatibility, storefront
+
+- [x] `npx vinext check` (`apps/web`) → **97% compatible** (18 supported, 1 partial `images`, 0 issues);
+      imports 6/6; 17 pages / 38 route handlers
+- [x] Non-destructive `vinext init --platform=cloudflare --name=liksha-storefront` —
+      `vite.config.ts`, `cloudflare.config.ts`, scripts `dev:vinext` / `build:vinext` /
+      `start:vinext` / `deploy:vinext`; **`next dev` + `next build` + Vercel/Render intact**
+- [x] **Workers FS read-only fix**: naya `apps/web/src/lib/fs-runtime.ts` (Node = asli `node:fs`,
+      Workers = memory fallback) aur 9 libs usi par — pehle `EPERM` se `/api/settings`,
+      `/api/delivery/check`, `POST /api/orders` 500 ho rahe the
+- [x] **Policies**: `scripts/build-policies.mjs` → `src/content/policies.generated.ts`
+      (runtime `readFileSync` hataya; `/policies/:slug` workerd par 404 tha)
+- [x] **Invoice logo**: `scripts/build-invoice-logo.mjs` → `src/content/invoice-logo.generated.ts`
+      (Workers par `public/` padha nahi ja sakta — PDF me wahi logo)
+- [x] **Invoice PDF workerd par chalaya**: pdfkit ka node ESM entry + ICC URL + `#standard-fonts`
+      static imports (`vite.config.ts` patch) → `200 application/pdf`, ~146 KB, logo embed
+- [x] `/api/health` ab `runtime` / `storage` / `durable` batata hai (Workers par `DATABASE_URL`
+      ke bina `storage:"memory", durable:false`)
+- [x] `cloudflare.config.ts` me secrets sirf **naam** se declare (`DATABASE_URL`, `ADMIN_API_TOKEN`,
+      UPI/OTP/Sheets/Resend) — koi value repo me nahi
+- [x] Local workerd smoke (8787 preview + 3001 dev): home, PDP, collections, search, cart/pricing,
+      order create + idempotency, order page tracking (courier/AWB), admin 401/200 + status machine
+      + payment confirm, delivery check, settings, contact/newsletter, best-sellers, policies (4),
+      sitemap, robots, health
+- [x] `scripts/repo-audit.mjs` `.cloudflare`/`.wrangler` ignore (build output audit me aa raha tha)
+- [x] Tests: naya `tests/unit/cloudflare-workers.test.ts` (8) — fs shim, policies/logo drift guard,
+      raw `node:fs` guard, config guards → **217 unit pass / 0 fail**, integration **40/0**,
+      `catalog:verify` ok, `next build` ok, `vite build` ok
+- [x] Doc: `docs/09-devops/cloudflare-workers.md` (commands, config, secrets, feature matrix,
+      preview deploy steps, rollback, limitations)
+- [x] Repo ka apna smoke suite workerd par: `BASE_URL=http://127.0.0.1:3001 npm run test:smoke`
+      → **88 pass / 0 fail** (`dev:vinext`, `.dev.vars`); `vite preview` (8787) par 77/10 — saare
+      10 admin-token wale (preview local secrets nahi leta, deploy par `wrangler secret put`)
+- [ ] **Preview deploy nahi hua** — Cloudflare credentials nahi the; DNS/Vercel production jaisa hi hai

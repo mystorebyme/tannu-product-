@@ -23,7 +23,9 @@ Read this first. Then `STRUCTURE.md`, then `PROGRESS.md`, then the matching skil
 4. **Business rules live once** — `packages/validation/index.ts` (coupons, COD limits, status machine,
    order number format). Import it, don't copy it.
 5. **Server vs client:** `@/lib/store` and anything touching `fs` is server-only. Client components
-   never import the catalogue.
+   never import the catalogue. Storefront also runs on Cloudflare Workers (read-only FS), isliye
+   `apps/web/src/lib/*` me seedha `node:fs` nahi — `@/lib/fs-runtime` use karein
+   (`docs/09-devops/cloudflare-workers.md`; `tests/unit/cloudflare-workers.test.ts` ise gate karta hai).
 6. **Validate at the edge.** zod schema on every write path; `String(req.params.x)` in Express handlers.
 7. **Every admin mutation writes an audit entry** and calls `revalidatePath`.
 8. **Idempotency + atomic writes** for anything money-related (`.data/*.json`, tmp+rename).
@@ -39,6 +41,7 @@ npm run audit                     # scorecard: skills, instruction files, hygien
 npm run audit -- --check          # CI gate (regression par fail)
 npm run catalog:verify            # if catalogue touched
 npm run build:web                 # if storefront touched
+npm run build:vinext --workspace @liksha/web   # if Cloudflare Workers path touched
 cd apps/admin && npx next build   # admin root se build nahi hoti
 npm run dev / dev:admin / dev:api # ports 3000 / 3001 / 4000
 ```

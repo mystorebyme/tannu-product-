@@ -1,6 +1,6 @@
 import "server-only";
 
-import fs from "node:fs";
+import fs from "@/lib/fs-runtime";
 import { dataFile } from "./data-dir";
 import { dbEnabled } from "./db";
 import { readSheetSettings, writeSheetSettings } from "./google-sheets";
