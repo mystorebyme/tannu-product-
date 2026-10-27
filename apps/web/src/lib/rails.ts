@@ -15,10 +15,13 @@ export const RAILS: Record<
   { title: string; subtitle: string; href: string; collections: string[]; count: number }
 > = {
   trendy: {
-    title: "Trendy Anarkali Sets",
-    subtitle: "Top picks — rotated every 10 minutes",
+    /** R50 (owner): "trending … home page pr bi dikha do jo jo collection mahi" —
+     *  home rail ab sirf Trending collection dikhata hai (wahi cards jo
+     *  /collections/trending par hain), best-score picks ke saath. */
+    title: "Trending Now",
+    subtitle: "This week's most-loved styles — straight from the Trending collection",
     href: "/collections/trending",
-    collections: ["trending", "likshas-choice", "party-wear-gown"],
+    collections: ["trending"],
     count: 8,
   },
   newArrivals: {

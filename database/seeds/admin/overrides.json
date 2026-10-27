@@ -13,6 +13,9 @@
   },
   "collections": {},
   "hidden": [],
+  "mergeInto": {
+    "noor-festive-elegance-designer-suit-set": ["aarushi-heavy-pure-cinon-silk-gown"]
+  },
   "newProducts": [
     {
       "handle": "noor-festive-elegance-designer-suit-set",

@@ -115,8 +115,12 @@ test("R47: promo product — naam, ₹699/65%, sab sizes available, collections"
   assert.equal(promo.featured, true, "featured");
   assert.equal(promo.inStock, true, "in stock");
   assert.equal(promo.hidden ?? false, false, "visitors ko dikhta hai");
-  assert.equal(promo.rating, 0, "koi fake review nahi");
-  assert.equal(promo.reviewCount, 0, "koi fake review nahi");
+  // R50: owner-curated merge — Noor == Aarushi Heavy Pure Cinon Silk Gown (owner:
+  // "ek hi product hai … jo treanding mai hai usko rhne dena"). Aarushi ke ASLI
+  // 4.8★/52 reviews family card par carry hote hain — fake review nahi, same
+  // dress ka real aggregate (carry sirf upward, build-catalog pass 0).
+  assert.equal(promo.rating, 4.8, "family ka asli score carry hua (R50 curated merge)");
+  assert.equal(promo.reviewCount, 52, "family ke asli reviews carry hue");
   for (const collection of ["new-arrivals", "party-wear-gown", "likshas-choice", "trending"]) {
     assert.ok(promo.collections.includes(collection), `${collection} me hai`);
   }
