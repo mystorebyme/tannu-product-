@@ -53,7 +53,11 @@ export function SiteHeader() {
   const router = useRouter();
 
   // owner (admin ya Google Sheet) se announcement badalte hi header par wahi dikhta hai
-  const announcements = announcement ? [announcement, ...defaultAnnouncements] : defaultAnnouncements;
+  // R47: sheet ka announcement fallback copy se match kar sakta hai — duplicate hatao,
+  // warna do dots ko same React key milta hai ("two children with the same key" warning).
+  const announcements = announcement
+    ? [announcement, ...defaultAnnouncements.filter((item) => item !== announcement)]
+    : defaultAnnouncements;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -194,7 +198,7 @@ export function SiteHeader() {
             <span className="text-[11px] tracking-[.06em]">Premium Designer Collection ✦</span>
             {announcements.map((item, index) => (
               <button
-                key={item}
+                key={`${index}-${item}`}
                 type="button"
                 aria-label={`Announcement ${index + 1}`}
                 onClick={() => setBannerIndex(index)}

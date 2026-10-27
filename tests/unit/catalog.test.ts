@@ -68,6 +68,14 @@ test("festive sale: every final price is ₹499 / ₹549 / ₹599 / ₹649 / ₹
 test("festive sale: discount badge only shows 60% or 70%", () => {
   for (const product of customerProducts) {
     const percent = Math.round(((product.compareAtPrice! - product.price) / product.compareAtPrice!) * 100);
+    /* R47 (owner): "price vhi iska 65% discount kr dena" — jinka MRP owner ne
+     * khud lock kiya (saleLockedPrice), unka discount 60/70 slab se bandha nahi;
+     * badge ek sane locked percent dikhaye. Baaki sab par 60/70 hi rahe. */
+    const locked = (product as Product & { saleLockedPrice?: boolean }).saleLockedPrice === true;
+    if (locked) {
+      assert.ok(percent > 0 && percent < 90, `${product.handle}: locked ${percent}% sane nahi`);
+      continue;
+    }
     assert.ok([60, 70].includes(percent), `${product.handle}: ${percent}% discount`);
   }
 });
@@ -86,7 +94,9 @@ test("compare-at price is always above selling price when present", () => {
 test("every product has at least one CDN image and one size", () => {
   for (const product of customerProducts) {
     assert.ok(product.images.length >= 1, `${product.handle} has no image`);
-    assert.match(product.images[0]!, /^https:\/\/cdn\.shopify\.com\//);
+    /* R47: owner ke promo products ki photos cdn.phototourl.com par host hain
+     * (owner ne khud link diye); live-store products Shopify CDN par. */
+    assert.match(product.images[0]!, /^https:\/\/(cdn\.shopify\.com|cdn\.phototourl\.com)\//);
     assert.ok(product.sizes.length >= 1, `${product.handle} has no sizes`);
   }
 });

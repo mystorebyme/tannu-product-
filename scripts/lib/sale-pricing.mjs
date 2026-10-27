@@ -62,9 +62,21 @@ export function applySalePricing(products) {
     // admin ne ladder ke andar ka price chuna hai to wo respect karo, warna handle se
     const keepChosen = SALE_FINAL_PRICES.includes(product.price) && !product.saleAutoPrice;
     const price = keepChosen ? product.price : computed.price;
-    const compareAtPrice = keepChosen
-      ? Math.round(price / (1 - (computed.percent === 60 ? 0.6 : 0.7)))
-      : computed.compareAtPrice;
+    /* R47 (owner): "price vhi iska 65% discount kr dena vhi 699 tk final price ho
+     * jaye" — jinka MRP owner ne khud lock kiya hai (saleLockedPrice + explicit
+     * compareAtPrice), unka discount 70/60 slab se override nahi hota. */
+    const lockedMrp =
+      keepChosen &&
+      product.saleLockedPrice === true &&
+      Number.isInteger(product.compareAtPrice) &&
+      product.compareAtPrice > price
+        ? product.compareAtPrice
+        : null;
+    const compareAtPrice =
+      lockedMrp ??
+      (keepChosen
+        ? Math.round(price / (1 - (computed.percent === 60 ? 0.6 : 0.7)))
+        : computed.compareAtPrice);
     product.price = price;
     product.compareAtPrice = compareAtPrice;
     // har size par wahi final price — "final price 499/599/…" har size par sach ho

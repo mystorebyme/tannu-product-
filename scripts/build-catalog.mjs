@@ -473,16 +473,19 @@ const groupKeyOf = (base) => base.toLowerCase().replace(/[^a-z0-9]+/g, "-").repl
 const OVERRIDES_FILE = path.join(ROOT, "database/seeds/admin/overrides.json");
 
 function adminOverrides() {
-  if (!fs.existsSync(OVERRIDES_FILE)) return { products: {}, collections: {}, hidden: [] };
+  if (!fs.existsSync(OVERRIDES_FILE)) return { products: {}, collections: {}, hidden: [], newProducts: [] };
   try {
     const parsed = JSON.parse(fs.readFileSync(OVERRIDES_FILE, "utf8"));
     return {
       products: parsed.products ?? {},
       collections: parsed.collections ?? {},
       hidden: parsed.hidden ?? [],
+      // R47: ye pehle return hi nahi ho raha tha — admin panel se add kiye products
+      // catalog me kabhi nahi jude. Ab newProducts build me merge hote hain.
+      newProducts: parsed.newProducts ?? [],
     };
   } catch {
-    return { products: {}, collections: {}, hidden: [] };
+    return { products: {}, collections: {}, hidden: [], newProducts: [] };
   }
 }
 
@@ -758,30 +761,42 @@ const readExtra = (name, key) => {
     const collections = (Array.isArray(item.collections) ? item.collections : []).filter((h) => COLLECTION_KEYS.has(h));
     if (!collections.length) collections.push("new-arrivals");
     const description = String(item.description ?? "").trim() || title;
+    /* R47 (owner): "price vhi iska 65% discount kr dena vhi 699 tk final price ho
+     * jaye" — owner ne khud MRP/discount tay kiya ho (saleLockedPrice + explicit
+     * compareAtPrice) to build usse 70/60 slab se override nahi karta. applySalePricing
+     * isi flag ko respect karta hai. */
+    const lockedMrp =
+      item.saleLockedPrice === true && Number.isInteger(item.compareAtPrice) && item.compareAtPrice > price
+        ? item.compareAtPrice
+        : null;
     products.push({
       handle,
       sourceHandle: handle,
       title,
       price,
-      compareAtPrice: null,
+      compareAtPrice: lockedMrp,
+      ...(lockedMrp ? { saleLockedPrice: true } : {}),
       images,
       collections,
       category: ["anarkali", "lehnga", "printed", "gown", "sharara", "other"].includes(item.category)
         ? item.category
         : "anarkali",
-      productType: "Admin upload",
+      productType: String(item.productType ?? "").trim() || "Admin upload",
       fabric: String(item.fabric ?? "").trim() || "Silk blend",
       color: String(item.color ?? "").trim() || "As shown",
       sizes: finalSizes,
-      sizePricing: Object.fromEntries(finalSizes.map((size) => [size, { price, compareAtPrice: null, available: true }])),
+      sizePricing: Object.fromEntries(finalSizes.map((size) => [size, { price, compareAtPrice: lockedMrp, available: true }])),
       details: description.split(/\n+/).filter(Boolean).slice(0, 8),
       description: description.slice(0, 400),
       descriptionHtml: `<p>${description.replace(/</g, "&lt;")}</p>`,
-      source: "admin",
+      /* R47: owner/admin se add products live liksha-store ke nahi hote — isliye
+       * `extra` bucket (287 live-parity count aur snapshot check inhe chhod dete
+       * hain, jaise guest-store products ko). */
+      source: "extra",
       rating: 0,
       reviewCount: 0,
       inStock: item.inStock !== false,
-      featured: false,
+      featured: item.featured === true,
       publishedAt: item.createdAt ?? new Date().toISOString(),
     });
     addedCount += 1;

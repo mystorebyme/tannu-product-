@@ -64,6 +64,9 @@ for (const product of products) {
       fail(`${product.handle}: compareAtPrice must be > price`);
     }
   }
+  /* R44 ka hidden payment-test product (₹0.10, sirf direct link) intentionally
+   * minimal hai — image/size/description jaisi listing checks uspar lagu nahi. */
+  if (product.hidden === true) continue;
   if (!product.images?.length) fail(`${product.handle}: no image`);
   if (!product.sizes?.length) fail(`${product.handle}: no sizes`);
   for (const size of product.sizes ?? []) {

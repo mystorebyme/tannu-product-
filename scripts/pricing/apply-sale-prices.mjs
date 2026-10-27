@@ -42,6 +42,14 @@ for (const relative of FILES) {
   // verify
   const badPrice = products.filter((product) => !SALE_FINAL_PRICES.includes(product.price));
   const badPercent = products.filter((product) => {
+    // R47: owner-locked MRP (saleLockedPrice) — e.g. promo products par 65% off.
+    if (
+      product.saleLockedPrice === true &&
+      Number.isInteger(product.compareAtPrice) &&
+      product.compareAtPrice > product.price
+    ) {
+      return false;
+    }
     const percent = displayedPercent(product.price, product.compareAtPrice);
     return percent !== 70 && percent !== 60;
   });
