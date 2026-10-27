@@ -67,6 +67,8 @@ function makeSheet(name: string, id: number, grid: Grid = []) {
     };
     const api = {
       getValues: read,
+      /** R43: onEdit tests — single-cell read (script `getRange(r,c).getValue()` karta hai) */
+      getValue: () => read()[0]?.[0] ?? "",
       setValues: (values: Cell[][]) => {
         values.forEach((line, r) => {
           const target = row - 1 + r;
@@ -1097,7 +1099,7 @@ test("R39: browser se plain /exec → HTML control panel (JSON nahi)", () => {
   assert.equal(typeof out.getContent, "function", "HtmlOutput mila");
   const html = out.getContent();
   assert.match(html, /sheet control panel/i);
-  assert.match(html, /r42-1/);
+  assert.match(html, /r4[23]-1/);
   assert.match(html, /Admin Note/);
   assert.match(html, /Waiting for confirmation/);
   assert.match(html, /designerclothing\.fashion/);
@@ -1295,7 +1297,7 @@ test("R42: GET/POST ?action=dropdowns — token ke saath chalta hai, bina token 
 
   const allowed = sandbox.doGet({ parameter: { action: "dropdowns", token: "test-token" } }).getJson();
   assert.equal(allowed.ok, true);
-  assert.equal(allowed.version, "r42-1");
+  assert.equal(allowed.version, "r43-1");
   assert.ok(allowed.applied >= 10, "saare tabs ke columns apply hue");
   assert.ok(orders.validations.length > before, "Orders par validation dobara lagi (idempotent)");
 
@@ -1304,4 +1306,134 @@ test("R42: GET/POST ?action=dropdowns — token ke saath chalta hai, bina token 
   }).getJson();
   assert.equal(posted.ok, true, "site ka scriptPost('dropdowns') bhi chalta hai");
   assert.ok(posted.applied >= 10);
+});
+
+/* ───────────────────────── R43: Products tab = catalog ka DB ─────────────────────────
+ * Owner: "jitne bi product hai vo saare sheet me list kr do … price change krte hi
+ * site pr visible ho jaye … product ki id se search kar sake … koi bi new product
+ * add kr paye … sheet se product delete ho jaye". Script side: Products HEADERS +
+ * dropdowns, `?action=catalog` (GET, token), `products_seed` (POST, sirf khaali tab),
+ * aur onEdit me Notes/Payment status watchers (owner comment timeline me dikhe).
+ */
+test("R43: setup() Products tab banata hai — headers + dropdowns (Status/In stock/Featured/Category)", () => {
+  const { sandbox, sheets } = loadScript();
+  sandbox.setup();
+
+  const products = sheets.find((sheet) => sheet.getName() === "Products");
+  assert.ok(products, "Products tab bana");
+  const headers = products!.getRange(1, 1, 1, 20).getValues()[0].map(String).filter(Boolean);
+  assert.ok(headers.includes("Id"), "Id column (product ki id se search)");
+  assert.ok(headers.includes("Price"), "Price column");
+  assert.ok(headers.includes("Main image"), "Main image column");
+  assert.ok(headers.includes("Status"), "Status column");
+  assert.ok(headers.includes("Sizes"), "Sizes column");
+
+  const lists = products!.validations.map((validation) => (validation.rule.list ?? []).join(","));
+  assert.ok(lists.some((list) => list === "active,hidden"), "Status dropdown");
+  assert.ok(lists.filter((list) => list === "yes,no").length >= 2, "In stock + Featured dropdown");
+  assert.ok(lists.some((list) => list.includes("anarkali") && list.includes("other")), "Category dropdown");
+  for (const validation of products!.validations) {
+    assert.equal(validation.rule.allowInvalid, true, "allowInvalid — site seed/automation kabhi block na ho");
+  }
+});
+
+test("R43: ?action=catalog — token ke saath Products rows, bina token nahi", () => {
+  const { sandbox, sheets } = loadScript();
+  sandbox.setup();
+  sandbox.appendRows_([
+    {
+      sheet: "Products",
+      row: { Timestamp: "2026-10-27T08:00:00.000Z", Id: "td-9001", Title: "Test Anarkali", Price: 599, "Main image": "https://cdn.shopify.com/x.jpg", Status: "active", Sizes: "S [36]|M [38]" },
+    },
+  ]);
+
+  const denied = sandbox.doGet({ parameter: { action: "catalog" } }).getJson();
+  assert.equal(denied.ok, false, "bina token catalog nahi (business data)");
+
+  const reply = sandbox.doGet({ parameter: { action: "catalog", token: "test-token" } }).getJson();
+  assert.equal(reply.ok, true);
+  assert.equal(reply.version, "r43-1");
+  assert.equal(reply.count, 1);
+  assert.equal(reply.products[0].Id, "td-9001");
+  assert.equal(String(reply.products[0].Title), "Test Anarkali");
+  assert.equal(String(reply.products[0].Sizes), "S [36]|M [38]");
+
+  const alias = sandbox.doGet({ parameter: { action: "products", token: "test-token" } }).getJson();
+  assert.equal(alias.count, 1, "?action=products alias bhi chalta hai");
+});
+
+test("R43: products_seed — sirf KHAALI tab bharta hai, owner ka data kabhi override nahi", () => {
+  const { sandbox } = loadScript();
+  sandbox.setup();
+
+  const noToken = sandbox.doPost({
+    postData: { contents: JSON.stringify({ action: "products_seed", products: [{ Id: "x" }] }) },
+  }).getJson();
+  assert.equal(noToken.ok, false, "bina token seed nahi");
+
+  const seeded = sandbox.doPost({
+    postData: {
+      contents: JSON.stringify({
+        token: "test-token",
+        action: "products_seed",
+        actor: "site-auto",
+        products: [
+          { Id: "p-1", Title: "Product One", Price: 599, Status: "active" },
+          { Id: "p-2", Title: "Product Two", Price: 1299, Status: "active" },
+        ],
+      }),
+    },
+  }).getJson();
+  assert.equal(seeded.ok, true);
+  assert.equal(seeded.seeded, 2, "khaali tab me 2 rows gayi");
+
+  const again = sandbox.doPost({
+    postData: {
+      contents: JSON.stringify({
+        token: "test-token",
+        action: "products_seed",
+        products: [{ Id: "p-3", Title: "Override Attempt", Price: 1 }],
+      }),
+    },
+  }).getJson();
+  assert.equal(again.ok, true);
+  assert.equal(again.seeded, 0, "bhare tab par seed skip");
+  assert.equal(again.skipped, true);
+
+  const catalog = sandbox.doGet({ parameter: { action: "catalog", token: "test-token" } }).getJson();
+  assert.equal(catalog.count, 2, "owner ka data override nahi hua");
+  assert.ok(catalog.products.every((row: { Id: string }) => row.Id !== "p-3"));
+});
+
+test("R43: onEdit — Notes comment aur Payment status edit audit rows banate hain", () => {
+  const { sandbox, sheets } = loadScript();
+  sandbox.setup();
+  const orders = sheets.find((sheet) => sheet.getName() === "Orders")!;
+  sandbox.appendRows_([
+    {
+      sheet: "Orders",
+      row: { Timestamp: "2026-10-27T08:00:00.000Z", Event: "order.placed", "Order number": "LK-EDT1", "Order status": "placed", "Payment status": "pending", Notes: "" },
+    },
+  ]);
+  const headers = orders.getRange(1, 1, 1, 30).getValues()[0].map(String);
+  const notesCol = headers.indexOf("Notes") + 1;
+  const payCol = headers.indexOf("Payment status") + 1;
+  assert.ok(notesCol > 1 && payCol > 1);
+
+  // owner ne Notes column me comment likha → order.owner_note audit row
+  sandbox.onEdit({ range: { getSheet: () => orders, getRow: () => 2, getColumn: () => notesCol }, value: "Gift wrap kar dena" });
+  let rows = orders.getRange(2, 1, orders.getLastRow() - 1, headers.length).getValues();
+  let last = rows[rows.length - 1];
+  assert.equal(String(last[headers.indexOf("Event")]), "order.owner_note");
+  assert.equal(String(last[headers.indexOf("Notes")]), "Gift wrap kar dena");
+  assert.equal(String(last[headers.indexOf("Source")]), "sheet-edit");
+  assert.equal(String(last[headers.indexOf("Order number")]), "LK-EDT1");
+
+  // owner ne Payment status paid kiya → order.payment_sheet audit row
+  sandbox.onEdit({ range: { getSheet: () => orders, getRow: () => 2, getColumn: () => payCol }, value: "paid" });
+  rows = orders.getRange(2, 1, orders.getLastRow() - 1, headers.length).getValues();
+  last = rows[rows.length - 1];
+  assert.equal(String(last[headers.indexOf("Event")]), "order.payment_sheet");
+  assert.equal(String(last[headers.indexOf("Payment status")]), "paid");
+  assert.equal(String(last[headers.indexOf("Source")]), "sheet-edit");
 });

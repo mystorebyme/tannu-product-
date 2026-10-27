@@ -47,6 +47,25 @@ try {
   moveAway("api");
   moveAway("orders");
 
+  /**
+   * R43: products page Vercel par `dynamicParams = true` rakhta hai (sheet me
+   * naya product add hote hi URL khule). `output: export` me static `false`
+   * zaroori hai — build ke dauraan sirf ye ek line swap (baad me restore).
+   */
+  moveAway("products/[handle]/page.tsx");
+  {
+    const productPageFrom = path.join(TMP, "products/[handle]/page.tsx");
+    const productPageTo = path.join(APP_DIR, "products/[handle]/page.tsx");
+    const source = fs.readFileSync(productPageFrom, "utf8");
+    const patched = source.replace(
+      "export const dynamicParams = true;",
+      "export const dynamicParams = false;",
+    );
+    if (patched === source) throw new Error("products page me dynamicParams = true line nahi mili (export swap fail)");
+    fs.mkdirSync(path.dirname(productPageTo), { recursive: true });
+    fs.writeFileSync(productPageTo, patched);
+  }
+
   // search ko static client version se replace karo
   moveAway("search");
   fs.mkdirSync(path.join(APP_DIR, "search"), { recursive: true });

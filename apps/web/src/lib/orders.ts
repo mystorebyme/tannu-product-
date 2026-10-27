@@ -23,7 +23,7 @@ import {
 } from "./orders-sheet";
 import { checkPincode } from "./delivery";
 import { canonicalStateName, statesMatch } from "./state-match";
-import { products } from "./store";
+import { allProducts } from "./store";
 import { syncOrderToSheet, syncShipmentToSheet } from "./google-sheets";
 import { cleanAwb, courierTrackingUrl } from "./tracking";
 
@@ -183,6 +183,12 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
     }
   }
 
+  /**
+   * R43: price/stock **live catalog** (sheet ka Products tab) se — owner sheet me
+   * price badle to checkout nayi price hi charge kare (build-time nahi), sheet se
+   * delete product order na ho, naya sheet product order ho sake.
+   */
+  const products = await allProducts();
   const items = payload.items.map((line) => {
     const product = products.find((candidate) => candidate.handle === line.handle);
     if (!product) throw new OrderError(`Product nahi mila: ${line.handle}`, 400, "product_not_found");

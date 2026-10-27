@@ -269,7 +269,10 @@ function updateFromAudit(entry: AuditEntry): TrackingUpdate | null {
     };
   }
   if (entry.action === "payment.verified" || entry.action === "payment.confirmed") {
-    return { at: entry.at, status: "payment", label: "Payment received", kind: "payment" };
+    // R43: owner ka sheet-payment-edit ka message bhi dikhe ("Sheet se payment update (owner)")
+    const textRaw = entry.meta?.text ?? entry.meta?.note;
+    const text = typeof textRaw === "string" ? textRaw.trim() : "";
+    return { at: entry.at, status: "payment", label: "Payment received", kind: "payment", text: text || undefined };
   }
   return null;
 }

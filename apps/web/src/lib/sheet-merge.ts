@@ -13,6 +13,10 @@ export type SheetTrackingUpdate = {
   status: string;
   event: string;
   message: string;
+  /** R43: row ka Payment status (owner ne sheet se paid kiya → timeline dikhe) */
+  payment?: string;
+  /** R43: row ka Notes column (owner ke in-place comment edit pakadne ke liye) */
+  notes?: string;
 };
 
 export type SheetTracking = {
@@ -91,22 +95,73 @@ export function sheetTrackingWins(order: Order, sheet: SheetTracking | null): bo
 }
 
 /**
+ * R43 (owner): **"sheet me order confirm kar diya fir bhi payment verify kar
+ * raha hai — fix karo. Order confirm means store owner ne verify kar diya ki
+ * payment aa gaya."**
+ *
+ * Prepaid/UPI order par owner ne sheet (ya admin) se status `confirmed` ya usse
+ * aage kiya → payment ko store-verified maano: CTA hat jaata hai, payment block
+ * "paid" dikhata hai, watcher ruk jaata hai. COD par ye rule nahi (wahan
+ * delivery par paisa milta hai — pending sahi hai). `refunded`/`paid` ko chhoo
+ * nahi (refunded = paisa wapas gaya, paid = pehle se verify).
+ */
+const OWNER_CONFIRMED_STAGES: OrderStatus[] = ["confirmed", "packed", "shipped", "delivered"];
+
+export function applyOwnerConfirmation(order: Order): Order {
+  if (order.paymentMethod === "cod") return order;
+  if (!OWNER_CONFIRMED_STAGES.includes(order.status)) return order;
+  if (!["pending", "processing", "failed"].includes(order.paymentStatus)) return order;
+  const at = order.statusNote?.at ?? order.createdAt;
+  return {
+    ...order,
+    paymentStatus: "paid",
+    payment: order.payment
+      ? { ...order.payment, status: "paid", verifiedAt: at, verifiedBy: order.payment.verifiedBy ?? "store" }
+      : {
+          gateway: "sheet",
+          reference: null,
+          amount: order.total,
+          status: "paid",
+          createdAt: at,
+          verifiedAt: at,
+          verifiedBy: "store",
+          failureReason: null,
+        },
+  };
+}
+
+/**
  * DB ke order par sheet ka tracking merge — **pure** (tests isi par chalte hain).
  * Sheet jeete to status / statusNote / courier-AWB-URL aur timeline ke updates
- * sheet se aate hain; paymentStatus hamesha DB ka (paisa = DB sacchai).
+ * sheet se aate hain.
  *
  * R39: sheet ka `adminNote` (Orders → Admin Note column) **hamesha** jeetta hai
  * — status merge ho ya na ho, owner ka message customer ke note-box me dikhega.
+ * R43: owner confirm kare to payment bhi verified (applyOwnerConfirmation) aur
+ * Notes column me likha owner comment bhi dikhta hai (adminNote ke baad).
  */
 export function mergeSheetTracking(order: Order, sheet: SheetTracking | null): Order {
-  if (!sheet) return order;
-  const merged = sheetTrackingWins(order, sheet) ? mergeSheetWins(order, sheet) : order;
+  if (!sheet) return applyOwnerConfirmation(order);
+  // Pehle sheet ka status merge — phir owner-confirm rule (sheet ke confirmed
+  // par bhi laagu ho, sirf purane status par nahi).
+  const merged = applyOwnerConfirmation(
+    sheetTrackingWins(order, sheet) ? mergeSheetWins(order, sheet) : order,
+  );
   const adminNote = String(sheet.adminNote ?? "").trim();
-  if (!adminNote) return merged;
+  /**
+   * R43 (owner): "jo comment maine likha vo show nhi ho rha" — owner kabhi
+   * comment `Notes` column me likh deta hai (Admin Note me nahi). Snapshot ke
+   * customer-note se alag latest Notes = owner ka comment → note-box + timeline.
+   */
+  const customerNote = String(order.notes ?? "").trim();
+  const rowNote = String(sheet.updates.find((update) => String(update.notes ?? "").trim())?.notes ?? "").trim();
+  const ownerNote = rowNote && rowNote !== customerNote ? rowNote : "";
+  const noteText = adminNote || ownerNote;
+  if (!noteText) return merged;
   return {
     ...merged,
     statusNote: {
-      text: adminNote,
+      text: noteText,
       at: sheet.updates[0]?.at ?? merged.createdAt,
       by: "sheet",
       status: merged.status,
@@ -117,14 +172,41 @@ export function mergeSheetTracking(order: Order, sheet: SheetTracking | null): O
 function mergeSheetWins(order: Order, sheet: SheetTracking): Order {
   const status = sheetStatusToOrderStatus(sheet.status) ?? order.status;
 
+  /**
+   * R43: onEdit events ko timeline ki sahi bhasha do —
+   *  • `order.admin_note`/`order.owner_note` → `order.note_updated` (owner ka
+   *    comment "Team update" bankar dikhe; pehle ye stage-entry ban jaata tha
+   *    aur comment stage ke canned text me dab jaata tha)
+   *  • `order.payment_sheet` (owner ne Payment status badla) → paid par
+   *    `payment.verified` ("Payment received")
+   */
   const audit: AuditEntry[] = sheet.updates
     .filter((update) => update?.at)
-    .map((update) => ({
-      at: update.at,
-      actor: "sheet",
-      action: `order.status.${sheetStatusToOrderStatus(update.status) ?? "placed"}`,
-      meta: { note: update.message || undefined, event: update.event || undefined },
-    }))
+    .map((update) => {
+      const event = String(update.event ?? "");
+      if (event === "order.admin_note" || event === "order.owner_note") {
+        return {
+          at: update.at,
+          actor: "sheet" as const,
+          action: "order.note_updated",
+          meta: { text: update.message || undefined, event },
+        };
+      }
+      if (event === "order.payment_sheet" && /paid|verified|success/i.test(String(update.payment ?? ""))) {
+        return {
+          at: update.at,
+          actor: "sheet" as const,
+          action: "payment.verified",
+          meta: { note: update.message || undefined, event, payment: update.payment },
+        };
+      }
+      return {
+        at: update.at,
+        actor: "sheet" as const,
+        action: `order.status.${sheetStatusToOrderStatus(update.status) ?? "placed"}`,
+        meta: { note: update.message || undefined, event: event || undefined },
+      };
+    })
     .reverse(); // trackingUpdates newest-first expect karta hai
 
   const courier = sheet.courier || order.tracking?.courier || null;
@@ -183,6 +265,9 @@ function trackingFromRows(orderNumber: string, rows: SheetRow[]): SheetTracking 
       status: String(row["Order status"] ?? ""),
       event: String(row.Event ?? ""),
       message: String(row.Notes ?? "") || String(row["Admin Note"] ?? ""),
+      // R43: payment + notes alag se — owner ke sheet edits timeline/comment me dikhein
+      payment: String(row["Payment status"] ?? ""),
+      notes: String(row.Notes ?? ""),
     }))
     .reverse(); // newest-first (mergeSheetWins isi order me audit banata hai)
   const status = lastNonEmpty("Order status");
@@ -285,12 +370,19 @@ export function orderFromSheetRows(orderNumber: string, rows: SheetRow[]): Order
       let action = rawEvent;
       if (rawEvent === "order.status_sheet") {
         action = `order.status.${sheetStatusToOrderStatus(row["Order status"]) ?? "placed"}`;
-      } else if (rawEvent === "order.admin_note") {
+      } else if (rawEvent === "order.admin_note" || rawEvent === "order.owner_note") {
+        // R43: owner ka comment (Admin Note ya Notes column se) → note entry
         action = "order.note_updated";
+      } else if (rawEvent === "order.payment_sheet") {
+        // R43: owner ne Payment status sheet se badla → paid par "Payment received"
+        action = /paid|verified|success/i.test(String(row["Payment status"] ?? ""))
+          ? "payment.verified"
+          : `order.status.${sheetStatusToOrderStatus(row["Order status"]) ?? "placed"}`;
       }
       const comment =
         String(row["Admin Note"] ?? "").trim() || (sheetEdit ? String(row.Notes ?? "").trim() : "");
-      const meta = comment ? { [rawEvent === "order.admin_note" ? "text" : "note"]: comment } : undefined;
+      const isNoteEvent = action === "order.note_updated" || action === "payment.verified";
+      const meta = comment ? { [isNoteEvent ? "text" : "note"]: comment } : undefined;
       return { at: toIso(row.Timestamp), actor: sheetEdit ? "sheet" : "system", action, meta };
     })
     .reverse();
@@ -323,7 +415,8 @@ export function orderFromSheetRows(orderNumber: string, rows: SheetRow[]): Order
   const courier = lastNonEmpty("Tracking courier") || null;
   const awb = lastNonEmpty("AWB") || null;
   const url = lastNonEmpty("Tracking URL") || null;
-  return {
+  // R43: owner ne sheet se confirm kiya → payment store-verified (COD chhod kar)
+  return applyOwnerConfirmation({
     id: orderNumber,
     orderNumber,
     createdAt,
@@ -362,7 +455,20 @@ export function orderFromSheetRows(orderNumber: string, rows: SheetRow[]): Order
         ? { courier, awb, url, shippedAt: null, deliveredAt: null, updatedAt: createdAt, updatedBy: "sheet" }
         : undefined,
     audit,
-  };
+  });
+}
+
+/**
+ * R43: `state.json` khaali ho (order_state timeout ke baad compat rows) to rows
+ * ke `Order JSON` column se snapshot utha lo — warna items Rs. 0 / khaali link
+ * par reconstruct hota tha (live bug LK-QDM2EXQMGO).
+ */
+export function lastOrderJsonInRows(rows: SheetRow[]): string {
+  for (let i = rows.length - 1; i >= 0; i -= 1) {
+    const value = String(rows[i]?.["Order JSON"] ?? "").trim();
+    if (value) return value;
+  }
+  return "";
 }
 
 /** order_state/orders_state ka ek entry → Order (JSON snapshot + rows overlay). */
@@ -375,7 +481,7 @@ export function parseOrderState(state: OrderState | null | undefined): Order | n
     : state.row
       ? [state.row]
       : [];
-  const json = String(state.json ?? "").trim();
+  const json = String(state.json ?? "").trim() || lastOrderJsonInRows(rows);
   let base: Order | null = null;
   if (json) {
     try {

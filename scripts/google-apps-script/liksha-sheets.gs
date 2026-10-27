@@ -8,8 +8,11 @@
  * hai / sheet se settings padhta hai. Koi 3rd party service nahi, koi paid tool
  * nahi — sirf Google Apps Script (free).
  *
- * ── KAAM (16 tabs) ────────────────────────────────────────────────────────────
+ * ── KAAM (17 tabs) ────────────────────────────────────────────────────────────
  *   Settings    → phone / WhatsApp / email / UPI / announcement / GSTIN (site 15s me padhti hai)
+ *   Products    → **R43: sheet hi catalog ka DB hai** — saare products yahan list;
+ *                 owner row add/delete kare, price/image badle → site par live
+ *                 (site `?action=catalog` se padhti hai; khaali tab ko khud seed karti hai)
  *   Orders      → har order + har status change (append-only timeline) + `Order JSON`
  *                 snapshot — **R40: sheet hi orders ka DB hai** (koi Supabase nahi)
  *   OrderItems  → order ki har item alag row me (size, colour, qty, price)
@@ -84,7 +87,7 @@ var TOKEN = 'CHANGE-ME-liksha-token';
 var TOKEN_PLACEHOLDER = 'CHANGE-ME-liksha-token';
 
 /** Code ka version — `?action=health` me dikhta hai. Code badle to isse badhaayein. */
-var CODE_VERSION = 'r42-1';
+var CODE_VERSION = 'r43-1';
 
 /**
  * R40 (owner rule): sheet ka id **code me kahin nahi** — sirf Script Properties
@@ -102,7 +105,7 @@ var CODE_VERSION = 'r42-1';
  * **naam** se dhoondhe jaate hain (naam humare apne hain — Orders, Settings, …).
  */
 var GIDS = {
-  Settings: null, Orders: null, Payments: null, Messages: null, Newsletter: null,
+  Settings: null, Products: null, Orders: null, Payments: null, Messages: null, Newsletter: null,
   OrderItems: null, Invoices: null, Shipments: null, Checkout: null, Reviews: null,
   Coupons: null, Inventory: null, Audit: null, Errors: null, Dashboard: null, Sync: null,
 };
@@ -130,6 +133,24 @@ var ERRORS_KEEP = 2000;
  *   • Naya column yahan add karne par purani sheet me bhi apne aap jud jaata hai.
  */
 var HEADERS = {
+  /**
+   * R43 (owner): "jitne bi product hai vo saare sheet me list kr do … price
+   * change krte hi site pr visible ho jaye … product ki id se search kar sake …
+   * koi bi new product add kr paye" — Products tab = catalog ka database.
+   *   • Id          = product ka handle/URL-id (isi se site product kholta hai)
+   *   • Price       = rupees me (599 ya 599.00) — site paise me badal leti hai
+   *   • Main image  = pehli/photo URL; Images = baaki gallery (| se alag)
+   *   • Sizes       = | se alag (jaise XS [34]|S [36]|M [38])
+   *   • Status      = active / hidden (dropdown) — hidden product site par nahi dikhta
+   *   • Row delete  = product site se hat jaata hai
+   * Site khaali tab ko apne catalog se khud bhar deti hai (?action=products_seed
+   * site bhejti hai; script sirf KHAALI tab par likhta hai — owner data safe).
+   */
+  Products: [
+    'Timestamp', 'Id', 'Title', 'Price', 'Compare-at price', 'Main image', 'Images',
+    'Collections', 'Category', 'Fabric', 'Colour', 'Sizes', 'In stock', 'Featured',
+    'Status', 'Description', 'Source', 'Updated by',
+  ],
   Orders: [
     'Timestamp', 'Event', 'Order number', 'Order status', 'Payment status', 'Payment method',
     'Payment reference', 'UPI ID', 'Total', 'Subtotal', 'Discount', 'Coupon', 'Items',
@@ -214,6 +235,7 @@ var DASHBOARD_METRICS = [
 
 /** Money columns — in par ₹ format lagta hai (sirf naye tab banne par). */
 var MONEY_COLUMNS = {
+  Products: ['Price', 'Compare-at price'],
   Orders: ['Total', 'Subtotal', 'Discount'],
   Payments: ['Total', 'Subtotal', 'Discount'],
   OrderItems: ['Price', 'Line total'],
@@ -238,6 +260,13 @@ var MONEY_COLUMNS = {
 var ORDER_DROPDOWN = ['placed', 'confirmed', 'packed', 'shipped', 'delivered', 'cancelled', 'returned'];
 var PAYMENT_DROPDOWN = ['pending', 'processing', 'paid', 'failed', 'refunded'];
 var VALIDATIONS = {
+  // R43: Products tab — owner ko har column me saaf choices dikhein
+  Products: {
+    Status: ['active', 'hidden'],
+    'In stock': ['yes', 'no'],
+    Featured: ['yes', 'no'],
+    Category: ['anarkali', 'lehnga', 'printed', 'saree', 'gown', 'sharara', 'other'],
+  },
   Orders: { 'Order status': ORDER_DROPDOWN, 'Payment status': PAYMENT_DROPDOWN, 'Payment method': ['prepaid', 'cod'] },
   Payments: { 'Order status': ORDER_DROPDOWN, 'Payment status': PAYMENT_DROPDOWN, 'Payment method': ['prepaid', 'cod'] },
   OrderItems: { Status: ORDER_DROPDOWN },
@@ -751,10 +780,11 @@ var COLUMN_WIDTHS = {
 var TEXT_COLUMNS = ['Phone', 'Pincode', 'AWB', 'Order number', 'Invoice number', 'SKU', 'Code', 'Message ID', 'GSTIN', 'UPI ID', 'Payment reference'];
 
 /** Wrap wale columns (lambe text) */
-var WRAP_COLUMNS = ['Item details', 'Notes', 'Message', 'Review', 'Address', 'Details', 'Payload', 'Note', 'Title', 'Order JSON', 'Invoice JSON'];
+var WRAP_COLUMNS = ['Item details', 'Notes', 'Message', 'Review', 'Address', 'Details', 'Payload', 'Note', 'Title', 'Order JSON', 'Invoice JSON', 'Description', 'Images'];
 
 /** Money columns — in par ₹ format lagta hai (sirf naye tab banne par). */
 var MONEY_COLUMNS = {
+  Products: ['Price', 'Compare-at price'],
   Orders: ['Total', 'Subtotal', 'Discount'],
   Payments: ['Total', 'Subtotal', 'Discount'],
   OrderItems: ['Price', 'Line total'],
@@ -1060,6 +1090,68 @@ function findRows_(name, column, value, limit) {
     }
   }
   return out;
+}
+
+/**
+ * R43: Products tab ki **saari** rows (upar se neeche — owner ka order hi site
+ * ka order hai; naye products owner jahan daale wahan dikhte hain).
+ */
+function productRows_(limit) {
+  if (!HEADERS.Products) return [];
+  var sheet = sheet_('Products');
+  var last = sheet.getLastRow();
+  if (last < 2) return [];
+  var headers = headersOf_(sheet);
+  var count = Math.min(last - 1, limit || 2000);
+  var values = sheet.getRange(2, 1, count, headers.length).getValues();
+  return values.map(function (row) {
+    var object = {};
+    for (var i = 0; i < headers.length; i += 1) {
+      object[headers[i]] = row[i] === null || row[i] === undefined ? '' : row[i];
+    }
+    return object;
+  });
+}
+
+/**
+ * R43: website ka build-time catalog → Products tab (sirf jab tab KHAALI ho —
+ * owner ka data kabhi override nahi hota). Ek hi baar chalta hai; uske baad
+ * sheet hi source of truth hai (site dobara seed nahi karti).
+ */
+function seedProducts_(rows) {
+  var list = Array.isArray(rows) ? rows : [];
+  if (!list.length) return { ok: false, version: CODE_VERSION, error: 'products ki rows chahiye' };
+  var sheet = sheet_('Products');
+  var headers = headersOf_(sheet);
+  if (sheet.getLastRow() >= 2) {
+    return { ok: true, version: CODE_VERSION, seeded: 0, skipped: true, reason: 'Products tab me pehle se rows hain — owner ka data override nahi kiya' };
+  }
+  var lock = LockService.getScriptLock();
+  lock.waitLock(LOCK_WAIT_MS);
+  var written = 0;
+  try {
+    // lock milne ke baad dobara check — beech me kisi aur ne bhar diya ho to skip
+    if (sheet.getLastRow() >= 2) {
+      return { ok: true, version: CODE_VERSION, seeded: 0, skipped: true, reason: 'Products tab bhara hua hai' };
+    }
+    var values = list.map(function (row) {
+      return headers.map(function (column) {
+        return cell_(row && row[column]);
+      });
+    });
+    var CHUNK = 100;
+    for (var start = 0; start < values.length; start += CHUNK) {
+      var slice = values.slice(start, start + CHUNK);
+      sheet.getRange(2 + written, 1, slice.length, headers.length).setValues(slice);
+      written += slice.length;
+    }
+  } catch (error) {
+    logError_('seedProducts_', error, { count: list.length });
+    return { ok: false, version: CODE_VERSION, error: String(error && error.message ? error.message : error), written: written };
+  } finally {
+    lock.releaseLock();
+  }
+  return { ok: true, version: CODE_VERSION, seeded: written, note: 'Products tab website ke catalog se bhar gaya — ab sheet hi source of truth hai. Row badaliye/jodiye/hataiye — site par live dikhega.' };
 }
 
 /** Ek order ki poori kahani — Orders + Items + Payments + Shipments + Invoices. */
@@ -2172,6 +2264,62 @@ function onEdit(e) {
       return;
     }
 
+    /**
+     * R43 (owner): "jo comment hai maine likha vo show nhi ho rha" — owner
+     * kabhi comment `Notes` column me bhi likh deta hai (sirf Admin Note me
+     * nahi). Notes edit → `order.owner_note` audit row; site isay timeline ke
+     * note-comment me badalti hai (customer ko owner ka message dikhta hai).
+     */
+    if (name === 'Orders' && column === 'Notes') {
+      var cmtIdCol = head.indexOf('Order number') + 1;
+      var cmtOrder = cmtIdCol ? text_(tab.getRange(row, cmtIdCol).getValue()) : '';
+      var cmtText = text_(e.value);
+      if (!cmtOrder || !cmtText) return;
+      var cmtStatusCol = head.indexOf('Order status') + 1;
+      appendRows_([
+        {
+          sheet: 'Orders',
+          row: {
+            Timestamp: now_(),
+            Event: 'order.owner_note',
+            'Order number': cmtOrder,
+            'Order status': cmtStatusCol ? text_(tab.getRange(row, cmtStatusCol).getValue()) : '',
+            Notes: cmtText,
+            Source: 'sheet-edit',
+          },
+        },
+      ]);
+      return;
+    }
+
+    /**
+     * R43: owner ne `Payment status` badla (jaise pending → paid) → audit row,
+     * taaki customer page par "Payment received" turant dikhe aur site ka
+     * payment block sheet ke saath sync rahe.
+     */
+    if (name === 'Orders' && column === 'Payment status') {
+      var payIdCol = head.indexOf('Order number') + 1;
+      var payOrder = payIdCol ? text_(tab.getRange(row, payIdCol).getValue()) : '';
+      var payValue = text_(e.value);
+      if (!payOrder || !payValue) return;
+      var payStatusCol = head.indexOf('Order status') + 1;
+      appendRows_([
+        {
+          sheet: 'Orders',
+          row: {
+            Timestamp: now_(),
+            Event: 'order.payment_sheet',
+            'Order number': payOrder,
+            'Order status': payStatusCol ? text_(tab.getRange(row, payStatusCol).getValue()) : '',
+            'Payment status': payValue,
+            Notes: 'Sheet se payment update (owner)',
+            Source: 'sheet-edit',
+          },
+        },
+      ]);
+      return;
+    }
+
     if (name === 'Messages' && column === 'Status') {
       var value = String(e.value || '').trim().toLowerCase();
       var repliedCol = head.indexOf('Replied') + 1;
@@ -2579,6 +2727,21 @@ function doGet(e) {
     }
 
     /**
+     * R43 (owner): "jitne bi product hai vo saare sheet me list kr do … price
+     * change krte hi site pr visible ho jaye" — Products tab = catalog ka DB.
+     * Site `?action=catalog` se saari rows padhti hai (30s cache + stale-while-
+     * revalidate) aur build-time catalog par overlay karti hai:
+     *   • row badli (price/image/title/status) → site par live
+     *   • nayi row (naya Id) → naya product site par
+     *   • row delete → product site se gaya
+     * Tab khaali mile to site apna catalog `products_seed` (POST) se bhar deti hai.
+     */
+    if (action === 'catalog' || action === 'products') {
+      var productRows = productRows_(2000);
+      return json_({ ok: true, version: CODE_VERSION, count: productRows.length, products: productRows, time: now_() });
+    }
+
+    /**
      * Tracking timeline — order number + registered mobile se.
      *   ?action=timeline&order=LK-XXXX&phone=98XXXXXXXX
      * (site ka tracking DB se chalta hai; ye sheet se hi jawab deta hai — owner
@@ -2688,6 +2851,16 @@ function doPost(e) {
 
     if (action === 'coupon_save') {
       return json_(upsertCoupon_(body));
+    }
+
+    // R43: site apna build-time catalog Products tab me seed karti hai (sirf
+    // jab tab khaali ho — owner ka data kabhi override nahi hota).
+    if (action === 'products_seed') {
+      var seedResult = seedProducts_(body.products);
+      if (seedResult.ok && seedResult.seeded) {
+        noteAudit_(body.actor || 'site', 'products_seed', 'Products', seedResult.seeded + ' rows');
+      }
+      return json_(seedResult);
     }
 
     if (action === 'review_add') {

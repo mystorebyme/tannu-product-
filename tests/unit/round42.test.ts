@@ -135,7 +135,7 @@ test("R42: watcher — refunded ki apni copy + polling paid/refunded par rukti h
 
 test("R42: script r42-1 — VALIDATIONS map, dropdowns action (GET+POST), setup/repair me auto", () => {
   const gs = read("scripts/google-apps-script/liksha-sheets.gs");
-  assert.match(gs, /var CODE_VERSION = 'r42-1';/);
+  assert.match(gs, /var CODE_VERSION = 'r4[23]-1';/);
   assert.match(gs, /function applyValidations_\(/);
   assert.match(gs, /setAllowInvalid\(true\)/, "dropdown suvidha hai, taala nahi — automation nahi tootta");
   // "jis column mai jrurat hai sabhi mai"

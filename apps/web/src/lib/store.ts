@@ -1,39 +1,78 @@
 import "server-only";
 
+import { connection } from "next/server";
+
 import type { Catalog, Collection, ColourGroup, ColourOption, Product } from "@liksha/types";
 import catalog from "@/data/catalog.json";
+import { getLiveCatalog } from "@/lib/catalog-sheet";
+import { sheetsConfigured } from "@/lib/google-sheets";
 
 /**
- * Catalog ek build-time JSON hai (database/seeds/catalog.json se generate hota hai).
- * Isliye har page static render ho sakta hai — koi DB call nahi, TTFB fast.
+ * Catalog do layer me hai (R43 — owner: "proper sheet se chaljaye db"):
+ *
+ *  1. **Build-time base** (`@/data/catalog.json`) — seed + fallback. Sheet
+ *     configured nahi (dev/tests), GitHub Pages ka static export, ya sheet
+ *     down — tab site isi par chalti hai (kabhi tootti nahi).
+ *  2. **Live sheet overlay** — Products tab (`?action=catalog`, 30s TTL +
+ *     stale-while-revalidate). Owner sheet me price/image/title badle, row
+ *     add/delete kare → site par live. `mergeSheetCatalog` (catalog-merge.ts)
+ *     overlay karti hai; fetch/cache `catalog-sheet.ts` me.
+ *
+ * Render paths sab **live** padhte hain (async getters neeche). Sync exports
+ * (`products`, `collections`) sirf build-time kaam ke liye hain — sitemap aur
+ * `generateStaticParams` (static export me poora catalog prerender hota hai).
  */
 const data = catalog as unknown as Catalog;
 
+/** Build-time products — SIRF sitemap/generateStaticParams (render ke liye async getters use karein). */
 export const products: Product[] = data.products;
+/** Build-time collections — SIRF sitemap/generateStaticParams. */
 export const collections: Collection[] = data.collections;
 export const catalogMeta = data.meta;
 export const colourGroups: Record<string, ColourGroup> = data.colourGroups ?? {};
 
 /**
+ * Runtime catalog — sheet live ho to merged (sheet jeetti hai), warna baked.
+ * `connection()` Vercel build ke prerender me route ko dynamic rakhta hai
+ * (warna price sheet me badli aur static HTML purani dikhati). Static export
+ * (PAGES_PREVIEW) me connection() skip — wahan poora site baked se banta hai.
+ */
+async function liveData(): Promise<Catalog> {
+  if (process.env.PAGES_PREVIEW === "1") return data;
+  if (!sheetsConfigured()) return data;
+  try {
+    if (typeof connection === "function") await connection();
+  } catch {
+    // workerd/build environment — dynamism ka faisla Next khud karega
+  }
+  try {
+    return (await getLiveCatalog()) ?? data;
+  } catch {
+    return data;
+  }
+}
+
+/**
  * Ek hi design ke alag colours store par alag products hain — listing par sirf
  * representative card dikhta hai (duplicate cards nahi), PDP par swatch se colour badalta hai.
  */
-export function isRepresentative(product: Product): boolean {
-  const group = product.colourGroup ? colourGroups[product.colourGroup] : null;
+export function isRepresentative(product: Product, groups: Record<string, ColourGroup> = colourGroups): boolean {
+  const group = product.colourGroup ? groups[product.colourGroup] : null;
   return !group || group.handle === product.handle;
 }
 
-export function listed<T extends Product>(list: T[]): T[] {
-  return list.filter(isRepresentative);
+export function listed<T extends Product>(list: T[], groups: Record<string, ColourGroup> = colourGroups): T[] {
+  return list.filter((product) => isRepresentative(product, groups));
 }
 
-export function colourGroupFor(product: Product): ColourGroup | null {
-  return product.colourGroup ? (colourGroups[product.colourGroup] ?? null) : null;
+export function colourGroupFor(product: Product, groups: Record<string, ColourGroup> = colourGroups): ColourGroup | null {
+  return product.colourGroup ? (groups[product.colourGroup] ?? null) : null;
 }
 
-/** PDP ke swatches: is product ka colour pehle, phir baaki */
-export function colourOptionsFor(product: Product): ColourOption[] {
-  const group = colourGroupFor(product);
+/** PDP ke swatches: is product ka colour pehle, phir baaki (live prices ke saath). */
+export async function colourOptionsFor(product: Product): Promise<ColourOption[]> {
+  const live = await liveData();
+  const group = colourGroupFor(product, live.colourGroups ?? {});
   if (!group) return [];
   const own = group.colours.find((option) => option.handle === product.handle);
   return own ? [own, ...group.colours.filter((option) => option.handle !== product.handle)] : group.colours;
@@ -41,15 +80,28 @@ export function colourOptionsFor(product: Product): ColourOption[] {
 
 /** listed products — colour groups ka sirf ek card */
 export async function getProducts(): Promise<Product[]> {
-  return listed(products);
+  const live = await liveData();
+  return listed(live.products, live.colourGroups ?? {});
+}
+
+/** Poora catalog (colour-group duplicates ke saath) — best-sellers jaise lookups ke liye. */
+export async function allProducts(): Promise<Product[]> {
+  const live = await liveData();
+  return live.products;
 }
 
 export async function getProduct(handle: string): Promise<Product | undefined> {
-  return products.find((product) => product.handle === handle);
+  const live = await liveData();
+  const wanted = handle.trim().toLowerCase();
+  return (
+    live.products.find((product) => product.handle === wanted) ??
+    live.products.find((product) => product.handle.toLowerCase() === wanted)
+  );
 }
 
 export async function getCollections(): Promise<Collection[]> {
-  return [...collections].sort((a, b) => a.sortOrder - b.sortOrder);
+  const live = await liveData();
+  return [...live.collections].sort((a, b) => a.sortOrder - b.sortOrder);
 }
 
 /**
@@ -80,51 +132,70 @@ export function canonicalCollectionHandle(handle: string): string {
 
 export async function getCollection(handle: string): Promise<Collection | undefined> {
   const canonical = resolveCollectionHandle(handle);
-  return collections.find((collection) => collection.handle === canonical);
+  const live = await liveData();
+  return live.collections.find((collection) => collection.handle === canonical);
 }
 
 export async function getProductsByCollection(handle: string, limit?: number): Promise<Product[]> {
   const canonical = resolveCollectionHandle(handle);
-  const list = listed(products.filter((product) => product.collections.includes(canonical)));
+  const live = await liveData();
+  const list = listed(
+    live.products.filter((product) => product.collections.includes(canonical)),
+    live.colourGroups ?? {},
+  );
   return typeof limit === "number" ? list.slice(0, limit) : list;
 }
 
 export async function getFeatured(limit = 8): Promise<Product[]> {
-  return listed(products).filter((product) => product.featured).slice(0, limit);
+  const live = await liveData();
+  return listed(live.products, live.colourGroups ?? {}).filter((product) => product.featured).slice(0, limit);
 }
 
 export async function getLatest(limit = 12): Promise<Product[]> {
-  return listed(products).slice(0, limit);
+  const live = await liveData();
+  return listed(live.products, live.colourGroups ?? {}).slice(0, limit);
 }
 
 export async function getRelated(handle: string, limit = 8): Promise<Product[]> {
-  const current = products.find((product) => product.handle === handle);
-  if (!current) return products.slice(0, limit);
-  const sameCategory = listed(products).filter(
+  const live = await liveData();
+  const all = listed(live.products, live.colourGroups ?? {});
+  const current = live.products.find((product) => product.handle === handle);
+  if (!current) return all.slice(0, limit);
+  const sameCategory = all.filter(
     (product) => product.handle !== handle && product.category === current.category,
   );
   const sameColor = sameCategory.filter((product) => product.color === current.color);
   return [...sameColor, ...sameCategory.filter((p) => !sameColor.includes(p))].slice(0, limit);
 }
 
-export function searchProducts(term: string, limit = 8) {
+/**
+ * R43 (owner): "product ki id se product ko search kar sake" — handle/Id ab
+ * search haystack me hai (exact-id match sabse pehle aata hai).
+ */
+export async function searchProducts(term: string, limit = 8) {
   const query = term.trim().toLowerCase();
   if (query.length < 2) return [];
-  return listed(products)
-    .filter((product) => {
-      const haystack = `${product.title} ${product.color} ${product.fabric} ${product.category}`.toLowerCase();
-      return query.split(/\s+/).every((word) => haystack.includes(word));
-    })
-    .slice(0, limit)
-    .map((product) => ({
-      handle: product.handle,
-      title: product.title,
-      price: product.price,
-      compareAtPrice: product.compareAtPrice,
-      images: product.images,
-      color: product.color,
-      fabric: product.fabric,
-    }));
+  const live = await liveData();
+  const matches = listed(live.products, live.colourGroups ?? {}).filter((product) => {
+    const haystack =
+      `${product.handle} ${product.title} ${product.color} ${product.fabric} ${product.category} ${product.productType ?? ""}`.toLowerCase();
+    return query.split(/\s+/).every((word) => haystack.includes(word));
+  });
+  const exactId = query.replace(/\s+/g, "");
+  matches.sort((a, b) => {
+    const aId = a.handle.replace(/-/g, "") === exactId ? 0 : 1;
+    const bId = b.handle.replace(/-/g, "") === exactId ? 0 : 1;
+    return aId - bId;
+  });
+  return matches.slice(0, limit).map((product) => ({
+    handle: product.handle,
+    title: product.title,
+    price: product.price,
+    compareAtPrice: product.compareAtPrice,
+    images: product.images,
+    color: product.color,
+    fabric: product.fabric,
+  }));
 }
 
 /** Search box ke "search suggestions" — curated phrases + live catalog se colours/categories. */
@@ -142,22 +213,22 @@ const CURATED_SEARCH_PHRASES = [
   "sale",
 ];
 
-let suggestionCache: string[] | null = null;
+let suggestionCache: { key: Product[]; phrases: string[] } | null = null;
 
-function allSearchPhrases(): string[] {
-  if (suggestionCache) return suggestionCache;
+function allSearchPhrases(all: Product[], collectionList: Collection[]): string[] {
+  if (suggestionCache && suggestionCache.key === all) return suggestionCache.phrases;
   const colours = new Set<string>();
   const fabrics = new Set<string>();
   const categories = new Set<string>();
-  for (const product of listed(products)) {
+  for (const product of all) {
     if (product.color && product.color !== "As Shown") colours.add(product.color.toLowerCase());
     if (product.fabric && product.fabric !== "As Shown") fabrics.add(product.fabric.toLowerCase());
     if (product.category) categories.add(product.category.replace(/-/g, " "));
   }
-  const collectionTitles = collections
+  const collectionTitles = collectionList
     .filter((collection) => collection.handle !== "saree")
     .map((collection) => collection.title.toLowerCase());
-  suggestionCache = Array.from(
+  const phrases = Array.from(
     new Set([
       ...CURATED_SEARCH_PHRASES,
       ...collectionTitles,
@@ -166,15 +237,17 @@ function allSearchPhrases(): string[] {
       ...Array.from(categories),
     ]),
   );
-  return suggestionCache;
+  suggestionCache = { key: all, phrases };
+  return phrases;
 }
 
 /** Typeahead terms — "ana" par "anarkali suit set", "anarkali suit set georgette" etc. */
-export function searchSuggestions(term: string, limit = 6): string[] {
+export async function searchSuggestions(term: string, limit = 6): Promise<string[]> {
   const query = term.trim().toLowerCase();
   if (query.length < 2) return [];
+  const live = await liveData();
   const words = query.split(/\s+/).filter(Boolean);
-  return allSearchPhrases()
+  return allSearchPhrases(live.products, live.collections)
     .filter((phrase) => words.every((word) => phrase.includes(word)))
     .filter((phrase) => phrase !== query)
     .sort((a, b) => a.length - b.length)
@@ -182,10 +255,12 @@ export function searchSuggestions(term: string, limit = 6): string[] {
 }
 
 /** Search page ke liye "recommended" picks — trending pehle, phir Liksha's choice. */
-export function recommendedProducts(limit = 8): Product[] {
-  const trending = listed(products).filter((product) => product.collections.includes("trending"));
-  const picks = listed(products).filter((product) => product.collections.includes("likshas-choice"));
-  const newest = [...listed(products)].sort((a, b) =>
+export async function recommendedProducts(limit = 8): Promise<Product[]> {
+  const live = await liveData();
+  const all = listed(live.products, live.colourGroups ?? {});
+  const trending = all.filter((product) => product.collections.includes("trending"));
+  const picks = all.filter((product) => product.collections.includes("likshas-choice"));
+  const newest = [...all].sort((a, b) =>
     String(b.publishedAt ?? "").localeCompare(String(a.publishedAt ?? "")),
   );
   const merged: Product[] = [];

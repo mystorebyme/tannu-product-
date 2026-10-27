@@ -116,7 +116,7 @@ test("R41: orders-sheet — full/compat/none mode, purana script orders block na
   assert.match(lib, /rows\?\.Orders/, "orderStory_ ke Orders rows se reconstruct");
   assert.match(lib, /groupOrdersFromRecentRows/, "list = recent rows → groups → reconstruct");
   assert.match(lib, /\{ sheet: "Orders", limit: 200 \}/, "recent ki cap 200 (script ki apni cap)");
-  assert.match(lib, /orderFromSheetRows\(wanted, rows\)/, "reconstruct pure fn se (unit-tested)");
+  assert.match(lib, /parseOrderState\(\{ orderNumber: wanted, rows, json: lastOrderJson\(rows\) \}\)/, "reconstruct pure fn se (unit-tested) + Order JSON restore (R43)");
 });
 
 test("R41: orders.ts — gate sirf mode 'none' par, customer message friendly", () => {

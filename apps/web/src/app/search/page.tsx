@@ -24,7 +24,8 @@ export default async function SearchPage({
   const products = await getProducts();
   const results = term
     ? products.filter((product) => {
-        const haystack = `${product.title} ${product.color} ${product.fabric} ${product.category}`.toLowerCase();
+        // R43 (owner): "product ki id se search kar sake" — handle/id bhi haystack me
+        const haystack = `${product.handle} ${product.title} ${product.color} ${product.fabric} ${product.category}`.toLowerCase();
         return term
           .toLowerCase()
           .split(/\s+/)
@@ -33,8 +34,8 @@ export default async function SearchPage({
       })
     : [];
 
-  const suggestions = term ? searchSuggestions(term, 6) : [];
-  const fallback = recommendedProducts(8);
+  const suggestions = term ? await searchSuggestions(term, 6) : [];
+  const fallback = await recommendedProducts(8);
 
   return (
     <div className="container-liksha py-9">

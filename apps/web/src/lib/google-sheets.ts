@@ -595,6 +595,7 @@ export async function readScriptVersion(): Promise<{ version: string; major: num
 export async function scriptPost<T = Record<string, unknown>>(
   action: string,
   body: Record<string, unknown> = {},
+  options: { timeoutMs?: number } = {},
 ): Promise<{ ok: true; data: T } | { ok: false; error: string }> {
   const config = googleSheetsConfig();
   if (!config) return { ok: false, error: "sheet pipeline configured nahi (GOOGLE_SHEETS_WEBAPP_URL)" };
@@ -604,7 +605,8 @@ export async function scriptPost<T = Record<string, unknown>>(
       cache: "no-store",
       headers: sheetHeaders({ "content-type": "text/plain;charset=utf-8" }),
       body: JSON.stringify({ token: config.token, action, ...body }),
-      signal: AbortSignal.timeout(WRITE_TIMEOUT_MS),
+      // R43: catalog seed jaisi badi calls ko zyada waqt chahiye (446 rows)
+      signal: AbortSignal.timeout(options.timeoutMs ?? WRITE_TIMEOUT_MS),
     });
     if (!response.ok) return { ok: false, error: `HTTP ${response.status}` };
     const payload = (await response.json().catch(() => null)) as (T & { ok?: boolean; error?: string }) | null;
@@ -778,6 +780,16 @@ export async function readSheetHealth(): Promise<SheetHealth | null> {
     // R42: r42+ script mila to dropdowns ek baar khud lagwa do (fire-and-forget)
     if (healMajor >= 42) {
       void applySheetDropdowns().catch(() => {});
+    }
+    /**
+     * R43: r43+ script par Products tab khaali ho to catalog seed bhi yahin se
+     * trigger ho jaata hai (catalog read → empty → seed, 10-min rate limit —
+     * `catalog-sheet.ts`). Health probe site ka pehla sheet-touch hota hai,
+     * isliye owner ke r43-1 paste karte hi seeding apne aap shuru.
+     */
+    if (healMajor >= 43) {
+      const { readSheetCatalogRows } = await import("./catalog-sheet");
+      void readSheetCatalogRows({ fresh: true }).catch(() => {});
     }
     const rows: Record<string, number> = {};
     for (const entry of payload.sheets ?? []) {
