@@ -13,8 +13,8 @@ import { bindings, defineConfig, defineWorker } from "cf/config";
  * `bindings.secret()` = sensitive (token/DB/URL), `bindings.text()` = public var.
  */
 const SECRETS = [
-  // orders/invoices durable rakhne ke liye — Workers par FS read-only hai
-  "DATABASE_URL",
+  // R40: orders sirf Google Sheet me save hote hain (owner: "Supabase nahi —
+  // only sheet") — DATABASE_URL ab Worker ko chahiye hi nahi, isliye list se gaya.
   // admin APIs (orders status, tracking, settings, invoices) ka bearer token
   "ADMIN_API_TOKEN",
   // payments page ka return link sign karne ke liye
@@ -82,6 +82,14 @@ export default defineConfig({
        * Workers build me env nahi hota → default khaali → sheet hi sab kuch.
        */
       STORE_UPI_ID: bindings.text(process.env.STORE_UPI_ID?.trim() ?? ""),
+      /**
+       * R40: sheet ka id **sirf env me** rehta hai (owner rule: sheet ki koi cheez
+       * code me hardcoded nahi). Value build ke waqt shell env se bake hoti hai —
+       * `STORE_UPI_ID` wala hi pattern. Kaam: script props khaali mile
+       * (`sheet_not_configured`) to site khud `sheet_set?id=…` chala kar heal karti
+       * hai. Khaali → heal band (honest), Vercel par wahi env already set hai.
+       */
+      SHEET_EXPECTED_ID: bindings.text(process.env.SHEET_EXPECTED_ID?.trim() ?? ""),
     },
   }),
 });

@@ -111,12 +111,12 @@ function loadScript(
   assert.ok(source.includes(`var TOKEN = '${token}';`), "token replace hua");
 
   /**
-   * Owner ne paste karte waqt `SPREADSHEET_ID` line delete kar di thi — usi galti
-   * ka test. Script crash nahi honi chahiye, fallback id se asli sheet pakdni chahiye.
+   * R40: code me SPREADSHEET_ID line hoti hi nahi — sheet id sirf Script
+   * Properties me. `dropSpreadsheetId` option ab "SHEET_ID property khaali"
+   * (fresh paste) scenario hai.
    */
   if (options.dropSpreadsheetId) {
-    source = source.replace(/^var SPREADSHEET_ID = '[^']*';\s*$/m, "");
-    assert.ok(!/^var SPREADSHEET_ID/m.test(source), "SPREADSHEET_ID line hataayi gayi");
+    options.propertySheetId = null;
   }
 
   const sheets: ReturnType<typeof makeSheet>[] = [];
@@ -211,7 +211,10 @@ function loadScript(
       getScriptProperties: () => {
         const opts = options as Record<string, unknown>;
         const props = (opts.props ?? (opts.props = {})) as Record<string, string>;
-        if (options.propertySheetId && props.SHEET_ID === undefined) props.SHEET_ID = options.propertySheetId;
+        // R40: sheet ka id sirf props me — harness default 'test-sheet-id' (null = fresh paste)
+        if (options.propertySheetId !== null && props.SHEET_ID === undefined) {
+          props.SHEET_ID = options.propertySheetId ?? "test-sheet-id";
+        }
         return {
           getProperty: (key: string) => props[key] ?? null,
           setProperty: (key: string, value: string) => {
@@ -433,7 +436,7 @@ test("R38: set_token — fresh install par save, baad me old ke bina change nahi
 
 test("R38: adopt — bound sheet hi website ki sheet ban jaati hai (SHEET_ID property)", () => {
   // configured (purani) sheet access nahi — script owner ki sheet se bound hai
-  const { sandbox } = loadScript("test-token", { openByIdFails: true });
+  const { sandbox } = loadScript("test-token", { openByIdFails: true, propertySheetId: "purani-sheet-id" });
   const adopted = sandbox.doGet({ parameter: { action: "adopt", token: "test-token" } }).getJson();
   assert.equal(adopted.ok, true);
   assert.equal(adopted.adopted.id, "test-sheet-id");
@@ -621,14 +624,42 @@ test("owner doc (apps-script-code.md) script ke saath sync hai", () => {
   assert.ok(doc.includes(gs), "doc purani hai — `npm run apps-script:export` chalaiye");
 });
 
-test("SPREADSHEET_ID line delete ho jaye to bhi asli sheet me likhta hai (ReferenceError-proof)", () => {
-  // Owner ne paste karte waqt ye line delete kar di thi → live script crash ho rahi thi.
+test("R40: fresh paste (SHEET_ID khaali) → loud error; sheet_set se turant fix — copy sheet me kabhi nahi likhta", () => {
+  // Fresh paste: props me SHEET_ID nahi, script ek "copy" sheet se bound hai.
   const { sandbox, sheets, copySheets } = loadScript("test-token", {
     dropSpreadsheetId: true,
     activeIsCopy: true,
   });
-  sandbox.setup();
+  // R40: bound-copy fallback jaan-boojh kar nahi — loud error
+  assert.throws(() => sandbox.setup(), /sheet_not_configured/, "bina SHEET_ID ke book_ loud error deta hai");
+  const blocked = sandbox.doPost({
+    postData: {
+      contents: JSON.stringify({
+        token: "test-token",
+        action: "append",
+        rows: [{ sheet: "Audit", row: { Actor: "test", Action: "fresh", Target: "sheet", Details: "ok" } }],
+      }),
+    },
+  });
+  assert.equal(blocked.getJson().ok, false, "bina SHEET_ID ke write nahi hota");
 
+  // fresh bootstrap: SHEET_ID khaali hai to sheet_set bina token ke bhi chalega
+  const set = sandbox.doGet({
+    parameter: {
+      action: "sheet_set",
+      id: "https://docs.google.com/spreadsheets/d/test-sheet-id/edit#gid=0",
+    },
+  }).getJson();
+  assert.equal(set.ok, true, "sheet_set fresh install par ok");
+  assert.equal(set.sheet.id, "test-sheet-id", "URL se id nikli");
+
+  // set hone ke baad bina token id badalna block (security)
+  const changeBlocked = sandbox.doGet({
+    parameter: { action: "sheet_set", id: "copy-sheet-id" },
+  }).getJson();
+  assert.equal(changeBlocked.ok, false, "set hone ke baad bina token change nahi");
+
+  sandbox.setup();
   const response = sandbox.doPost({
     postData: {
       contents: JSON.stringify({
@@ -642,7 +673,8 @@ test("SPREADSHEET_ID line delete ho jaye to bhi asli sheet me likhta hai (Refere
 
   const audit = sheets.find((sheet) => sheet.getName() === "Audit");
   assert.ok(audit, "asli sheet me Audit tab bana");
-  assert.equal(audit!.rows.length, 2, "header + 1 data row");
+  // header + sheet_set ka audit row + test append row
+  assert.equal(audit!.rows.length, 3, "header + sheet_set audit + 1 data row");
   assert.ok(
     copySheets.every((sheet) => sheet.rows.length <= 1),
     "copy sheet me koi data row nahi gayi",
@@ -878,6 +910,7 @@ test("R38: sheet access nahi to ANAATH sheet nahi banti — loud error + health 
   const { sandbox } = loadScript("test-token", {
     openByIdFails: true,
     activeIsNull: true,
+    propertySheetId: "doosre-account-ki-sheet",
   });
   assert.throws(() => sandbox.setup(), /sheet_access_denied/, "book_ loud error deta hai");
   const health = sandbox.doGet({ parameter: { action: "health" } }).getJson();
@@ -894,7 +927,7 @@ test("R38: sheet access nahi to ANAATH sheet nahi banti — loud error + health 
 });
 
 test("v3: doctor permission problem ko pakadta hai aur account batata hai", () => {
-  const broken = loadScript("test-token", { openByIdFails: true, activeIsCopy: false, activeIsNull: true });
+  const broken = loadScript("test-token", { openByIdFails: true, activeIsCopy: false, activeIsNull: true, propertySheetId: "doosre-account-ki-sheet" });
   const report = broken.sandbox.doctor();
   assert.equal(report.sheetAccess, false);
   assert.match(String(report.problems.join(" ")), /Share/);
@@ -1050,7 +1083,7 @@ test("R39: browser se plain /exec → HTML control panel (JSON nahi)", () => {
   assert.equal(typeof out.getContent, "function", "HtmlOutput mila");
   const html = out.getContent();
   assert.match(html, /sheet control panel/i);
-  assert.match(html, /r39-1/);
+  assert.match(html, /r40-1/);
   assert.match(html, /Admin Note/);
   assert.match(html, /Waiting for confirmation/);
   assert.match(html, /designerclothing\.fashion/);
@@ -1059,4 +1092,106 @@ test("R39: browser se plain /exec → HTML control panel (JSON nahi)", () => {
   const settings = sandbox.doGet({ parameter: { action: "settings" } }).getJson();
   assert.equal(settings.ok, true);
   assert.equal(settings.public, true);
+});
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * R40 — sheet hi orders ka DB: order_state/orders_state, sheet id sirf
+ * props me (sheet_set bootstrap), health ka expected param, message_status.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+test("R40: order_state/orders_state — Order JSON snapshot + poori history, token-gated", () => {
+  const { sandbox } = loadScript();
+  sandbox.setup();
+  const appended = sandbox.doPost({
+    postData: {
+      contents: JSON.stringify({
+        token: "test-token",
+        action: "append",
+        rows: [
+          { sheet: "Orders", row: { Timestamp: "2026-10-27T05:00:00.000Z", Event: "order.placed", "Order number": "LK-OLD9", "Order status": "placed", Total: 1200 } },
+          { sheet: "Orders", row: { Timestamp: "2026-10-27T02:00:00.000Z", Event: "order.placed", "Order number": "LK-JSON1", "Order status": "placed", "Admin Note": "Gift wrap karna", "Order JSON": JSON.stringify({ orderNumber: "LK-JSON1", status: "placed", paymentStatus: "pending", total: 500000, customerName: "Asha" }) } },
+          { sheet: "Orders", row: { Timestamp: "2026-10-27T03:00:00.000Z", Event: "order.status.confirmed", "Order number": "LK-JSON1", "Order status": "confirmed", "Order JSON": JSON.stringify({ orderNumber: "LK-JSON1", status: "confirmed", paymentStatus: "paid", total: 500000 }) } },
+          { sheet: "Orders", row: { Timestamp: "2026-10-27T04:00:00.000Z", Event: "order.status_sheet", "Order number": "LK-JSON1", "Order status": "Shipped", Source: "sheet-edit" } },
+        ],
+      }),
+    },
+  }).getJson();
+  assert.equal(appended.ok, true);
+
+  const one = sandbox.doGet({ parameter: { action: "order_state", token: "test-token", order: "lk-json1" } }).getJson();
+  assert.equal(one.ok, true, "order number case-insensitive");
+  assert.equal(one.order.orderNumber, "LK-JSON1");
+  assert.equal(JSON.parse(one.order.json).paymentStatus, "paid", "latest JSON snapshot jeeta");
+  assert.equal(one.order.row["Order status"], "Shipped", "latest row (owner ka sheet edit)");
+  assert.equal(one.order.row["Order JSON"], undefined, "row payload me JSON duplicate nahi");
+  assert.equal(one.order.rows.length, 3, "poori history — site isi se audit banati hai");
+  assert.equal(one.order.rows[0]["Admin Note"], "Gift wrap karna");
+
+  const all = sandbox.doGet({ parameter: { action: "orders_state", token: "test-token", limit: 10 } }).getJson();
+  assert.equal(all.ok, true);
+  assert.equal(all.orders.length, 2);
+  assert.equal(all.orders[0].orderNumber, "LK-JSON1", "newest-first (last row ke hisaab se)");
+  assert.equal(all.orders[1].json, "", "purani row (JSON ke bina) — site reconstruct karegi");
+  assert.equal(all.orders[0].rows, undefined, "list me history nahi (payload chhota)");
+
+  const missing = sandbox.doGet({ parameter: { action: "order_state", token: "test-token", order: "LK-NAHI" } }).getJson();
+  assert.equal(missing.ok, false);
+
+  const blocked = sandbox.doGet({ parameter: { action: "order_state", order: "LK-JSON1" } }).getJson();
+  assert.equal(blocked.ok, false, "bina token order data nahi milta");
+  const blockedList = sandbox.doGet({ parameter: { action: "orders_state" } }).getJson();
+  assert.equal(blockedList.ok, false);
+});
+
+test("R40: health ka expected param — idMatch site ke env se, code me kuch nahi", () => {
+  const { sandbox } = loadScript();
+  sandbox.setup();
+  const match = sandbox.doGet({ parameter: { action: "health", expected: "test-sheet-id" } }).getJson();
+  assert.equal(match.sheetFound, true);
+  assert.equal(match.idMatch, true);
+  assert.equal(match.sheetConfigured, true);
+
+  const mismatch = sandbox.doGet({ parameter: { action: "health", expected: "koi-dusri-sheet" } }).getJson();
+  assert.equal(mismatch.idMatch, false);
+
+  const noExpected = sandbox.doGet({ parameter: { action: "health" } }).getJson();
+  assert.equal(noExpected.idMatch, true, "expected na bheja → match maano (check skip)");
+});
+
+test("R40: panel — SHEET_ID khaali ho to 'Sheet URL set karein' bootstrap form", () => {
+  const { sandbox } = loadScript("test-token", { dropSpreadsheetId: true });
+  const out = sandbox.doGet({ parameter: {} }) as { getContent: () => string };
+  const html = out.getContent();
+  assert.match(html, /sheet_set/, "form sheet_set submit karta hai");
+  assert.match(html, /Sheet URL set karein/);
+  assert.match(html, /SHEET_ID set nahi/);
+  assert.match(html, /orders isi sheet me save hote hain/i, "panel batata hai ki sheet hi DB hai");
+  const health = sandbox.doGet({ parameter: { action: "health" } }).getJson();
+  assert.equal(health.sheetConfigured, false);
+  assert.equal(health.sheetFound, false);
+  assert.match(String(health.problems.join(" ")), /SHEET_ID set nahi/);
+});
+
+test("R40: message_status — 'handled' Replied state ko nahi chhuta", () => {
+  const { sandbox } = loadScript();
+  sandbox.setup();
+  sandbox.doPost({
+    postData: {
+      contents: JSON.stringify({
+        token: "test-token",
+        action: "append",
+        rows: [
+          { sheet: "Messages", row: { Timestamp: "2026-10-27T02:00:00.000Z", Name: "A", Email: "a@b.c", Message: "hello", Status: "replied", Replied: "yes", "Replied at": "2026-10-27T03:00:00.000Z", "Message ID": "m1" } },
+        ],
+      }),
+    },
+  }).getJson();
+  const handled = sandbox.doPost({
+    postData: { contents: JSON.stringify({ token: "test-token", action: "message_status", id: "m1", status: "handled" }) },
+  }).getJson();
+  assert.equal(handled.ok, true);
+  const rows = sandbox.doGet({ parameter: { action: "recent", token: "test-token", sheet: "Messages", limit: 5 } }).getJson();
+  assert.equal(rows.rows[0].Status, "handled");
+  assert.equal(rows.rows[0].Replied, "yes", "replied preserve (R40 fix)");
+  assert.equal(rows.rows[0]["Replied at"], "2026-10-27T03:00:00.000Z");
 });

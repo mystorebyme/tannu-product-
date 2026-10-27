@@ -152,7 +152,7 @@ test("R39: note-box order page par — sheet text warna default; purana static A
 
 test("R39: script r39-1 — Admin Note column, timeline adminNote, onEdit, /exec panel", () => {
   const gs = read("scripts/google-apps-script/liksha-sheets.gs");
-  assert.match(gs, /var CODE_VERSION = 'r39-1';/);
+  assert.match(gs, /var CODE_VERSION = 'r40-\d+';/);
   assert.match(gs, /'Tracking URL', 'Notes', 'Admin Note', 'Source', 'Device',/, "Orders headers me Admin Note");
   assert.match(gs, /adminNote: adminNote,/, "timeline response me adminNote");
   assert.match(gs, /row\['Admin Note'\]/, "timeline Admin Note column padhta hai");
@@ -167,22 +167,32 @@ test("R39: script r39-1 — Admin Note column, timeline adminNote, onEdit, /exec
   assert.match(gs, /\['admin_url', 'https:\/\/admin\.designerclothing\.fashion'\]/);
 });
 
-test("R39: final sheet id code me — purani id kahin nahi", () => {
+test("R40: sheet ka id code me kahin hardcoded nahi — sirf env / Script Properties", () => {
   for (const rel of [
     "scripts/google-apps-script/liksha-sheets.gs",
     "apps/web/src/lib/google-sheets.ts",
+    "apps/web/src/lib/orders-sheet.ts",
     "scripts/sheets-selfcheck.mjs",
   ]) {
     const src = read(rel);
-    assert.ok(src.includes(FINAL_SHEET_ID), `${rel} me final sheet id`);
-    assert.ok(!src.includes(OLD_SHEET_ID), `${rel} se purani sheet id gayi`);
+    assert.ok(!src.includes(FINAL_SHEET_ID), `${rel} me final sheet id hardcoded nahi`);
+    assert.ok(!src.includes(OLD_SHEET_ID), `${rel} me purani sheet id nahi`);
   }
-  assert.match(read("apps/web/src/lib/google-sheets.ts"), /export const EXPECTED_SHEET_ID = "1b8DReh2/);
+  // site: expected id sirf Vercel env se (verify + auto-heal)
+  assert.match(read("apps/web/src/lib/google-sheets.ts"), /process\.env\.SHEET_EXPECTED_ID/);
+  assert.ok(!read("apps/web/src/lib/google-sheets.ts").includes("export const EXPECTED_SHEET_ID"), "constant gaya");
+  // script: id sirf Script Properties + set karne ke tareeke (panel form / sheet_set / adopt)
+  const gs = read("scripts/google-apps-script/liksha-sheets.gs");
+  assert.match(gs, /getProperty\('SHEET_ID'\)/);
+  assert.match(gs, /action === 'sheet_set'/);
+  assert.match(gs, /action === 'adopt'/);
+  assert.ok(!gs.includes("var SPREADSHEET_ID"), "SPREADSHEET_ID constant gaya");
+  assert.ok(!gs.includes("SHEET_ID_FALLBACK ="), "fallback constant gaya");
 });
 
 test("R39: sheet-health — version gate r39, probe-timeout akela failure nahi, warnings alag", () => {
   const route = read("apps/web/src/app/api/sheet-health/route.ts");
-  assert.match(route, /major < 39/, "purana script version flag hota hai");
+  assert.match(route, /major < 40/, "purana script version flag hota hai");
   assert.match(route, /probeTimedOut/, "timeout detect hota hai");
   assert.match(route, /pipelineAlive/, "settings+write chal rahe ho to timeout sirf warning");
   assert.match(route, /warnings,/, "payload me warnings");

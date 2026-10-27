@@ -123,8 +123,12 @@ test("Cloudflare config: worker entry, nodejs_compat aur secrets declared hain",
   const code = fs.readFileSync(configFile, "utf8");
   assert.match(code, /entrypoint:\s*"vinext\/server\/fetch-handler"/);
   assert.match(code, /compatibilityFlags:\s*\["nodejs_compat"\]/);
-  // Workers par orders durable rakhne ka ek hi rasta — Postgres
-  assert.match(code, /"DATABASE_URL"/, "DATABASE_URL secret declare hona chahiye");
+  // R40: orders sirf Google Sheet me — DATABASE_URL Worker secrets se NIKAL diya
+  // (Supabase project owner ne band kiya). Sheet bridge ke bina orders durable nahi.
+  assert.doesNotMatch(code, /"DATABASE_URL"/, "DATABASE_URL ab secret nahi (orders sheet me)");
+  assert.match(code, /"GOOGLE_SHEETS_WEBAPP_URL"/, "sheet bridge declare hona chahiye (orders ka DB)");
+  assert.match(code, /"GOOGLE_SHEETS_TOKEN"/, "sheet token declare hona chahiye");
+  assert.match(code, /SHEET_EXPECTED_ID/, "auto-heal ke liye expected sheet id declare (value env se, hardcoded nahi)");
   assert.match(code, /"ADMIN_API_TOKEN"/, "admin token secret declare hona chahiye");
   assert.doesNotMatch(code, /sk_live|password|postgres:\/\//i, "config me koi secret value nahi");
 });

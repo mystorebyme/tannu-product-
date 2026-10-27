@@ -92,6 +92,24 @@ export function CheckoutForm() {
   const [savedPhone, setSavedPhone] = useState("");
   /** jis order ka payment chal raha hai */
   const orderNumber = placedOrderNumber ?? resumeOrderNumber;
+  /**
+   * R40 (owner): "order karne ke baad new order karne par cache wala purana
+   * order hi de deta hai" — URL me purana `?order=LK-…` bacha ho (back /
+   * refresh / mobile tab-restore) aur cart me nayi items hon, to purana order
+   * poora checkout hijack kar leta tha: review/payment purana dikhta aur
+   * button dabane par naya order banta hi nahi tha.
+   *
+   * Rule: **cart me items hain = fresh checkout jeetta hai.** Resume sirf cart
+   * khaali hone par (legit "payment se back" flow — order place hote hi cart
+   * apne aap clear ho jaata hai) ya abhi-abhi place hue order ke liye.
+   */
+  const staleResume =
+    Boolean(resumeOrderNumber) && lines.length > 0 && placedOrderNumber !== resumeOrderNumber;
+  const linesCountRef = useRef(0);
+  linesCountRef.current = lines.length;
+  const placedRef = useRef<string | null>(null);
+  placedRef.current = placedOrderNumber;
+  const staleCleanedRef = useRef(false);
   // OTP step hata diya gaya hai (owner request) — order sirf details par
   const [error, setError] = useState<string | null>(null);
   // delivery check — admin ke rules + India Post data se
@@ -119,13 +137,14 @@ export function CheckoutForm() {
    * review seedha dikhta hai (cart khali hone par bhi).
    */
   useEffect(() => {
-    if (!resumeOrderNumber) {
+    if (!resumeOrderNumber || staleResume) {
+      setResumed(null);
       setResumeChecked(true);
       return;
     }
     setResumed(readPlacedOrder(resumeOrderNumber));
     setResumeChecked(true);
-  }, [resumeOrderNumber]);
+  }, [resumeOrderNumber, staleResume]);
 
   /**
    * URL hi step batata hai (refresh / share / back-forward): `?step=review` → step 2,
@@ -133,8 +152,12 @@ export function CheckoutForm() {
    */
   useEffect(() => {
     if (!resumeOrderNumber) return;
+    if (staleResume) {
+      setStep("details");
+      return;
+    }
     setStep(wantsReview ? "review" : "payment");
-  }, [resumeOrderNumber, wantsReview, wantsPayment]);
+  }, [resumeOrderNumber, wantsReview, wantsPayment, staleResume]);
 
   /**
    * History hum khud `pushState` karte hain (server round-trip nahi), isliye
@@ -145,6 +168,8 @@ export function CheckoutForm() {
       const params = new URLSearchParams(window.location.search);
       const order = params.get("order");
       if (!order) return;
+      // R40: cart me nayi items hain to purane order ka hijack nahi (back/forward)
+      if (linesCountRef.current > 0 && order !== placedRef.current) return;
       setPlacedOrderNumber((current) => current ?? order);
       setStep(params.get("step") === "review" ? "review" : "payment");
     };
@@ -153,11 +178,21 @@ export function CheckoutForm() {
   }, []);
 
   /**
+   * Stale `?order=` ko URL se hatao — warna refresh/back par wahi purana order
+   * dobara hijack karta. Ek hi baar (fresh checkout ka flow disturb na ho).
+   */
+  useEffect(() => {
+    if (!staleResume || staleCleanedRef.current) return;
+    staleCleanedRef.current = true;
+    router.replace("/checkout");
+  }, [staleResume, router]);
+
+  /**
    * Step 3 ka data — amount, **sheet se live UPI**, payment status aur UPI-return
    * ka signed token. Order place hote hi, ya `?order=` ke saath page khulte hi.
    */
   useEffect(() => {
-    const target = orderNumber;
+    const target = staleResume ? null : orderNumber;
     if (!target || !API_AVAILABLE) return;
     let active = true;
     setContextLoading(true);
@@ -176,7 +211,7 @@ export function CheckoutForm() {
     return () => {
       active = false;
     };
-  }, [orderNumber]);
+  }, [orderNumber, staleResume]);
 
   /**
    * Owner (R36): "ek baar address card ki detail bhar de to agli baar direct
@@ -505,8 +540,9 @@ export function CheckoutForm() {
    * nahi hote (public API privacy ke liye wahi nahi bhejta), isliye sirf
    * naam + sheher + pincode dikhta hai.
    */
-  const resumed: PlacedOrderSnapshot | null =
-    resumedSnapshot ??
+  const resumed: PlacedOrderSnapshot | null = staleResume
+    ? null
+    : (resumedSnapshot ??
     (context
       ? {
           orderNumber: context.orderNumber,
@@ -530,7 +566,7 @@ export function CheckoutForm() {
             notes: undefined,
           },
         }
-      : null);
+      : null));
 
   /** step 3 = payment, checkout ke andar hi */
   const isPayment = step === "payment" && Boolean(orderNumber);
@@ -568,9 +604,9 @@ export function CheckoutForm() {
    * `?order=` aaya par na snapshot mila na context (doosra tab/device + API/DB down)
    * — order phir bhi safe hai, payment page se pay ho jaata hai.
    */
-  const resumeMissing = Boolean(orderNumber && resumeChecked && !resumed && !contextLoading);
+  const resumeMissing = Boolean(orderNumber && resumeChecked && !resumed && !contextLoading && !staleResume);
   /** snapshot/context padhne se pehle "cart empty" na dikhe (ek pal ka flash bhi nahi) */
-  const resumePending = Boolean(orderNumber && !resumed && (!resumeChecked || contextLoading));
+  const resumePending = Boolean(orderNumber && !resumed && (!resumeChecked || contextLoading) && !staleResume);
 
   if (resumePending) {
     return (

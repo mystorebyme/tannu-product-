@@ -4,6 +4,8 @@ import fs from "@/lib/fs-runtime";
 import type { ManualInvoice } from "@liksha/types";
 import { dataFile } from "./data-dir";
 import { dbEnabled } from "./db";
+import { appendSheetRows, scriptGet } from "./google-sheets";
+import { ordersBackend } from "./orders-sheet";
 
 /**
  * Admin ke manual invoices (kisi bhi naam/address par).
@@ -43,6 +45,26 @@ function nextNumber(existing: string[]): string {
 }
 
 export async function listManualInvoices(): Promise<ManualInvoice[]> {
+  /** R40: sheet hi store hai — Invoices tab ki `Invoice JSON` rows se list. */
+  if (ordersBackend() === "sheet") {
+    const result = await scriptGet<{ rows?: Record<string, unknown>[] }>(
+      "recent",
+      { sheet: "Invoices", limit: 100 },
+    );
+    if (result.ok && Array.isArray(result.data.rows)) {
+      return result.data.rows
+        .filter((row) => String(row.Type ?? "") === "manual" && String(row["Invoice JSON"] ?? "").trim())
+        .map((row) => {
+          try {
+            return JSON.parse(String(row["Invoice JSON"])) as ManualInvoice;
+          } catch {
+            return null;
+          }
+        })
+        .filter((invoice): invoice is ManualInvoice => Boolean(invoice && invoice.number));
+    }
+    // sheet read fail — neeche local fallback
+  }
   if (dbEnabled()) {
     const { query } = await import("./db");
     const rows = await query<Row>("select number, payload from manual_invoices order by created_at desc");
@@ -67,6 +89,38 @@ export async function createManualInvoice(
     subtotal,
     total: subtotal,
   };
+
+  if (ordersBackend() === "sheet") {
+    const inr = (paise: number) => Math.round(paise) / 100;
+    const ok = await appendSheetRows([
+      {
+        sheet: "Invoices",
+        row: {
+          Timestamp: invoice.createdAt,
+          "Invoice number": invoice.number,
+          "Order number": invoice.orderRef ?? "",
+          Type: "manual",
+          Customer: invoice.customerName,
+          Phone: invoice.phone,
+          Email: invoice.email ?? "",
+          GSTIN: "",
+          Address: [invoice.address, invoice.city, invoice.pincode].filter(Boolean).join(", "),
+          State: invoice.state,
+          "Taxable value": inr(invoice.subtotal),
+          CGST: 0,
+          SGST: 0,
+          IGST: 0,
+          Shipping: 0,
+          Discount: 0,
+          Total: inr(invoice.total),
+          Notes: invoice.notes ?? "",
+          "Invoice JSON": JSON.stringify(invoice),
+        },
+      },
+    ]);
+    if (ok) return invoice;
+    console.warn("[manual-invoices] sheet write fail — local JSON fallback");
+  }
 
   if (dbEnabled()) {
     const { query } = await import("./db");

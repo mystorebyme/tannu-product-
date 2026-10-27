@@ -87,12 +87,13 @@ Worker → Settings → Variables and Secrets).
 
 | Name | Type | Kya karta hai |
 | --- | --- | --- |
-| `DATABASE_URL` | secret | **zaroori** — Postgres (orders, invoices, payments, messages, settings) |
+| `GOOGLE_SHEETS_WEBAPP_URL` | secret | **zaroori (R40)** — sheet hi orders ka DB hai (Apps Script bridge) |
+| `GOOGLE_SHEETS_TOKEN` | secret | **zaroori (R40)** — sheet bridge token |
+| `SHEET_EXPECTED_ID` | var | final sheet ka id — sirf **auto-heal** ke liye (script props khaali mile to site khud `sheet_set` karti hai); value build-env se, code me hardcoded nahi |
 | `ADMIN_API_TOKEN` | secret | admin APIs (`/api/admin/*`) ka bearer token |
 | `UPI_RETURN_SECRET` | secret | payment return link signature |
 | `OTP_TOKEN_SECRET` | secret | OTP token sign (UI se OTP hata hua hai, server verify rehta hai) |
-| `GOOGLE_SHEETS_WEBAPP_URL` | secret | owner ki sheet bridge (Apps Script) |
-| `GOOGLE_SHEETS_TOKEN` | secret | sheet bridge token |
+| ~~`DATABASE_URL`~~ | — | ❌ **R40 me hata diya** — Supabase project band; orders/invoices/messages sirf sheet me. Postgres chahiye hi nahi |
 | `GOOGLE_SHEETS_SETTINGS_CSV_URL` | secret | Settings sheet ka CSV URL |
 | `SHEET_SELFTEST_KEY` | secret | `/api/sheet-selftest` key-gate |
 | `RESEND_API_KEY` | secret | order/contact email |
@@ -127,10 +128,12 @@ Workers ka file system **read-only** hai. Isliye:
 | `src/app/api/health/route.ts` | `runtime`, `storage`, `durable` fields | deploy ke baad ek hi call me pata chale ki data durable hai ya nahi |
 | `src/app/policies/[slug]/page.tsx` | generated markdown import | runtime fs nahi |
 
-**Sabse zaroori baat:** Workers par `DATABASE_URL` ke bina orders **memory** me
-jaate hain (per-isolate, restart par gayab). `/api/health` aise case me
-`"storage":"memory", "durable":false` batata hai. Production me ye **nahi** hona
-chahiye.
+**Sabse zaroori baat (R40):** orders ka DB **Google Sheet** hai. Workers par
+`GOOGLE_SHEETS_WEBAPP_URL` + `GOOGLE_SHEETS_TOKEN` ke bina orders **memory/JSON**
+me jaate hain (per-isolate, restart par gayab) — aur script **r40+** na ho to site
+order place karne par honest 503 deti hai (jhoothi success nahi). `/api/health`
+`ordersStore` batata hai: production me `"sheet"` dikhna chahiye. `DATABASE_URL`
+ab chahiye hi nahi (Supabase band — R40).
 
 ---
 
@@ -253,13 +256,14 @@ cd apps/web
 export WORKER_NAME=designer              # aapka existing worker
 npx wrangler login                       # ya CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID env
 
-npx wrangler secret put DATABASE_URL             # zaroori — warna orders memory me
+# R40: DATABASE_URL ki zaroorat NAHI — orders sirf sheet me (neeche ke GOOGLE_SHEETS_* zaroori hain)
 npx wrangler secret put ADMIN_API_TOKEN
 npx wrangler secret put UPI_RETURN_SECRET
 npx wrangler secret put OTP_TOKEN_SECRET
-# sheet = owner ka control panel (UPI/phone/announcement real-time inhi se aate hain)
+# sheet = R40 se orders ka DB + owner ka control panel (UPI/phone/announcement real-time)
 npx wrangler secret put GOOGLE_SHEETS_WEBAPP_URL
 npx wrangler secret put GOOGLE_SHEETS_TOKEN
+npx wrangler secret put SHEET_EXPECTED_ID        # final sheet ka id — auto-heal (sheet_set) ke liye
 npx wrangler secret put SHEET_SELFTEST_KEY
 # optional
 npx wrangler secret put GOOGLE_SHEETS_SETTINGS_CSV_URL
@@ -334,7 +338,7 @@ version, ya Worker delete. **Vercel production par koi asar nahi** — DNS wahin
 
 | Cheez | Asar | Hal |
 | --- | --- | --- |
-| `DATABASE_URL` bina deploy | orders memory me (restart par gone) | `/api/health` → `durable:true` check; Postgres/Hyperdrive set karein |
+| `GOOGLE_SHEETS_*` bina deploy (R40) | orders memory/JSON me (restart par gone) | `/api/health` → `ordersStore:"sheet"` check; sheet ke 2 secrets + `SHEET_EXPECTED_ID` set karein |
 | Postgres TCP from Workers | sandbox me verify nahi hua | preview deploy par health check; Hyperdrive recommended |
 | `pdfkit` bundle ~1 MB | Worker size badhta hai (limits ke andar) | chaho to invoice PDF ko alag service par le jaayein |
 | `.cloudflare/` build output | audit me na aaye | `scripts/repo-audit.mjs` aur `.gitignore` me excluded |

@@ -1,7 +1,13 @@
-# Live deployment — Vercel + Supabase (Round 18)
+# Live deployment — Vercel + Google Sheet (R18 me Vercel + Supabase tha)
+
+> **R40 update (27 Oct):** owner ne Supabase project **khud band kar diya** — ab orders ka
+> DB **sirf Google Sheet** hai (owner: *"supabase pr nhai chiye… sheet mai hi chiye… only
+> sheet"*). Vercel se `DATABASE_URL` **delete** kar diya gaya. Neeche ka Postgres content
+> history + dev-fallback ke liye hai; live stack = Vercel + Apps Script (**r40+**) + owner
+> ki sheet. Setup: `docs/09-devops/google-sheets.md` §4g.
 
 Render (`likshaclothing.onrender.com`) ne kaam karna band kar diya (har path par `Not Found`,
-`/api/health` bhi). Isliye production stack ab **Vercel + Supabase Postgres** par hai — same
+`/api/health` bhi). Isliye production stack R18 se **Vercel** par hai — same
 repo, same code, zero code change ke saath.
 
 ## 1. Live URLs
@@ -11,7 +17,7 @@ repo, same code, zero code change ke saath.
 | Storefront (public) | **https://liksha-clothing.vercel.app** |
 | Payment page (order ke baad) | `https://liksha-clothing.vercel.app/orders/<LK-XXXX>/pay` |
 | Admin panel | **https://liksha-admin.vercel.app** (login) |
-| Database | Supabase `Liksha Clothing` project (region `ap-south-1`, Mumbai) |
+| Database | **Google Sheet (R40)** — owner ki final sheet hi orders/invoices/messages ka DB hai; ~~Supabase `Liksha Clothing`~~ project R40 me band |
 | Static preview (sirf browse) | https://mystorebyme.github.io/tannu-product-/ |
 
 ## 2. Vercel projects
@@ -30,7 +36,7 @@ Monorepo hone ke kaaran install/build repo root se chalta hai (`cd ../..`), outp
 
 | Key | Value / kahan se |
 | --- | --- |
-| `DATABASE_URL` | Supabase **session pooler** (port 5432): `postgresql://postgres.<ref>:<password>@aws-0-ap-south-1.pooler.supabase.com:5432/postgres` |
+| `DATABASE_URL` | ❌ **R40 me delete** — Supabase project owner ne band kiya; orders sirf sheet me, Postgres runtime me chahiye hi nahi |
 | `NEXT_PUBLIC_SITE_URL` | `https://liksha-clothing.vercel.app` (domain lagne par `https://www.likshaclothing.com`) |
 | `ADMIN_API_TOKEN` | random long string — **admin project me wahi** hona chahiye |
 | `STORE_UPI_ID` | ❌ **R38 me delete** — UPI sirf sheet ke `upi_id` se aati hai (koi fallback payee nahi) |
@@ -46,28 +52,30 @@ Monorepo hone ke kaaran install/build repo root se chalta hai (`cd ../..`), outp
 
 > `ADMIN_PASSWORD` production me zaroori hai — na ho to login band rehta hai (safety).
 
-## 4. Database — koi manual step nahi
+## 4. Data store — R40 se sheet hi DB hai
 
-Serverless par `npm run db:migrate` chalane ka mauka nahi hota, isliye app khud migrate karta hai:
+Production me koi Postgres nahi: orders, invoices, messages, newsletter — sab owner ki
+Google Sheet me (Apps Script **r40+** bridge). Order create **awaited** append hai (sheet
+fail → honest 503 + WhatsApp order ka raasta, jhoothi success nahi); read
+`?action=order_state`/`?action=orders_state` se; owner ke sheet edits (status, Admin Note,
+courier/AWB) ~2 second me site par. Backend selection: **`sheet`** (GOOGLE_SHEETS_* set ho)
+→ `postgres` (DATABASE_URL ho tab — sirf dev/backup) → `json` (dev).
+Check: `GET /api/health` → `{ ordersStore: "sheet" }` + `/api/sheet-health` → `ok: true`.
 
-- `apps/web/src/lib/db-schema.ts` — `database/schema.sql` + `database/migrations/*.sql` ka
-  generated embed (`node scripts/db/embed-schema.mjs`).
-- Pehli DB query par `ensureSchema()` chalta hai: advisory lock → schema (agar `orders` nahi hai)
-  → baaki migrations ek-ek (record `schema_migrations` me). Idempotent.
-- Check: `GET /api/health` → `{ ordersStore: "postgres", db: "up" }`.
-
-Naya DB lagana ho to: Supabase project banao → connection string copy → `DATABASE_URL` update →
-redeploy. Baseline tables khud ban jayengi.
+> **History (R18–R39, ab sirf dev-fallback):** Postgres auto-migrate — `db-schema.ts`
+> (`database/schema.sql` + migrations embed), pehli query par `ensureSchema()` (advisory
+> lock, idempotent). Naya DB chahiye ho (dev): `DATABASE_URL` set + `ORDERS_STORE=postgres`.
 
 ## 5. Payment + tracking flow (jo live verify hua)
 
 ```
 checkout → POST /api/orders (server validation: stock, size, pincode, price)
-        → order DB me: status=placed, payment_status=pending, order number LK-…
+        → order **sheet** me (R40): Orders row + `Order JSON` snapshot, status=placed,
+          payment_status=pending, order number LK-…  (append fail → honest 503)
         → redirect /orders/<LK-…>/pay   (payment page ALAG)
              • order number, amount, items, live payment state
              • UPI QR + UPI ID + "Open UPI app" (mobile)
-        → customer UTR daalta hai → payment_status=processing (DB)
+        → customer UTR daalta hai → payment_status=processing (sheet + site)
         → admin panel → payment verify (ya UPI return auto-confirm) → paid
         → order status: placed → confirmed
         → /orders/<LK-…> par tracking timeline + courier/AWB
@@ -76,7 +84,7 @@ checkout → POST /api/orders (server validation: stock, size, pincode, price)
 Rules jo code me hard-locked hain:
 
 - Payment confirm hone se pehle order **packed/shipped/delivered** nahi ho sakta (409 `payment_pending`).
-- `payment_status` ke saare states DB me save hote hain: `pending`, `processing`, `paid`, `failed`, `refunded`.
+- `payment_status` ke saare states save hote hain (R40: sheet rows + `Order JSON`): `pending`, `processing`, `paid`, `failed`, `refunded`.
 - Customer ke liye `/api/orders/<num>/payment` (no-store) — payment page 8s me poll karta hai.
 
 ## 6. Deploy / redeploy

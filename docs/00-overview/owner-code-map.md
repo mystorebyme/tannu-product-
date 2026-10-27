@@ -65,6 +65,7 @@ Repo me **do Next.js apps** hain (ek hi repo, do deploy):
 | Checkout (step 1–3: delivery → review → **payment**) `/checkout` | `apps/web/src/app/checkout/page.tsx` + `components/checkout-form.tsx` + `components/checkout-payment-step.tsx` |
 | Saved delivery details (browser cache) | `apps/web/src/lib/checkout-details.ts` |
 | **Sheet = order ka DB (R37)** — status/courier/AWB/note sheet se merge | `apps/web/src/lib/sheet-tracking.ts` + `apps/web/src/lib/sheet-merge.ts` (Apps Script: `scripts/google-apps-script/liksha-sheets.gs` → `onEdit` + `?action=timeline`) |
+| **Sheet HI orders ka DB (R40)** — create/read/update sab sheet se; Supabase/Postgres runtime se out; sheet id kahin hardcoded nahi | `apps/web/src/lib/orders-sheet.ts` + `lib/sheet-merge.ts` (`parseOrderState`/`orderFromSheetRows`) + script `?action=order_state`/`orders_state`/`sheet_set`; auto-heal `lib/google-sheets.ts` → `healSheetConfig()` |
 | **Sheet pipeline report card (R38)** — owner browser me khud diagnose kare | `apps/web/src/app/api/sheet-health/route.ts` (public) + script ka `?action=health`; likhne ka hisaab `sheetWriteInfo()` (`lib/google-sheets.ts` retry ke saath) |
 | **Token paste-proof (R38)** — script ka token Script Properties me | `liksha-sheets.gs` → `effectiveToken_` + `?action=set_token` (ek baar) + `?action=adopt` (bound sheet apnao); UPI sirf sheet se — payment pause state `components/upi-payment.tsx` (`upi-unavailable`) |
 | **India timezone (R39)** — har date IST me | `apps/web/src/lib/format.ts` (`STORE_TIME_ZONE`) + `lib/tracking.ts` + `lib/invoice-pdf.ts` + `apps/admin/src/lib/format.ts` — sab `timeZone: "Asia/Kolkata"` pin |
@@ -160,17 +161,21 @@ lib/orders.ts → createOrder()     ← asli validation + price + order number
     ├─ lib/delivery.ts     → checkPincode()        (serviceable? blocked?)
     ├─ lib/state-match.ts  → statesMatch()         (pincode ka state match?)
     ├─ lib/store.ts        → products / findProduct
-    ├─ lib/orders-pg.ts    → saveOrders()          (Postgres me insert)
-    └─ background: lib/google-sheets.ts → appendSheetRows()  ("Orders" + "Payments" tab)
+    ├─ **R40: lib/orders-sheet.ts → persistOrderEvent()**   ← AWAITED batch append
+    │        (Orders row + `Order JSON` snapshot + OrderItems rows + Payments row)
+    ├─ lib/orders-pg.ts    → saveOrders()          (sirf DATABASE_URL ho tab — dev/backup)
+    └─ JSON fallback       → ephemeral file        (dev only — production me nahi)
 ```
 
-**Owner rule "order turant bane":**
+**Owner rules "order turant bane" + "only sheet" (R40 balance):**
 
-- `createOrder()` me sheet write **`await` nahi** hota — `runInBackground()` (`lib/orders.ts`) se background me jaata hai.
-  Isliye order create 5–10 ms me, sheet baad me.
+- **R40: sheet write `await` hota hai** — sheet hi DB hai, isliye row likhe bina customer ko
+  "order placed" nahi bolte (fail → honest 503 + WhatsApp order ka raasta). Par ek **batch**
+  append hai (Orders+OrderItems+Payments ek hi POST me) + 2s TTL cache — order ~1–2s me banta hai.
 - Payment page `getStoreSettingsFast(700)` use karta hai → sheet slow ho to bhi page turant khulta hai
   (`lib/store-settings.ts`).
-- Order read: `getOrder()` poora ledger nahi padhta, sirf **ek row** (`lib/orders-pg.ts` → `loadOrder`).
+- Order read: `getOrder()` → `?action=order_state` (JSON snapshot + owner ke sheet edits ka
+  overlay); list `?action=orders_state` (newest-first, admin `/orders` isi se).
 
 **Order number format** → `lib/orders.ts` → `generateOrderNumber()`.
 
@@ -224,17 +229,25 @@ Wo text `components/upi-payment.tsx` me hai.
 
 ⚠️ Purane `pub?output=csv` link (`2PACX-1vTLs42cuo-…`, gids 1135948941/1261780310/…) **doosre account ki copy** ke hain — un gid ka koi tab is sheet me nahi. Code **naam** se tab dhoondhta hai, isliye tab ka **naam** badalna mat.
 
-### 6.2 7 tabs aur unke columns (exact)
+> **R40: ye id code me kahin hardcoded nahi** — script me sirf Script Properties (`SHEET_ID`),
+> site me sirf env (`SHEET_EXPECTED_ID`, wo bhi sirf auto-heal ke liye). Sheet badalni ho to
+> script ke `/exec` par "Sheet URL set karein" form ya `?action=sheet_set&id=…` — **koi
+> redeploy nahi, koi code change nahi**. Ye doc sirf owner ki reference ke liye hai.
+
+### 6.2 Tabs aur unke columns (R40 — exact count `.gs` `HEADERS` me)
 
 | Tab | Columns |
 | --- | --- |
 | `Settings` | `key`, `value` (2 column, §3 dekhein) |
-| `Orders` | Timestamp, Event, Order number, Order status, Payment status, Payment method, Payment reference, UPI ID, Total, Subtotal, Discount, Coupon, Items, Item details, Customer, Phone, Email, Address, City, State, Pincode, Tracking courier, AWB, Tracking URL, Notes |
-| `Payments` | bilkul `Orders` jaisa (payment events alag tab me) |
-| `Messages` | Timestamp, Name, Email, Phone, Subject, Message, Status |
-| `Newsletter` | Timestamp, Email |
-| `Checkout` | Timestamp, Event, Step, Order number, Items, Subtotal, Reason, Phone |
-| `Audit` | Timestamp, Actor, Action, Target, Details |
+| `Orders` | Timestamp, Event, Order number, Order status, Payment status, …, Source, Device, **`Order JSON`** — 29 columns; `Order JSON` = order ka poora snapshot (site isi se order banati hai) |
+| `OrderItems` | per-item rows (13 columns) — order ke items ka hisaab |
+| `Payments` | bilkul `Orders` jaisa (payment events alag tab me, 27 columns) |
+| `Invoices` | 19 columns + **`Invoice JSON`** (manual invoice ka snapshot) |
+| `Messages` | Timestamp, Name, Email, Phone, Subject, Message, Status, **Message ID, Replied, Replied at** (11) |
+| `Newsletter` | 4 columns |
+| `Checkout` | Timestamp, Event, Step, Order number, Items, Subtotal, Reason, Phone (12) |
+| `Audit` | Timestamp, Actor, Action, Target, Details (6) |
+| `Shipments` | 9 columns (shipping events) |
 
 Headers ka master list: `scripts/google-apps-script/liksha-sheets.gs` → **`HEADERS`** (line ~82).
 Row ka shape: `apps/web/src/lib/sheet-format.ts` → `orderSheetRow()`, `checkoutEventSheetRow()`, `messageSheetRow()`, `subscriberSheetRow()`.
@@ -244,33 +257,40 @@ Row ka shape: `apps/web/src/lib/sheet-format.ts` → `orderSheetRow()`, `checkou
 ### 6.3 Likhne ka rasta (write path)
 
 ```
-1) Order / checkout event / message / newsletter
-      lib/orders.ts        → syncOrderToSheet(order, event)
+1) Order create/update (R40 — AWAITED, sheet hi DB hai)
+      lib/orders.ts          → createOrder() / writeAll()
+      lib/orders-sheet.ts    → persistOrderEvent(order, event)
+                               ← Orders (+ Order JSON) + OrderItems + Payments ek batch me
+      lib/messages.ts        → message row (+ Message ID / Replied)
+      lib/manual-invoices.ts → Invoices (+ Invoice JSON)
       lib/checkout-events.ts → mirrorCheckoutEventToSheet(event)
-      lib/messages.ts      → sheet me message row
-      lib/store.ts/api/newsletter → subscriberSheetRow()
                 │
                 ▼
 2) apps/web/src/lib/google-sheets.ts
-      appendSheetRows(tab, rows)      ← Apps Script ko POST
-      readSheetSettings()             ← Apps Script se GET
-      (WRITE_TIMEOUT_MS = 6s, READ_TIMEOUT_MS = 2.5s, CACHE_MS = 15s)
+      appendSheetRows(rows)      ← Apps Script ko POST (6s timeout)
+      scriptGet()/scriptPost()   ← order_state / orders_state / settings reads
+      healSheetConfig()          ← `sheet_not_configured` mile to khud `sheet_set`
+                                   (env SHEET_EXPECTED_ID se; 10-min rate limit)
       env: GOOGLE_SHEETS_WEBAPP_URL + GOOGLE_SHEETS_TOKEN
                 │
                 ▼
-3) scripts/google-apps-script/liksha-sheets.gs
+3) scripts/google-apps-script/liksha-sheets.gs (r40-1)
       doPost / doGet  → JSON {ok, ...}
       sheet_(name)    → tab dhoondho (naam se), na ho to banao
+                        (ensureHeaders_ naye columns END me append karta hai — purana data safe)
       appendRows_()   → header naam se column match karke row likho
-      book_()         → active sheet → SPREADSHEET_ID → Script Property SHEET_ID
+      book_()         → SIRF Script Property SHEET_ID (R40: koi constant/bound-sheet
+                        fallback nahi — props khaali = loud `sheet_not_configured`
+                        + /exec par "Sheet URL set karein" form)
+      orderStates_()  → last 4000 rows → per-order latest JSON + poori history
       readSettings_() → Settings tab ke key/value
 ```
 
-**Sheet me data na aane ki 3 hi wajah hoti hain:**
+**Sheet me data na aane ki wajah (R40):**
 
-1. Vercel me `GOOGLE_SHEETS_WEBAPP_URL` / `GOOGLE_SHEETS_TOKEN` **set nahi** → function chup-chaap skip karta hai.
-2. Apps Script deploy hi nahi hua / access "Anyone" nahi hai.
-3. Script me doosri sheet id hai (`SPREADSHEET_ID` check kariye).
+1. Vercel me `GOOGLE_SHEETS_WEBAPP_URL` / `GOOGLE_SHEETS_TOKEN` **set nahi** → order place **honest 503** deta hai (ab chup-chaap skip nahi hota).
+2. Apps Script deploy nahi hua / access "Anyone" nahi / version **r40 se purana** → site 503 `sheet_store_not_ready` deti hai — naya code paste → **New version → Deploy**.
+3. Script props khaali ya galat sheet id → `/exec` kholiye (form dikhega) ya `?action=sheet_set&id=…`; site ke env me `SHEET_EXPECTED_ID` hai to **auto-heal** khud `sheet_set` kar deta hai.
 
 **Deploy ka tarika:** `docs/00-overview/apps-script-code.md` (poora copy-paste code + steps).
 **Steps + troubleshooting:** `docs/00-overview/sheet-setup-owner.md`.
@@ -384,13 +404,17 @@ Order par double check: `lib/orders.ts` → `createOrder()` (pincode serviceable
 
 | Variable | Kaam | Zaroori? |
 | --- | --- | --- |
-| `DATABASE_URL` | Postgres (orders, messages, delivery settings) | ✅ |
+| `GOOGLE_SHEETS_WEBAPP_URL` | Apps Script `/exec` URL — **R40: sheet hi orders ka DB** | ✅ |
+| `GOOGLE_SHEETS_TOKEN` | script ke Script Properties `TOKEN` jitna hi | ✅ |
+| `SHEET_EXPECTED_ID` | final sheet ka id — auto-heal (`sheet_set`) + `/api/sheet-health` `idMatch`; **code me kahin hardcoded nahi** | ✅ |
 | `ADMIN_API_TOKEN` | admin → web API calls | ✅ |
-| `GOOGLE_SHEETS_WEBAPP_URL` | Apps Script `/exec` URL | ⚠️ **abhi missing — sheet isliye khaali hai** |
-| `GOOGLE_SHEETS_TOKEN` | wahi secret token jo `.gs` me hai | ⚠️ missing |
-| `STORE_UPI_ID` | fallback UPI (sheet na ho to) | optional |
-| `SELLER_GSTIN` | invoice GSTIN fallback | optional |
-| `SITE_URL` | canonical/OG URL | ✅ |
+| `OTP_TOKEN_SECRET` / `UPI_RETURN_SECRET` | OTP verify / payment return signing | ✅ |
+| `SHEET_SELFTEST_KEY` | `/api/sheet-selftest` debugging | ✅ |
+| `STORE_UPI_NAME` | payee-name fallback (sheet na chale tab) | optional |
+| `NEXT_PUBLIC_SITE_URL` | canonical/OG URL | ✅ |
+| `SHEET_READ_TIMEOUT_MS` / `SHEET_SETTINGS_TTL_MS` / `SHEET_TRACKING_TTL_MS` | sheet tuning (4000/2000/2000 set hain) | optional |
+| `DATABASE_URL` | ❌ **R40 me delete** — Supabase project band; orders sirf sheet me | ❌ |
+| `STORE_UPI_ID` | ❌ **R38 me delete** — UPI sirf sheet ke `upi_id` se | ❌ |
 
 **Admin (`liksha-admin`):** `ADMIN_API_TOKEN` (same), `NEXT_PUBLIC_API_BASE` (web ka URL).
 
@@ -400,7 +424,7 @@ Order par double check: `lib/orders.ts` → `createOrder()` (pincode serviceable
 
 | Cheez | Abhi | Hona chahiye |
 | --- | --- | --- |
-| `designerclothing.fashion` | ✅ naya site (`/api/health` → `db: up`) | Cloudflare DNS records (doc: `docs/09-devops/domain-and-brand.md`) |
+| `designerclothing.fashion` | ✅ naya site (`/api/health` → `ordersStore:"sheet"`) | Cloudflare DNS records (doc: `docs/09-devops/domain-and-brand.md`) |
 | `www.designerclothing.fashion` | ⏳ apex par 308 redirect (Vercel me set) | Cloudflare me `CNAME www` record |
 | `admin.designerclothing.fashion` | ⏳ Vercel me set | Cloudflare me `CNAME admin` record |
 | `liksha-clothing.vercel.app` / `liksha-admin.vercel.app` | ✅ backup URLs | chalta rahega (canonical nahi) |
@@ -426,9 +450,10 @@ Commit message me `[live-test]` likhne par live flow (asli deployed site par) ch
 ## 15. Sabse chhota summary (aapke liye)
 
 1. **Roz ka kaam (price, UPI, phone, sale text)** → **Google Sheet ke `Settings` tab** me. Code chhune ki zaroorat nahi.
-2. **Sheet me row na aaye** → Vercel env me `GOOGLE_SHEETS_WEBAPP_URL` + `GOOGLE_SHEETS_TOKEN` daaliye, Apps Script "New version → Deploy".
-3. **Product / photo / price badalna** → `database/seeds/live/products.json` ya Admin → Products.
-4. **Order status, tracking, invoice, pincode block** → Admin panel (`liksha-admin.vercel.app`), file `apps/admin/src/app/actions.ts`.
-5. **Payment page ka logic (UTR/last-4/WhatsApp)** → `apps/web/src/components/upi-payment.tsx`.
+2. **Orders sheet me save hote hain (R40 — Supabase band)** → script **r40-1** paste hona zaroori hai (Apps Script → naya code → New version → Deploy). Order par 503 mile to `/api/sheet-health` kholiye — har line me fix likha hai.
+3. **Sheet me row na aaye / sheet badalni ho** → Vercel env me `GOOGLE_SHEETS_WEBAPP_URL` + `GOOGLE_SHEETS_TOKEN`; sheet id badle to script ke `/exec` par form se ya `?action=sheet_set&id=…` — redeploy ki zaroorat nahi.
+4. **Product / photo / price badalna** → `database/seeds/live/products.json` ya Admin → Products.
+5. **Order status, tracking, invoice, pincode block** → Admin panel (`liksha-admin.vercel.app`), file `apps/admin/src/app/actions.ts`. Status/Admin Note seedha sheet me bhi edit kar sakte hain — site ~2s me utha leti hai.
+6. **Payment page ka logic (UTR/last-4/WhatsApp)** → `apps/web/src/components/upi-payment.tsx`.
 
 Kisi bhi line par "ye exact line kahan hai?" ho to file kholiye aur upar diya **function naam** search kariye — wahi jagah milegi.

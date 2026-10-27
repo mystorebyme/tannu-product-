@@ -10,7 +10,8 @@
  *
  * ── KAAM (16 tabs) ────────────────────────────────────────────────────────────
  *   Settings    → phone / WhatsApp / email / UPI / announcement / GSTIN (site 15s me padhti hai)
- *   Orders      → har order + har status change (append-only timeline)
+ *   Orders      → har order + har status change (append-only timeline) + `Order JSON`
+ *                 snapshot — **R40: sheet hi orders ka DB hai** (koi Supabase nahi)
  *   OrderItems  → order ki har item alag row me (size, colour, qty, price)
  *   Payments    → payment pending / UTR submitted / claimed / verified / failed
  *   Invoices    → GST invoice (taxable value, CGST/SGST/IGST, invoice number)
@@ -33,10 +34,13 @@
  *     (`TOKEN` line jaisi hai waisi rehne dijiye — asli token ab **Script Properties**
  *     me rehta hai, step 7 me ek baar set hota hai, code dobara paste karne par bhi nahi tootta.)
  *  4. Save (Ctrl + S).
- *  5. Upar function dropdown me `setup` chuniye → **Run** → permission maange to
- *     apna hi account chuniye → "Advanced" → "Go to … (unsafe)" → **Allow**.
- *     (Ye "unsafe" warning har personal script par aata hai — normal hai.)
- *     → Sheet me saare tabs + headers apne aap ban jayenge.
+ *  5. Deploy ke baad browser me /exec URL kholiye → panel ke form me **apni sheet
+ *     ka URL** daal kar "Sheet set karo" (R40: sheet ka id code me nahi, Script
+ *     Properties me rehta hai — paste se kabhi nahi mit-ta). Permission maange to
+ *     apna hi account chuniye → "Advanced" → "Go to … (unsafe)" → **Allow**
+ *     (ye warning har personal script par aata hai — normal hai). Chaho to
+ *     `setup` Run karke saare tabs/headers ek saath bana sakte hain — warna
+ *     pehla order apne aap tabs bana dega.
  *  6. **Deploy → Manage deployments → ✏️ (pencil) → Version: New version → Deploy.**
  *     Pehli baar: New deployment → gear → Web app → Execute as **Me** →
  *     Who has access **Anyone** → Deploy → /exec URL copy kariye.
@@ -79,38 +83,27 @@ var TOKEN = 'CHANGE-ME-liksha-token';
 var TOKEN_PLACEHOLDER = 'CHANGE-ME-liksha-token';
 
 /** Code ka version — `?action=health` me dikhta hai. Code badle to isse badhaayein. */
-var CODE_VERSION = 'r39-1';
+var CODE_VERSION = 'r40-1';
 
 /**
- * Sheet ka id (URL me `/d/<ID>/edit`).
- * Extensions → Apps Script se banaya ho to ye line zaroori nahi, par standalone
- * script me kaam aati hai. (Neeche fallback bhi hai — delete karne par crash nahi.)
+ * R40 (owner rule): sheet ka id **code me kahin nahi** — sirf Script Properties
+ * (`SHEET_ID`) me. Set karne ke 3 tareeke: (1) browser me /exec panel ka
+ * "Sheet URL set karein" form, (2) `<webapp URL>?action=sheet_set&id=<sheet URL>&token=…`,
+ * (3) script apni sheet se bound ho to `?action=adopt`. Website bhi khud
+ * `sheet_set` kar deti hai (Vercel ke `SHEET_EXPECTED_ID` env se) — sheet badlo,
+ * code paste karo, id turant set, **kuch bhi hardcoded nahi**.
  */
-/** Owner ki FINAL sheet (27 Oct) — script isi ko padhta hai; site `SHEET_EXPECTED_ID` env se verify karti hai. */
-var SPREADSHEET_ID = '1b8DReh2RF5JeOSJeknWmH1KSE1RZgmBjatgkCDS9w_4';
-
-/** Safety net — agar upar ki line galti se delete ho jaye. */
-var SHEET_ID_FALLBACK = '1b8DReh2RF5JeOSJeknWmH1KSE1RZgmBjatgkCDS9w_4';
 
 /** Sheet ke tab-id (URL me `#gid=…`) — optional, naam badalne par bhi kaam aate hain. */
+/**
+ * R40: gid **kisi ek sheet ke nahi** hote — owner sheet badle to purane gid
+ * nayi sheet ke kisi aur tab se takra sakte the. Isliye sab null: tab hamesha
+ * **naam** se dhoondhe jaate hain (naam humare apne hain — Orders, Settings, …).
+ */
 var GIDS = {
-  Settings: 1827766020,
-  Orders: 19757621,
-  Payments: 1008049319,
-  Messages: 750680779,
-  Newsletter: 1223926652,
-  // ye tabs script khud banata hai (gid Google deta hai)
-  OrderItems: null,
-  Invoices: null,
-  Shipments: null,
-  Checkout: null,
-  Reviews: null,
-  Coupons: null,
-  Inventory: null,
-  Audit: null,
-  Errors: null,
-  Dashboard: null,
-  Sync: null,
+  Settings: null, Orders: null, Payments: null, Messages: null, Newsletter: null,
+  OrderItems: null, Invoices: null, Shipments: null, Checkout: null, Reviews: null,
+  Coupons: null, Inventory: null, Audit: null, Errors: null, Dashboard: null, Sync: null,
 };
 
 /** Timezone / paise ka format */
@@ -119,8 +112,8 @@ var MONEY_FORMAT = '₹#,##0.00';
 
 /** Ek call me kitni rows (Vercel se batch aata hai; bahut badi call block na kare) */
 var MAX_ROWS_PER_CALL = 300;
-/** Ek cell me itne se zyada characters na jaayein */
-var MAX_CELL_CHARS = 5000;
+/** Ek cell me itne se zyada characters na jaayein (R40: Order JSON snapshot ~20k tak safe) */
+var MAX_CELL_CHARS = 20000;
 /** Sheet ka lock kitni der wait kare (do requests ek saath aayein to) */
 var LOCK_WAIT_MS = 25000;
 /** Errors tab me sirf itni hi purani rows rakhein (warna tab bhaari ho jata hai) */
@@ -141,6 +134,7 @@ var HEADERS = {
     'Payment reference', 'UPI ID', 'Total', 'Subtotal', 'Discount', 'Coupon', 'Items',
     'Item details', 'Customer', 'Phone', 'Email', 'Address', 'City', 'State', 'Pincode',
     'Tracking courier', 'AWB', 'Tracking URL', 'Notes', 'Admin Note', 'Source', 'Device',
+    'Order JSON',
   ],
   Payments: [
     'Timestamp', 'Event', 'Order number', 'Order status', 'Payment status', 'Payment method',
@@ -155,7 +149,7 @@ var HEADERS = {
   Invoices: [
     'Timestamp', 'Invoice number', 'Order number', 'Type', 'Customer', 'Phone', 'Email',
     'GSTIN', 'Address', 'State', 'Taxable value', 'CGST', 'SGST', 'IGST',
-    'Shipping', 'Discount', 'Total', 'Notes',
+    'Shipping', 'Discount', 'Total', 'Notes', 'Invoice JSON',
   ],
   Shipments: [
     'Timestamp', 'Order number', 'Courier', 'AWB', 'Tracking URL', 'Status',
@@ -383,52 +377,71 @@ var PUBLIC_SETTING_KEYS = [
 /* ═══════════════════════════ 4. SHEET ACCESS ════════════════════════════════ */
 
 /**
- * Kaun si sheet? — pehle `SPREADSHEET_ID`, phir Script Property `SHEET_ID`,
- * phir (last me) jis sheet ke saath script bana hai.
+ * Kaun si sheet? — **sirf** Script Properties ka `SHEET_ID` (R40 owner rule:
+ * sheet ka kuch bhi code me hardcoded nahi). Set karne ke tareeke: /exec panel
+ * ka form, `?action=sheet_set&id=…`, `?action=adopt` (bound sheet), ya website
+ * ka auto-heal (SHEET_EXPECTED_ID env se).
  *
- * Order jaan-boojhkar aisa hai: agar script kisi "copy" sheet ke saath bound ho
- * gaya ho to `getActiveSpreadsheet()` galat jagah likh deta tha (owner ke saath
- * yahi hua tha — asli sheet khaali dikh rahi thi).
- *
- * `typeof` ka use: agar `SPREADSHEET_ID` line delete ho jaye to crash na ho.
+ * Bound-sheet fallback jaan-boojh kar **nahi** hai: script aksar kisi purani /
+ * copy sheet se bound hoti hai aur chup-chaap wahan likhne lagti thi (R38 me
+ * owner ke saath yahi hua tha — asli sheet khaali dikh rahi thi). Ab har
+ * ambiguity loud error hai.
  */
 function book_() {
-  var store = props_();
-  var id = '';
-  if (store) {
-    try {
-      id = String(store.getProperty('SHEET_ID') || '').trim();
-    } catch (error) {}
-  }
-  if (!id) id = (typeof SPREADSHEET_ID === 'string' && SPREADSHEET_ID) || SHEET_ID_FALLBACK || '';
+  var id = propsSheetId_();
 
   if (id) {
     try {
       return SpreadsheetApp.openById(id);
     } catch (error) {
-      // is account ko configured sheet par access nahi — neeche bound sheet try hoti hai
-      Logger.log('book_: "' + id + '" khul nahi rahi (' + error.message + ')');
+      /**
+       * R38 philosophy: chup-chaap dusri sheet par kabhi nahi jaate. Id set hai
+       * par sheet khul nahi rahi = access problem — loud error, fix saath me.
+       */
+      throw new Error(
+        'sheet_access_denied — SHEET_ID "' + id + '" khul nahi rahi (' + error.message + '). FIX: ' +
+        'sheet → Share → ' + (executingEmail_() || 'script ke account') + ' → Editor dijiye, ' +
+        'ya sheet badal gayi ho to /exec panel se nayi sheet URL set kijiye.',
+      );
     }
   }
 
-  // Script kisi sheet ke andar se bani hai (Extensions → Apps Script) → wahi use karo
-  try {
-    var active = SpreadsheetApp.getActiveSpreadsheet();
-    if (active) return active;
-  } catch (ignored) {}
-
   /**
-   * R38: chup-chaap nayi sheet **kabhi nahi** banate. Purana behaviour
-   * (`SpreadsheetApp.create` fallback) owner ke orders ek anaath sheet me daal
-   * deta tha — website par sab "ok" dikhta, sheet khaali rehti. Ab loud error:
-   * `?action=health` aur `doctor` fix bataate hain. Nayi sheet chahiye to
-   * `createOwnSheet` **jaan-boojh kar** chalaiye.
+   * R40: id set hi nahi — koi hardcoded fallback nahi (owner rule: "sheet ka
+   * kuch bhi hardcoded nahi"). Bound-sheet fallback bhi jaan-boojh kar nahi:
+   * script aksar kisi purani/copy sheet se bound hoti hai aur chup-chaap wahan
+   * likhna shuru kar deti thi (R38 me owner ke saath yahi hua tha).
    */
   throw new Error(
-    'sheet_access_denied — na configured sheet khuli, na script kisi sheet se bound hai. FIX: ' +
-    'apni sheet → Share → ' + (executingEmail_() || 'script ke account') + ' → Editor, ' +
-    'ya script apni sheet se banaiye (Sheet → Extensions → Apps Script) aur ?action=adopt kholiye.',
+    'sheet_not_configured — script ko sheet ka id set nahi hai. FIX (koi ek): ' +
+    '(1) browser me /exec kholiye → "Sheet URL set karein" form; ' +
+    '(2) <webapp URL>?action=sheet_set&id=<apni sheet ka URL ya id>&token=<TOKEN>; ' +
+    '(3) script apni sheet se banaiye (Sheet → Extensions → Apps Script) → ?action=adopt. ' +
+    'Website khud bhi sheet_set kar deti hai (Vercel SHEET_EXPECTED_ID env se).',
   );
+}
+
+/** Script Properties me rakha sheet id (R40 ka ek hi source of truth). */
+function propsSheetId_() {
+  var store = props_();
+  if (!store) return '';
+  try {
+    return String(store.getProperty('SHEET_ID') || '').trim();
+  } catch (error) {
+    return '';
+  }
+}
+
+/** Sheet ka poora URL ya sirf id — dono se spreadsheet id nikaalo. */
+function extractSheetId_(value) {
+  var text = String(value || '').trim();
+  if (!text) return '';
+  var match = text.match(/\/d\/([a-zA-Z0-9-_]{10,})/);
+  if (match) return match[1];
+  if (/^[a-zA-Z0-9-_]{10,}$/.test(text)) return text;
+  // "id=..." ya "?id=..." jaisa chipka hua value
+  var param = text.match(/[?&]id=([a-zA-Z0-9-_]{10,})/);
+  return param ? param[1] : '';
 }
 
 /**
@@ -484,14 +497,18 @@ function executingEmail_() {
  * Permission wali error me sabse pehle yahi chalaiye.
  */
 function whoAmI() {
-  var id = (typeof SPREADSHEET_ID === 'string' && SPREADSHEET_ID) || SHEET_ID_FALLBACK;
+  var id = propsSheetId_();
   var info = { version: CODE_VERSION, effectiveUser: executingEmail_(), sheetId: id, sheetAccess: false, sheetName: '', error: '' };
-  try {
-    var book = SpreadsheetApp.openById(id);
-    info.sheetAccess = true;
-    info.sheetName = book.getName();
-  } catch (error) {
-    info.error = String(error && error.message ? error.message : error);
+  if (!id) {
+    info.error = 'SHEET_ID set nahi — /exec panel se apni sheet ka URL set kijiye (?action=sheet_set&id=…)';
+  } else {
+    try {
+      var book = SpreadsheetApp.openById(id);
+      info.sheetAccess = true;
+      info.sheetName = book.getName();
+    } catch (error) {
+      info.error = String(error && error.message ? error.message : error);
+    }
   }
   Logger.log(JSON.stringify(info, null, 2));
   try {
@@ -516,24 +533,31 @@ function doctor() {
     account: executingEmail_(),
     tokenSet: Boolean(effectiveToken_()),
     tokenLength: effectiveToken_().length,
-    sheetId: (typeof SPREADSHEET_ID === 'string' && SPREADSHEET_ID) || SHEET_ID_FALLBACK,
+    sheetId: propsSheetId_(),
     sheetAccess: false,
     sheetName: '',
     tabs: [],
     settingsKeys: 0,
     problems: [],
   };
-  try {
-    var book = SpreadsheetApp.openById(report.sheetId);
-    report.sheetAccess = true;
-    report.sheetName = book.getName();
-  } catch (error) {
+  if (!report.sheetId) {
     report.problems.push(
-      'Configured sheet khul nahi rahi (' + (error && error.message ? error.message : error) + ') — ' +
-      'koi baat nahi: script apni nayi sheet bana kar usme likh legi. ' +
-      'Apni sheet abhi banani ho to function `createOwnSheet` chalaiye (isi account me ban jayegi). ' +
-      'Purani sheet me hi likhna ho to Sheet → Share → ' + (report.account || 'script ka account') + ' → Editor.',
+      'SHEET_ID set nahi (R40: sheet ka id code me nahi hota) — browser me /exec kholiye aur ' +
+      'panel ke form me apni sheet ka URL daaliye, ya ?action=sheet_set&id=<sheet URL>&token=… chalaiye. ' +
+      'Nayi sheet chahiye to function `createOwnSheet` (id apne aap set ho jayega).',
     );
+  } else {
+    try {
+      var book = SpreadsheetApp.openById(report.sheetId);
+      report.sheetAccess = true;
+      report.sheetName = book.getName();
+    } catch (error) {
+      report.problems.push(
+        'Configured sheet (' + report.sheetId + ') khul nahi rahi: ' +
+        (error && error.message ? error.message : error) + ' — Sheet → Share → ' +
+        (report.account || 'script ka account') + ' → Editor dijiye, ya sheet badal gayi ho to /exec panel se nayi URL set kijiye.',
+      );
+    }
   }
   if (report.sheetAccess) {
     try {
@@ -658,7 +682,7 @@ var COLUMN_WIDTHS = {
   Note: 160, Stock: 65, Change: 65, 'Low stock alert': 95, Actor: 110,
   Action: 150, Target: 120, Details: 260, IP: 110, Context: 130,
   Payload: 260, Version: 70, Metric: 150, Direction: 110, Rows: 60,
-  Detail: 180, Total: 90,
+  Detail: 180, Total: 90, 'Order JSON': 200, 'Invoice JSON': 200,
 };
 
 /**
@@ -669,7 +693,7 @@ var COLUMN_WIDTHS = {
 var TEXT_COLUMNS = ['Phone', 'Pincode', 'AWB', 'Order number', 'Invoice number', 'SKU', 'Code', 'Message ID', 'GSTIN', 'UPI ID', 'Payment reference'];
 
 /** Wrap wale columns (lambe text) */
-var WRAP_COLUMNS = ['Item details', 'Notes', 'Message', 'Review', 'Address', 'Details', 'Payload', 'Note', 'Title'];
+var WRAP_COLUMNS = ['Item details', 'Notes', 'Message', 'Review', 'Address', 'Details', 'Payload', 'Note', 'Title', 'Order JSON', 'Invoice JSON'];
 
 /** Money columns — in par ₹ format lagta hai (sirf naye tab banne par). */
 var MONEY_COLUMNS = {
@@ -991,6 +1015,59 @@ function orderStory_(orderNumber) {
     if (rows.length) found = true;
   });
   return found ? story : null;
+}
+
+/**
+ * R40: Orders tab = append-only event log + `Order JSON` snapshot column —
+ * **sheet hi orders ka database hai** (owner: "Supabase nahi, only sheet").
+ * Har order ke liye: latest JSON snapshot + latest human-columns row. Ek order
+ * maanga ho (`wanted`) to poori row-history bhi (`rows`) — site us se audit /
+ * timeline banati hai. List newest-first (last row = sabse fresh).
+ */
+function orderStates_(wanted, limit) {
+  var sheet = sheet_('Orders');
+  var last = sheet.getLastRow();
+  if (last < 2) return [];
+  var headers = headersOf_(sheet);
+  var idCol = headers.indexOf('Order number');
+  var jsonCol = headers.indexOf('Order JSON');
+  if (idCol < 0) return [];
+  var from = Math.max(2, last - 4000 + 1); // bahut badi sheet par poori scan nahi
+  var values = sheet.getRange(from, 1, last - from + 1, headers.length).getValues();
+  var needle = String(wanted || '').trim().toUpperCase();
+  var byOrder = {};
+  var keys = [];
+  for (var i = 0; i < values.length; i += 1) {
+    var rawNum = values[i][idCol];
+    var num = String(rawNum === null || rawNum === undefined ? '' : rawNum).trim().toUpperCase();
+    if (!num) continue;
+    if (needle && num !== needle) continue;
+    if (!byOrder[num]) {
+      byOrder[num] = { orderNumber: num, json: '', row: null, rows: [], lastIndex: i };
+      keys.push(num);
+    }
+    var entry = byOrder[num];
+    var object = {};
+    for (var c = 0; c < headers.length; c += 1) {
+      object[headers[c]] = values[i][c] === null || values[i][c] === undefined ? '' : values[i][c];
+    }
+    if (jsonCol >= 0) {
+      var snapshot = String(object['Order JSON'] || '').trim();
+      if (snapshot) entry.json = snapshot; // last non-empty snapshot = current state
+    }
+    delete object['Order JSON']; // payload halka — snapshot upar `json` field me hai
+    entry.row = object;
+    entry.lastIndex = i;
+    if (needle) entry.rows.push(object);
+  }
+  keys.sort(function (a, b) { return byOrder[b].lastIndex - byOrder[a].lastIndex; });
+  var out = keys.map(function (key) {
+    var entry = byOrder[key];
+    if (!needle) entry.rows = undefined; // list me history nahi bhejte (payload chhota)
+    delete entry.lastIndex;
+    return entry;
+  });
+  return limit ? out.slice(0, limit) : out;
 }
 
 /* ───────────────────────────── TRACKING TIMELINE ─────────────────────────────
@@ -2098,7 +2175,7 @@ function removeTriggers() {
  * bound, upiSet, problems — diagnose ke liye kaafi, private kuch nahi.
  * Token match ho to extra: sheet ka naam/URL + tab-wise row counts.
  */
-function healthReport_(authed, tokenGiven) {
+function healthReport_(authed, tokenGiven, expectedId) {
   var report = {
     ok: true,
     version: CODE_VERSION,
@@ -2108,6 +2185,7 @@ function healthReport_(authed, tokenGiven) {
     tokenSet: Boolean(effectiveToken_()),
     tokenOk: Boolean(authed),
     sheetFound: false,
+    sheetConfigured: Boolean(propsSheetId_()),
     sheetId: '',
     spreadsheetId: '',
     idMatch: false,
@@ -2133,7 +2211,9 @@ function healthReport_(authed, tokenGiven) {
     report.sheetId = book.getId();
     // website ka selftest/admin `spreadsheetId` padhta hai — same value dono naam se
     report.spreadsheetId = report.sheetId;
-    report.idMatch = report.sheetId === ((typeof SPREADSHEET_ID === 'string' && SPREADSHEET_ID) || SHEET_ID_FALLBACK);
+    // R40: expected id site bhejti hai (SHEET_EXPECTED_ID env) — code me kuch hardcoded nahi.
+    var expected = String(expectedId || '').trim();
+    report.idMatch = !expected || report.sheetId === expected;
     var settings = readSettings_();
     report.settingsKeys = Object.keys(settings).length;
     report.upiSet = Boolean(String(settings.upi_id || '').trim());
@@ -2144,6 +2224,9 @@ function healthReport_(authed, tokenGiven) {
     }
   } catch (error) {
     report.problems.push('Sheet access nahi: ' + String(error && error.message ? error.message : error));
+  }
+  if (!report.sheetConfigured) {
+    report.problems.push('SHEET_ID set nahi — /exec panel kholiye aur apni sheet ka URL "Sheet URL set karein" form me daaliye (website SHEET_EXPECTED_ID env se khud bhi set kar deti hai)');
   }
   if (!report.tokenSet) {
     report.problems.push('TOKEN set nahi — browser me kholiye: <webapp URL>?action=set_token&token=<Vercel GOOGLE_SHEETS_TOKEN>');
@@ -2175,7 +2258,7 @@ function esc_(value) {
  * panel sirf script ki sehat dikhata hai (har line ka matlab: diagnose karo).
  */
 function controlPanel_() {
-  var report = healthReport_(false, false);
+  var report = healthReport_(false, false, '');
   var settings = {};
   try {
     settings = readSettings_();
@@ -2191,6 +2274,23 @@ function controlPanel_() {
   var problems = (report.problems || []).map(function (line) {
     return '<li>' + esc_(line) + '</li>';
   }).join('');
+  /**
+   * R40: sheet ka id code me nahi — Script Properties me. Set na ho to panel
+   * par hi form: owner apni sheet ka URL daale, submit = GET sheet_set.
+   */
+  var sheetDetail = report.sheetFound
+    ? ('ID ' + esc_(report.sheetId) + ' — Script Properties (SHEET_ID) me set ✔')
+    : (report.sheetConfigured
+      ? ('SHEET_ID ' + esc_(propsSheetId_()) + ' set hai, par sheet khul nahi rahi — Share → Editor access dekhiye')
+      : 'SHEET_ID set nahi — neeche apni sheet ka URL daaliye');
+  var setForm = report.sheetFound ? '' :
+    '<form class="setform" method="GET" action="">' +
+    '<input type="hidden" name="action" value="sheet_set">' +
+    '<label>Sheet URL set karein — apni Google Sheet ka URL (ya id)' +
+    '<input name="id" type="text" placeholder="https://docs.google.com/spreadsheets/d/…" required></label>' +
+    '<label>Token (SHEET_ID pehle se set hai to zaroori, warna khaali chhodiye)' +
+    '<input name="token" type="password" placeholder="Vercel GOOGLE_SHEETS_TOKEN"></label>' +
+    '<button type="submit">Sheet set karo</button></form>';
   var html = '' +
     '<!DOCTYPE html><html lang="hi"><head><meta charset="utf-8">' +
     '<title>Liksha sheet panel · ' + esc_(report.version) + '</title>' +
@@ -2206,10 +2306,14 @@ function controlPanel_() {
     'a.btn{display:inline-block;border:1px solid #862222;color:#862222;text-decoration:none;font-size:12px;font-weight:600;padding:8px 14px;border-radius:8px}' +
     'a.btn.solid{background:#862222;color:#fff}' +
     '.hint{margin-top:14px;font-size:12px;color:#5c534b;background:#faf6f0;border:1px dashed #e0d5c8;border-radius:8px;padding:10px 12px}' +
+    '.setform{margin-top:12px;padding:12px;border:1px dashed #862222;border-radius:8px;background:#fdf6f4}' +
+    '.setform label{display:block;font-size:12px;font-weight:600;margin:8px 0 3px}' +
+    '.setform input{width:100%;box-sizing:border-box;padding:8px;border:1px solid #d8cbbc;border-radius:6px;font:13px sans-serif}' +
+    '.setform button{margin-top:10px;background:#862222;color:#fff;border:0;padding:9px 16px;border-radius:8px;font-weight:600;cursor:pointer}' +
     '</style></head><body><div class="card">' +
     '<h1>Liksha Clothing — sheet control panel</h1>' +
     '<p class="sub">Apps Script ' + esc_(report.version) + ' · ' + esc_(report.time) + ' · timezone ' + esc_(report.timezone) + '</p>' +
-    dot(report.sheetFound, 'Sheet', report.sheetFound ? ('ID ' + esc_(report.sheetId) + (report.idMatch ? ' (expected se match ✔)' : ' (expected se MATCH NAHI — adopt kariye)')) : 'sheet nahi mili — access/URL dekhiye') +
+    dot(report.sheetFound, 'Sheet', sheetDetail) + setForm +
     dot(report.tokenSet, 'Token (script)', report.tokenSet ? 'set hai ✔ — website wale token se match website ke /api/sheet-health par dikhta hai' : 'set nahi — ?action=set_token&token=… chalaiye') +
     dot(report.upiSet, 'UPI (sheet Settings)', report.upiSet ? 'upi_id bhara hai ✔ — payment chalu' : 'upi_id khaali — payment page paused rahega') +
     (report.problems && report.problems.length && report.problems[0] !== 'sab green ✔' ? '<ul>' + problems + '</ul>' : '') +
@@ -2218,7 +2322,7 @@ function controlPanel_() {
     (adminUrl ? '<a class="btn" href="' + esc_(adminUrl) + '">Admin panel</a>' : '') +
     '<a class="btn" href="' + esc_(storeUrl) + '/api/sheet-health">Site ka sheet-health</a>' +
     '</div>' +
-    '<div class="hint">Order ke liye customer ko message dikhana ho to sheet ke <b>Orders</b> tab me us order ki row ka <b>Admin Note</b> column bhar dijiye — 2 second me order page par dikhega (khaali ho to default “Waiting for confirmation”). Status badalna ho to <b>Order status</b> column edit kariye.</div>' +
+    '<div class="hint"><b>R40: orders isi sheet me save hote hain</b> (Orders tab ka <b>Order JSON</b> column = poora order; koi Supabase/DB nahi). Customer ko message dikhana ho to order ki row ka <b>Admin Note</b> column bhar dijiye — 2 second me order page par dikhega (khaali ho to default “Waiting for confirmation”). Status badalna ho to <b>Order status</b> column edit kariye. Sheet badalni ho to upar wala form dobara — code/paste kuch nahi badlega.</div>' +
     '</div></body></html>';
   return HtmlService.createHtmlOutput(html)
     .setTitle('Liksha sheet panel')
@@ -2227,9 +2331,11 @@ function controlPanel_() {
 
 /**
  * GET actions:
- *   public (token nahi):  settings (public keys) · version · ping · health · set_token · adopt(fresh)
- *   token-gated:          settings (poora) · recent · search · order · timeline · stats ·
- *                         dashboard · seed · clear-demo · health (poora)
+ *   public (token nahi):  settings (public keys) · version · ping · health · set_token ·
+ *                         adopt (fresh) · sheet_set (fresh; set id badalna = token)
+ *   token-gated:          settings (poora) · recent · search · order · order_state ·
+ *                         orders_state · timeline · stats · dashboard · seed ·
+ *                         clear-demo · health (poora)
  */
 function doGet(e) {
   var params = (e && e.parameter) || {};
@@ -2270,6 +2376,46 @@ function doGet(e) {
   }
 
   /**
+   * R40 `sheet_set` — sheet ka id Script Properties me set karo (code me kahin
+   * hardcoded nahi). Fresh install (SHEET_ID khaali) par bina token ke bhi
+   * chalega — warna token zaroori (koi random id se sheet na tode). URL ya id
+   * dono chalte hain; set karne se pehle sheet khol kar access verify hota hai.
+   * Website bhi yahi call karti hai (SHEET_EXPECTED_ID env se auto-heal).
+   */
+  if (action === 'sheet_set') {
+    var wantId = extractSheetId_(params.id || params.url || '');
+    if (!wantId) {
+      return json_({ ok: false, version: CODE_VERSION, error: 'sheet ka sahi URL/id nahi mila — https://docs.google.com/spreadsheets/d/<ID>/edit wala poora URL bhejiye' });
+    }
+    var haveId = propsSheetId_();
+    if (haveId && !authed) {
+      return json_({ ok: false, version: CODE_VERSION, error: 'SHEET_ID pehle se set hai (' + haveId + ') — badalne ke liye token bhi bhejiye', fix: tokenFix_() });
+    }
+    var target = null;
+    try {
+      target = SpreadsheetApp.openById(wantId);
+      target.getName();
+    } catch (error) {
+      return json_({
+        ok: false,
+        version: CODE_VERSION,
+        error: 'sheet "' + wantId + '" khul nahi rahi: ' + String(error && error.message ? error.message : error),
+        hint: 'Sheet → Share → ' + (executingEmail_() || 'script ka account') + ' → Editor dijiye, phir dobara try kariye.',
+      });
+    }
+    var propStore = props_();
+    if (!propStore) return json_({ ok: false, version: CODE_VERSION, error: 'Script Properties available nahi' });
+    propStore.setProperty('SHEET_ID', wantId);
+    try { noteAudit_('owner', 'sheet_set', wantId, 'SHEET_ID property set'); } catch (ignored) {}
+    return json_({
+      ok: true,
+      version: CODE_VERSION,
+      sheet: { id: wantId, name: target.getName(), url: target.getUrl() },
+      note: 'Ab website isi sheet ko padhegi/usme likhegi. Id Script Properties me safe hai — code dobara paste karne par bhi nahi mit-ti.',
+    });
+  }
+
+  /**
    * Public actions — website ko settings token set hone se pehle bhi padhni hai,
    * aur owner `?action=health` browser me khol kar khud diagnose kar sakta hai.
    */
@@ -2298,7 +2444,7 @@ function doGet(e) {
     }
 
     if (action === 'health') {
-      return json_(healthReport_(authed, Boolean(params.token)));
+      return json_(healthReport_(authed, Boolean(params.token), params.expected));
     }
 
     if (action === 'recent' || action === 'rows' || action === 'sheet') {
@@ -2326,6 +2472,20 @@ function doGet(e) {
       var story = orderStory_(params.orderNumber || params.order || '');
       if (!story) return json_({ ok: false, error: 'order nahi mila' });
       return json_({ ok: true, order: story });
+    }
+
+    /**
+     * R40: sheet-as-DB reads. `order_state` = ek order (json snapshot + poori
+     * row-history), `orders_state` = sab orders newest-first (admin list).
+     */
+    if (action === 'order_state') {
+      var single = orderStates_(params.order || params.orderNumber || '', 1);
+      if (!single.length) return json_({ ok: false, version: CODE_VERSION, error: 'order nahi mila' });
+      return json_({ ok: true, order: single[0], time: now_() });
+    }
+    if (action === 'orders_state') {
+      var stateLimit = Math.min(300, Math.max(1, Number(params.limit || 100)));
+      return json_({ ok: true, orders: orderStates_('', stateLimit), time: now_() });
     }
 
     /**
@@ -2454,11 +2614,17 @@ function doPost(e) {
       var id = String(body.id || '').trim();
       if (!id) return json_({ ok: false, error: 'id chahiye' });
       var status = String(body.status || 'replied').toLowerCase();
-      var updated = updateWhere_('Messages', 'Message ID', id, {
-        Status: status,
-        Replied: status === 'replied' ? 'yes' : 'no',
-        'Replied at': status === 'replied' ? istNow_() : '',
-      });
+      // R40: 'handled' sirf Status badalta hai — Replied ka state chhuta nahi
+      // (pehle handled bhejne par Replied galti se 'no' ho jaata tha).
+      var msgUpdates = { Status: status };
+      if (status === 'replied') {
+        msgUpdates.Replied = 'yes';
+        msgUpdates['Replied at'] = istNow_();
+      } else if (status === 'new' || status === 'unreplied') {
+        msgUpdates.Replied = 'no';
+        msgUpdates['Replied at'] = '';
+      }
+      var updated = updateWhere_('Messages', 'Message ID', id, msgUpdates);
       return json_({ ok: updated > 0, updated: updated });
     }
 

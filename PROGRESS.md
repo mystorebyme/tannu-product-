@@ -824,6 +824,62 @@ secret/variable update** karke verify karna."
 - [x] Docs: `google-sheets.md` §4f + §0 final-sheet note, `live-vercel-supabase.md`
       (SHEET_EXPECTED_ID row), owner-code-map (4 R39 rows), `apps-script-code.md`
       (r39-1 export), `owner-report-round39.md`, sheet-setup/setup-steps me final id.
-- [ ] Deploy: PR → merge → Vercel env `SHEET_EXPECTED_ID` → production deploy → verify;
-      owner ka 1 kadam: **r39-1 paste → Deploy → New version** (token Script Properties
-      me safe — set_token dobara nahi karna).
+- [x] Deploy: PR #11 squash-merged → `main` @ `b96dab8`; Vercel production PROMOTED;
+      env `SHEET_EXPECTED_ID` live. Owner ka r39-1 paste **baaki tha** (live script r38-1
+      raha) — R40 ka r40-1 paste dono ko cover karta hai (neeche Round 40).
+
+## Round 40 — 27 Oct 2026 (sheet hi orders ka DB — Supabase out; zero sheet-hardcoding; cached-order fix)
+
+Owner: *"supabase pr nhai chiye, sheet mai hi chiye — **only sheet**"* (Supabase project
+owner ne khud delete kiya → live orders fail: "Order server par save nahi hua"),
+*"**google sheet ka koi bhi chij hardcoded nhai honi chiye** — koi bhi nahi means koi bhi
+nahi"* (change turant dikhna chahiye), *"**bar bar merge mt kro**"* (sab ek hi PR/deploy
+me), aur repeat checkout par **purana cached order** dikhne ka bug.
+
+- [x] **Sheet-as-DB backend** (`lib/orders-sheet.ts`, naya): order create = **awaited**
+      batch append (Orders row + `Order JSON` snapshot + OrderItems + Payments rows); fail
+      → honest 502/503 + WhatsApp order ka raasta (jhoothi success nahi). Read =
+      `?action=order_state` (JSON snapshot + owner-edit overlay: Admin Note/status/courier/
+      AWB last-non-empty scan; `paymentStatus` site ka truth). List = `?action=orders_state`
+      (newest-first, ≤300). Update = snapshot diff → event row append (append-only log).
+      2s TTL cache + invalidate; invoice serial Invoices tab ke max se.
+- [x] **Script r40-1**: `order_state`/`orders_state`/`sheet_set` actions + `orderStates_`
+      (last 4000 rows, latest non-empty JSON, poori history); HEADERS me `Order JSON` +
+      `Invoice JSON` + `Message ID`/`Replied`/`Replied at` (`ensureHeaders_` purani sheet
+      me END par jodta hai — data safe); **props-only `SHEET_ID`** — `SPREADSHEET_ID`
+      constant + bound-sheet fallback **delete** (container galat sheet se bound tha);
+      fresh paste par `/exec` = "Sheet URL set karein" bootstrap form; `message_status`
+      fix (`handled` ab Replied state preserve karta hai); MAX_CELL_CHARS 20000.
+- [x] **Zero hardcoding**: site ka `EXPECTED_SHEET_ID` constant bhi delete — sheet id sirf
+      env `SHEET_EXPECTED_ID` me, wo bhi sirf **auto-heal** ke liye: `sheet_not_configured`
+      mile to site khud `sheet_set?id=…&token=…` karti hai (10-min rate limit) → retry.
+      Sheet badalna = panel form ya ek env change — koi code change/redeploy nahi. Guard
+      tests purani FINAL/OLD ids ki maujoodgi par fail karte hain.
+- [x] **Backend selection + gate**: `sheet` (GOOGLE_SHEETS_* set ho) → `postgres`
+      (DATABASE_URL ho tab — dev/backup) → `json` (dev). Version gate: script **r40+** na
+      ho to orders honest 503 `sheet_store_not_ready`. Messages + manual invoices ke sheet
+      branches bhi (Messages/Invoices tabs, JSON snapshots ke saath).
+- [x] **Purana cached-order fix**: checkout `staleResume` guard — payment se wapas aane par
+      cart me **nayi** lines ho to purana `?order=` param ignore, step `details`, one-shot
+      `router.replace("/checkout")` (URL saaf); popstate/context/submit guards refs ke
+      saath (stale closure fix). Legit back-from-payment waise hi kaam karta hai.
+- [x] Worker config: `DATABASE_URL` secrets se nikla (R40), `SHEET_EXPECTED_ID` declare
+      (build-env bake — `STORE_UPI_ID` pattern, value hardcoded nahi); `.env.example` me
+      DATABASE_URL ab optional-dev. Vercel se `DATABASE_URL` deploy ke saath delete.
+- [x] Tests: unit **294/294** (round40: 9 naye + harness ab props-aware — 4 naye R40
+      harness tests: order_state/orders_state roundtrip, health `expected`→idMatch, panel
+      bootstrap form, message_status handled), test:all **353**, typecheck 0, lint web
+      0 err/**34** warn, next + vinext build ✅, Next-prod parity: smoke **111/0** (R40
+      enum/null assertions), payments 61/0, links 40/0, round16 35/0, responsive 44/0,
+      breakpoints 48/0; workerd parity same **111/0** (DATABASE_URL warning bhi gaya).
+- [x] Docs: `google-sheets.md` (intro flip + §0 R40 + §3 curls + §4 files + §4c/4e/4f +
+      naya **§4g**), `live-vercel-supabase.md` (Supabase→sheet; DATABASE_URL delete; §4/§5
+      rewrite), `cloudflare-workers.md` (secrets table + deploy steps + limitations),
+      `owner-code-map.md` (§1 R40 row, §4 awaited flow, §6.1–6.3, §12 env, §15),
+      `netlify-shift-guide.md` (R40 banner), `apps-script-code.md` (r40-1 export),
+      `owner-report-round40.md` (naya).
+- [ ] Deploy: **ek hi PR** → squash merge → storefront production deploy → Vercel se
+      `DATABASE_URL` DELETE → redeploy → verify `/api/health` `ordersStore:"sheet"` +
+      `/api/sheet-health` `ok:true`. Owner ke 2 kadam: **r40-1 paste → New version →
+      Deploy** (r39-1 ka baaki paste bhi isi me cover) aur sheet confirm — `/exec` panel
+      form se ya auto-heal (`SHEET_EXPECTED_ID`) khud `sheet_set` kar dega.

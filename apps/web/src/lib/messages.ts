@@ -4,7 +4,8 @@ import fs from "@/lib/fs-runtime";
 import { randomUUID } from "node:crypto";
 import { dataFile } from "@/lib/data-dir";
 import { dbEnabled } from "@/lib/db";
-import { appendSheetRows } from "@/lib/google-sheets";
+import { appendSheetRows, scriptGet, scriptPost } from "@/lib/google-sheets";
+import { ordersBackend } from "@/lib/orders-sheet";
 import { messageSheetRow, subscriberSheetRow } from "@/lib/sheet-format";
 
 /**
@@ -93,6 +94,18 @@ export async function saveMessage(
     ...input,
   };
 
+  /**
+   * R40 (owner: "only sheet"): sheet hi primary store hai — message **await**
+   * karke Messages tab me likhte hain (retry appendSheetRows me built-in hai).
+   * Sheet fail ho to customer ko error nahi dete — local JSON me gir jaata hai
+   * (Vercel par ephemeral, par message tab bhi admin ko usi invocation me dikhta hai).
+   */
+  if (ordersBackend() === "sheet") {
+    const mirrored = await mirrorMessageToSheet(message);
+    if (mirrored) return message;
+    console.warn("[messages] sheet write fail — local JSON fallback");
+  }
+
   if (dbEnabled()) {
     const { query } = await import("@/lib/db");
     await query(
@@ -127,6 +140,32 @@ export async function mirrorSubscriberToSheet(email: string): Promise<boolean> {
 }
 
 export async function listMessages(limit = 100): Promise<ContactMessage[]> {
+  if (ordersBackend() === "sheet") {
+    const result = await scriptGet<{ rows?: Record<string, string | number>[] }>(
+      "recent",
+      { sheet: "Messages", limit: Math.min(500, Math.max(1, limit)) },
+    );
+    if (result.ok && Array.isArray(result.data.rows)) {
+      return result.data.rows
+        .map((row) => ({
+          id: String(row["Message ID"] ?? ""),
+          createdAt: String(row.Timestamp ?? ""),
+          name: String(row.Name ?? ""),
+          email: String(row.Email ?? ""),
+          phone: String(row.Phone ?? "") || null,
+          subject: String(row.Subject ?? "") || null,
+          message: String(row.Message ?? ""),
+          handled: /handl|repl|done|closed/i.test(String(row.Status ?? "")),
+          handledAt: String(row["Replied at"] ?? "") || null,
+          handledBy: null,
+          replied: /^y/i.test(String(row.Replied ?? "")) || String(row.Status ?? "").toLowerCase() === "replied",
+          repliedAt: String(row["Replied at"] ?? "") || null,
+          repliedBy: null,
+        }))
+        .filter((row) => row.id || row.email || row.message);
+    }
+    // sheet read fail — neeche local fallback
+  }
   if (dbEnabled()) {
     const { query } = await import("@/lib/db");
     const rows = await query<Row>(
@@ -182,6 +221,12 @@ export async function setMessageReplied(
   replied: boolean,
   actor: string,
 ): Promise<ContactMessage | null> {
+  if (ordersBackend() === "sheet") {
+    const result = await scriptPost("message_status", { id, status: replied ? "replied" : "new", actor });
+    if (!result.ok) return null;
+    const rows = await listMessages(300);
+    return rows.find((row) => row.id === id) ?? null;
+  }
   if (dbEnabled()) {
     const { query } = await import("@/lib/db");
     const rows = await query<Row>(
@@ -219,6 +264,12 @@ export async function setMessageReplied(
 }
 
 export async function markMessageHandled(id: string, actor: string): Promise<ContactMessage | null> {
+  if (ordersBackend() === "sheet") {
+    const result = await scriptPost("message_status", { id, status: "handled", actor });
+    if (!result.ok) return null;
+    const rows = await listMessages(300);
+    return rows.find((row) => row.id === id) ?? null;
+  }
   if (dbEnabled()) {
     const { query } = await import("@/lib/db");
     const rows = await query<Row>(
@@ -242,6 +293,12 @@ export async function markMessageHandled(id: string, actor: string): Promise<Con
 }
 
 export async function saveSubscriber(email: string): Promise<{ duplicate: boolean }> {
+  if (ordersBackend() === "sheet") {
+    // script ka subscribe_ duplicate-email khud skip karta hai
+    const result = await scriptPost<{ duplicate?: boolean }>("subscribe", { email });
+    if (result.ok) return { duplicate: Boolean(result.data.duplicate) };
+    console.warn("[messages] subscribe sheet write fail — local JSON fallback");
+  }
   if (dbEnabled()) {
     const { query } = await import("@/lib/db");
     const rows = await query<{ id: string }>(

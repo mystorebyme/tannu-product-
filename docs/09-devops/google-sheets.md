@@ -15,15 +15,26 @@ Google Sheet se hote hain:
 Sheet **append-only log** hai — purani row kabhi overwrite nahi hoti, isliye owner ko
 poora timeline milta hai (kab order aaya, kab payment aaya, kab ship hua).
 
-Database (Postgres / JSON) **primary** hai: order, payment verification, invoice, tracking
-sab wahin rehta hai. Sheet uski live copy + owner ke settings ka source hai. Sheet down ho
-jaye to site chalti rehti hai (sirf owner edits ruk jaate hain) — koi order fail nahi hota.
+**R40 (27 Oct) se Sheet hi orders ka database hai** (owner: "Supabase nahi — only sheet"):
+order place karna, padhna, status/tracking/payment update — sab Google Sheet (Apps Script)
+se hota hai. Postgres/Supabase runtime se **nikaal diya gaya** (owner ne project khud band
+kiya; Vercel se `DATABASE_URL` delete). Order append **await** hota hai: sheet likh na paye
+to customer ko jhoothi success nahi milti — saaf error + WhatsApp par order karne ka raasta
+dikhta hai. Sheet hi source of truth hai, isliye owner ka har sheet edit (status, Admin
+Note, courier/AWB) ~2 second me site par dikhta hai — bina redeploy.
 
 ## 0. Ready-made sheet (link — owner ke account me already shared)
 
 > **R39 update (27 Oct):** owner ki **FINAL sheet** `1b8DReh2RF5JeOSJeknWmH1KSE1RZgmBjatgkCDS9w_4`
-> hai — script (r39-1) isi ko padhta hai, site isi ko `SHEET_EXPECTED_ID` env se verify
+> hai — script isi ko padhta hai, site isi ko `SHEET_EXPECTED_ID` env se verify
 > karti hai, aur neeche ki setup history me jo id dikhe wo original setup sheet ki hai.
+>
+> **R40 update (27 Oct):** sheet ka id ab **code me kahin nahi** hai — script me sirf
+> Script Properties (`SHEET_ID`), site me sirf env (`SHEET_EXPECTED_ID`, wo bhi sirf
+> auto-heal ke liye). Fresh paste par `/exec` khud "Sheet URL set karein" form dikhata hai
+> (`sheet_set`) — sheet badalni ho to bhi **koi code change/redeploy nahi**. Script
+> version **r40-1** chahiye (orders sheet me save hone ke liye) — purana paste hai to site
+> honest 503 deti hai, jhoothi success nahi.
 
 Sheet ban chuki hai, tabs + headers ready hain, aur **`info.likshaclothing@gmail.com`**
 ko **Editor** access de diya gaya hai (notification mail bhi gaya hai):
@@ -32,7 +43,7 @@ ko **Editor** access de diya gaya hai (notification mail bhi gaya hai):
 | --- | --- |
 | Sheet ka naam | `Designer Clothing — Store (Orders · Payments · Settings)` |
 | Link | https://docs.google.com/spreadsheets/d/1b8DReh2RF5JeOSJeknWmH1KSE1RZgmBjatgkCDS9w_4/edit |
-| Tabs | `Settings` (10 keys bhare hue), `Orders` (25 columns), `Payments` (25 columns), `Messages` (7), `Newsletter` (2), `Checkout` (8) |
+| Tabs | `Settings` (10 keys bhare hue), `Orders` (29 columns — R40 me `Order JSON` snapshot juda), `Payments` (27), `Messages` (11 — `Message ID`/`Replied`/`Replied at`), `Newsletter` (4), `Checkout` (12), `Invoices` (19 — `Invoice JSON`), `OrderItems` (13), `Audit` (6), `Shipments` (9) |
 | Access | owner ka email = Editor · "Anyone with link" = **off** (customer data protect) |
 
 `Settings` tab me ye values pehle se hain: `support_phone` = 8005900581,
@@ -109,16 +120,26 @@ curl -s "$SHEET_URL?action=recent&sheet=Orders&limit=20&token=$TOKEN"
 curl -s -X POST "$SHEET_URL" \
   -H 'Content-Type: text/plain;charset=utf-8' \
   --data '{"token":"'"$TOKEN"'","action":"append","rows":[{"sheet":"Orders","row":{"Order number":"LK-TEST01","Event":"test","Total":499}}]}'
+
+# R40: ek order ka poora state (JSON snapshot + saari rows) — site yahi padhti hai
+curl -s "$SHEET_URL?action=order_state&order=LK-TEST01&token=$TOKEN" | head -c 400
+
+# R40: saare orders (newest-first) — admin list isi se banti hai
+curl -s "$SHEET_URL?action=orders_state&limit=20&token=$TOKEN" | head -c 400
+
+# R40: script ko apni sheet batana (fresh paste ke baad; Script Props SHEET_ID set hota hai)
+curl -s "$SHEET_URL?action=sheet_set&id=https://docs.google.com/spreadsheets/d/<SHEET_ID>/edit&token=$TOKEN"
 ```
 
 ## 4. Website side (code)
 
 | File | Kaam |
 | --- | --- |
-| `apps/web/src/lib/google-sheets.ts` | settings read (4s timeout, 10s TTL + stale-while-revalidate, fail par **last good** value, Workers par edge cache) + rows append (6s timeout, best-effort) |
+| `apps/web/src/lib/google-sheets.ts` | settings read (4s timeout, 10s TTL + stale-while-revalidate, fail par **last good** value, Workers par edge cache) + rows append (6s timeout) + **R40: `scriptGet`/`scriptPost` aur auto-heal** — `sheet_not_configured` mile to `sheet_set?id=$SHEET_EXPECTED_ID` khud chalata hai (10-min rate limit) |
+| `apps/web/src/lib/orders-sheet.ts` | **R40: sheet-as-DB backend** — order create (awaited append + `Order JSON` snapshot), read (`order_state`/`orders_state`), update (diff → append), 2s TTL cache, version gate (script **r40+**) |
 | `apps/web/src/lib/sheet-format.ts` | pure row/format helpers (unit tested) |
 | `apps/web/src/lib/store-settings.ts` | DB/file settings + sheet merge (sheet jeetti hai) + `getStoreSettingsFast()` — payment page: cache ho to turant, cold ho to 3s tak asli read, aur jab tak koi **last good** value hai tab tak hardcoded default kabhi nahi |
-| `apps/web/src/lib/orders.ts` | `order.placed`, `order.status.*`, `payment.paid`, `payment.reference_submitted`, `order.tracking_updated` par append |
+| `apps/web/src/lib/orders.ts` | backend selection (**sheet** → postgres → json) + `order.placed`, `order.status.*`, `payment.paid`, `payment.reference_submitted`, `order.tracking_updated` events |
 | `apps/web/src/lib/messages.ts` | contact message + newsletter subscriber append |
 | `apps/web/src/app/api/settings/route.ts` | public settings (UPI, phone, email, announcement) no-store · `?fresh=1` = sheet se abhi padho · `meta` = read diagnostics |
 | `apps/web/src/components/store-settings-provider.tsx` | browser me har 15s + tab focus par refresh — sheet ka change bina page reload dikhta hai |
@@ -178,7 +199,9 @@ build command `cd ../.. && npm run build --workspace @liksha/web`, domains
 | `GOOGLE_SHEETS_WEBAPP_URL` | ✅ set (`script.google.com/macros/s/…/exec`) | Apps Script web app (settings + rows) |
 | `GOOGLE_SHEETS_TOKEN` | ✅ set (encrypted, R38 me rotate) | script ke Script Properties `TOKEN` se match hona chahiye |
 | `SHEET_SELFTEST_KEY` | ✅ set (encrypted) | `/api/sheet-selftest?key=…` debugging |
-| `DATABASE_URL`, `ADMIN_API_TOKEN`, `OTP_TOKEN_SECRET`, `UPI_RETURN_SECRET` | ✅ set | order DB + payment confirm |
+| `ADMIN_API_TOKEN`, `OTP_TOKEN_SECRET`, `UPI_RETURN_SECRET` | ✅ set | admin APIs + payment confirm |
+| `DATABASE_URL` | ❌ **R40 me delete** (Supabase project owner ne khud band kiya) | orders sheet me hain — DB runtime me chahiye hi nahi |
+| `SHEET_EXPECTED_ID` | ✅ set (final sheet ka id — **sirf env me**, code me kahin nahi) | script props khaali mile to site `sheet_set` se khud jod deti hai (auto-heal); `/api/sheet-health` par `idMatch` |
 | `STORE_UPI_ID` | ❌ **R38 me production se delete** | UPI sirf sheet (`upi_id`) se aati hai — koi fallback payee nahi |
 | `STORE_UPI_NAME` | ✅ `Designer Clothing` | sirf payee-name fallback (sheet na chale tab) |
 | `GOOGLE_SHEETS_SETTINGS_CSV_URL` | ❌ nahi | optional fallback (~5 min Google cache) — real-time ke liye zaroori nahi |
@@ -253,7 +276,7 @@ likh deti thi — isliye owner ki sheet khaali dikhti thi. R38 me teeno jadein k
 | Placeholder token | `CHANGE-ME-…` **kabhi authorize nahi hota** (public repo me hai) |
 | Public actions (bina token) | `settings` (public keys ka subset), `health`, `version`, `ping` — website ka UPI read token set hone se pehle bhi chalta hai |
 | Token-gated | `recent/search/order/timeline/stats/dashboard/seed` + saare POST writes |
-| Sheet kaun si | Script Properties `SHEET_ID` → `SPREADSHEET_ID` constant → bound sheet. **Anaath sheet kabhi nahi banti** — access na ho to loud `sheet_access_denied` |
+| Sheet kaun si | **R40: sirf Script Properties `SHEET_ID`** — code me koi constant nahi, bound-sheet fallback nahi (container galat sheet se bound nikla tha). Props khaali → loud `sheet_not_configured` + `/exec` par "Sheet URL set karein" form; site `SHEET_EXPECTED_ID` env se `sheet_set` auto-heal karti hai. **Anaath sheet kabhi nahi banti** — access na ho to loud `sheet_access_denied` |
 | Apni sheet par switch | script apni sheet se bound ho to `<webapp URL>?action=adopt` (SHEET_ID property set) |
 | Script ka health | `<webapp URL>?action=health` — version, tokenSet/tokenOk, sheetFound, sheetId, upiSet, problems[] (Hinglish fix) |
 | Website ka health | **`https://designerclothing.fashion/api/sheet-health`** — settings source/age, script health, **last sheet write** ka nateeja, orders store, help[] |
@@ -277,8 +300,36 @@ confirmation, har order ke liye alag\".
 | Default text | Admin Note khaali → **\"Waiting for confirmation\"** (static AWB waada hata diya) |
 | onEdit | Admin Note edit hote hi Orders me `order.admin_note` event row — timeline me bhi dikhta hai |
 | `/exec` browser se | action ke bina kholne par ab **HTML control panel**: version, token/sheet/UPI status, problems, buttons (website/admin/site-health) + Admin Note ka hint. Website ka JSON contract (`?action=…`) bilkul nahi badla |
-| Final sheet id | code (`EXPECTED_SHEET_ID`, `.gs` `SPREADSHEET_ID`), selfcheck aur Vercel env `SHEET_EXPECTED_ID` — teeno `1b8DReh2…` par; `/api/sheet-health` par `idMatch: true` dikhe |
+| Final sheet id | **R40: code me kahin nahi** (site ka `EXPECTED_SHEET_ID` constant aur `.gs` ka `SPREADSHEET_ID` dono hata diye) — id sirf script props (`SHEET_ID`) + Vercel env `SHEET_EXPECTED_ID` me; `/api/sheet-health` par `idMatch: true` dikhe |
 | sheet-health | script **r39+** na ho to help me paste reminder; health-probe ka cold-start timeout akela failure nahi (settings + last write chal rahe hain to sirf `warnings[]`) |
+
+## 4g. R40 — sheet hi orders ka DB (Supabase/Postgres runtime se out)
+
+Owner (27 Oct): *"supabase pr nhai chiye… sheet mai hi chiye… only sheet"*, *"google sheet
+ka koi bhi chij hardcoded nhai honi chiye"*, *"bar bar merge mt kro"*, aur repeat checkout
+par purana (cached) order dikhne ka bug. Charo ka ek hi batch me ilaaj:
+
+| Cheez | Ab kaise hai |
+| --- | --- |
+| Order create | `POST /api/orders` → `Orders` row (**`Order JSON`** snapshot ke saath) + `OrderItems` rows — **awaited** batch append. Sheet fail → jhoothi success nahi: saaf 502/503 + WhatsApp par order karne ka raasta |
+| Order read | `?action=order_state&order=LK-…` → JSON snapshot + poori row history. Site overlay karti hai — owner ke sheet edits (status/Admin Note/courier/AWB, last-non-empty scan) jeette hain; `paymentStatus` site ka truth rehta hai (paisa sheet se override nahi) |
+| Order list | `?action=orders_state&limit=…` → newest-first, har order ka JSON + latest row — admin panel `/orders` isi se banta hai |
+| Update | status/tracking change → purani snapshot se diff → nayi event row append (append-only log kabhi tootta nahi; purani rows overwrite nahi hoti) |
+| Backend selection | `sheet` (GOOGLE_SHEETS_WEBAPP_URL+TOKEN set ho) → warna `postgres` (DATABASE_URL ho tab) → warna `json` (dev). Production = **sheet**; Vercel se `DATABASE_URL` delete |
+| Version gate | script **r40+** na ho to orders honestly 503 (`sheet_store_not_ready`) — purane script par order "save" karke jhooth nahi bolte |
+| Sheet id | **kuch bhi hardcoded nahi**: script props `SHEET_ID`; fresh paste par `/exec` = "Sheet URL set karein" form (`sheet_set`); site ka `SHEET_EXPECTED_ID` env sirf **auto-heal** ke liye (props khaali + `sheet_not_configured` mile → khud `sheet_set` → retry; 10-min rate limit) |
+| Purana order bug | checkout resume guard — payment se wapas aane par cart me **nayi** lines ho to purana `?order=` param ignore + URL ek baar saaf (`/checkout`); purana order dobara "place" nahi hota |
+| Messages | `Message ID`/`Replied`/`Replied at` columns; `message_status` action ab `handled` par bhi Replied state preserve karta hai |
+| Invoices | manual invoice `Invoices` tab me **`Invoice JSON`** snapshot ke saath (admin list sheet se) |
+
+Order numbers, paise (site par integer paise / sheet par rupees), invoice serial (Invoices
+tab ka max + 1) — sab sheet se aata hai. Delivery-pin check, traffic/checkout-events aur
+admin ke kuch counters abhi JSON fallback par hain — ye ephemeral data hai, orders nahi.
+
+> `onEdit` sirf us sheet par fire karta hai jisse script **bound** hai (container sheet).
+> Owner ki FINAL sheet edit karne par auto-timeline row nahi banti — par koi baat nahi:
+> site read-time overlay se owner ka Admin Note/status/courier waise hi ~2s me dikha deti
+> hai (isi liye overlay last-non-empty scan karta hai).
 
 ## 5. Security
 
