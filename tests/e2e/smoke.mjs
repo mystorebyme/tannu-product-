@@ -41,6 +41,18 @@ async function main() {
     String(healthBody.data?.products),
   );
 
+  // R38: sheet pipeline ka public report card — owner browser me khol kar khud
+  // diagnose karta hai (settings kahan se aa rahi, script version/token/sheet,
+  // last write ka nateeja). Secret (URL/token) kabhi expose nahi hona chahiye.
+  const sheetHealth = await get("/api/sheet-health");
+  check("sheet-health 200", sheetHealth.status === 200, `status ${sheetHealth.status}`);
+  const sheetBody = JSON.parse(sheetHealth.text);
+  check("sheet-health no-store", /no-store/.test(sheetHealth.headers.get("cache-control") ?? ""));
+  check("sheet-health orders store batata hai", ["postgres", "file"].includes(sheetBody.ordersStore), String(sheetBody.ordersStore));
+  check("sheet-health help array deta hai", Array.isArray(sheetBody.help));
+  check("sheet-health expectedSheetId deta hai", typeof sheetBody.sheet?.expectedSheetId === "string" && sheetBody.sheet.expectedSheetId.length > 10);
+  check("sheet-health secret expose nahi karta", !/script\.google\.com\/macros|GOOGLE_SHEETS_TOKEN=/.test(sheetHealth.text));
+
   const home = await get("/");
   check("home 200", home.status === 200, `status ${home.status}`);
   check("home lists products", /\/products\/[a-z0-9-]+/.test(home.text));

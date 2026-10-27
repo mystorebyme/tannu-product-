@@ -34,7 +34,15 @@ export type StoreSettings = {
 export const DEFAULT_STORE_SETTINGS: StoreSettings = {
   announcement: "Diwali Sale — Up to 70% OFF · Final price ₹499 onwards",
   freeShipping: true,
-  upiId: process.env.STORE_UPI_ID ?? "dhakadgourav@fam",
+  /**
+   * R38 (owner): purana hardcoded payee VPA code se **poora hata diya** — jo
+   * sheet me hai wahi fetch honi chahiye. UPI ka ek hi source hai: Google Sheet
+   * (Settings tab, `upi_id`). Env `STORE_UPI_ID` sirf emergency fallback hai
+   * (sheet bilkul na chale; production me ye env bhi hata diya gaya). Dono
+   * khaali hon to payment page honestly bolta hai "settings load nahi ho rahi"
+   * — galat payee par paisa jaane se ye kahin behtar hai.
+   */
+  upiId: process.env.STORE_UPI_ID ?? "",
   upiName: process.env.STORE_UPI_NAME ?? "Designer Clothing",
   gstin: process.env.SELLER_GSTIN ?? "",
   sellerName: process.env.SELLER_NAME ?? "Designer Clothing",

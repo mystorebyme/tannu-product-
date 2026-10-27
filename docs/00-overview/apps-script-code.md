@@ -83,7 +83,7 @@ Warna purana code hi chalta rehta hai — owner ke saath yahi hua tha.
 
 ---
 
-## Poora code (2268 lines)
+## Poora code (2420 lines)
 
 ```javascript
 /**
@@ -115,29 +115,29 @@ Warna purana code hi chalta rehta hai — owner ke saath yahi hua tha.
  *   Sync        → har sync call ka hisaab (kab, kya, kitni rows)
  *
  * ── SETUP (ek baar, 4 minute) ─────────────────────────────────────────────────
- *  1. Google Sheet kholiye (wahi jisme data chahiye).
+ *  1. Apni Google Sheet kholiye (jisme data chahiye — owner: prkigothwal@gmail.com).
  *  2. Extensions → Apps Script.
  *  3. `Code.gs` ka poora purana code **delete** karke niche ka poora code paste kijiye.
- *  4. Neeche `TOKEN` me apna lamba random word daaliye (yahi Vercel ke
- *     `GOOGLE_SHEETS_TOKEN` me jaana chahiye).
- *  5. Save (Ctrl + S).
- *  6. Upar function dropdown me `setup` chuniye → **Run** → permission maange to
+ *     (`TOKEN` line jaisi hai waisi rehne dijiye — asli token ab **Script Properties**
+ *     me rehta hai, step 7 me ek baar set hota hai, code dobara paste karne par bhi nahi tootta.)
+ *  4. Save (Ctrl + S).
+ *  5. Upar function dropdown me `setup` chuniye → **Run** → permission maange to
  *     apna hi account chuniye → "Advanced" → "Go to … (unsafe)" → **Allow**.
  *     (Ye "unsafe" warning har personal script par aata hai — normal hai.)
- *     → Sheet me saare 16 tabs + headers apne aap ban jayenge.
- *  7. **Deploy → New deployment → gear icon → Web app**
- *       Description     : liksha v3
- *       Execute as      : **Me**
- *       Who has access  : **Anyone**            ← "Anyone with Google account" NAHI
- *     → Deploy → **Web app URL** copy kariye (…/exec par khatam hota hai).
- *  8. Vercel → project `liksha-clothing` → Settings → Environment Variables:
- *       GOOGLE_SHEETS_WEBAPP_URL = <wahi /exec URL>
- *       GOOGLE_SHEETS_TOKEN      = <TOKEN jaisa hi>
- *     → Save → Deployments → latest → ⋯ → **Redeploy**.
- *  9. Test: browser me kholein (TOKEN apna):
- *       <webapp URL>?action=health&token=<TOKEN>
- *     Jawab: {"ok":true,"version":"r31-1","sheets":[…]}
- *     Phir website par ek test message bhejiye → Messages tab me row aa jayegi.
+ *     → Sheet me saare tabs + headers apne aap ban jayenge.
+ *  6. **Deploy → Manage deployments → ✏️ (pencil) → Version: New version → Deploy.**
+ *     Pehli baar: New deployment → gear → Web app → Execute as **Me** →
+ *     Who has access **Anyone** → Deploy → /exec URL copy kariye.
+ *     Naya URL ban gaya ho to Vercel me `GOOGLE_SHEETS_WEBAPP_URL` bhi wahi daaliye.
+ *  7. Token set (ek hi baar zindagi me): browser me kholiye
+ *       <webapp URL>?action=set_token&token=<Vercel ke GOOGLE_SHEETS_TOKEN ki value>
+ *     Jawab {"ok":true,…} aana chahiye. Iske baad code kitni baar bhi paste ho,
+ *     token Script Properties me safe rehta hai.
+ *  8. Health check (kabhi bhi, browser se):
+ *       <webapp URL>?action=health        → "problems":["sab green ✔"]
+ *       https://designerclothing.fashion/api/sheet-health → website ki taraf ka check
+ *  9. Sheet ke **Settings** tab me `upi_id` row me apna UPI ID bhariye —
+ *     website ka payment **sirf sheet** se UPI padhta hai (koi hardcoded default nahi).
  *
  * ── ZAROORI BAATEIN ───────────────────────────────────────────────────────────
  *  • Code badalne ke baad **naya version** deploy karna padta hai:
@@ -154,11 +154,20 @@ Warna purana code hi chalta rehta hai — owner ke saath yahi hua tha.
 
 /* ═══════════════════════════ 1. CONFIG (yahi badalna hota hai) ═══════════════ */
 
-/** Apna secret token — Vercel ke GOOGLE_SHEETS_TOKEN se bilkul same rakhein. */
+/**
+ * Fallback token — asli token **Script Properties** me rehta hai (naam `TOKEN`),
+ * jo `?action=set_token&token=…` URL se ek baar set hota hai. Code dobara paste
+ * karne par Properties nahi mitte, isliye baar-baar token bharne ki zaroorat nahi.
+ * Is line ko default ('CHANGE-ME-liksha-token') par hi rehne dijiye — default
+ * public repo me likha hai, isliye script use "token hi nahi" maanti hai.
+ */
 var TOKEN = 'CHANGE-ME-liksha-token';
 
+/** Wahi public placeholder — isse kabhi bhi authorize nahi hona chahiye. */
+var TOKEN_PLACEHOLDER = 'CHANGE-ME-liksha-token';
+
 /** Code ka version — `?action=health` me dikhta hai. Code badle to isse badhaayein. */
-var CODE_VERSION = 'r37-1';
+var CODE_VERSION = 'r38-1';
 
 /**
  * Sheet ka id (URL me `/d/<ID>/edit`).
@@ -272,7 +281,9 @@ var DEFAULT_SETTINGS = [
   ['whatsapp', '8005900581'],
   // Owner rule: support email site/admin par kahin dikhta nahi — khaali rakha hai.
   ['support_email', ''],
-  ['upi_id', 'dhakadgourav@fam'],
+  // UPI **sirf owner bharta hai** — koi default nahi. Khaali hai to website
+  // payment rok deti hai aur /api/sheet-health par "upiSet:false" dikhta hai.
+  ['upi_id', ''],
   ['upi_name', 'Designer Clothing'],
   ['announcement', 'Diwali Sale — Flat 70% OFF · Final price ₹499 onwards'],
   ['gstin', ''],
@@ -376,6 +387,85 @@ function chunk_(list, size) {
   return out;
 }
 
+/* ═══════════════════ 3b. TOKEN (Script Properties me rehta hai) ══════════════ */
+
+/** Script Properties — yahin TOKEN aur SHEET_ID rehte hain (code paste se nahi mitte). */
+function props_() {
+  try {
+    return PropertiesService.getScriptProperties();
+  } catch (error) {
+    return null;
+  }
+}
+
+/**
+ * Asli token = Script Properties `TOKEN`, warna code wali `var TOKEN`.
+ * Public placeholder ('CHANGE-ME-liksha-token') **token hi nahi** maana jaata —
+ * wo public repo me likha hai, usse koi bhi sheet me likh paata.
+ */
+function effectiveToken_() {
+  var fromProps = '';
+  var store = props_();
+  if (store) {
+    try {
+      fromProps = String(store.getProperty('TOKEN') || '').trim();
+    } catch (error) {}
+  }
+  var fromCode = String((typeof TOKEN === 'string' && TOKEN) || '').trim();
+  var token = fromProps || fromCode;
+  if (!token || token === TOKEN_PLACEHOLDER) return '';
+  return token;
+}
+
+/** Token match hua? Token set hi nahi → false (protected action kabhi nahi chalega). */
+function tokenOk_(given) {
+  var token = effectiveToken_();
+  if (!token) return false;
+  return String(given === null || given === undefined ? '' : given) === token;
+}
+
+/** Token error ke saath insaano layak FIX — owner khud theek kar sakta hai. */
+function tokenFix_() {
+  if (!effectiveToken_()) {
+    return 'Script ka TOKEN set nahi hai. Browser me kholiye: <webapp URL>?action=set_token&token=<Vercel ke GOOGLE_SHEETS_TOKEN ki value>';
+  }
+  return 'Vercel ka GOOGLE_SHEETS_TOKEN aur script ka token same hone chahiye. Badalna ho: <webapp URL>?action=set_token&token=<nayi value>&old=<abhi wali value>';
+}
+
+/**
+ * `set_token` — naya token Script Properties me save karo (ek baar ka setup).
+ * Safety: token pehle se set hai to sirf `old` match karne par hi badalta hai.
+ * Fresh install (placeholder/unset) par sahi value wala koi bhi set kar sakta hai —
+ * warna setup hi kabhi shuru nahi hoga.
+ */
+function setToken_(next, old) {
+  var token = String(next || '').trim();
+  if (token.length < 20) return { ok: false, error: 'token kam se kam 20 character ka hona chahiye' };
+  if (token === TOKEN_PLACEHOLDER) {
+    return { ok: false, error: 'ye public placeholder hai — apna random token daaliye (terminal me: openssl rand -hex 24)' };
+  }
+  var current = effectiveToken_();
+  if (current && String(old || '') !== current) {
+    return { ok: false, error: 'token pehle se set hai — badalne ke liye old=<abhi wali value> bhi bhejiye' };
+  }
+  var store = props_();
+  if (!store) return { ok: false, error: 'Script Properties available nahi' };
+  store.setProperty('TOKEN', token);
+  return {
+    ok: true,
+    tokenSet: true,
+    tokenLength: token.length,
+    note: 'Token Script Properties me save — code dobara paste karne par bhi nahi tootega. Vercel ka GOOGLE_SHEETS_TOKEN bhi yahi hona chahiye.',
+  };
+}
+
+/** Bina token ke dikhne layak settings keys (admin_url/support_email jaisi private cheezein nahi). */
+var PUBLIC_SETTING_KEYS = [
+  'store_name', 'announcement', 'support_phone', 'phone', 'whatsapp', 'whatsapp_number',
+  'upi_id', 'upi_name', 'gstin', 'free_shipping', 'order_prefix', 'prepaid_only',
+  'support_hours', 'return_window_days', 'instagram',
+];
+
 /* ═══════════════════════════ 4. SHEET ACCESS ════════════════════════════════ */
 
 /**
@@ -389,43 +479,42 @@ function chunk_(list, size) {
  * `typeof` ka use: agar `SPREADSHEET_ID` line delete ho jaye to crash na ho.
  */
 function book_() {
-  var id = (typeof SPREADSHEET_ID === 'string' && SPREADSHEET_ID) || SHEET_ID_FALLBACK;
-  var props = null;
-  try {
-    props = PropertiesService.getScriptProperties();
-    if (props && props.getProperty('SHEET_ID')) id = props.getProperty('SHEET_ID');
-  } catch (error) {
-    props = null;
+  var store = props_();
+  var id = '';
+  if (store) {
+    try {
+      id = String(store.getProperty('SHEET_ID') || '').trim();
+    } catch (error) {}
   }
+  if (!id) id = (typeof SPREADSHEET_ID === 'string' && SPREADSHEET_ID) || SHEET_ID_FALLBACK || '';
+
   if (id) {
     try {
       return SpreadsheetApp.openById(id);
     } catch (error) {
-      // is account ko is sheet par access nahi — neeche apni sheet bana lenge
+      // is account ko configured sheet par access nahi — neeche bound sheet try hoti hai
       Logger.log('book_: "' + id + '" khul nahi rahi (' + error.message + ')');
     }
   }
 
-  var active = null;
+  // Script kisi sheet ke andar se bani hai (Extensions → Apps Script) → wahi use karo
   try {
-    active = SpreadsheetApp.getActiveSpreadsheet();
+    var active = SpreadsheetApp.getActiveSpreadsheet();
+    if (active) return active;
   } catch (ignored) {}
-  if (active) return active;
 
   /**
-   * Kuch bhi nahi khula → **apni sheet khud bana lo** (jo account script chala raha
-   * hai usi ke Drive me). Owner ke saath yahi problem thi: sheet doosre account ki
-   * thi aur "You do not have permission to access the requested document" aata tha.
-   * Ab script apni sheet bana kar usme likhti hai — koi sharing ki zaroorat nahi.
+   * R38: chup-chaap nayi sheet **kabhi nahi** banate. Purana behaviour
+   * (`SpreadsheetApp.create` fallback) owner ke orders ek anaath sheet me daal
+   * deta tha — website par sab "ok" dikhta, sheet khaali rehti. Ab loud error:
+   * `?action=health` aur `doctor` fix bataate hain. Nayi sheet chahiye to
+   * `createOwnSheet` **jaan-boojh kar** chalaiye.
    */
-  var created = SpreadsheetApp.create('Designer Clothing — Store (website data)');
-  if (props) {
-    try {
-      props.setProperty('SHEET_ID', created.getId());
-    } catch (ignored) {}
-  }
-  Logger.log('book_: nayi sheet ban gayi → ' + created.getUrl());
-  return created;
+  throw new Error(
+    'sheet_access_denied — na configured sheet khuli, na script kisi sheet se bound hai. FIX: ' +
+    'apni sheet → Share → ' + (executingEmail_() || 'script ke account') + ' → Editor, ' +
+    'ya script apni sheet se banaiye (Sheet → Extensions → Apps Script) aur ?action=adopt kholiye.',
+  );
 }
 
 /**
@@ -511,8 +600,8 @@ function doctor() {
     version: CODE_VERSION,
     time: istNow_(),
     account: executingEmail_(),
-    tokenSet: Boolean(TOKEN) && TOKEN !== 'CHANGE-ME-liksha-token',
-    tokenLength: String(TOKEN || '').length,
+    tokenSet: Boolean(effectiveToken_()),
+    tokenLength: effectiveToken_().length,
     sheetId: (typeof SPREADSHEET_ID === 'string' && SPREADSHEET_ID) || SHEET_ID_FALLBACK,
     sheetAccess: false,
     sheetName: '',
@@ -542,35 +631,10 @@ function doctor() {
       report.problems.push('Tabs/settings padhne me dikkat: ' + (error && error.message ? error.message : error) + ' → `setup` chalaiye');
     }
   }
-  if (!report.tokenSet) report.problems.push('TOKEN default par hai — apna lamba token daal kar Vercel me bhi wahi daaliye');
+  if (!report.tokenSet) report.problems.push('TOKEN set nahi hai — browser me ?action=set_token&token=<Vercel GOOGLE_SHEETS_TOKEN> kholiye');
   if (!report.problems.length) report.problems.push('koi problem nahi mili ✔');
   Logger.log(JSON.stringify(report, null, 2));
   return report;
-}
-
-/**
- * Owner-facing functions ko saaf error ke saath chalane wala wrapper.
- *
- * Kyun: "You do not have permission to access the requested document" jaisi
- * Google ki error samajhna mushkil hoti hai. Ye wrapper usko seedha FIX me
- * badal deta hai — Apps Script ke **Execution log** me padhne layak.
- */
-function guard_(name, fn) {
-  try {
-    return fn();
-  } catch (error) {
-    var message = String(error && error.message ? error.message : error);
-    var fix = /permission|access|document/i.test(message)
-      ? 'FIX: Sheet kholein → Share → ' + (executingEmail_() || 'jo account script chala raha hai') +
-        ' → Editor → Send. (Script isi account se chal rahi hai, sheet doosre account ki hai.)'
-      : 'Detail ke liye function `doctor` chalaiye (log me poora report aayega).';
-    Logger.log('❌ ' + name + ' fail hua: ' + message);
-    Logger.log('👉 ' + fix);
-    try {
-      book_().toast(name + ' fail: ' + fix, name, 10);
-    } catch (ignored) {}
-    throw new Error(name + ' fail: ' + message + ' — ' + fix);
-  }
 }
 
 /**
@@ -1638,7 +1702,7 @@ function seedDemoData_() {
       row: {
         Timestamp: iso, Event: 'order.placed', 'Order number': orderNumber,
         'Order status': 'placed', 'Payment status': 'pending', 'Payment method': 'prepaid',
-        'Payment reference': '', 'UPI ID': 'dhakadgourav@fam', Total: total, Subtotal: subtotal,
+        'Payment reference': '', 'UPI ID': '', Total: total, Subtotal: subtotal,
         Discount: discount, Coupon: discount ? 'DEMO50' : '', Items: qty + secondQty,
         'Item details': itemDetails, Customer: customer.name, Phone: customer.phone, Email: customer.email,
         Address: customer.address, City: customer.city, State: customer.state, Pincode: customer.pincode,
@@ -1652,7 +1716,7 @@ function seedDemoData_() {
         Timestamp: iso, Event: paid ? 'payment.paid' : 'payment.pending', 'Order number': orderNumber,
         'Order status': status, 'Payment status': paymentStatus, 'Payment method': 'prepaid',
         'Payment reference': paid ? 'UTRDEMO' + (900000 + index) : '',
-        'UPI ID': 'dhakadgourav@fam', Total: total, Subtotal: subtotal,
+        'UPI ID': '', Total: total, Subtotal: subtotal,
         Discount: discount, Coupon: discount ? 'DEMO50' : '', Items: qty + secondQty,
         'Item details': itemDetails, Customer: customer.name, Phone: customer.phone, Email: customer.email,
         Address: customer.address, City: customer.city, State: customer.state, Pincode: customer.pincode,
@@ -1687,7 +1751,7 @@ function seedDemoData_() {
       row: {
         Timestamp: iso, Event: 'payment.' + paymentStatus, 'Order number': orderNumber,
         'Order status': status, 'Payment status': paymentStatus, 'Payment method': 'prepaid',
-        'Payment reference': paid ? 'UTRDEMO' + (900000 + index) : '', 'UPI ID': 'dhakadgourav@fam',
+        'Payment reference': paid ? 'UTRDEMO' + (900000 + index) : '', 'UPI ID': '',
         Total: total, Subtotal: subtotal, Discount: discount, Coupon: discount ? 'DEMO50' : '',
         Items: qty + secondQty, 'Item details': itemDetails, Customer: customer.name,
         Phone: customer.phone, Email: customer.email, Address: customer.address, City: customer.city,
@@ -2081,31 +2145,131 @@ function removeTriggers() {
   return true;
 }
 
-/* ═══════════════════════════ 12. HTTP API — doGet ═══════════════════════════ */
+/* ═══════════════════════════ 12. HTTP API — doGet ══════════════════════════ */
 
 /**
- * GET endpoints (sab token ke saath):
- *   ?action=health      → version, sheet ka naam, har tab kitni rows
- *   ?action=ping        → halka jawab (uptime check)
- *   ?action=version     → sirf code version
- *   ?action=settings    → Settings tab ka key/value (default action)
- *   ?action=recent&sheet=Orders&limit=20
- *   ?action=rows&sheet=Messages&limit=50
- *   ?action=search&sheet=Orders&column=Order+number&value=LK-1234
- *   ?action=order&orderNumber=LK-1234   → poora order (items+payments+shipments+invoices)
- *   ?action=stats       → aaj ke orders, revenue, pending, messages
- *   ?action=dashboard   → stats + Dashboard tab refresh
+ * Health report — `?action=health` (token ke bina bhi, browser se khulne layak).
+ *
+ * Public (bina token): version, tokenSet/tokenOk, sheetFound, sheetId, idMatch,
+ * bound, upiSet, problems — diagnose ke liye kaafi, private kuch nahi.
+ * Token match ho to extra: sheet ka naam/URL + tab-wise row counts.
+ */
+function healthReport_(authed) {
+  var report = {
+    ok: true,
+    version: CODE_VERSION,
+    codeVersion: CODE_VERSION,
+    time: now_(),
+    timezone: TIMEZONE,
+    tokenSet: Boolean(effectiveToken_()),
+    tokenOk: Boolean(authed),
+    sheetFound: false,
+    sheetId: '',
+    spreadsheetId: '',
+    idMatch: false,
+    bound: false,
+    boundId: '',
+    upiSet: false,
+    settingsKeys: 0,
+    sheets: [],
+    spreadsheet: '',
+    spreadsheetUrl: '',
+    problems: [],
+  };
+  try {
+    var active = SpreadsheetApp.getActiveSpreadsheet();
+    if (active) {
+      report.bound = true;
+      report.boundId = active.getId();
+    }
+  } catch (ignored) {}
+  try {
+    var book = book_();
+    report.sheetFound = true;
+    report.sheetId = book.getId();
+    // website ka selftest/admin `spreadsheetId` padhta hai — same value dono naam se
+    report.spreadsheetId = report.sheetId;
+    report.idMatch = report.sheetId === ((typeof SPREADSHEET_ID === 'string' && SPREADSHEET_ID) || SHEET_ID_FALLBACK);
+    var settings = readSettings_();
+    report.settingsKeys = Object.keys(settings).length;
+    report.upiSet = Boolean(String(settings.upi_id || '').trim());
+    if (authed) {
+      report.spreadsheet = book.getName();
+      report.spreadsheetUrl = book.getUrl();
+      report.sheets = sheetCounts_();
+    }
+  } catch (error) {
+    report.problems.push('Sheet access nahi: ' + String(error && error.message ? error.message : error));
+  }
+  if (!report.tokenSet) {
+    report.problems.push('TOKEN set nahi — browser me kholiye: <webapp URL>?action=set_token&token=<Vercel GOOGLE_SHEETS_TOKEN>');
+  } else if (!report.tokenOk) {
+    report.problems.push('Ye request ka token script ke token se match nahi hua (website ke writes fail honge — Vercel env aur script same rakhiye)');
+  }
+  if (report.sheetFound && !report.upiSet) {
+    report.problems.push('Settings tab me upi_id khaali hai — website par payment ruk jaayega; apna UPI ID bhariye');
+  }
+  if (!report.problems.length) report.problems.push('sab green ✔');
+  return report;
+}
+
+/**
+ * GET actions:
+ *   public (token nahi):  settings (public keys) · version · ping · health · set_token · adopt(fresh)
+ *   token-gated:          settings (poora) · recent · search · order · timeline · stats ·
+ *                         dashboard · seed · clear-demo · health (poora)
  */
 function doGet(e) {
   var params = (e && e.parameter) || {};
-  if (TOKEN && String(params.token || '') !== TOKEN) {
-    return json_({ ok: false, version: CODE_VERSION, error: 'unauthorized — token match nahi hua' });
+  var action = String(params.action || 'settings');
+  var authed = tokenOk_(params.token);
+
+  // Token ek baar set karne ka URL — safety guard setToken_ ke andar hai.
+  if (action === 'set_token') {
+    return json_(setToken_(params.token, params.old));
   }
-  var action = params.action || 'settings';
+
+  // Script ko apni bound sheet par switch karo (SHEET_ID property) — fresh ya authed.
+  if (action === 'adopt') {
+    if (!authed && effectiveToken_()) {
+      return json_({ ok: false, version: CODE_VERSION, error: 'unauthorized — token match nahi hua', fix: tokenFix_() });
+    }
+    var bound = null;
+    try {
+      bound = SpreadsheetApp.getActiveSpreadsheet();
+    } catch (ignored) {}
+    if (!bound) {
+      return json_({ ok: false, version: CODE_VERSION, error: 'script kisi sheet se bound nahi — Sheet → Extensions → Apps Script se script banaiye, tabhi adopt chalega' });
+    }
+    var store = props_();
+    if (!store) return json_({ ok: false, version: CODE_VERSION, error: 'Script Properties available nahi' });
+    store.setProperty('SHEET_ID', bound.getId());
+    return json_({
+      ok: true,
+      version: CODE_VERSION,
+      adopted: { id: bound.getId(), name: bound.getName(), url: bound.getUrl() },
+      note: 'Ab website isi sheet ko padhegi/usme likhegi.',
+    });
+  }
+
+  /**
+   * Public actions — website ko settings token set hone se pehle bhi padhni hai,
+   * aur owner `?action=health` browser me khol kar khud diagnose kar sakta hai.
+   */
+  var isPublic = action === 'settings' || action === 'version' || action === 'ping' || action === 'health';
+  if (!isPublic && !authed) {
+    return json_({ ok: false, version: CODE_VERSION, error: 'unauthorized — token match nahi hua', fix: tokenFix_() });
+  }
 
   try {
     if (action === 'settings') {
-      return json_({ ok: true, version: CODE_VERSION, settings: readSettings_(), time: now_() });
+      var all = readSettings_();
+      if (authed) return json_({ ok: true, version: CODE_VERSION, settings: all, time: now_() });
+      var pub = {};
+      PUBLIC_SETTING_KEYS.forEach(function (key) {
+        if (all[key] !== undefined) pub[key] = all[key];
+      });
+      return json_({ ok: true, version: CODE_VERSION, settings: pub, public: true, time: now_() });
     }
 
     if (action === 'version') {
@@ -2114,6 +2278,10 @@ function doGet(e) {
 
     if (action === 'ping') {
       return json_({ ok: true, pong: true, version: CODE_VERSION, time: now_() });
+    }
+
+    if (action === 'health') {
+      return json_(healthReport_(authed));
     }
 
     if (action === 'recent' || action === 'rows' || action === 'sheet') {
@@ -2171,22 +2339,6 @@ function doGet(e) {
       return json_({ ok: true, removed: clearDemoData_() });
     }
 
-    if (action === 'health') {
-      var book = book_();
-      return json_({
-        ok: true,
-        version: CODE_VERSION,
-        codeVersion: CODE_VERSION,
-        time: now_(),
-        timezone: TIMEZONE,
-        spreadsheet: book.getName(),
-        spreadsheetId: book.getId(),
-        spreadsheetUrl: book.getUrl(),
-        sheets: sheetCounts_(),
-        settingsKeys: Object.keys(readSettings_()).length,
-      });
-    }
-
     return json_({ ok: false, error: 'unknown action: ' + action });
   } catch (error) {
     logError_('doGet/' + action, error, params);
@@ -2224,8 +2376,8 @@ function doPost(e) {
   } catch (error) {
     return json_({ ok: false, version: CODE_VERSION, error: 'invalid json' });
   }
-  if (TOKEN && String(body.token || '') !== TOKEN) {
-    return json_({ ok: false, version: CODE_VERSION, error: 'unauthorized — token match nahi hua' });
+  if (!tokenOk_(body.token)) {
+    return json_({ ok: false, version: CODE_VERSION, error: 'unauthorized — token match nahi hua', fix: tokenFix_() });
   }
 
   var action = String(body.action || '');

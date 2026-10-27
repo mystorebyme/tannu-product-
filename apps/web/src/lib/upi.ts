@@ -8,7 +8,7 @@
  */
 
 export type UpiTarget = {
-  /** dhakadgourav@fam jaisa VPA */
+  /** `yourstore@upi` jaisa VPA — sheet ke Settings tab (`upi_id`) se aata hai */
   vpa: string;
   /** payee name (UPI app me dikhta hai) */
   name: string;

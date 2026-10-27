@@ -330,7 +330,8 @@ export type StoreSettings = {
 const DEFAULT_SETTINGS: StoreSettings = {
   announcement: "Diwali Sale — Up to 70% OFF · Final price ₹499 onwards",
   freeShipping: true,
-  upiId: "dhakadgourav@fam",
+  /* R38: UPI ka source sheet/admin settings hain — koi hardcoded payee nahi. */
+  upiId: "",
   upiName: "Designer Clothing",
   // GSTIN khaali — owner apna asli number Settings me daalega (fake number kabhi nahi)
   gstin: "",

@@ -49,7 +49,7 @@ test("applySalePricing sets price on product, every size and variant", () => {
 });
 
 test("UPI id validation", () => {
-  assert.equal(normaliseUpiId("dhakadgourav@fam"), "dhakadgourav@fam");
+  assert.equal(normaliseUpiId("teststore@upi"), "teststore@upi");
   assert.equal(normaliseUpiId("  liksha.clothing@okhdfcbank "), "liksha.clothing@okhdfcbank");
   assert.equal(normaliseUpiId("not-a-vpa"), null);
   assert.equal(normaliseUpiId("a@b"), null);
@@ -58,13 +58,13 @@ test("UPI id validation", () => {
 
 test("UPI URI carries amount, payee and order note", () => {
   const uri = buildUpiUri({
-    vpa: "dhakadgourav@fam",
+    vpa: "teststore@upi",
     name: "Designer Clothing",
     amountPaise: 49_900,
     note: "Order LK-ABC123",
   });
   const params = new URLSearchParams(uri.replace("upi://pay?", ""));
-  assert.equal(params.get("pa"), "dhakadgourav@fam");
+  assert.equal(params.get("pa"), "teststore@upi");
   assert.equal(params.get("am"), "499.00");
   assert.equal(params.get("cu"), "INR");
   assert.equal(params.get("tn"), "Order LK-ABC123");
@@ -87,14 +87,14 @@ test("sheet settings parser handles Apps Script shapes", () => {
   const parsed = normaliseSheetSettings({
     ok: true,
     settings: {
-      upi_id: "dhakadgourav@fam",
+      upi_id: "teststore@upi",
       support_phone: "8005900581",
       support_email: "Info.likshaclothing@gmail.com",
       announcement: "Diwali Sale — Flat 70% OFF",
       free_shipping: "yes",
     },
   });
-  assert.equal(parsed?.upiId, "dhakadgourav@fam");
+  assert.equal(parsed?.upiId, "teststore@upi");
   assert.equal(parsed?.supportPhone, "8005900581");
   assert.equal(parsed?.freeShipping, true);
   assert.equal(normaliseSheetSettings({ ok: false }), null);
@@ -125,11 +125,11 @@ test("order sheet row carries payment + tracking details", () => {
       notes: null,
     } as never,
     "payment.paid",
-    { "UPI ID": "dhakadgourav@fam" },
+    { "UPI ID": "teststore@upi" },
   );
   assert.equal(row["Order number"], "LK-ABC123");
   assert.equal(row["Payment reference"], "412345678901");
-  assert.equal(row["UPI ID"], "dhakadgourav@fam");
+  assert.equal(row["UPI ID"], "teststore@upi");
   assert.equal(row["Total"], 499);
   assert.equal(row["AWB"], "AWB123");
   assert.equal(row["Item details"], "Anarkali (S [36]) x1");

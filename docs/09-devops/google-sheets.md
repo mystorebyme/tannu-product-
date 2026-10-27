@@ -33,7 +33,7 @@ ko **Editor** access de diya gaya hai (notification mail bhi gaya hai):
 
 `Settings` tab me ye values pehle se hain: `support_phone` = 8005900581,
 `whatsapp` = 8005900581, `support_email` = Info.likshaclothing@gmail.com,
-`upi_id` = dhakadgourav@fam, `upi_name` = Designer Clothing, `announcement` = Diwali Sale,
+`upi_id` = <owner ka apna UPI ID — **koi default nahi**, sheet me jo bhara wahi site par>, `upi_name` = Designer Clothing, `announcement` = Diwali Sale,
 `free_shipping` = true, `shop_name` = Designer Clothing. `gstin` aur `admin_url` khaali hain —
 owner jise chahe bhar de (khaali = site apni default use karti hai).
 
@@ -81,7 +81,7 @@ sirf server env + admin panel ke `/sheet` screen me.
 | `support_phone` | `8005900581` | footer, contact page, header |
 | `whatsapp` | `8005900581` | WhatsApp buttons (91 lagakar) |
 | `support_email` | `Info.likshaclothing@gmail.com` | footer, contact page, mailto |
-| `upi_id` | `dhakadgourav@fam` | checkout + order page QR |
+| `upi_id` | **owner bharta hai** — R38 se koi code/script default nahi; khaali hai to payment page pause dikhata hai | checkout + order page QR |
 | `upi_name` | `Designer Clothing` | UPI app me payee name |
 | `announcement` | `Diwali Sale — Flat 70% OFF` | top announcement bar |
 | `gstin` | `27AAAAA0000A1Z5` | invoice |
@@ -172,10 +172,11 @@ build command `cd ../.. && npm run build --workspace @liksha/web`, domains
 | Env variable | Status | Kaam |
 | --- | --- | --- |
 | `GOOGLE_SHEETS_WEBAPP_URL` | ✅ set (`script.google.com/macros/s/…/exec`) | Apps Script web app (settings + rows) |
-| `GOOGLE_SHEETS_TOKEN` | ✅ set (encrypted) | Apps Script ka `TOKEN` |
+| `GOOGLE_SHEETS_TOKEN` | ✅ set (encrypted, R38 me rotate) | script ke Script Properties `TOKEN` se match hona chahiye |
 | `SHEET_SELFTEST_KEY` | ✅ set (encrypted) | `/api/sheet-selftest?key=…` debugging |
 | `DATABASE_URL`, `ADMIN_API_TOKEN`, `OTP_TOKEN_SECRET`, `UPI_RETURN_SECRET` | ✅ set | order DB + payment confirm |
-| `STORE_UPI_ID` / `STORE_UPI_NAME` | ✅ `dhakadgourav@fam` / `Designer Clothing` | **sirf fallback** — sheet na chale tab |
+| `STORE_UPI_ID` | ❌ **R38 me production se delete** | UPI sirf sheet (`upi_id`) se aati hai — koi fallback payee nahi |
+| `STORE_UPI_NAME` | ✅ `Designer Clothing` | sirf payee-name fallback (sheet na chale tab) |
 | `GOOGLE_SHEETS_SETTINGS_CSV_URL` | ❌ nahi | optional fallback (~5 min Google cache) — real-time ke liye zaroori nahi |
 | `SHEET_READ_TIMEOUT_MS` / `SHEET_SETTINGS_TTL_MS` | ❌ nahi (default 4000 / 10000) | tuning chahiye tabhi add karein |
 
@@ -233,6 +234,30 @@ reply**. Hamari `liksha-sheets.gs` (version **r37-1**) me wahi aa gaya:
    (`docs/00-overview/apps-script-code.md`) → Deploy → Manage deployments → Edit →
    **New version** → Deploy. (Purane version par status merge chalta hai; `onEdit` wala
    auto-timeline + marked-reply naye version se.)
+
+## 4e. Token, adopt aur diagnostics (R38 — "order sheet me show nahi ho raha" ka permanent ilaaj)
+
+27 Oct 2026 ko jo mila: Vercel ka `GOOGLE_SHEETS_TOKEN` aur script dono par **public
+placeholder** (`CHANGE-ME-…`) tha, UPI ka hardcoded default site par dikhta tha, aur
+sheet access na milne par script **chup-chaap nayi (anaath) sheet** bana kar usme
+likh deti thi — isliye owner ki sheet khaali dikhti thi. R38 me teeno jadein khatam:
+
+| Cheez | Ab kaise hai |
+| --- | --- |
+| Token kahan rehta hai | **Script Properties** (`TOKEN`) — code kitni baar bhi paste ho, token nahi tootta |
+| Token set karna | browser me ek baar: `<webapp URL>?action=set_token&token=<Vercel GOOGLE_SHEETS_TOKEN>` (fresh install par; baad me `old=` bhi chahiye) |
+| Placeholder token | `CHANGE-ME-…` **kabhi authorize nahi hota** (public repo me hai) |
+| Public actions (bina token) | `settings` (public keys ka subset), `health`, `version`, `ping` — website ka UPI read token set hone se pehle bhi chalta hai |
+| Token-gated | `recent/search/order/timeline/stats/dashboard/seed` + saare POST writes |
+| Sheet kaun si | Script Properties `SHEET_ID` → `SPREADSHEET_ID` constant → bound sheet. **Anaath sheet kabhi nahi banti** — access na ho to loud `sheet_access_denied` |
+| Apni sheet par switch | script apni sheet se bound ho to `<webapp URL>?action=adopt` (SHEET_ID property set) |
+| Script ka health | `<webapp URL>?action=health` — version, tokenSet/tokenOk, sheetFound, sheetId, upiSet, problems[] (Hinglish fix) |
+| Website ka health | **`https://designerclothing.fashion/api/sheet-health`** — settings source/age, script health, **last sheet write** ka nateeja, orders store, help[] |
+| Order mirror | append par ek retry (600ms) + har attempt ka result `sheetWriteInfo()` me — sheet-health par dikhta hai |
+| UPI default | **koi nahi** — sheet ka `upi_id` hi site par chalta hai; khaali ho to payment page "settings load nahi ho rahi" dikhata hai |
+
+Owner ke liye 10-second check: `/api/sheet-health` kholiye — `"ok": true` aur
+`help: []` ho to pipeline green hai; warna har line me fix likha hai.
 
 ## 5. Security
 

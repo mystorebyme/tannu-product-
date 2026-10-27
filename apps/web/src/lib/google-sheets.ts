@@ -113,6 +113,23 @@ export function sheetsConfigured(): boolean {
 }
 
 /**
+ * R38: sheet-id verify — neeche wala constant owner ki purani sheet ka hai.
+ * Owner jab apni sheet adopt karta hai (`?action=adopt` ya Extensions → Apps Script
+ * se bound script) to asli id `/api/sheet-health` par dikhti hai; expected id
+ * `SHEET_EXPECTED_ID` env se override ho sakti hai (code redeploy ki zaroorat nahi).
+ */
+export function expectedSheetId(): string {
+  return (process.env.SHEET_EXPECTED_ID ?? "").trim() || EXPECTED_SHEET_ID;
+}
+
+/** Error strings token ko logs/API tak na le jaayein (token query me bhi jaata hai). */
+export function redactSheetSecrets(message: string): string {
+  const token = googleSheetsConfig()?.token;
+  if (!token) return message;
+  return message.split(token).join("[token]");
+}
+
+/**
  * Owner ki **published** Settings CSV (File → Share → Publish to web).
  *
  * Kyun: Apps Script ke bina bhi settings (phone, UPI ID, announcement) sheet se
@@ -464,10 +481,25 @@ export async function readSheetRecent(
   }
 }
 
-/** Sheet me rows append karo. Best-effort — order kabhi isliye fail nahi hota. */
-export async function appendSheetRows(appends: SheetAppend[]): Promise<boolean> {
-  const config = googleSheetsConfig();
-  if (!config || !appends.length) return false;
+export type SheetWriteInfo = {
+  at: number;
+  ok: boolean;
+  sheets: string;
+  error: string | null;
+};
+
+let lastWrite: SheetWriteInfo | null = null;
+
+/** /api/sheet-health + admin ke liye: sheet par last write ka nateeja. */
+export function sheetWriteInfo(): SheetWriteInfo | null {
+  return lastWrite;
+}
+
+/** Ek append attempt — `{ok, error}` (error redacted nahi; wrapper redact karta hai). */
+async function appendSheetRowsOnce(
+  config: { url: string; token: string },
+  appends: SheetAppend[],
+): Promise<{ ok: boolean; error: string | null }> {
   try {
     const response = await fetch(config.url, {
       method: "POST",
@@ -478,41 +510,59 @@ export async function appendSheetRows(appends: SheetAppend[]): Promise<boolean> 
       body: JSON.stringify({ token: config.token, action: "append", rows: appends }),
       signal: AbortSignal.timeout(WRITE_TIMEOUT_MS),
     });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    if (!response.ok) return { ok: false, error: `HTTP ${response.status}` };
     /**
-     * Apps Script kabhi HTTP 200 ke saath `{ok:false, error}` bhi bhejta hai
+     * Apps Script kabhi HTTP 200 ke saath bhi `{ok:false, error}` bhejta hai
      * (galat token, sheet access, ya script me ReferenceError). Pehle hum use
      * success maan lete the — isliye "row nahi aayi" ka pata hi nahi chalta tha.
      */
     const text = await response.text();
-    let payload: { ok?: boolean; written?: number; error?: string } | null = null;
+    type AppendReply = { ok?: boolean; written?: number; error?: string; fix?: string };
+    let payload: AppendReply | null = null;
     try {
-      payload = JSON.parse(text) as { ok?: boolean; written?: number; error?: string };
+      payload = JSON.parse(text) as AppendReply;
     } catch {
       payload = null;
     }
     if (!payload) {
       /**
        * JSON hi nahi aaya = script ne jawab nahi diya (Google ka HTML error page,
-       * ya galat URL). Pehle hum ise success maan lete the — isi wajah se
-       * "sheet mirror: true" dikhta tha jabki sheet me kuch nahi jaata.
+       * ya galat/purana webapp URL). Iska matlab hi "mirror fail" hai.
        */
-      console.warn(
-        `[sheets] append got non-JSON reply (${appends.map((a) => a.sheet).join(",")}) — script ka naya version deploy hua?`,
-      );
-      return false;
+      return {
+        ok: false,
+        error: "non-JSON reply — script ka sahi version deploy hua? URL /exec par khatam hota hai?",
+      };
     }
     if (payload.ok === false) {
-      console.warn(
-        `[sheets] append rejected (${appends.map((a) => a.sheet).join(",")}): ${payload.error ?? "unknown error"}`,
-      );
-      return false;
+      return { ok: false, error: `${payload.error ?? "unknown error"}${payload.fix ? ` (fix: ${payload.fix})` : ""}` };
     }
-    return true;
+    return { ok: true, error: null };
   } catch (error) {
-    console.warn(`[sheets] append failed (${appends.map((a) => a.sheet).join(",")}): ${(error as Error).message}`);
-    return false;
+    return { ok: false, error: (error as Error).message };
   }
+}
+
+/**
+ * Sheet me rows append karo. Best-effort — order kabhi isliye fail nahi hota.
+ *
+ * R38: ek **retry** (600ms baad) — Apps Script cold start / transient network se
+ * mirror chhoot na jaaye. Har attempt ka nateeja `sheetWriteInfo()` me dikhta hai
+ * (`/api/sheet-health` isi se batata hai ki orders sheet me ja rahe hain ya nahi).
+ */
+export async function appendSheetRows(appends: SheetAppend[]): Promise<boolean> {
+  const config = googleSheetsConfig();
+  if (!config || !appends.length) return false;
+  const sheets = [...new Set(appends.map((a) => a.sheet))].join(",");
+  let result = await appendSheetRowsOnce(config, appends);
+  if (!result.ok) {
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    result = await appendSheetRowsOnce(config, appends);
+  }
+  const error = result.error ? redactSheetSecrets(result.error) : null;
+  lastWrite = { at: Date.now(), ok: result.ok, sheets, error };
+  if (!result.ok) console.warn(`[sheets] append failed (${sheets}): ${error}`);
+  return result.ok;
 }
 
 /**
@@ -530,6 +580,15 @@ export type SheetHealth = {
   rows: Record<string, number>;
   ms: number;
   error?: string;
+  /** r38-1 script ke naye fields (purane script par undefined) */
+  version?: string | null;
+  tokenSet?: boolean | null;
+  tokenOk?: boolean | null;
+  sheetFound?: boolean | null;
+  idMatch?: boolean | null;
+  bound?: boolean | null;
+  upiSet?: boolean | null;
+  problems?: string[] | null;
 };
 
 /**
@@ -555,10 +614,18 @@ export async function readSheetHealth(): Promise<SheetHealth | null> {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const payload = (await response.json()) as {
       ok?: boolean;
+      version?: string;
       spreadsheet?: string;
       spreadsheetId?: string;
       spreadsheetUrl?: string;
       sheets?: { name?: string; rows?: number }[];
+      tokenSet?: boolean;
+      tokenOk?: boolean;
+      sheetFound?: boolean;
+      idMatch?: boolean;
+      bound?: boolean;
+      upiSet?: boolean;
+      problems?: string[];
     };
     if (!payload?.ok) throw new Error("script ne ok:false diya");
     const rows: Record<string, number> = {};
@@ -567,14 +634,22 @@ export async function readSheetHealth(): Promise<SheetHealth | null> {
     }
     return {
       ok: true,
-      spreadsheet: payload.spreadsheet ?? null,
-      spreadsheetId: payload.spreadsheetId ?? null,
-      spreadsheetUrl: payload.spreadsheetUrl ?? null,
+      spreadsheet: payload.spreadsheet || null,
+      spreadsheetId: payload.spreadsheetId || null,
+      spreadsheetUrl: payload.spreadsheetUrl || null,
       rows,
       ms: Date.now() - started,
+      version: payload.version ?? null,
+      tokenSet: payload.tokenSet ?? null,
+      tokenOk: payload.tokenOk ?? null,
+      sheetFound: payload.sheetFound ?? null,
+      idMatch: payload.idMatch ?? null,
+      bound: payload.bound ?? null,
+      upiSet: payload.upiSet ?? null,
+      problems: Array.isArray(payload.problems) ? payload.problems : null,
     };
   } catch (error) {
-    return { ok: false, spreadsheet: null, spreadsheetId: null, spreadsheetUrl: null, rows: {}, ms: Date.now() - started, error: (error as Error).message };
+    return { ok: false, spreadsheet: null, spreadsheetId: null, spreadsheetUrl: null, rows: {}, ms: Date.now() - started, error: redactSheetSecrets((error as Error).message) };
   }
 }
 
