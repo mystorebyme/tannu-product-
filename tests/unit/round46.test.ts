@@ -267,7 +267,11 @@ test("R46: coupon checkout me payment ki jagah — review step par", () => {
   assert.match(form, /Have a coupon\?/);
   assert.match(form, /\/api\/coupons\/check\?code=/);
   assert.match(form, /async function applyCoupon\(\): Promise<boolean>/, "submit stale-state se nahi phasta");
-  assert.match(form, /const applied = await applyCoupon\(\);\s*\n\s*if \(!applied\) return;/);
+  // R48: coupon fail par submit abort + reserved WhatsApp tab close
+  assert.match(
+    form,
+    /const applied = await applyCoupon\(\);\s*\n\s*if \(!applied\) \{\s*\n\s*closeReservedWa\(\);\s*\n\s*return;/,
+  );
   assert.match(form, /couponCode: coupon\?\.code \?\? null/, "order POST me couponCode");
   assert.match(form, /data-testid="summary-discount"/, "aside me discount row");
 });

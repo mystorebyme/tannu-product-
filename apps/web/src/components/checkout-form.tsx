@@ -475,6 +475,44 @@ export function CheckoutForm() {
     return whatsappLink(text, wa);
   }
 
+  /**
+   * R48 (owner): WhatsApp bhejne ka reliable tarika — customer ke tap (user
+   * gesture) par ek blank tab **synchronously** reserve karo. Order API ke await
+   * ke BAAD window.open mobile browsers par popup-block ho jaata tha, isliye
+   * order ki detail owner ke WhatsApp par nahi pahunchti thi. Number sheet se
+   * (`whatsapp` setting) — number khali ho to koi tab nahi (order phir bhi banta
+   * hai, step 3 ka button bhi dikhta nahi — R45 rule).
+   */
+  function reserveWhatsAppTab(): Window | null {
+    if (typeof window === "undefined") return null;
+    if (!whatsappNumber(whatsapp)) return null;
+    try {
+      const reserved = window.open("", "_blank");
+      if (!reserved) return null; // browser ne phir bhi block kiya — step 3 button fallback hai
+      try {
+        reserved.document.title = "Designer Clothing";
+        reserved.document.body.innerHTML =
+          "<p style=\"font-family:sans-serif;padding:24px\">Placing your order… WhatsApp will open here in a moment.</p>";
+      } catch {
+        /* blank tab saj na paya to chalega — link thodi der me bhar denge */
+      }
+      return reserved;
+    } catch {
+      return null;
+    }
+  }
+
+  /** R48: reserved tab me poori detail waala wa.me link bharo. True = WhatsApp khul gaya. */
+  function openInReservedTab(reserved: Window | null, href: string): boolean {
+    if (!href || !reserved || reserved.closed) return false;
+    try {
+      reserved.location.href = href;
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   /** R46: coupon Apply — validation sheet ke Coupons tab se (server-side). True = coupon lag gaya. */
   async function applyCoupon(): Promise<boolean> {
     const code = couponInput.trim().toUpperCase();
@@ -588,13 +626,29 @@ export function CheckoutForm() {
       setError("Please check your delivery pincode first — we only ship to verified pincodes.");
       return;
     }
+    /* R48 (owner): "2nd step jo continue aata ahi uski jgha whatshap pr send kre
+     * detail" — WhatsApp ka tab customer ke tap par hi reserve kar lo (kisi await
+     * se pehle — uske baad mobile browsers popup block kar dete hain). Order
+     * number aate hi poori detail waala wa.me link isi tab me bhar denge. */
+    const reservedWa = reserveWhatsAppTab();
+    const closeReservedWa = () => {
+      try {
+        if (reservedWa && !reservedWa.closed) reservedWa.close();
+      } catch {
+        /* tab band na ho saka to koi baat nahi */
+      }
+    };
     // coupon input me code likha hai par Apply nahi dabaya — khud check kar lein
     if (couponInput.trim() && !coupon) {
       const applied = await applyCoupon();
-      if (!applied) return; // message coupon-status par dikh gaya
+      if (!applied) {
+        closeReservedWa();
+        return; // message coupon-status par dikh gaya
+      }
     }
     if (!pinStatus.ok) {
       setError(pinStatus.message);
+      closeReservedWa();
       return;
     }
     setError(null);
@@ -606,6 +660,7 @@ export function CheckoutForm() {
      * nahi ho sakta. Customer ko clearly batate hain aur live store par bhejte hain.
      */
     if (!API_AVAILABLE) {
+      closeReservedWa();
       setFallbackReason("preview");
       setFallbackHref(liveStoreCheckoutUrl());
       return;
@@ -630,6 +685,7 @@ export function CheckoutForm() {
       );
 
       if (!result.data?.orderNumber) {
+        closeReservedWa();
         const message =
           result.data?.error ?? result.error ?? "Your order could not be placed. Please check your details and try again.";
         setError(message);
@@ -647,6 +703,10 @@ export function CheckoutForm() {
        */
       const waHref = placedWhatsAppHref(result.data.orderNumber);
       setPlacedWaHref(waHref || null);
+      /* R48: step 2 ke tap se hi poori order detail owner ke WhatsApp (sheet wale
+       * number) par — reserved tab me wa.me bharo. Tab reserve nahi hua tha to
+       * goToPlaced wala window.open + step 3 ka button fallback hain. */
+      const waSent = openInReservedTab(reservedWa, waHref);
       /**
        * Snapshot pehle save — `clear()` ke baad bhi step 3 se "back" par
        * review dikh sake (owner rule, R33). Koi payment detail isme nahi jaati.
@@ -683,10 +743,12 @@ export function CheckoutForm() {
       setCouponMsg(null);
       /**
        * Step 3 (R46) — order placed + WhatsApp confirmation, checkout ke andar hi.
-       * WhatsApp turant kholne ki koshish hoti hai; block hua to button dikhta hai.
+       * R48: WhatsApp reserved tab se pehle hi khul chuka ho to dobara mat kholo
+       * (do tab na ban jaayein); warna purana window.open attempt + step 3 button.
        */
-      goToPlaced(result.data.orderNumber, waHref || undefined);
+      goToPlaced(result.data.orderNumber, waSent ? undefined : waHref || undefined);
     } catch (error) {
+      closeReservedWa();
       console.warn("order submit failed", error);
       setError("Your order could not be completed. Please try again, or send your order to us on WhatsApp — our team will confirm it right away.");
       setFallbackReason("failed");
@@ -1294,14 +1356,15 @@ export function CheckoutForm() {
           </>
         ) : resumed ? (
           <>
-            {/* Resumed (already placed) — continue to confirmation step */}
+            {/* Resumed (already placed) — R48 (owner): step 2 ka "Continue" ab
+                seedha WhatsApp par poori detail bhejta hai (label bhi wahi) */}
             <button
               type="button"
               onClick={() => goToPlaced(resumed.orderNumber, placedWhatsAppHref(resumed.orderNumber))}
               data-testid="review-continue-payment"
               className="mt-4 w-full bg-[#862222] py-3 text-[11.5px] font-semibold tracking-[.16em] text-white uppercase"
             >
-              Continue · {formatPrice(shownTotal)}
+              Send order on WhatsApp · {formatPrice(shownTotal)}
             </button>
             <p className="mt-2 text-center text-[10.5px] leading-relaxed text-[#8a8078]">
               Order <strong className="text-[#862222]">{resumed.orderNumber}</strong> has already been
@@ -1334,6 +1397,11 @@ export function CheckoutForm() {
             >
               ← Edit delivery details
             </button>
+            {/* R48 (owner): customer ko saaf dikhe — button WhatsApp kholta hai poori detail ke saath */}
+            <p className="mt-2 text-center text-[10.5px] leading-relaxed text-[#8a8078]" data-testid="checkout-whatsapp-note">
+              WhatsApp will open with your complete order details — everything you filled in and
+              every item you bought — so our team can confirm it right away.
+            </p>
           </>
         )}
         <p className="mt-2 text-center text-[10.5px] leading-relaxed text-[#8a8078]">
