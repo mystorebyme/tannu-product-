@@ -31,6 +31,9 @@ async function handleGet(request: Request) {
         upiName: settings.upiName,
         supportPhone: settings.supportPhone,
         whatsapp: settings.whatsapp,
+        // R44: delivery estimate sheet se — UI ko exact values chahiye
+        deliveryEstimateDays: settings.deliveryEstimateDays,
+        deliveryEstimateText: settings.deliveryEstimateText,
         updatedAt: settings.updatedAt,
         source: configured ? "google-sheet" : "admin",
       },

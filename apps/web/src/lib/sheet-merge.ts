@@ -215,7 +215,7 @@ function mergeSheetWins(order: Order, sheet: SheetTracking): Order {
    */
   const audit: AuditEntry[] = sheet.updates
     .filter((update) => update?.at)
-    .map((update) => {
+    .map((update): AuditEntry | null => {
       const event = String(update.event ?? "");
       if (event === "order.admin_note" || event === "order.owner_note") {
         return {
@@ -242,13 +242,18 @@ function mergeSheetWins(order: Order, sheet: SheetTracking): Order {
           meta: { note: update.message || undefined, event },
         };
       }
+      // R44: row ka status khaali hai (payment-only ya note-only sheet edit) →
+      // stage entry banti hi nahi; pehle fallback "placed" se galat entry aati thi.
+      const rowStatus = sheetStatusToOrderStatus(update.status);
+      if (!rowStatus) return null;
       return {
         at: update.at,
         actor: "sheet" as const,
-        action: `order.status.${sheetStatusToOrderStatus(update.status) ?? "placed"}`,
+        action: `order.status.${rowStatus}`,
         meta: { note: update.message || undefined, event: event || undefined },
       };
     })
+    .filter((entry): entry is AuditEntry => entry !== null)
     .reverse(); // trackingUpdates newest-first expect karta hai
 
   const courier = sheet.courier || order.tracking?.courier || null;

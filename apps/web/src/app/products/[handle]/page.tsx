@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ProductDetail } from "@/components/product-detail";
 import { ProductReviews, Stars } from "@/components/product-reviews";
-import { reviewsFor } from "@/lib/reviews";
+import { liveReviewBlock } from "@/lib/reviews-sheet";
 import { ProductGrid } from "@/components/product-card";
 import { colourOptionsFor, getProduct, getRelatedProducts, products } from "@/lib/store";
 import { categoryHref, categoryLabel } from "@/lib/categories";
@@ -65,8 +65,13 @@ export default async function ProductPage({
   const { handle } = await params;
   const product = await getProduct(handle);
   if (!product) notFound();
-  const [related, colours] = await Promise.all([getRelatedProducts(product, 4), colourOptionsFor(product)]);
-  const reviewBlock = reviewsFor(product.handle);
+  // R44: reviews sheet ke Reviews tab se live (approve hote hi dikhte hain,
+  // row delete hote hi gayab) — sheet down ho to purane baked reviews.
+  const [related, colours, reviewBlock] = await Promise.all([
+    getRelatedProducts(product, 4),
+    colourOptionsFor(product),
+    liveReviewBlock(product.handle),
+  ]);
 
   const jsonLd = {
     "@context": "https://schema.org",

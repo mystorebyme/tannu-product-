@@ -70,7 +70,12 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
     : null;
   const order = dbOrder ? mergeSheetTracking(dbOrder, sheet) : dbOrder;
 
-  const etaLabel = estimatedDelivery(order.createdAt);
+  // R44: delivery estimate sheet se (Settings tab: delivery_estimate_days /
+  // delivery_estimate_text) — owner badle, site par turant laagu.
+  const etaLabel = estimatedDelivery(order.createdAt, {
+    days: settings.deliveryEstimateDays,
+    text: settings.deliveryEstimateText,
+  });
   /** 5 step + har step ki asli date + cancelled/returned handle (lib/tracking.ts) */
   const { steps, stopped } = trackingSteps(order);
   const updates = trackingUpdates(order);

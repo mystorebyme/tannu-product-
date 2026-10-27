@@ -62,7 +62,9 @@ export function isRepresentative(product: Product, groups: Record<string, Colour
 }
 
 export function listed<T extends Product>(list: T[], groups: Record<string, ColourGroup> = colourGroups): T[] {
-  return list.filter((product) => isRepresentative(product, groups));
+  // R44: hidden products (sheet Status=hidden — jaise ₹0.10 test product) listings
+  // me kabhi nahi; direct link (getProduct) par khulte hain.
+  return list.filter((product) => !product.hidden && isRepresentative(product, groups));
 }
 
 export function colourGroupFor(product: Product, groups: Record<string, ColourGroup> = colourGroups): ColourGroup | null {
@@ -221,6 +223,7 @@ function allSearchPhrases(all: Product[], collectionList: Collection[]): string[
   const fabrics = new Set<string>();
   const categories = new Set<string>();
   for (const product of all) {
+    if (product.hidden) continue; // R44: test/hidden product ke terms typeahead me na aayein
     if (product.color && product.color !== "As Shown") colours.add(product.color.toLowerCase());
     if (product.fabric && product.fabric !== "As Shown") fabrics.add(product.fabric.toLowerCase());
     if (product.category) categories.add(product.category.replace(/-/g, " "));

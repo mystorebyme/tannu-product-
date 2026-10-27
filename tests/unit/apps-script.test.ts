@@ -1099,7 +1099,7 @@ test("R39: browser se plain /exec → HTML control panel (JSON nahi)", () => {
   assert.equal(typeof out.getContent, "function", "HtmlOutput mila");
   const html = out.getContent();
   assert.match(html, /sheet control panel/i);
-  assert.match(html, /r4[23]-1/);
+  assert.match(html, /r4[234]-1/);
   assert.match(html, /Admin Note/);
   assert.match(html, /Waiting for confirmation/);
   assert.match(html, /designerclothing\.fashion/);
@@ -1297,7 +1297,7 @@ test("R42: GET/POST ?action=dropdowns — token ke saath chalta hai, bina token 
 
   const allowed = sandbox.doGet({ parameter: { action: "dropdowns", token: "test-token" } }).getJson();
   assert.equal(allowed.ok, true);
-  assert.equal(allowed.version, "r43-1");
+  assert.equal(allowed.version, "r44-1");
   assert.ok(allowed.applied >= 10, "saare tabs ke columns apply hue");
   assert.ok(orders.validations.length > before, "Orders par validation dobara lagi (idempotent)");
 
@@ -1352,7 +1352,7 @@ test("R43: ?action=catalog — token ke saath Products rows, bina token nahi", (
 
   const reply = sandbox.doGet({ parameter: { action: "catalog", token: "test-token" } }).getJson();
   assert.equal(reply.ok, true);
-  assert.equal(reply.version, "r43-1");
+  assert.equal(reply.version, "r44-1");
   assert.equal(reply.count, 1);
   assert.equal(reply.products[0].Id, "td-9001");
   assert.equal(String(reply.products[0].Title), "Test Anarkali");
@@ -1436,4 +1436,216 @@ test("R43: onEdit — Notes comment aur Payment status edit audit rows banate ha
   assert.equal(String(last[headers.indexOf("Event")]), "order.payment_sheet");
   assert.equal(String(last[headers.indexOf("Payment status")]), "paid");
   assert.equal(String(last[headers.indexOf("Source")]), "sheet-edit");
+});
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * R44 — reviews sheet me (approve hote hi live), product CRUD panel se,
+ * order_set (status + Admin Note comment), message_replied, settings_save GET,
+ * reviews_seed aur naya visual control panel.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+test("R44: reviews — add (Image 1…8), public approved-only, approve hote hi live, delete hote hi gaya", () => {
+  const { sandbox } = loadScript();
+  sandbox.setup();
+
+  // khaali tab → token ke saath empty:true (site is par baked reviews seed karti hai)
+  const emptyTab = sandbox.doGet({ parameter: { action: "reviews", token: "test-token" } }).getJson();
+  assert.equal(emptyTab.ok, true);
+  assert.equal(emptyTab.empty, true);
+
+  const added = sandbox.doPost({
+    postData: {
+      contents: JSON.stringify({
+        token: "test-token", action: "review_add", product: "p-1", handle: "p-1",
+        customer: "Anita", city: "Jaipur", rating: 5, title: "Superb",
+        review: "Fabric bahut accha hai", images: ["https://a/1.webp", "https://a/2.webp"],
+        status: "pending",
+      }),
+    },
+  }).getJson();
+  assert.equal(added.ok, true);
+  assert.equal(added.duplicate, false);
+  assert.ok(String(added.id).startsWith("RV-"), "Review ID bana");
+
+  // public (bina token) → pending nahi dikhta
+  const publicList = sandbox.doGet({ parameter: { action: "reviews" } }).getJson();
+  assert.equal(publicList.ok, true, "reviews public action hai (approved-only)");
+  assert.equal(publicList.approvedOnly, true);
+  assert.equal(publicList.count, 0, "pending review site par nahi");
+
+  // token ke saath → pending dikhta hai, images alag columns se
+  const all = sandbox.doGet({ parameter: { action: "reviews", token: "test-token", status: "pending" } }).getJson();
+  assert.equal(all.count, 1);
+  assert.deepEqual(all.reviews[0].images, ["https://a/1.webp", "https://a/2.webp"]);
+  assert.equal(all.reviews[0].city, "Jaipur");
+
+  // approve (panel ka GET link) → public list me live
+  const approved = sandbox.doGet({ parameter: { action: "review_set", id: added.id, status: "approved", token: "test-token" } }).getJson();
+  assert.equal(approved.ok, true);
+  const publicNow = sandbox.doGet({ parameter: { action: "reviews" } }).getJson();
+  assert.equal(publicNow.count, 1, "approve karte hi live");
+  assert.equal(publicNow.reviews[0].review, "Fabric bahut accha hai");
+
+  // bina token moderation nahi
+  const denied = sandbox.doGet({ parameter: { action: "review_set", id: added.id, status: "approved" } }).getJson();
+  assert.equal(denied.ok, false, "bina token approve nahi");
+
+  // delete → row gayi, site se gaya
+  const deleted = sandbox.doGet({ parameter: { action: "review_delete", id: added.id, token: "test-token" } }).getJson();
+  assert.equal(deleted.ok, true);
+  assert.equal(sandbox.doGet({ parameter: { action: "reviews", token: "test-token" } }).getJson().count, 0);
+});
+
+test("R44: review_update — owner edit karke approve kare (title/review/rating/images)", () => {
+  const { sandbox } = loadScript();
+  sandbox.setup();
+  const added = sandbox.doPost({
+    postData: { contents: JSON.stringify({ token: "test-token", action: "review_add", product: "p-2", handle: "p-2", customer: "Ravi", rating: 3, review: "Theek tha product", status: "pending" }) },
+  }).getJson();
+  const updated = sandbox.doPost({
+    postData: { contents: JSON.stringify({ token: "test-token", action: "review_update", id: added.id, title: "Accha hai", review: "Fabric accha, delivery fast.", rating: 5, images: ["https://b/1.jpg"], status: "approved", actor: "owner" }) },
+  }).getJson();
+  assert.equal(updated.ok, true);
+  const list = sandbox.doGet({ parameter: { action: "reviews" } }).getJson();
+  assert.equal(list.count, 1);
+  assert.equal(list.reviews[0].rating, 5);
+  assert.equal(list.reviews[0].title, "Accha hai");
+  assert.equal(list.reviews[0].review, "Fabric accha, delivery fast.");
+  assert.deepEqual(list.reviews[0].images, ["https://b/1.jpg"]);
+  const badStatus = sandbox.doPost({
+    postData: { contents: JSON.stringify({ token: "test-token", action: "review_update", id: added.id, status: "published" }) },
+  }).getJson();
+  assert.equal(badStatus.ok, false, "galat status reject");
+});
+
+test("R44: reviews_seed — sirf KHAALI tab bharta hai (purane approved reviews), override kabhi nahi", () => {
+  const { sandbox } = loadScript();
+  sandbox.setup();
+  const seedRow = (id: string, handle: string) => ({
+    Timestamp: "2026-10-01", "Review ID": id, Product: handle, Handle: handle, Customer: "Deep",
+    City: "", Rating: 5, Title: "", Review: "Great fabric", Verified: "yes", Status: "approved",
+    "Photo URL": "https://c/1.jpg", "Image 1": "https://c/1.jpg", "Order number": "", Updated: "",
+  });
+  const seeded = sandbox.doPost({
+    postData: { contents: JSON.stringify({ token: "test-token", action: "reviews_seed", reviews: [seedRow("RV-A", "p-1"), seedRow("RV-B", "p-2")] }) },
+  }).getJson();
+  assert.equal(seeded.ok, true);
+  assert.equal(seeded.seeded, 2);
+  const again = sandbox.doPost({
+    postData: { contents: JSON.stringify({ token: "test-token", action: "reviews_seed", reviews: [seedRow("RV-C", "p-3")] }) },
+  }).getJson();
+  assert.equal(again.seeded, 0, "bhare tab par seed skip");
+  assert.equal(again.skipped, true);
+  const list = sandbox.doGet({ parameter: { action: "reviews" } }).getJson();
+  assert.equal(list.count, 2);
+  assert.deepEqual(list.reviews.find((row: { handle: string }) => row.handle === "p-1").images, ["https://c/1.jpg"]);
+});
+
+test("R44: product_upsert/delete — naya product add, update me sirf bheje fields badlein (form fallback)", () => {
+  const { sandbox } = loadScript();
+  sandbox.setup();
+
+  const added = sandbox.doPost({
+    postData: { contents: JSON.stringify({ token: "test-token", action: "product_upsert", id: "new-suit", title: "New Suit", price: 0.1, images: ["https://d/1.webp", "https://d/2.webp"], category: "anarkali", status: "hidden" }) },
+  }).getJson();
+  assert.equal(added.ok, true);
+  assert.equal(added.mode, "add");
+  let catalog = sandbox.doGet({ parameter: { action: "catalog", token: "test-token" } }).getJson();
+  let row = catalog.products.find((item: { Id: string }) => item.Id === "new-suit");
+  assert.equal(String(row.Title), "New Suit");
+  assert.equal(Number(row.Price), 0.1);
+  assert.equal(String(row["Main image"]), "https://d/1.webp", "pehli image main");
+  assert.equal(String(row.Images), "https://d/2.webp");
+  assert.equal(String(row.Status), "hidden");
+
+  // panel ka urlencoded form (JSON nahi) — e.parameter fallback; khaali fields wipe na karein
+  const form = new URLSearchParams({ action: "product_upsert", token: "test-token", id: "new-suit", price: "0.5", title: "", images: "", category: "" }).toString();
+  const updated = sandbox.doPost({
+    postData: { contents: form },
+    parameter: Object.fromEntries(new URLSearchParams(form)),
+  }).getJson();
+  assert.equal(updated.ok, true);
+  assert.equal(updated.mode, "update");
+  catalog = sandbox.doGet({ parameter: { action: "catalog", token: "test-token" } }).getJson();
+  row = catalog.products.find((item: { Id: string }) => item.Id === "new-suit");
+  assert.equal(Number(row.Price), 0.5);
+  assert.equal(String(row.Title), "New Suit", "khaali form field se title wipe nahi hua");
+  assert.equal(String(row["Main image"]), "https://d/1.webp", "images safe");
+
+  const deleted = sandbox.doGet({ parameter: { action: "product_delete", id: "new-suit", token: "test-token" } }).getJson();
+  assert.equal(deleted.ok, true, "delete token ke saath");
+  catalog = sandbox.doGet({ parameter: { action: "catalog", token: "test-token" } }).getJson();
+  assert.equal(catalog.products.some((item: { Id: string }) => item.Id === "new-suit"), false, "row delete → product gaya");
+
+  const bad = sandbox.doPost({ postData: { contents: JSON.stringify({ token: "test-token", action: "product_upsert", id: "x" }) } }).getJson();
+  assert.equal(bad.ok, false, "naya product bina title/price nahi");
+});
+
+test("R44: order_set — status+comment → order.status_sheet + Admin Note; comment-only → order.admin_note", () => {
+  const { sandbox, sheets } = loadScript();
+  sandbox.setup();
+  const orders = sheets.find((sheet) => sheet.getName() === "Orders")!;
+  const headers = orders.getRange(1, 1, 1, 30).getValues()[0].map(String);
+
+  const withStatus = sandbox.doGet({
+    parameter: { action: "order_set", orderNumber: "LK-P1", status: "confirmed", adminNote: "Payment verify ho gaya — parcel kal niklega", token: "test-token" },
+  }).getJson();
+  assert.equal(withStatus.ok, true);
+  let rows = orders.getRange(2, 1, orders.getLastRow() - 1, 30).getValues();
+  let last = rows[rows.length - 1];
+  assert.equal(String(last[headers.indexOf("Event")]), "order.status_sheet");
+  assert.equal(String(last[headers.indexOf("Order status")]), "confirmed");
+  assert.equal(String(last[headers.indexOf("Admin Note")]), "Payment verify ho gaya — parcel kal niklega");
+
+  const noteOnly = sandbox.doGet({
+    parameter: { action: "order_set", orderNumber: "LK-P1", adminNote: "Gift wrap kar dena", token: "test-token" },
+  }).getJson();
+  assert.equal(noteOnly.ok, true);
+  rows = orders.getRange(2, 1, orders.getLastRow() - 1, 30).getValues();
+  last = rows[rows.length - 1];
+  assert.equal(String(last[headers.indexOf("Event")]), "order.admin_note", "comment-only edit status row nahi banta");
+  assert.equal(String(last[headers.indexOf("Admin Note")]), "Gift wrap kar dena");
+
+  const denied = sandbox.doGet({ parameter: { action: "order_set", orderNumber: "LK-P1", status: "confirmed" } }).getJson();
+  assert.equal(denied.ok, false, "bina token order update nahi");
+});
+
+test("R44: message_replied + settings_save GET + visual panel sections", () => {
+  const { sandbox, sheets } = loadScript();
+  sandbox.setup();
+  sandbox.appendRows_([
+    { sheet: "Messages", row: { Timestamp: "2026-10-27 10:00", Name: "Pooja", Phone: "9800000000", Message: "Stock me hai?", Status: "new", Replied: "no", "Message ID": "MSG-1" } },
+  ]);
+  const replied = sandbox.doGet({ parameter: { action: "message_replied", id: "MSG-1", token: "test-token" } }).getJson();
+  assert.equal(replied.ok, true);
+  const messages = sheets.find((sheet) => sheet.getName() === "Messages")!;
+  const msgHeaders = messages.getRange(1, 1, 1, 20).getValues()[0].map(String);
+  const msgRow = messages.getRange(2, 1, 1, msgHeaders.length).getValues()[0];
+  assert.equal(String(msgRow[msgHeaders.indexOf("Replied")]), "yes");
+  assert.equal(String(msgRow[msgHeaders.indexOf("Status")]), "replied");
+
+  const saved = sandbox.doGet({ parameter: { action: "settings_save", delivery_estimate_days: "4", delivery_estimate_text: "Diwali tak delivery", token: "test-token" } }).getJson();
+  assert.equal(saved.ok, true);
+  const authedSettings = sandbox.doGet({ parameter: { action: "settings", token: "test-token" } }).getJson();
+  assert.equal(String(authedSettings.settings.delivery_estimate_days), "4");
+  const publicSettings = sandbox.doGet({ parameter: { action: "settings" } }).getJson();
+  assert.equal(String(publicSettings.settings.delivery_estimate_days), "4", "delivery estimate public keys me hai");
+  assert.equal(String(publicSettings.settings.delivery_estimate_text), "Diwali tak delivery");
+
+  // pending review panel par dikhe
+  sandbox.doPost({
+    postData: { contents: JSON.stringify({ token: "test-token", action: "review_add", product: "p-9", handle: "p-9", customer: "Meena", rating: 4, review: "Colour photo jaisa hi tha", status: "pending" }) },
+  });
+  const out = sandbox.doGet({ parameter: {} }) as { getContent: () => string };
+  const html = out.getContent();
+  assert.match(html, /Orders — status \+ comment/);
+  assert.match(html, /Products — add \/ edit \/ delete/);
+  assert.match(html, /Reviews — approve karo/);
+  assert.match(html, /Messages — naye message/);
+  assert.match(html, /Settings — delivery estimate/);
+  assert.match(html, /value="product_upsert"/);
+  assert.match(html, /value="order_set"/);
+  assert.match(html, /name="delivery_estimate_days"/);
+  assert.match(html, /Colour photo jaisa hi tha/, "pending review panel par dikhta hai");
+  assert.match(html, /action=review_set/, "approve link");
 });

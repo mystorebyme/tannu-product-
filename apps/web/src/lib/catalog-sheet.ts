@@ -270,7 +270,8 @@ export function catalogSeedRows(products: Product[] = base.products): SheetProdu
     Sizes: product.sizes.join("|"),
     "In stock": product.inStock ? "yes" : "no",
     Featured: product.featured ? "yes" : "no",
-    Status: "active",
+    // R44: hidden test product sheet me bhi hidden hi seed ho (visitors ko na dikhe)
+    Status: product.hidden ? "hidden" : "active",
     // cell limit (script 20k par truncate karta hai) se pehle khud chhota kar lo
     Description: (product.description ?? "").slice(0, 8_000),
     Source: "site",

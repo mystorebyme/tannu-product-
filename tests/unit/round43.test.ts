@@ -153,17 +153,25 @@ test("R43: price/image/title override — sheet jeetti hai, base ka baaki data s
   assert.equal(merged.meta.productCount, 1);
 });
 
-test("R43: row delete → product site se gaya; hidden → listings se chhupa", () => {
+test("R43: row delete → product site se gaya; hidden → listings se chhupa (R44: flag ke saath catalog me rehta hai)", () => {
   const base = makeCatalog([makeProduct({ handle: "keep" }), makeProduct({ handle: "gone" }), makeProduct({ handle: "hide-me" })]);
   const merged = mergeSheetCatalog(base, [
     { Id: "keep", Status: "active" },
     { Id: "hide-me", Status: "hidden" },
     // "gone" ki row owner ne delete kar di
   ]);
-  const handles = merged.products.map((product) => product.handle);
-  assert.deepEqual(handles, ["keep"]);
+  assert.deepEqual(merged.products.map((product) => product.handle), ["keep", "hide-me"], "row delete → product gaya");
+  const hidden = merged.products.find((product) => product.handle === "hide-me");
+  assert.equal(hidden?.hidden, true, "hidden row → flag (direct link ke liye product bacha rehta hai)");
+  assert.equal(keep(merged).length, 1, "listings me sirf visible");
   assert.equal(merged.collections[0]!.productCount, 1, "collection count live");
+  assert.equal(merged.meta.productCount, 1, "meta count me hidden nahi");
 });
+
+/** listings = jo hidden nahi (store.ts listed() ka pure equivalent) */
+function keep(catalog: Catalog) {
+  return catalog.products.filter((product) => !product.hidden);
+}
 
 test("R43: nayi row → naya product (sabse upar), title/price zaroori", () => {
   const base = makeCatalog([makeProduct({ handle: "old" })]);
@@ -470,7 +478,7 @@ test("R43: rows me Order JSON ho to compat path bhi snapshot se items/price laut
 
 test("R43: script r43-1 — Products tab, catalog/products_seed actions, onEdit watchers", () => {
   const gs = read("scripts/google-apps-script/liksha-sheets.gs");
-  assert.match(gs, /var CODE_VERSION = 'r43-1';/);
+  assert.match(gs, /var CODE_VERSION = 'r4\d-\d+';/);
   assert.match(gs, /Products: \[\n    'Timestamp', 'Id', 'Title', 'Price'/, "Products HEADERS");
   assert.match(gs, /action === 'catalog' \|\| action === 'products'/, "GET catalog action");
   assert.match(gs, /action === 'products_seed'/, "POST seed action");

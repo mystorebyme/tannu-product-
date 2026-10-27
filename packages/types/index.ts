@@ -50,6 +50,12 @@ export interface Product {
   colourGroup?: string | null;
   /** is product ka colour naam, jaise "Maroon" */
   colourName?: string | null;
+  /**
+   * R44 (owner): sheet me Status=hidden → product listings/search/sitemap se
+   * chhup jaata hai, par direct link se khulta hai (₹0.10 test product isi se
+   * chalta hai — visitors ko kahin nahi dikhta, owner payment test karta hai).
+   */
+  hidden?: boolean;
 }
 
 export interface Collection {

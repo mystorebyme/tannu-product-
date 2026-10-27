@@ -212,22 +212,29 @@ export function mergeSheetCatalog(base: Catalog, rows: SheetProductRow[] | null 
     const id = slugifyHandle(String(row?.Id ?? row?.Handle ?? ""));
     if (!id || seen.has(id)) continue;
     seen.add(id);
-    if (hiddenRow(row)) continue; // owner ne hide kiya → site par nahi
     const existing = byHandle.get(id);
     const product = productFromSheetRow(row, existing);
     if (!product) continue;
-    if (existing) merged.push(product);
-    else fresh.push(product);
+    /**
+     * R44: hidden row ab product ko SITE se hatati nahi — `hidden` flag lagti
+     * hai. Listings/search/sitemap flag dekh kar chhupa dete hain, par direct
+     * link khulta rehta hai (owner ka ₹0.10 payment-test product isi se chalta
+     * hai: "vo kisi user ya visiter ko nhai dikhe … link se buy kre").
+     */
+    const flagged: Product = { ...product, hidden: hiddenRow(row) || undefined };
+    if (existing) merged.push(flagged);
+    else fresh.push(flagged);
   }
 
   // Sheet me jo base-products nahi mile (owner ne row delete ki) → site se gaye.
   // Naye products sabse upar (New Arrivals/latest rails me turant dikhein).
   const products = [...fresh, ...merged];
-  if (!products.length) return base; // sheet me sirf hidden/galat rows — site khaali na ho
+  if (!products.some((product) => !product.hidden)) return base; // sheet me sirf hidden/galat rows — site khaali na ho
 
   // Colour groups saaf: gayab handles ke swatch na dikhein; sheet se price/image
   // badla hai to swatch ka data bhi wahi dikhe (PDP colour-switch stale na lage).
-  const alive = new Set(products.map((product) => product.handle));
+  // R44: hidden products colour-swatch group me bhi nahi (visitors ko kahin na dikhein)
+  const alive = new Set(products.filter((product) => !product.hidden).map((product) => product.handle));
   const byHandleNow = new Map(products.map((product) => [product.handle, product]));
   const colourGroups: Record<string, ColourGroup> = {};
   for (const [key, group] of Object.entries(base.colourGroups ?? {})) {
@@ -253,14 +260,16 @@ export function mergeSheetCatalog(base: Catalog, rows: SheetProductRow[] | null 
     if (product.colourGroup && !colourGroups[product.colourGroup]) product.colourGroup = null;
   }
 
+  // R44: counts me hidden (test) products nahi gine jaate
+  const visible = products.filter((product) => !product.hidden);
   const collections = base.collections.map((collection) => ({
     ...collection,
-    productCount: products.filter((product) => product.collections.includes(collection.handle)).length,
+    productCount: visible.filter((product) => product.collections.includes(collection.handle)).length,
   }));
 
   return {
     ...base,
-    meta: { ...base.meta, productCount: products.length },
+    meta: { ...base.meta, productCount: visible.length },
     collections,
     colourGroups,
     products,

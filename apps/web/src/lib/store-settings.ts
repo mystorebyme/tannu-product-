@@ -27,6 +27,13 @@ export type StoreSettings = {
   whatsapp: string;
   /** Admin panel ka link (sirf admin/owner ke liye — public API me nahi jaata) */
   adminUrl: string;
+  /**
+   * R44 (owner): "estimated delivery date bi sheet se change honi chiye" —
+   * days = placed + itne din; text bhara ho to wahi exact line dikhti hai.
+   * Dono sheet (Settings tab) se aate hain; na mile to default 6 din.
+   */
+  deliveryEstimateDays: number;
+  deliveryEstimateText: string;
   updatedAt: string;
   updatedBy: string;
 };
@@ -54,6 +61,8 @@ export const DEFAULT_STORE_SETTINGS: StoreSettings = {
   supportEmail: process.env.SELLER_EMAIL ?? "",
   whatsapp: "8005900581",
   adminUrl: process.env.ADMIN_PANEL_URL ?? "",
+  deliveryEstimateDays: 6,
+  deliveryEstimateText: "",
   updatedAt: new Date(0).toISOString(),
   updatedBy: "system",
 };
@@ -85,6 +94,14 @@ export function normalizeStoreSettings(input: unknown): StoreSettings {
     supportEmail: text(raw.supportEmail, base.supportEmail, 120),
     whatsapp: text(raw.whatsapp, base.whatsapp, 16),
     adminUrl: text(raw.adminUrl, base.adminUrl, 200),
+    deliveryEstimateDays:
+      Number.isInteger(raw.deliveryEstimateDays) &&
+      (raw.deliveryEstimateDays as number) >= 1 &&
+      (raw.deliveryEstimateDays as number) <= 30
+        ? (raw.deliveryEstimateDays as number)
+        : base.deliveryEstimateDays,
+    deliveryEstimateText:
+      typeof raw.deliveryEstimateText === "string" ? raw.deliveryEstimateText.trim().slice(0, 120) : base.deliveryEstimateText,
     updatedAt: typeof raw.updatedAt === "string" ? raw.updatedAt : base.updatedAt,
     updatedBy: typeof raw.updatedBy === "string" ? raw.updatedBy : base.updatedBy,
   };
@@ -177,6 +194,9 @@ async function merge(options: { fresh?: boolean }): Promise<StoreSettings> {
         ...(sheet.gstin ? { gstin: sheet.gstin } : {}),
         ...(typeof sheet.freeShipping === "boolean" ? { freeShipping: sheet.freeShipping } : {}),
         ...(sheet.adminUrl ? { adminUrl: sheet.adminUrl } : {}),
+        // R44: delivery estimate sheet se (days ya exact text)
+        ...(typeof sheet.deliveryEstimateDays === "number" ? { deliveryEstimateDays: sheet.deliveryEstimateDays } : {}),
+        ...(sheet.deliveryEstimateText ? { deliveryEstimateText: sheet.deliveryEstimateText } : {}),
         ...(sheet.announcement || sheet.upiId || sheet.supportPhone
           ? { updatedAt: new Date().toISOString(), updatedBy: "google-sheet" }
           : {}),

@@ -788,10 +788,53 @@ const readExtra = (name, key) => {
   }
   if (addedCount) console.log(`admin products added: ${addedCount}`);
 
+
   /* ---------- festive sale pricing (Flat 70% / 60%, final ₹499–₹699) ---------- */
   applySalePricing(products);
   console.log(`sale pricing: ${products.length} products -> ₹${[...new Set(products.map((p) => p.price / 100))].sort((a, b) => a - b).join(" / ₹")}`);
 
+
+  /* ---------- R44: owner ka payment-test product (₹0.10, hidden) ----------
+   * Owner: "ik product isme aisa rkhna jiski price only .1 ho jo testing
+   * purpose ke liye payment ko test kr lu vo kisi user ya visiter ko nhai
+   * dikhe sheet mai uska link hona chiye jo sheet se detailed vieu dekh kr
+   * usko buy kre".
+   * Catalog me `hidden: true` — site ki listings/search/sitemap isse chhupate
+   * hain, direct link khulta hai. Sheet seed me Status=hidden jata hai; uske
+   * baad sheet hi source of truth (owner row badal/delete kar sakta hai).
+   */
+  const TEST_PRODUCT_HANDLE = "test-product-payment";
+  if (!usedHandles.has(TEST_PRODUCT_HANDLE)) {
+    usedHandles.add(TEST_PRODUCT_HANDLE);
+    products.push({
+      handle: TEST_PRODUCT_HANDLE,
+      sourceHandle: TEST_PRODUCT_HANDLE,
+      title: "Test Product — Payment Testing",
+      price: 10,
+      compareAtPrice: null,
+      images: [],
+      collections: [],
+      category: "other",
+      productType: "Store test",
+      fabric: "",
+      color: "",
+      sizes: ["Free Size"],
+      sizePricing: { "Free Size": { price: 10, compareAtPrice: null, available: true } },
+      details: [],
+      description:
+        "Owner ke payment test ke liye ₹0.10 ka product — visitors ko listings ya search me nahi dikhta, sirf direct link se khulta hai.",
+      descriptionHtml:
+        "<p>Owner ke payment test ke liye ₹0.10 ka product — visitors ko listings ya search me nahi dikhta, sirf direct link se khulta hai.</p>",
+      source: "extra",
+      rating: 0,
+      reviewCount: 0,
+      inStock: true,
+      featured: false,
+      publishedAt: new Date().toISOString(),
+      hidden: true,
+    });
+    console.log("test product added: test-product-payment (₹0.10, hidden)");
+  }
   /* ---------- colour grouping: same design, different colours -> one product ---------- */
   const groupMap = new Map();
   for (const product of products) {
@@ -1009,9 +1052,11 @@ const readExtra = (name, key) => {
     if (representative) group.title = representative.title;
   }
 
-  /** listed products: ek group ka sirf representative (cards duplicate na dikhein) */
+  /** listed products: ek group ka sirf representative (cards duplicate na dikhein);
+   *  R44: `hidden` (test product) listings me kabhi nahi */
   const listedProducts = products.filter(
     (product) =>
+      !product.hidden &&
       !hiddenHandles.has(product.handle) &&
       (!product.colourGroup || colourGroups[product.colourGroup]?.handle === product.handle),
   );

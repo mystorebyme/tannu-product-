@@ -325,12 +325,23 @@ export function trackingTimeLabel(iso: string | null | undefined): string {
   });
 }
 
-/** Delivery ka andaaza — placed + 6 din (weekend adjust nahi, simple aur honest) */
-export function estimatedDelivery(createdAt: string): string {
+/**
+ * Delivery ka andaaza — placed + `days` din (default 6; weekend adjust nahi,
+ * simple aur honest). R44 (owner): "estimated delivery date bi sheet se change
+ * honi chiye" — sheet Settings se `days` override ya exact `text` (bhara ho to
+ * wahi line dikhti hai, calculate kuch nahi hota).
+ */
+export function estimatedDelivery(
+  createdAt: string,
+  options: { days?: number; text?: string } = {},
+): string {
+  const text = String(options.text ?? "").trim();
+  if (text) return text;
   const created = new Date(createdAt);
   if (Number.isNaN(created.getTime())) return "";
+  const days = Number.isInteger(options.days) && (options.days as number) >= 1 ? (options.days as number) : 6;
   // ms jod kar + IST me format — server ke UTC date arithmetic se 1-din ki
   // galti (raat 10:30 IST baad ke orders) nahi hoti.
-  const eta = new Date(created.getTime() + 6 * 86_400_000);
+  const eta = new Date(created.getTime() + days * 86_400_000);
   return eta.toLocaleDateString("en-IN", { day: "numeric", month: "long", timeZone: STORE_TIME_ZONE });
 }
