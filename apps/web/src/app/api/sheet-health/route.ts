@@ -1,4 +1,3 @@
-import { dbEnabled } from "@/lib/db";
 import {
   expectedSheetId,
   readSheetHealth,
@@ -6,6 +5,7 @@ import {
   sheetsConfigured,
   type SheetHealth,
 } from "@/lib/google-sheets";
+import { sheetOrderStoreInfo } from "@/lib/orders-sheet";
 import { getStoreSettings, storeSettingsInfo } from "@/lib/store-settings";
 
 export const dynamic = "force-dynamic";
@@ -39,10 +39,11 @@ export async function GET() {
   const configured = sheetsConfigured();
   const started = Date.now();
 
-  const [health, settings, info] = await Promise.all([
+  const [health, settings, info, orderStore] = await Promise.all([
     configured ? scriptHealth() : Promise.resolve(null),
     getStoreSettings().catch(() => null),
     Promise.resolve(storeSettingsInfo()),
+    sheetOrderStoreInfo().catch(() => null),
   ]);
 
   const write = sheetWriteInfo();
@@ -72,8 +73,8 @@ export async function GET() {
   }
   if (health?.ok) {
     const major = Number(/^r(\d+)/.exec(String(health.version ?? ""))?.[1] ?? 0);
-    if (major && major < 39) {
-      help.push(`Script ka purana version chal raha hai (${health.version}) — naya code paste karke Deploy → Manage deployments → ✏️ → New version → Deploy kariye.`);
+    if (major && major < 40) {
+      help.push(`Script ka purana version chal raha hai (${health.version}) — r40-1 paste kariye (docs/00-overview/apps-script-code.md): Deploy → Manage deployments → ✏️ → New version → Deploy. R40 se orders **sheet me hi save hote hain** (Order JSON column) — purane script par order save nahi hoga.`);
     }
     if (health.tokenSet === false) {
       help.push("Script ka TOKEN set nahi — browser me <webapp URL>?action=set_token&token=<Vercel GOOGLE_SHEETS_TOKEN> kholiye.");
@@ -81,10 +82,14 @@ export async function GET() {
       help.push("Vercel ka GOOGLE_SHEETS_TOKEN aur script ka token match nahi kar rahe — dono same rakhiye (set_token URL se).");
     }
     if (health.sheetFound === false) {
-      help.push("Script ko sheet access nahi mili — script apni sheet se banaiye (Sheet → Extensions → Apps Script) ya Share → Editor dijiye.");
+      help.push(
+        health.sheetConfigured === false
+          ? "Script ki sheet (SHEET_ID) set nahi hai — /exec URL browser me kholiye: panel ke form me apni sheet ka URL daal kar 'Sheet set karo' dabaiye (website SHEET_EXPECTED_ID env se khud bhi set kar deti hai)."
+          : "Script ko sheet access nahi mili — sheet → Share → script ke account ko Editor dijiye.",
+      );
     }
-    if (health.spreadsheetId && health.spreadsheetId !== expectedSheetId()) {
-      help.push(`Script doosri sheet pakde hue hai (${health.spreadsheetId}); expected ${expectedSheetId()} — sahi sheet se <webapp URL>?action=adopt kholiye ya SHEET_EXPECTED_ID env update kariye.`);
+    if (expectedSheetId() && health.spreadsheetId && health.spreadsheetId !== expectedSheetId()) {
+      help.push(`Script doosri sheet pakde hue hai (${health.spreadsheetId}); expected ${expectedSheetId()} — /exec panel ke form se sahi sheet URL set kariye (?action=sheet_set&id=…&token=…) ya SHEET_EXPECTED_ID env update kariye.`);
     }
     if (health.upiSet === false) {
       help.push("Sheet ke Settings tab me upi_id khaali hai — website par payment tab tak pause rahega. Apna UPI ID bhariye.");
@@ -99,16 +104,23 @@ export async function GET() {
   if (!settings?.upiId) {
     help.push("Website ke paas abhi koi UPI ID nahi hai (sheet + fallback dono khaali) — payment page 'load nahi ho rahi' dikhata rahega.");
   }
+  /** R40: orders ka store sheet hai — ready na ho to order save hi nahi hoga. */
+  if (orderStore && orderStore.backend === "sheet" && !orderStore.ready) {
+    help.push(`Orders sheet me save nahi ho payenge: ${orderStore.reason} — script r40-1 paste karke New version deploy kariye.`);
+  }
 
   return Response.json(
     {
       ok: help.length === 0,
       time: new Date().toISOString(),
       ms: Date.now() - started,
-      ordersStore: dbEnabled() ? "postgres" : "file",
+      ordersStore: orderStore?.backend ?? "json",
+      sheetOrders: orderStore
+        ? { ready: orderStore.ready, reason: orderStore.reason || null, version: orderStore.version }
+        : null,
       sheet: {
         configured,
-        expectedSheetId: expectedSheetId(),
+        expectedSheetId: expectedSheetId() || null,
         settings: {
           source: info.source,
           ageMs: info.ageMs,
@@ -125,6 +137,7 @@ export async function GET() {
               tokenSet: health.tokenSet ?? null,
               tokenOk: health.tokenOk ?? null,
               sheetFound: health.sheetFound ?? null,
+              sheetConfigured: health.sheetConfigured ?? null,
               sheetId: health.spreadsheetId,
               spreadsheet: health.spreadsheet,
               idMatch: health.idMatch ?? null,

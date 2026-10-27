@@ -67,24 +67,29 @@ try {
   expect("token sahi hai", health.body?.ok === true, JSON.stringify(health.body).slice(0, 160));
 
   if (health.body?.ok === true) {
-    expect("script version 2 hai", health.body.version === 2, String(health.body.version));
+    expect("script version r40+ hai", /^r(\d+)-/.test(String(health.body.version ?? "")) && Number(/^r(\d+)/.exec(String(health.body.version))[1]) >= 40, String(health.body.version));
     expect("Spreadsheet khul raha hai", Boolean(health.body.spreadsheet), health.body.spreadsheet);
     info(`spreadsheet: ${health.body.spreadsheet}`);
     /**
      * Sabse ahem check: script **aapki** sheet pakde hue hai ya kisi copy ko?
      * (25 Oct 2026 ko yahi bug tha — data ek copy me ja raha tha.)
      */
-    const wantedId = (process.argv[4] ?? process.env.EXPECTED_SHEET_ID ?? "1b8DReh2RF5JeOSJeknWmH1KSE1RZgmBjatgkCDS9w_4").trim();
+    // R40: koi hardcoded id nahi — argv/env se do, warna id-check skip (baaki checks chalte rehte hain)
+    const wantedId = (process.argv[4] ?? process.env.EXPECTED_SHEET_ID ?? "").trim();
     if (health.body.spreadsheetId) {
-      const match = health.body.spreadsheetId === wantedId;
-      expect("script sahi sheet pakde hue hai", match, `mila: ${health.body.spreadsheetId} · chahiye: ${wantedId}`);
       info(`sheet id: ${health.body.spreadsheetId}`);
-      if (!match) {
-        console.log("       FIX: Code.gs me `book_()` update kariye (SPREADSHEET_ID pehle),");
-        console.log("            phir Deploy → Manage deployments → ✏️ → New version → Deploy.");
+      if (wantedId) {
+        const match = health.body.spreadsheetId === wantedId;
+        expect("script sahi sheet pakde hue hai", match, `mila: ${health.body.spreadsheetId} · chahiye: ${wantedId}`);
+        if (!match) {
+          console.log("       FIX: /exec panel ke form se sahi sheet URL set kariye (?action=sheet_set&id=…&token=…),");
+          console.log("            ya Vercel ka SHEET_EXPECTED_ID env update kariye (site auto-heal karti hai).");
+        }
+      } else {
+        info("id-check skip — EXPECTED_SHEET_ID (argv[4]/env) diya nahi gaya (R40: koi default id nahi)");
       }
     } else {
-      info("sheet id nahi mila — purana code chal raha hai (book_() update karke New version deploy kariye)");
+      info("sheet id nahi mila — purana code chal raha hai (r40-1 paste karke New version deploy kariye)");
     }
 
     const sheets = Array.isArray(health.body.sheets) ? health.body.sheets : [];

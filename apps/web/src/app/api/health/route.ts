@@ -1,5 +1,6 @@
 import { catalogMeta } from "@/lib/store";
 import { dbEnabled, ensureSchema, query } from "@/lib/db";
+import { ordersBackend } from "@/lib/orders-sheet";
 import { isCloudflareWorkers, isEphemeralStorage } from "@/lib/fs-runtime";
 
 export const dynamic = "force-dynamic";
@@ -35,8 +36,8 @@ export async function GET() {
         commit: (process.env.VERCEL_GIT_COMMIT_SHA ?? "local").slice(0, 7),
         catalogBuiltAt: catalogMeta.builtAt,
         products: catalogMeta.productCount,
-        // orders ka backend: postgres (production) ya json (local dev)
-        ordersStore: dbEnabled() ? "postgres" : "json",
+        // orders ka backend (R40): sheet (production) / postgres / json (local dev)
+        ordersStore: ordersBackend(),
         db,
         dbError,
         /**
@@ -45,8 +46,15 @@ export async function GET() {
          * "memory" ka matlab: orders sirf us isolate me hain (preview only).
          */
         runtime: isCloudflareWorkers() ? "cloudflare-workers" : "node",
-        storage: dbEnabled() ? "postgres" : isEphemeralStorage() ? "memory" : "file",
-        durable: dbEnabled() || !isEphemeralStorage(),
+        storage:
+          ordersBackend() === "sheet"
+            ? "sheet"
+            : ordersBackend() === "postgres"
+              ? "postgres"
+              : isEphemeralStorage()
+                ? "memory"
+                : "file",
+        durable: ordersBackend() !== "json" || !isEphemeralStorage(),
         time: new Date().toISOString(),
       },
     },

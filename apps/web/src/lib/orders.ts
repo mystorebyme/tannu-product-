@@ -13,6 +13,14 @@ import {
 import { runInBackground } from "./background";
 import { dataFile } from "./data-dir";
 import { dbEnabled } from "./db";
+import {
+  nextInvoiceSerialSheet,
+  ordersBackend,
+  persistOrderEvent,
+  readSheetOrder,
+  readSheetOrders,
+  sheetOrdersReady,
+} from "./orders-sheet";
 import { checkPincode } from "./delivery";
 import { canonicalStateName, statesMatch } from "./state-match";
 import { products } from "./store";
@@ -22,10 +30,11 @@ import { cleanAwb, courierTrackingUrl } from "./tracking";
 type StoredOrder = Order;
 
 /**
- * Data backend.
+ * Data backend (R40, owner: "Supabase nahi — only sheet").
  *
- * `DATABASE_URL` set hai to Postgres (production/Render), warna local JSON file
- * (dev + tests). Dono ka behaviour same hai — baaki code ko farq nahi padta.
+ * Priority: `ORDERS_STORE` env force → **sheet** (script r40+ configured ho) →
+ * Postgres (DATABASE_URL) → local JSON (dev/tests). Production me sheet hi
+ * chalti hai — Google Sheet orders ka database hai (`orders-sheet.ts`).
  */
 let lastLoaded: StoredOrder[] = [];
 /** read ke waqt ka snapshot — in-memory array mutate hone se diff kharab na ho */
@@ -64,6 +73,11 @@ async function hydrateOnce() {
 }
 
 async function readAll(): Promise<StoredOrder[]> {
+  if (ordersBackend() === "sheet") {
+    lastLoaded = await readSheetOrders();
+    lastSnapshot = new Map(lastLoaded.map((order) => [order.orderNumber, JSON.stringify(order)]));
+    return lastLoaded;
+  }
   if (dbEnabled()) {
     await hydrateOnce();
     const { loadOrders } = await import("./orders-pg");
@@ -75,6 +89,30 @@ async function readAll(): Promise<StoredOrder[]> {
 }
 
 async function writeAll(orders: StoredOrder[]) {
+  if (ordersBackend() === "sheet") {
+    /**
+     * Sheet = append-only DB: jo order snapshot se badla hai uski nayi event
+     * row (Order JSON ke saath). Event naam audit[0].action se — timeline
+     * sheet par bhi wahi banti hai jo DB mode me banti thi.
+     */
+    for (const order of orders) {
+      const previous = lastSnapshot.get(order.orderNumber);
+      const current = JSON.stringify(order);
+      if (previous === current) continue;
+      const event = order.audit[0]?.action ?? "order.updated";
+      const result = await persistOrderEvent(order, event);
+      if (!result.ok) {
+        throw new OrderError(
+          `Order sheet me save nahi hua (${result.error ?? "unknown"}) — change apply nahi hua. Dobara try kariye.`,
+          502,
+          "sheet_write_failed",
+        );
+      }
+    }
+    lastLoaded = orders;
+    lastSnapshot = new Map(orders.map((order) => [order.orderNumber, JSON.stringify(order)]));
+    return;
+  }
   if (dbEnabled()) {
     const { saveOrders } = await import("./orders-pg");
     await saveOrders(lastSnapshot, orders);
@@ -247,12 +285,30 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
     ],
   };
 
-  /**
-   * Performance: pehle yahan poora ledger padha jaata tha (`readAll`) aur phir
-   * dobara likha jaata tha. Ek order insert karne ke liye poora history load karna
-   * bekaar tha — ab DB mode me seedha ek upsert.
-   */
-  if (dbEnabled()) {
+  const backend = ordersBackend();
+  if (backend === "sheet") {
+    /**
+     * R40: sheet hi DB hai — order **await karke** sheet me save hota hai.
+     * Save fail = order fail (customer ko saaf message + WhatsApp fallback);
+     * aadha-adhura "order ban gaya par sheet me nahi" wala dhokha nahi.
+     */
+    const ready = await sheetOrdersReady();
+    if (!ready.ready) {
+      throw new OrderError(
+        "Order abhi save nahi ho sakta — sheet store ready nahi hai. WhatsApp par order bhej dijiye, team turant confirm karegi.",
+        503,
+        "sheet_store_not_ready",
+      );
+    }
+    const saved = await persistOrderEvent(order, "order.placed", { items: true });
+    if (!saved.ok) {
+      throw new OrderError(
+        "Order sheet me save nahi hua — order nahi bana. Dobara try kariye, ya WhatsApp par order bhej dijiye (team turant confirm karegi).",
+        502,
+        "sheet_write_failed",
+      );
+    }
+  } else if (backend === "postgres") {
     const { saveOrders } = await import("./orders-pg");
     await saveOrders(new Map(), [order]);
   } else {
@@ -263,17 +319,20 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
   lastLoaded = [order, ...lastLoaded];
   lastSnapshot.set(order.orderNumber, JSON.stringify(order));
   /**
-   * Google Sheet rows **background me** jaati hain. Pehle `await` tha, isliye
-   * customer "Place order" ke baad 6-12 second (do Apps Script calls) rukta tha —
-   * ab order turant banta hai aur Sheet rows baad me likhi jaati hain
-   * (Postgres hi source of truth hai, sheet sirf owner ke liye copy).
+   * DB/JSON modes: sheet rows **background me** (mirror copy — order turant
+   * banta tha, sheet baad me bharti thi). Sheet mode me order.placed row
+   * upar await ho chuki hai; sirf Payments-tab ki pending log background me.
    */
   const sheetRow = (event: string) =>
     syncOrderToSheet(order, event).catch((error) =>
       console.warn("[sheets] background sync failed", (error as Error).message),
     );
-  runInBackground(() => sheetRow("order.placed"));
-  runInBackground(() => sheetRow("payment.pending"));
+  if (backend === "sheet") {
+    runInBackground(() => sheetRow("payment.pending"));
+  } else {
+    runInBackground(() => sheetRow("order.placed"));
+    runInBackground(() => sheetRow("payment.pending"));
+  }
   return order;
 }
 
@@ -288,6 +347,9 @@ export async function getOrder(orderNumberValue: string): Promise<Order | undefi
    * karta tha — payment page (step 3) isi wajah se 2-4 second leta tha. Ab DB
    * mode me sirf wahi ek row padhi jaati hai (order_number unique index).
    */
+  if (ordersBackend() === "sheet") {
+    return (await readSheetOrder(wanted)) ?? undefined;
+  }
   if (dbEnabled()) {
     const { loadOrder } = await import("./orders-pg");
     return (await loadOrder(wanted)) ?? undefined;
@@ -339,7 +401,7 @@ export async function updateOrderStatus(
   };
   all[index] = updated;
   await writeAll(all);
-  await syncOrderToSheet(updated, `order.status.${status}`);
+  if (ordersBackend() !== "sheet") await syncOrderToSheet(updated, `order.status.${status}`);
   return updated;
 }
 
@@ -426,8 +488,9 @@ export async function setTracking(
   };
   all[index] = updated;
   await writeAll(all);
-  await syncOrderToSheet(updated, "order.tracking_updated");
-  // Shipments tab — owner ko dispatch list (courier / AWB / status)
+  if (ordersBackend() !== "sheet") await syncOrderToSheet(updated, "order.tracking_updated");
+  // Shipments tab — owner ko dispatch list (courier / AWB / status); sheet mode me bhi
+  
   await syncShipmentToSheet(updated, updated.status).catch((error) =>
     console.warn("[sheets] shipment sync failed", (error as Error).message),
   );
@@ -441,6 +504,14 @@ export async function setTracking(
 type InvoiceSequence = { next: number };
 
 async function nextInvoiceSerial(): Promise<number> {
+  // Sheet mode: serial Invoices tab ki rows se (max trailing digits + 1)
+  if (ordersBackend() === "sheet") {
+    const serial = await nextInvoiceSerialSheet();
+    if (serial === null) {
+      throw new OrderError("Invoice serial sheet se padha nahi ja saka — dobara try kariye.", 502, "sheet_read_failed");
+    }
+    return serial;
+  }
   // DB mode: serials invoices table se aate hain, isliye deploy/restart par number repeat nahi hota
   if (dbEnabled()) {
     const { query } = await import("./db");
@@ -529,7 +600,7 @@ export async function markPaymentPaid(orderNumberValue: string, reference: strin
     ],
   };
   await writeAll(all);
-  await syncOrderToSheet(all[index]!, "payment.paid");
+  if (ordersBackend() !== "sheet") await syncOrderToSheet(all[index]!, "payment.paid");
   return all[index];
 }
 
@@ -642,7 +713,7 @@ export async function claimPayment(
   };
   all[index] = updated;
   await writeAll(all);
-  runInBackground(() => syncOrderToSheet(updated, "payment.claimed"));
+  if (ordersBackend() !== "sheet") runInBackground(() => syncOrderToSheet(updated, "payment.claimed"));
   return updated;
 }
 
@@ -703,7 +774,7 @@ export async function submitPaymentReference(
   };
   all[index] = updated;
   await writeAll(all);
-  if (!alreadySame) await syncOrderToSheet(updated, "payment.reference_submitted");
+  if (!alreadySame && ordersBackend() !== "sheet") await syncOrderToSheet(updated, "payment.reference_submitted");
   return updated;
 }
 
@@ -735,7 +806,7 @@ function writeIdempotency(rows: IdempotencyRecord[]) {
 }
 
 export async function findIdempotentOrder(key: string): Promise<Order | undefined> {
-  if (dbEnabled()) {
+  if (ordersBackend() === "postgres" && dbEnabled()) {
     const { query } = await import("./db");
     const rows = await query<{ order_number: string }>(
       "select order_number from orders where idempotency_key = $1 limit 1",
@@ -748,7 +819,7 @@ export async function findIdempotentOrder(key: string): Promise<Order | undefine
 }
 
 export async function rememberIdempotency(key: string, orderNumberValue: string): Promise<void> {
-  if (dbEnabled()) {
+  if (ordersBackend() === "postgres" && dbEnabled()) {
     const { query } = await import("./db");
     await query("update orders set idempotency_key = $1 where order_number = $2", [key, orderNumberValue]);
     return;
@@ -832,7 +903,7 @@ export async function confirmPayment(
   };
   orders[index] = paidOrder;
   await writeAll(orders);
-  await syncOrderToSheet(paidOrder, input.auto ? "payment.auto_confirmed" : "payment.paid");
+  if (ordersBackend() !== "sheet") await syncOrderToSheet(paidOrder, input.auto ? "payment.auto_confirmed" : "payment.paid");
   return { order: paidOrder, alreadyPaid: false };
 }
 
@@ -878,7 +949,7 @@ export async function reversePayment(
     ],
   };
   await writeAll(orders);
-  await syncOrderToSheet(orders[index]!, "payment.reversed");
+  if (ordersBackend() !== "sheet") await syncOrderToSheet(orders[index]!, "payment.reversed");
   return orders[index]!;
 }
 
@@ -912,7 +983,7 @@ export async function failPayment(
     ],
   };
   await writeAll(orders);
-  await syncOrderToSheet(orders[index]!, "payment.failed");
+  if (ordersBackend() !== "sheet") await syncOrderToSheet(orders[index]!, "payment.failed");
   return orders[index]!;
 }
 

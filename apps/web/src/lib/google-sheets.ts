@@ -68,6 +68,8 @@ function envNumber(name: string, fallback: number): number {
  * value badalta tha, site par kuch nahi hota tha. Timeout env se tunable hai.
  */
 const READ_TIMEOUT_MS = envNumber("SHEET_READ_TIMEOUT_MS", 4_000);
+/** orders-sheet jaise callers ke liye — env se tunable read timeout. */
+export const SHEET_READ_TIMEOUT = READ_TIMEOUT_MS;
 const WRITE_TIMEOUT_MS = 6_000;
 /**
  * Settings kitni der "fresh" maani jaayengi (owner ka sheet edit itni der me live).
@@ -113,13 +115,14 @@ export function sheetsConfigured(): boolean {
 }
 
 /**
- * R38/R39: sheet-id verify — constant owner ki final sheet (27 Oct) ka hai.
- * Owner sheet badle to `?action=adopt` se script apni SHEET_ID property update
- * karta hai aur site ki expected id `SHEET_EXPECTED_ID` env se override ho
- * sakti hai (code redeploy ki zaroorat nahi); asli id `/api/sheet-health` par.
+ * R40 (owner rule): sheet ka id **code me kahin nahi** — sirf Vercel env
+ * `SHEET_EXPECTED_ID`. Ye id (a) verify ke liye hai (script dusri sheet pakde
+ * to sheet-health pakadta hai) aur (b) auto-heal ke liye — script ki SHEET_ID
+ * property khaali mile to site usi env se `sheet_set` kar deti hai. Env khaali
+ * ho to check skip (site phir bhi script ki sheet se hi padhti hai).
  */
 export function expectedSheetId(): string {
-  return (process.env.SHEET_EXPECTED_ID ?? "").trim() || EXPECTED_SHEET_ID;
+  return (process.env.SHEET_EXPECTED_ID ?? "").trim();
 }
 
 /** Error strings token ko logs/API tak na le jaayein (token query me bhi jaata hai). */
@@ -481,6 +484,121 @@ export async function readSheetRecent(
   }
 }
 
+/**
+ * R40: script ka koi bhi GET action (token apne aap judta hai) — orders-sheet
+ * isi se order_state/orders_state/version padhta hai. JSON reply + redaction +
+ * `sheet_not_configured` par ek auto-heal retry.
+ */
+export async function scriptGet<T = Record<string, unknown>>(
+  action: string,
+  params: Record<string, string | number> = {},
+  options: { timeoutMs?: number } = {},
+): Promise<{ ok: true; data: T } | { ok: false; error: string }> {
+  const config = googleSheetsConfig();
+  if (!config) return { ok: false, error: "sheet pipeline configured nahi (GOOGLE_SHEETS_WEBAPP_URL)" };
+  const call = async (): Promise<{ ok: true; data: T } | { ok: false; error: string }> => {
+    try {
+      const endpoint = new URL(config.url);
+      endpoint.searchParams.set("action", action);
+      for (const [key, value] of Object.entries(params)) endpoint.searchParams.set(key, String(value));
+      if (config.token) endpoint.searchParams.set("token", config.token);
+      endpoint.searchParams.set("_ts", String(Date.now()));
+      const response = await fetch(endpoint, {
+        cache: "no-store",
+        headers: sheetHeaders(),
+        signal: AbortSignal.timeout(options.timeoutMs ?? READ_TIMEOUT_MS),
+      });
+      if (!response.ok) return { ok: false, error: `HTTP ${response.status}` };
+      const payload = (await response.json()) as T & { ok?: boolean; error?: string };
+      if (!payload || payload.ok === false) {
+        return { ok: false, error: String((payload as { error?: string } | null)?.error ?? "script ne ok:false diya") };
+      }
+      return { ok: true, data: payload };
+    } catch (error) {
+      return { ok: false, error: (error as Error).message };
+    }
+  };
+  let result = await call();
+  if (!result.ok && /sheet_not_configured/i.test(result.error)) {
+    if (await healSheetConfig()) result = await call();
+  }
+  if (!result.ok) result = { ok: false, error: redactSheetSecrets(result.error) };
+  return result;
+}
+
+/**
+ * Auto-heal: script ki SHEET_ID property khaali hai (fresh paste / property
+ * reset) aur site ke paas `SHEET_EXPECTED_ID` env hai → script ko wahi id
+ * `sheet_set` se de do. 10 minute me ek baar se zyada nahi (loop guard).
+ */
+let lastHealAt = 0;
+export async function healSheetConfig(): Promise<boolean> {
+  const config = googleSheetsConfig();
+  const expected = expectedSheetId();
+  if (!config || !expected) return false;
+  const now = Date.now();
+  if (now - lastHealAt < 10 * 60_000) return false;
+  lastHealAt = now;
+  try {
+    const endpoint = new URL(config.url);
+    endpoint.searchParams.set("action", "sheet_set");
+    endpoint.searchParams.set("id", expected);
+    if (config.token) endpoint.searchParams.set("token", config.token);
+    const response = await fetch(endpoint, {
+      cache: "no-store",
+      headers: sheetHeaders(),
+      signal: AbortSignal.timeout(READ_TIMEOUT_MS),
+    });
+    const payload = (await response.json().catch(() => null)) as { ok?: boolean } | null;
+    const healed = Boolean(payload?.ok);
+    console.info(`[sheets] sheet_set auto-heal ${healed ? "ok" : "fail"} (expected ${expected.slice(0, 8)}…)`);
+    return healed;
+  } catch (error) {
+    console.warn(`[sheets] sheet_set auto-heal error: ${redactSheetSecrets((error as Error).message)}`);
+    return false;
+  }
+}
+
+/** Script ka version (30s cache) — sheet-orders mode r40+ script maangta hai. */
+let versionCache: { at: number; version: string; major: number } | null = null;
+export async function readScriptVersion(): Promise<{ version: string; major: number } | null> {
+  if (versionCache && Date.now() - versionCache.at < 30_000) return versionCache;
+  const result = await scriptGet<{ version?: string }>("version", {}, { timeoutMs: READ_TIMEOUT_MS });
+  if (!result.ok) return versionCache ? { version: versionCache.version, major: versionCache.major } : null;
+  const version = String(result.data.version ?? "");
+  const major = Number(/^r(\d+)/.exec(version)?.[1] ?? 0);
+  versionCache = { at: Date.now(), version, major };
+  return { version, major };
+}
+
+/**
+ * R40: script ka koi bhi POST action (token apne aap judta hai) — messages/
+ * newsletter/manual-invoices sheet mode me isi se likhte hain.
+ */
+export async function scriptPost<T = Record<string, unknown>>(
+  action: string,
+  body: Record<string, unknown> = {},
+): Promise<{ ok: true; data: T } | { ok: false; error: string }> {
+  const config = googleSheetsConfig();
+  if (!config) return { ok: false, error: "sheet pipeline configured nahi (GOOGLE_SHEETS_WEBAPP_URL)" };
+  try {
+    const response = await fetch(config.url, {
+      method: "POST",
+      cache: "no-store",
+      headers: sheetHeaders({ "content-type": "text/plain;charset=utf-8" }),
+      body: JSON.stringify({ token: config.token, action, ...body }),
+      signal: AbortSignal.timeout(WRITE_TIMEOUT_MS),
+    });
+    if (!response.ok) return { ok: false, error: `HTTP ${response.status}` };
+    const payload = (await response.json().catch(() => null)) as (T & { ok?: boolean; error?: string }) | null;
+    if (!payload) return { ok: false, error: "non-JSON reply — script ka sahi version deploy hua?" };
+    if (payload.ok === false) return { ok: false, error: redactSheetSecrets(String(payload.error ?? "unknown")) };
+    return { ok: true, data: payload };
+  } catch (error) {
+    return { ok: false, error: redactSheetSecrets((error as Error).message) };
+  }
+}
+
 export type SheetWriteInfo = {
   at: number;
   ok: boolean;
@@ -555,6 +673,10 @@ export async function appendSheetRows(appends: SheetAppend[]): Promise<boolean> 
   if (!config || !appends.length) return false;
   const sheets = [...new Set(appends.map((a) => a.sheet))].join(",");
   let result = await appendSheetRowsOnce(config, appends);
+  if (!result.ok && /sheet_not_configured/i.test(result.error ?? "")) {
+    // R40: script fresh paste hua, SHEET_ID property khaali — env se set karwa ke retry
+    if (await healSheetConfig()) result = await appendSheetRowsOnce(config, appends);
+  }
   if (!result.ok) {
     await new Promise((resolve) => setTimeout(resolve, 600));
     result = await appendSheetRowsOnce(config, appends);
@@ -565,13 +687,6 @@ export async function appendSheetRows(appends: SheetAppend[]): Promise<boolean> 
   return result.ok;
 }
 
-/**
- * Asli sheet ka id (owner ne jo link diya) — sirf **verify** karne ke liye.
- *
- * Sheet ki id public information hai (owner ka link). Token/URL kabhi yahan nahi.
- */
-/** R39: owner ki FINAL sheet (27 Oct) — script bhi isi id par hai (r39-1). */
-export const EXPECTED_SHEET_ID = "1b8DReh2RF5JeOSJeknWmH1KSE1RZgmBjatgkCDS9w_4";
 
 export type SheetHealth = {
   ok: boolean;
@@ -586,6 +701,7 @@ export type SheetHealth = {
   tokenSet?: boolean | null;
   tokenOk?: boolean | null;
   sheetFound?: boolean | null;
+  sheetConfigured?: boolean | null;
   idMatch?: boolean | null;
   bound?: boolean | null;
   upiSet?: boolean | null;
@@ -607,6 +723,8 @@ export async function readSheetHealth(): Promise<SheetHealth | null> {
     const endpoint = new URL(config.url);
     endpoint.searchParams.set("action", "health");
     if (config.token) endpoint.searchParams.set("token", config.token);
+    const expected = expectedSheetId();
+    if (expected) endpoint.searchParams.set("expected", expected);
     const response = await fetch(endpoint, {
       cache: "no-store",
       headers: sheetHeaders(),
@@ -623,6 +741,7 @@ export async function readSheetHealth(): Promise<SheetHealth | null> {
       tokenSet?: boolean;
       tokenOk?: boolean;
       sheetFound?: boolean;
+      sheetConfigured?: boolean;
       idMatch?: boolean;
       bound?: boolean;
       upiSet?: boolean;
@@ -644,6 +763,7 @@ export async function readSheetHealth(): Promise<SheetHealth | null> {
       tokenSet: payload.tokenSet ?? null,
       tokenOk: payload.tokenOk ?? null,
       sheetFound: payload.sheetFound ?? null,
+      sheetConfigured: payload.sheetConfigured ?? null,
       idMatch: payload.idMatch ?? null,
       bound: payload.bound ?? null,
       upiSet: payload.upiSet ?? null,

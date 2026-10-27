@@ -100,7 +100,7 @@ test("R38-5: /api/sheet-health — public report card, secret-safe", () => {
   assert.match(route, /no-store/, "cache nahi hota");
   assert.match(route, /sheetWriteInfo/, "last write dikhata hai");
   assert.match(route, /expectedSheetId/, "sheet id match batata hai");
-  assert.match(route, /ordersStore: dbEnabled\(\) \? "postgres" : "file"/, "DB kahan chal raha hai — saaf jawab");
+  assert.match(route, /ordersStore: orderStore\?\.backend/, "orders ka store (sheet/postgres/json) — saaf jawab");
   // secret kabhi response me nahi jaana chahiye
   assert.ok(!route.includes("process.env.GOOGLE_SHEETS_TOKEN"), "token route me use hi nahi hota");
   assert.ok(!route.includes("process.env.GOOGLE_SHEETS_WEBAPP_URL"), "webapp URL ka value expose nahi hota");

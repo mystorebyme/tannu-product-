@@ -1,5 +1,11 @@
 # Netlify par poora shift — final step-by-step guide
 
+> **R40 note (27 Oct):** ye guide R40 se **pehle** likhi gayi thi. Ab orders ka DB
+> **sirf Google Sheet** hai (Supabase/`DATABASE_URL` runtime se nikal diya gaya — Vercel se
+> bhi delete). Netlify par shift karein to bhi sheet wale 3 env
+> (`GOOGLE_SHEETS_WEBAPP_URL`, `GOOGLE_SHEETS_TOKEN`, `SHEET_EXPECTED_ID`) hi orders ke
+> liye zaroori hain; neeche jahan-jahan `DATABASE_URL` likha hai wo **optional (dev)** hai.
+
 > **Kya hai ye doc:** Vercel se **Netlify** par shift karne ki **ek hi baar ki poori guide** —
 > doosri site (admin), saari env values, saare functions ka naksha, domain kaise jhulega,
 > aur deploy ke baad kya-kya check karna hai.

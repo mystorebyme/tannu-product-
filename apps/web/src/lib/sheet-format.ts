@@ -151,6 +151,7 @@ export function checkoutEventSheetRow(event: {
 
 /** Contact form ki row ("Messages" tab) */
 export function messageSheetRow(message: {
+  id?: string;
   createdAt: string;
   name: string;
   email: string;
@@ -168,6 +169,10 @@ export function messageSheetRow(message: {
     Subject: message.subject ?? "",
     Message: message.message,
     Status: message.replied ? "replied" : message.handled ? "handled" : "new",
+    Replied: message.replied ? "yes" : "no",
+    "Replied at": message.replied ? message.createdAt : "",
+    // R40: sheet hi store hai — update (replied/handled) isi id se row dhoondhta hai
+    "Message ID": message.id ?? "",
   };
 }
 

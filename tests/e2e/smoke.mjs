@@ -48,9 +48,18 @@ async function main() {
   check("sheet-health 200", sheetHealth.status === 200, `status ${sheetHealth.status}`);
   const sheetBody = JSON.parse(sheetHealth.text);
   check("sheet-health no-store", /no-store/.test(sheetHealth.headers.get("cache-control") ?? ""));
-  check("sheet-health orders store batata hai", ["postgres", "file"].includes(sheetBody.ordersStore), String(sheetBody.ordersStore));
+  // R40: backend enum "sheet" | "postgres" | "json" — sheet jeetta hai jab
+  // GOOGLE_SHEETS_WEBAPP_URL/TOKEN set ho; local parity me sheet env nahi hota.
+  check("sheet-health orders store batata hai", ["postgres", "json", "sheet"].includes(sheetBody.ordersStore), String(sheetBody.ordersStore));
   check("sheet-health help array deta hai", Array.isArray(sheetBody.help));
-  check("sheet-health expectedSheetId deta hai", typeof sheetBody.sheet?.expectedSheetId === "string" && sheetBody.sheet.expectedSheetId.length > 10);
+  // R40: expectedSheetId sirf env (SHEET_EXPECTED_ID) se aata hai — code me koi
+  // hardcoded id nahi. Env absent → null honest hai; present → poora id dikhna chahiye.
+  const expectedId = sheetBody.sheet?.expectedSheetId;
+  check(
+    "sheet-health expectedSheetId deta hai (env se, ya null)",
+    expectedId === null || (typeof expectedId === "string" && expectedId.length > 10),
+    String(expectedId),
+  );
   check("sheet-health secret expose nahi karta", !/script\.google\.com\/macros|GOOGLE_SHEETS_TOKEN=/.test(sheetHealth.text));
 
   const home = await get("/");

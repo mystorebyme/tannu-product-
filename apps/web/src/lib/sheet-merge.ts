@@ -155,3 +155,183 @@ function mergeSheetWins(order: Order, sheet: SheetTracking): Order {
     audit: audit.length ? audit : order.audit,
   };
 }
+
+/* ───────────────────────── R40: sheet hi orders ka DB hai ─────────────────────────
+ * Orders tab = append-only event log; har event row me poora order snapshot
+ * (`Order JSON` column, audit ke bina). Read = latest snapshot + rows se owner
+ * ke live edits ka overlay (upar wale proven merge rules). Ye functions **pure**
+ * hain — network/cache `orders-sheet.ts` me hai.
+ */
+
+export type SheetRow = Record<string, string | number>;
+export type OrderState = { orderNumber: string; json?: string; row?: SheetRow | null; rows?: SheetRow[] | null };
+
+/** row(s) → SheetTracking (merge rules reuse) — owner ke live edits ka overlay. */
+function trackingFromRows(orderNumber: string, rows: SheetRow[]): SheetTracking | null {
+  if (!rows.length) return null;
+  const lastNonEmpty = (column: string): string => {
+    for (let i = rows.length - 1; i >= 0; i -= 1) {
+      const value = String(rows[i]?.[column] ?? "").trim();
+      if (value) return value;
+    }
+    return "";
+  };
+  const updates: SheetTrackingUpdate[] = rows
+    .filter((row) => String(row?.Timestamp ?? "").trim())
+    .map((row) => ({
+      at: toIso(row.Timestamp),
+      status: String(row["Order status"] ?? ""),
+      event: String(row.Event ?? ""),
+      message: String(row.Notes ?? "") || String(row["Admin Note"] ?? ""),
+    }))
+    .reverse(); // newest-first (mergeSheetWins isi order me audit banata hai)
+  const status = lastNonEmpty("Order status");
+  const step = stepOfStatus(status);
+  return {
+    orderNumber,
+    status,
+    step,
+    steps: [],
+    paymentStatus: "",
+    courier: lastNonEmpty("Tracking courier"),
+    awb: lastNonEmpty("AWB"),
+    trackingUrl: lastNonEmpty("Tracking URL"),
+    note: "",
+    adminNote: lastNonEmpty("Admin Note"),
+    updates,
+    readAt: Date.now(),
+  };
+}
+
+const STATUS_STEPS: OrderStatus[] = ["placed", "confirmed", "packed", "shipped", "delivered"];
+function stepOfStatus(status: string): number {
+  const mapped = sheetStatusToOrderStatus(status);
+  return mapped ? Math.max(0, STATUS_STEPS.indexOf(mapped)) : 0;
+}
+
+function toIso(value: unknown): string {
+  if (value instanceof Date) return value.toISOString();
+  const text = String(value ?? "").trim();
+  if (!text) return new Date().toISOString();
+  const parsed = Date.parse(text);
+  return Number.isFinite(parsed) ? new Date(parsed).toISOString() : text;
+}
+
+function rupeesToPaise(value: unknown): number {
+  const num = Number(String(value ?? "").replace(/[^0-9.\-]/g, ""));
+  return Number.isFinite(num) ? Math.round(num * 100) : 0;
+}
+
+/**
+ * r40 se purani rows (JSON column khaali) → human columns se best-effort
+ * Order. Tracking page / admin list chalte rehte hain; items ki price 0 hoti
+ * hai (columns me sirf title/size/qty hota tha) — total sheet ke Total se.
+ */
+export function orderFromSheetRows(orderNumber: string, rows: SheetRow[]): Order | null {
+  const list = rows.length ? rows : [];
+  const latest = list[list.length - 1];
+  if (!latest) return null;
+  const first = list[0] ?? latest;
+  const itemsText = String(latest["Item details"] ?? "");
+  const items = itemsText
+    .split("|")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) => {
+      const match = /^(.*)\s\(([^)]+)\)\sx(\d+)$/.exec(part);
+      return {
+        handle: "",
+        title: match ? match[1]!.trim() : part,
+        image: "",
+        size: match ? match[2]! : "",
+        quantity: match ? Number(match[3]) || 1 : 1,
+        price: 0,
+      };
+    });
+  const status = (sheetStatusToOrderStatus(latest["Order status"]) ?? "placed") as OrderStatus;
+  /** sheet ka koi bhi text → valid PaymentStatus (galat/ khaali = pending) */
+  const payRaw = String(latest["Payment status"] ?? "").trim().toLowerCase();
+  const paymentStatus: Order["paymentStatus"] = ["pending", "processing", "paid", "failed", "refunded"].includes(payRaw)
+    ? (payRaw as Order["paymentStatus"])
+    : "pending";
+  const createdAt = toIso(first.Timestamp ?? latest.Timestamp);
+  const audit: AuditEntry[] = list
+    .filter((row) => String(row?.Timestamp ?? "").trim())
+    .map((row) => ({
+      at: toIso(row.Timestamp),
+      actor: String(row.Source ?? "") === "sheet-edit" ? "sheet" : "system",
+      action: String(row.Event ?? "order.updated"),
+      meta: String(row.Notes ?? "") ? { note: String(row.Notes ?? "") } : undefined,
+    }))
+    .reverse();
+  const courier = String(latest["Tracking courier"] ?? "").trim() || null;
+  const awb = String(latest.AWB ?? "").trim() || null;
+  const url = String(latest["Tracking URL"] ?? "").trim() || null;
+  return {
+    id: orderNumber,
+    orderNumber,
+    createdAt,
+    customerName: String(latest.Customer ?? ""),
+    email: String(latest.Email ?? ""),
+    phone: String(latest.Phone ?? ""),
+    address: String(latest.Address ?? ""),
+    city: String(latest.City ?? ""),
+    state: String(latest.State ?? ""),
+    pincode: String(latest.Pincode ?? ""),
+    notes: String(latest.Notes ?? "") || null,
+    items,
+    subtotal: rupeesToPaise(latest.Subtotal),
+    discount: rupeesToPaise(latest.Discount),
+    shipping: 0,
+    total: rupeesToPaise(latest.Total),
+    couponCode: String(latest.Coupon ?? "") || null,
+    paymentMethod: "prepaid",
+    paymentStatus,
+    payment: {
+      gateway: "sheet",
+      reference: String(latest["Payment reference"] ?? "") || null,
+      amount: rupeesToPaise(latest.Total),
+      status: paymentStatus,
+      createdAt,
+      verifiedAt: null,
+      verifiedBy: null,
+      failureReason: null,
+    },
+    status,
+    tracking:
+      courier || awb || url
+        ? { courier, awb, url, shippedAt: null, deliveredAt: null, updatedAt: createdAt, updatedBy: "sheet" }
+        : undefined,
+    audit,
+  };
+}
+
+/** order_state/orders_state ka ek entry → Order (JSON snapshot + rows overlay). */
+export function parseOrderState(state: OrderState | null | undefined): Order | null {
+  if (!state) return null;
+  const orderNumber = String(state.orderNumber ?? "").trim().toUpperCase();
+  if (!orderNumber) return null;
+  const rows = Array.isArray(state.rows) && state.rows.length
+    ? state.rows
+    : state.row
+      ? [state.row]
+      : [];
+  const json = String(state.json ?? "").trim();
+  let base: Order | null = null;
+  if (json) {
+    try {
+      const parsed = JSON.parse(json) as Order;
+      if (parsed && typeof parsed === "object" && parsed.orderNumber) {
+        base = { ...parsed, orderNumber: String(parsed.orderNumber).toUpperCase() };
+      }
+    } catch {
+      base = null; // snapshot toota → rows se reconstruct
+    }
+  }
+  if (!base) base = orderFromSheetRows(orderNumber, rows);
+  if (!base) return null;
+  // owner ke live sheet edits (status/Admin Note/AWB) — proven merge rules se
+  const overlay = trackingFromRows(orderNumber, rows);
+  return overlay ? mergeSheetTracking(base, overlay) : base;
+}
+
