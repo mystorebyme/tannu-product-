@@ -51,6 +51,7 @@ async function fetchTimeline(orderNumber: string, phone: string): Promise<SheetT
       awb: String(payload.awb ?? ""),
       trackingUrl: String(payload.trackingUrl ?? ""),
       note: String(payload.note ?? ""),
+      adminNote: String(payload.adminNote ?? ""),
       updates: Array.isArray(payload.updates) ? payload.updates : [],
       readAt: Date.now(),
     };

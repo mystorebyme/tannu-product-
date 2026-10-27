@@ -113,10 +113,10 @@ export function sheetsConfigured(): boolean {
 }
 
 /**
- * R38: sheet-id verify — neeche wala constant owner ki purani sheet ka hai.
- * Owner jab apni sheet adopt karta hai (`?action=adopt` ya Extensions → Apps Script
- * se bound script) to asli id `/api/sheet-health` par dikhti hai; expected id
- * `SHEET_EXPECTED_ID` env se override ho sakti hai (code redeploy ki zaroorat nahi).
+ * R38/R39: sheet-id verify — constant owner ki final sheet (27 Oct) ka hai.
+ * Owner sheet badle to `?action=adopt` se script apni SHEET_ID property update
+ * karta hai aur site ki expected id `SHEET_EXPECTED_ID` env se override ho
+ * sakti hai (code redeploy ki zaroorat nahi); asli id `/api/sheet-health` par.
  */
 export function expectedSheetId(): string {
   return (process.env.SHEET_EXPECTED_ID ?? "").trim() || EXPECTED_SHEET_ID;
@@ -570,7 +570,8 @@ export async function appendSheetRows(appends: SheetAppend[]): Promise<boolean> 
  *
  * Sheet ki id public information hai (owner ka link). Token/URL kabhi yahan nahi.
  */
-export const EXPECTED_SHEET_ID = "1k8fsea04WpbrGjiyXuDrrS2Eewt9W7wx9X2lUQc5qMo";
+/** R39: owner ki FINAL sheet (27 Oct) — script bhi isi id par hai (r39-1). */
+export const EXPECTED_SHEET_ID = "1b8DReh2RF5JeOSJeknWmH1KSE1RZgmBjatgkCDS9w_4";
 
 export type SheetHealth = {
   ok: boolean;

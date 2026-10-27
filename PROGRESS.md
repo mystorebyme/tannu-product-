@@ -785,3 +785,45 @@ aur Apps Script aisa chahiye "jisko change krne ki jrurat na pde".
       www + liksha-clothing.vercel.app). Env: `STORE_UPI_ID` delete +
       `GOOGLE_SHEETS_TOKEN` rotate (naya 48-char). Owner TODO: Apps Script r38-1 paste
       → `setup` → New version deploy → `?action=set_token&token=…` → `upi_id` sheet me.
+
+## Round 39 — 27 Oct 2026 (IST timezone + sheet-driven order note + final sheet + env audit)
+
+Owner (live order ke baad, screenshot ke saath): "Placed · 27 Oct, 2:16 am — **yha
+timezone india ka chalna chiye**; timeline ke neeche box me static AWB text ki jagah
+**sheet se kuch bhi likha ja sake**, default **Waiting for confirmation**, har order ke
+liye sheet se change; **final sheet Vercel se live hai — dekh lena**; aur vaha **saare
+secret/variable update** karke verify karna."
+
+- [x] **IST har jagah**: web (`format.ts` `STORE_TIME_ZONE`, `tracking.ts` time-label+ETA,
+      `invoice-pdf.ts`) + admin (`format.ts` dateTime/dateOnly, invoices ×2, products page)
+      — Vercel UTC server par bhi customer/owner ko India time dikhta hai (7:46 IST ka
+      order ab 7:46 am hi hai, 2:16 am nahi).
+- [x] **Admin Note (script r39-1)**: Orders tab me naya column (purani sheet me
+      `ensureHeaders_` apne aap jodta hai) → `timeline_().adminNote` → site note-box
+      (`order-note-box`): sheet text, warna default "Waiting for confirmation"; onEdit
+      Admin Note change ko `order.admin_note` event row banata hai; static AWB waada hata.
+- [x] **/exec control panel**: browser se script kholne par ab JSON ki jagah HTML panel
+      (version/token/sheet/UPI status + problems + website/admin/site-health buttons +
+      Admin Note hint). Website ka `?action=…` JSON contract bilkul nahi badla.
+- [x] **Final sheet** `1b8DReh2RF5JeOSJeknWmH1KSE1RZgmBjatgkCDS9w_4`: `.gs`
+      SPREADSHEET_ID/fallback + site `EXPECTED_SHEET_ID` + selfcheck default + Vercel env
+      `SHEET_EXPECTED_ID` (naya) — live script health ne confirm kiya (sheetFound:true,
+      upiSet:true, lastWrite ok, settings apps-script se).
+- [x] **sheet-health improvements**: version gate r39 (purana script → paste reminder),
+      probe-timeout akela failure nahi (settings+write chal rahe ho to `warnings[]`),
+      anonymous health request par jhootha token-alert nahi (script side fix).
+- [x] **Env audit (owner ka "check krna updated hai ki nhia")**: storefront —
+      GOOGLE_SHEETS_TOKEN rotated (R38) ✓ build me gaya ✓, STORE_UPI_ID deleted ✓,
+      SHEET_EXPECTED_ID added (R39); admin — sab present, STORE/NEXT_PUBLIC URLs
+      designerclothing.fashion ✓; `liksha-admin` ko chheda nahi (R37 rule) — sirf verify.
+- [x] Tests: unit **279/279** (round39: 7 naye + apps-script 2 naye), test:all **338**,
+      typecheck 0, lint web 0 err/**34** warn (3 dead constants + 1 unused import bhi
+      saaf — "every line meaningful"), audit sab A, next + vinext build ✅,
+      Next-prod parity: smoke **111/0** (naya note-box check), payments 61/0,
+      responsive 44/0, breakpoints 48/0, round16 35/0, links 40/0; workerd smoke **111/0**.
+- [x] Docs: `google-sheets.md` §4f + §0 final-sheet note, `live-vercel-supabase.md`
+      (SHEET_EXPECTED_ID row), owner-code-map (4 R39 rows), `apps-script-code.md`
+      (r39-1 export), `owner-report-round39.md`, sheet-setup/setup-steps me final id.
+- [ ] Deploy: PR → merge → Vercel env `SHEET_EXPECTED_ID` → production deploy → verify;
+      owner ka 1 kadam: **r39-1 paste → Deploy → New version** (token Script Properties
+      me safe — set_token dobara nahi karna).

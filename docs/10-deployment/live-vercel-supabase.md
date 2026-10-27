@@ -36,7 +36,8 @@ Monorepo hone ke kaaran install/build repo root se chalta hai (`cd ../..`), outp
 | `STORE_UPI_ID` | ❌ **R38 me delete** — UPI sirf sheet ke `upi_id` se aati hai (koi fallback payee nahi) |
 | `STORE_UPI_NAME` | owner ke UPI account ka naam |
 | `UPI_RETURN_SECRET` | random (UPI return callback signing) |
-| `GOOGLE_SHEETS_WEBAPP_URL` / `GOOGLE_SHEETS_TOKEN` | optional — owner ki sheet settings |
+| `GOOGLE_SHEETS_WEBAPP_URL` / `GOOGLE_SHEETS_TOKEN` | owner ki sheet settings — token R38 me rotate hua (48-char; script me `?action=set_token` se) |
+| `SHEET_EXPECTED_ID` | R39: `1b8DReh2RF5JeOSJeknWmH1KSE1RZgmBjatgkCDS9w_4` — owner ki **final sheet**; `/api/sheet-health` isse `idMatch` verify karta hai. Sheet badle to env update + redeploy (code change nahi) |
 
 ### `liksha-admin`
 

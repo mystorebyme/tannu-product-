@@ -1,4 +1,6 @@
-import type { AuditEntry, Order, OrderStatus } from "@liksha/types";
+import type { AuditEntry, Order } from "@liksha/types";
+
+import { STORE_TIME_ZONE } from "./format";
 
 /**
  * Tracking ka poora customer-facing logic — ek jagah, pure functions me.
@@ -272,7 +274,7 @@ function updateFromAudit(entry: AuditEntry): TrackingUpdate | null {
   return null;
 }
 
-/** Step ke saamne dikhne wali chhoti date — "26 Oct, 6:10 pm" */
+/** Step ke saamne dikhne wali chhoti date — "26 Oct, 6:10 pm" (hamesha IST, R39) */
 export function trackingTimeLabel(iso: string | null | undefined): string {
   if (!iso) return "";
   const date = new Date(iso);
@@ -282,13 +284,16 @@ export function trackingTimeLabel(iso: string | null | undefined): string {
     month: "short",
     hour: "numeric",
     minute: "2-digit",
+    timeZone: STORE_TIME_ZONE,
   });
 }
 
 /** Delivery ka andaaza — placed + 6 din (weekend adjust nahi, simple aur honest) */
 export function estimatedDelivery(createdAt: string): string {
-  const eta = new Date(createdAt);
-  if (Number.isNaN(eta.getTime())) return "";
-  eta.setDate(eta.getDate() + 6);
-  return eta.toLocaleDateString("en-IN", { day: "numeric", month: "long" });
+  const created = new Date(createdAt);
+  if (Number.isNaN(created.getTime())) return "";
+  // ms jod kar + IST me format — server ke UTC date arithmetic se 1-din ki
+  // galti (raat 10:30 IST baad ke orders) nahi hoti.
+  const eta = new Date(created.getTime() + 6 * 86_400_000);
+  return eta.toLocaleDateString("en-IN", { day: "numeric", month: "long", timeZone: STORE_TIME_ZONE });
 }

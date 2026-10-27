@@ -40,10 +40,18 @@ export function imageUrl(src: string | undefined, width = 600): string {
   return `${src}${src.includes("?") ? "&" : "?"}width=${width}`;
 }
 
+/**
+ * R39 (owner): "timezone india ka chalna chiye" — site/admin Vercel par UTC me
+ * render hoti thi (server iad1), isliye subah 7:46 IST ka order "2:16 am"
+ * dikhta tha. Har date formatter isi constant ko `timeZone` me deta hai.
+ */
+export const STORE_TIME_ZONE = "Asia/Kolkata";
+
 export function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-IN", {
     day: "numeric",
     month: "short",
     year: "numeric",
+    timeZone: STORE_TIME_ZONE,
   });
 }

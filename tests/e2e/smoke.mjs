@@ -206,6 +206,11 @@ async function main() {
 
   if (orderBody.orderNumber) {
     const page = await get(`/orders/${orderBody.orderNumber}`);
+    // R39 (owner): AWB se pehle note-box sheet-driven — default "Waiting for confirmation"
+    check(
+      "order page note-box default text dikhata hai",
+      page.text.includes('data-testid="order-note-box"') && page.text.includes("Waiting for confirmation"),
+    );
     check("order page 200", page.status === 200, `status ${page.status}`);
     check("order page shows number", page.text.includes(orderBody.orderNumber));
     check("order page has a tracking timeline", page.text.includes('data-testid="order-tracking"'));

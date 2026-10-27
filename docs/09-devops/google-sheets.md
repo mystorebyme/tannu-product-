@@ -21,13 +21,17 @@ jaye to site chalti rehti hai (sirf owner edits ruk jaate hain) — koi order fa
 
 ## 0. Ready-made sheet (link — owner ke account me already shared)
 
+> **R39 update (27 Oct):** owner ki **FINAL sheet** `1b8DReh2RF5JeOSJeknWmH1KSE1RZgmBjatgkCDS9w_4`
+> hai — script (r39-1) isi ko padhta hai, site isi ko `SHEET_EXPECTED_ID` env se verify
+> karti hai, aur neeche ki setup history me jo id dikhe wo original setup sheet ki hai.
+
 Sheet ban chuki hai, tabs + headers ready hain, aur **`info.likshaclothing@gmail.com`**
 ko **Editor** access de diya gaya hai (notification mail bhi gaya hai):
 
 | Cheez | Value |
 | --- | --- |
 | Sheet ka naam | `Designer Clothing — Store (Orders · Payments · Settings)` |
-| Link | https://docs.google.com/spreadsheets/d/1k8fsea04WpbrGjiyXuDrrS2Eewt9W7wx9X2lUQc5qMo/edit |
+| Link | https://docs.google.com/spreadsheets/d/1b8DReh2RF5JeOSJeknWmH1KSE1RZgmBjatgkCDS9w_4/edit |
 | Tabs | `Settings` (10 keys bhare hue), `Orders` (25 columns), `Payments` (25 columns), `Messages` (7), `Newsletter` (2), `Checkout` (8) |
 | Access | owner ka email = Editor · "Anyone with link" = **off** (customer data protect) |
 
@@ -258,6 +262,23 @@ likh deti thi — isliye owner ki sheet khaali dikhti thi. R38 me teeno jadein k
 
 Owner ke liye 10-second check: `/api/sheet-health` kholiye — `"ok": true` aur
 `help: []` ho to pipeline green hai; warna har line me fix likha hai.
+
+## 4f. India timezone, Admin Note aur /exec control panel (R39)
+
+Owner (27 Oct, live order ke baad): \"Placed · 27 Oct, 2:16 am — yha timezone india ka
+chalna chiye\" (order 7:46 IST ka tha; Vercel UTC me render karta tha), aur timeline ke
+neeche wala static AWB box \"**sheet se** likha ja sake — default Waiting for
+confirmation, har order ke liye alag\".
+
+| Cheez | Ab kaise hai |
+| --- | --- |
+| Timezone | Site + admin ke **har** date formatter me `timeZone: "Asia/Kolkata"` pin — server kahin bhi ho, customer/owner ko IST dikhta hai (ETA bhi IST math se) |
+| Per-order message | Orders tab ka **`Admin Note`** column (script r39-1 purani sheet me column apne aap jod deta hai) → `?action=timeline` ke `adminNote` me → order page ke note-box (`order-note-box`) me, ~2s me live |
+| Default text | Admin Note khaali → **\"Waiting for confirmation\"** (static AWB waada hata diya) |
+| onEdit | Admin Note edit hote hi Orders me `order.admin_note` event row — timeline me bhi dikhta hai |
+| `/exec` browser se | action ke bina kholne par ab **HTML control panel**: version, token/sheet/UPI status, problems, buttons (website/admin/site-health) + Admin Note ka hint. Website ka JSON contract (`?action=…`) bilkul nahi badla |
+| Final sheet id | code (`EXPECTED_SHEET_ID`, `.gs` `SPREADSHEET_ID`), selfcheck aur Vercel env `SHEET_EXPECTED_ID` — teeno `1b8DReh2…` par; `/api/sheet-health` par `idMatch: true` dikhe |
+| sheet-health | script **r39+** na ho to help me paste reminder; health-probe ka cold-start timeout akela failure nahi (settings + last write chal rahe hain to sirf `warnings[]`) |
 
 ## 5. Security
 

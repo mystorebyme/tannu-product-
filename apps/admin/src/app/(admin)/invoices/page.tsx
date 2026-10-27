@@ -3,7 +3,7 @@ import { getManualInvoices } from "@/lib/data";
 import { createManualInvoiceAction } from "@/app/actions";
 import { invoiceSlug } from "@/lib/invoice-slug";
 import { getSession } from "@/lib/session";
-import { inr } from "@/lib/format";
+import { dateOnly, inr } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -125,7 +125,7 @@ export default async function InvoicesPage() {
                     </Link>
                     <p className="small muted" style={{ margin: "2px 0 0" }}>
                       {invoice.customerName} · {inr(invoice.total)} ·{" "}
-                      {new Date(invoice.createdAt).toLocaleDateString("en-IN")}
+                      {dateOnly(invoice.createdAt)}
                     </p>
                   </li>
                 ))}

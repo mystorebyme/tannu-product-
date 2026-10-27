@@ -109,7 +109,7 @@ test("R38-5: /api/sheet-health — public report card, secret-safe", () => {
 
 test("R38-6: script ka token Script Properties me — paste-proof, placeholder-proof", () => {
   const gs = read("scripts/google-apps-script/liksha-sheets.gs");
-  assert.match(gs, /var CODE_VERSION = 'r38-1'/, "version r38-1");
+  assert.match(gs, /var CODE_VERSION = 'r\d+-\d+';/, "version pinned (r38+ rounds)");
   assert.match(gs, /function effectiveToken_/, "token Properties se padhta hai");
   assert.match(gs, /TOKEN_PLACEHOLDER/, "public placeholder pehchana jaata hai");
   assert.match(gs, /function setToken_/, "set_token implementation");

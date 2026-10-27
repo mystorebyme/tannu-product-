@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getCollections, getProducts } from "@/lib/data";
-import { inr } from "@/lib/format";
+import { dateTime, inr } from "@/lib/format";
 import { publishCatalogAction, saveProductEditAction, toggleProductVisibilityAction } from "@/app/actions";
 import { catalogWritable, mergedProduct, overrideStats } from "@/lib/catalog-admin";
 import { getSession } from "@/lib/session";
@@ -58,7 +58,7 @@ export default async function ProductEditPage({ params }: { params: Promise<{ id
 
       {stats.lastPublishedAt ? (
         <p className="small muted">
-          Last published: {new Date(stats.lastPublishedAt).toLocaleString("en-IN")} · edits pending publish:{" "}
+          Last published: {dateTime(stats.lastPublishedAt)} · edits pending publish:{" "}
           {stats.edited}
         </p>
       ) : null}

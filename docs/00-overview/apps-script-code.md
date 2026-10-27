@@ -83,7 +83,7 @@ Warna purana code hi chalta rehta hai — owner ke saath yahi hua tha.
 
 ---
 
-## Poora code (2420 lines)
+## Poora code (2525 lines)
 
 ```javascript
 /**
@@ -167,17 +167,18 @@ var TOKEN = 'CHANGE-ME-liksha-token';
 var TOKEN_PLACEHOLDER = 'CHANGE-ME-liksha-token';
 
 /** Code ka version — `?action=health` me dikhta hai. Code badle to isse badhaayein. */
-var CODE_VERSION = 'r38-1';
+var CODE_VERSION = 'r39-1';
 
 /**
  * Sheet ka id (URL me `/d/<ID>/edit`).
  * Extensions → Apps Script se banaya ho to ye line zaroori nahi, par standalone
  * script me kaam aati hai. (Neeche fallback bhi hai — delete karne par crash nahi.)
  */
-var SPREADSHEET_ID = '1k8fsea04WpbrGjiyXuDrrS2Eewt9W7wx9X2lUQc5qMo';
+/** Owner ki FINAL sheet (27 Oct) — script isi ko padhta hai; site `SHEET_EXPECTED_ID` env se verify karti hai. */
+var SPREADSHEET_ID = '1b8DReh2RF5JeOSJeknWmH1KSE1RZgmBjatgkCDS9w_4';
 
 /** Safety net — agar upar ki line galti se delete ho jaye. */
-var SHEET_ID_FALLBACK = '1k8fsea04WpbrGjiyXuDrrS2Eewt9W7wx9X2lUQc5qMo';
+var SHEET_ID_FALLBACK = '1b8DReh2RF5JeOSJeknWmH1KSE1RZgmBjatgkCDS9w_4';
 
 /** Sheet ke tab-id (URL me `#gid=…`) — optional, naam badalne par bhi kaam aate hain. */
 var GIDS = {
@@ -227,7 +228,7 @@ var HEADERS = {
     'Timestamp', 'Event', 'Order number', 'Order status', 'Payment status', 'Payment method',
     'Payment reference', 'UPI ID', 'Total', 'Subtotal', 'Discount', 'Coupon', 'Items',
     'Item details', 'Customer', 'Phone', 'Email', 'Address', 'City', 'State', 'Pincode',
-    'Tracking courier', 'AWB', 'Tracking URL', 'Notes', 'Source', 'Device',
+    'Tracking courier', 'AWB', 'Tracking URL', 'Notes', 'Admin Note', 'Source', 'Device',
   ],
   Payments: [
     'Timestamp', 'Event', 'Order number', 'Order status', 'Payment status', 'Payment method',
@@ -288,7 +289,8 @@ var DEFAULT_SETTINGS = [
   ['announcement', 'Diwali Sale — Flat 70% OFF · Final price ₹499 onwards'],
   ['gstin', ''],
   ['free_shipping', 'true'],
-  ['admin_url', ''],
+  ['admin_url', 'https://admin.designerclothing.fashion'],
+  ['store_url', 'https://designerclothing.fashion'],
   ['store_name', 'Designer Clothing'],
   ['order_prefix', 'LK'],
   ['prepaid_only', 'true'],
@@ -1162,6 +1164,7 @@ function timeline_(orderNumber, phone) {
   var awb = '';
   var url = '';
   var note = '';
+  var adminNote = '';
   var updates = [];
   for (var i = 0; i < rows.length; i += 1) {
     var row = rows[i];
@@ -1173,6 +1176,9 @@ function timeline_(orderNumber, phone) {
     if (text_(row.AWB)) awb = text_(row.AWB);
     if (text_(row['Tracking URL'])) url = text_(row['Tracking URL']);
     if (text_(row.Notes)) note = text_(row.Notes);
+    // R39 (owner): Orders ke `Admin Note` column me jo likha hai wahi customer
+    // ke order page ke note-box me dikhta hai (default: Waiting for confirmation).
+    if (text_(row['Admin Note'])) adminNote = text_(row['Admin Note']);
     var event = text_(row.Event);
     var message = text_(row.Notes, 300) || updateMessageFor_(event, text_(row['Order status']));
     updates.push({
@@ -1213,6 +1219,7 @@ function timeline_(orderNumber, phone) {
     awb: awb,
     trackingUrl: url || trackingUrlFor_(courier, awb),
     note: note,
+    adminNote: adminNote,
     updates: updates.slice(-12).reverse(),
     time: now_(),
   };
@@ -2091,6 +2098,31 @@ function onEdit(e) {
       return;
     }
 
+    // R39: owner ne kisi order ka `Admin Note` badla → ek event row aur, taaki
+    // timeline me dikhe aur site ka note-box turant (2s TTL) update ho.
+    if (name === 'Orders' && column === 'Admin Note') {
+      var noteIdCol = head.indexOf('Order number') + 1;
+      var noteOrderNumber = noteIdCol ? text_(tab.getRange(row, noteIdCol).getValue()) : '';
+      var noteText = text_(e.value);
+      if (!noteOrderNumber || !noteText) return;
+      var noteStatusCol = head.indexOf('Order status') + 1;
+      appendRows_([
+        {
+          sheet: 'Orders',
+          row: {
+            Timestamp: now_(),
+            Event: 'order.admin_note',
+            'Order number': noteOrderNumber,
+            'Order status': noteStatusCol ? text_(tab.getRange(row, noteStatusCol).getValue()) : '',
+            'Admin Note': noteText,
+            Notes: noteText,
+            Source: 'sheet-edit',
+          },
+        },
+      ]);
+      return;
+    }
+
     if (name === 'Messages' && column === 'Status') {
       var value = String(e.value || '').trim().toLowerCase();
       var repliedCol = head.indexOf('Replied') + 1;
@@ -2154,7 +2186,7 @@ function removeTriggers() {
  * bound, upiSet, problems — diagnose ke liye kaafi, private kuch nahi.
  * Token match ho to extra: sheet ka naam/URL + tab-wise row counts.
  */
-function healthReport_(authed) {
+function healthReport_(authed, tokenGiven) {
   var report = {
     ok: true,
     version: CODE_VERSION,
@@ -2203,14 +2235,82 @@ function healthReport_(authed) {
   }
   if (!report.tokenSet) {
     report.problems.push('TOKEN set nahi — browser me kholiye: <webapp URL>?action=set_token&token=<Vercel GOOGLE_SHEETS_TOKEN>');
-  } else if (!report.tokenOk) {
+  } else if (!report.tokenOk && tokenGiven) {
     report.problems.push('Ye request ka token script ke token se match nahi hua (website ke writes fail honge — Vercel env aur script same rakhiye)');
+  } else if (!report.tokenOk) {
+    report.problems.push('Ye request anonymous thi (token nahi bheja) — website hamesha token bhejti hai, isliye ye line website ke liye problem nahi');
   }
   if (report.sheetFound && !report.upiSet) {
     report.problems.push('Settings tab me upi_id khaali hai — website par payment ruk jaayega; apna UPI ID bhariye');
   }
   if (!report.problems.length) report.problems.push('sab green ✔');
   return report;
+}
+
+/** HTML escape — panel me sheet/settings se aaya text safe rakho. */
+function esc_(value) {
+  return String(value === null || value === undefined ? '' : value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/**
+ * R39: `/exec` browser me kholne par ek screen me poora sach — version, token,
+ * sheet, UPI, problems + seedhe button (website / admin / sheet). Purana mega
+ * script yahan poora admin dikhata tha; ab admin `admin_url` par hai aur ye
+ * panel sirf script ki sehat dikhata hai (har line ka matlab: diagnose karo).
+ */
+function controlPanel_() {
+  var report = healthReport_(false, false);
+  var settings = {};
+  try {
+    settings = readSettings_();
+  } catch (ignored) {}
+  var storeUrl = String(settings.store_url || 'https://designerclothing.fashion');
+  var adminUrl = String(settings.admin_url || '');
+  var dot = function (good, label, detail) {
+    return (
+      '<div class="row"><span class="dot" style="background:' + (good ? '#22c55e' : '#ef4444') + '"></span>' +
+      '<div><b>' + esc_(label) + '</b><br><span class="muted">' + esc_(detail) + '</span></div></div>'
+    );
+  };
+  var problems = (report.problems || []).map(function (line) {
+    return '<li>' + esc_(line) + '</li>';
+  }).join('');
+  var html = '' +
+    '<!DOCTYPE html><html lang="hi"><head><meta charset="utf-8">' +
+    '<title>Liksha sheet panel · ' + esc_(report.version) + '</title>' +
+    '<style>' +
+    'body{font:14px/1.6 -apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#faf8f5;color:#241d18;margin:0;padding:24px}' +
+    '.card{max-width:560px;margin:0 auto;background:#fff;border:1px solid #e9dfd4;border-radius:12px;padding:20px 22px}' +
+    'h1{font-size:18px;margin:0 0 2px}.sub{color:#8a8078;font-size:12px;margin:0 0 14px}' +
+    '.row{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-top:1px solid #f4efe9}' +
+    '.dot{width:10px;height:10px;border-radius:50%;margin-top:6px;flex:none}' +
+    '.muted{color:#8a8078;font-size:12px;word-break:break-all}' +
+    'ul{margin:8px 0 0;padding-left:18px;color:#8a3a2a;font-size:12.5px}' +
+    '.btns{margin-top:16px;display:flex;flex-wrap:wrap;gap:8px}' +
+    'a.btn{display:inline-block;border:1px solid #862222;color:#862222;text-decoration:none;font-size:12px;font-weight:600;padding:8px 14px;border-radius:8px}' +
+    'a.btn.solid{background:#862222;color:#fff}' +
+    '.hint{margin-top:14px;font-size:12px;color:#5c534b;background:#faf6f0;border:1px dashed #e0d5c8;border-radius:8px;padding:10px 12px}' +
+    '</style></head><body><div class="card">' +
+    '<h1>Liksha Clothing — sheet control panel</h1>' +
+    '<p class="sub">Apps Script ' + esc_(report.version) + ' · ' + esc_(report.time) + ' · timezone ' + esc_(report.timezone) + '</p>' +
+    dot(report.sheetFound, 'Sheet', report.sheetFound ? ('ID ' + esc_(report.sheetId) + (report.idMatch ? ' (expected se match ✔)' : ' (expected se MATCH NAHI — adopt kariye)')) : 'sheet nahi mili — access/URL dekhiye') +
+    dot(report.tokenSet, 'Token (script)', report.tokenSet ? 'set hai ✔ — website wale token se match website ke /api/sheet-health par dikhta hai' : 'set nahi — ?action=set_token&token=… chalaiye') +
+    dot(report.upiSet, 'UPI (sheet Settings)', report.upiSet ? 'upi_id bhara hai ✔ — payment chalu' : 'upi_id khaali — payment page paused rahega') +
+    (report.problems && report.problems.length && report.problems[0] !== 'sab green ✔' ? '<ul>' + problems + '</ul>' : '') +
+    '<div class="btns">' +
+    '<a class="btn solid" href="' + esc_(storeUrl) + '">Website kholo</a>' +
+    (adminUrl ? '<a class="btn" href="' + esc_(adminUrl) + '">Admin panel</a>' : '') +
+    '<a class="btn" href="' + esc_(storeUrl) + '/api/sheet-health">Site ka sheet-health</a>' +
+    '</div>' +
+    '<div class="hint">Order ke liye customer ko message dikhana ho to sheet ke <b>Orders</b> tab me us order ki row ka <b>Admin Note</b> column bhar dijiye — 2 second me order page par dikhega (khaali ho to default “Waiting for confirmation”). Status badalna ho to <b>Order status</b> column edit kariye.</div>' +
+    '</div></body></html>';
+  return HtmlService.createHtmlOutput(html)
+    .setTitle('Liksha sheet panel')
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
 
 /**
@@ -2221,8 +2321,13 @@ function healthReport_(authed) {
  */
 function doGet(e) {
   var params = (e && e.parameter) || {};
-  var action = String(params.action || 'settings');
+  var action = String(params.action || '');
   var authed = tokenOk_(params.token);
+
+  // R39: browser se seedha /exec kholne par JSON nahi — chhota HTML control
+  // panel (status + links). Website hamesha ?action=… bhejti hai, isliye uska
+  // contract (settings/version/health/…) bilkul nahi badla.
+  if (!action) return controlPanel_();
 
   // Token ek baar set karne ka URL — safety guard setToken_ ke andar hai.
   if (action === 'set_token') {
@@ -2281,7 +2386,7 @@ function doGet(e) {
     }
 
     if (action === 'health') {
-      return json_(healthReport_(authed));
+      return json_(healthReport_(authed, Boolean(params.token)));
     }
 
     if (action === 'recent' || action === 'rows' || action === 'sheet') {

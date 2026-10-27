@@ -25,7 +25,7 @@ Code yahan hai: **[`apps-script-code.md`](./apps-script-code.md)** (poora copy k
 
 ## ⚠️ SABSE PEHLE — sheet ka access (yahi asli problem hai)
 
-Aapke sheet (`1k8fsea04…`) **prakashgothwal370@gmail.com** ka hai, par Apps Script
+Aapke sheet (`1b8DReh2…`) **prakashgothwal370@gmail.com** ka hai, par Apps Script
 **prkigothwal@gmail.com** se chal rahi hai. Isi wajah se har function fail ho raha hai:
 
 ```
@@ -131,7 +131,7 @@ var CODE_VERSION = 'r31-1';
 
 5. **`SPREADSHEET_ID` line ko chhedna nahi:**
 ```js
-var SPREADSHEET_ID = '1k8fsea04WpbrGjiyXuDrrS2Eewt9W7wx9X2lUQc5qMo';
+var SPREADSHEET_ID = '1b8DReh2RF5JeOSJeknWmH1KSE1RZgmBjatgkCDS9w_4';
 ```
 (Agar galti se delete ho jaye to bhi script crash nahi hogi — andar fallback id hai.)
 

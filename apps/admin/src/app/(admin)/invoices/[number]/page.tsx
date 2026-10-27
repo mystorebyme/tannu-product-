@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { AutoPrint } from "@/components/auto-print";
 import { getManualInvoice, getSettings } from "@/lib/data";
 import { invoiceFromSlug, invoiceSlug } from "@/lib/invoice-slug";
-import { inr } from "@/lib/format";
+import { inr, STORE_TIME_ZONE } from "@/lib/format";
 import {
   GST_HSN_APPAREL,
   SELLER_STATE,
@@ -97,7 +97,7 @@ export default async function ManualInvoicePage({ params }: { params: Promise<{ 
             <p className="invoice-muted">
               Invoice No: <strong>{invoice.number}</strong>
               <br />
-              Date: {issued.toLocaleDateString("en-IN")}
+              Date: {issued.toLocaleDateString("en-IN", { timeZone: STORE_TIME_ZONE })}
               {invoice.orderRef ? (
                 <>
                   <br />
