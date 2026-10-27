@@ -212,6 +212,28 @@ Wo UPI `/api/orders/<n>/payment-context` se leta hai, jo `getStoreSettingsFast()
 **sheet-first** UPI deta hai — sheet me UPI badalte hi naya order naye VPA par banta hai
 (deploy/restart ki zaroorat nahi).
 
+## 4d. Sheet = order ka DB (R37, trends-sheets.gs pattern)
+
+Owner ki dusri repo (`mystorebyme/manoj-Product` → `scripts/google-apps-script/trends-sheets.gs`)
+ka core idea: **ek sheet tab me hi placed / confirmed / shipped / delivered + replied / marked
+reply**. Hamari `liksha-sheets.gs` (version **r37-1**) me wahi aa gaya:
+
+1. **`onEdit(e)`** (simple trigger, install ki zaroorat nahi):
+   - `Orders` tab ka `Order status` cell badla → nayi timeline row append
+     (`Event = order.status_sheet`) ⇒ site ka timeline + status update.
+   - `Messages` tab ka `Status` me `replied` / `done` / `closed` ⇒ `Replied = YES` +
+     `Replied at` = abhi (marked-reply).
+2. **Store merge** — `lib/sheet-tracking.ts` (`?action=timeline&order=…&phone=…`, 2s TTL + SWR +
+   `?fresh=1`) + `lib/sheet-merge.ts` (pure): sheet ka status/courier/AWB/Tracking URL/note +
+   updates DB ke order par merge hote hain **jab sheet DB se aage ho** (cancel/return hamesha).
+   `paymentStatus` hamesha DB se — paisa sheet se override nahi hota.
+3. **Instant knobs** (Vercel env, store project): `SHEET_READ_TIMEOUT_MS=4000`,
+   `SHEET_SETTINGS_TTL_MS=2000`, `SHEET_TRACKING_TTL_MS=2000`; browser poll 3s.
+4. **Apps Script update zaroori**: sheet → Extensions → Apps Script → naya code
+   (`docs/00-overview/apps-script-code.md`) → Deploy → Manage deployments → Edit →
+   **New version** → Deploy. (Purane version par status merge chalta hai; `onEdit` wala
+   auto-timeline + marked-reply naye version se.)
+
 ## 5. Security
 
 - Apps Script URL + token dono **server-side env** me hain, browser bundle me nahi.

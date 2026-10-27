@@ -38,7 +38,8 @@ export const DEFAULT_PUBLIC_SETTINGS: PublicSettings = {
 };
 
 /** Sheet ka change kitni der me browser tak pahunche (tab focus par turant hota hi hai). */
-const POLL_MS = 15_000;
+/* R37 (owner): "instant means instant" — 15s → 3s poll. */
+const POLL_MS = 3_000;
 
 type ContextValue = {
   settings: PublicSettings;

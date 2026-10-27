@@ -11,7 +11,7 @@ import { API_AVAILABLE, LIVE_STORE_URL, apiUrl } from "@/lib/api-base";
 import { postJson, readJson } from "@/lib/http-json";
 import { checkPincodeOffline } from "@/lib/pincode-offline";
 import { INDIAN_STATES, canonicalStateName, statesMatch } from "@/lib/state-match";
-import { whatsappNumber } from "@/lib/phone";
+import { autoFixPhoneInput, normaliseIndianPhone, whatsappNumber } from "@/lib/phone";
 import {
   paymentUrl,
   readPlacedOrder,
@@ -265,7 +265,7 @@ export function CheckoutForm() {
         ? "Poora naam likhiye."
         : !/^\S+@\S+\.\S+$/.test(form.email.trim())
           ? "Email theek likhiye — invoice/update isi par aata hai."
-          : form.phone.replace(/\D/g, "").length !== 10
+          : !normaliseIndianPhone(form.phone)
             ? "10 digit ka mobile number daaliye."
             : form.address.trim().length < 8
               ? "Poora address likhiye (house, street, area)."
@@ -471,7 +471,7 @@ export function CheckoutForm() {
         })),
         customer: {
           name: form.customerName,
-          phone: form.phone,
+          phone: normaliseIndianPhone(form.phone) ?? form.phone,
           email: form.email,
           address: form.address,
           city: form.city,
@@ -690,7 +690,8 @@ export function CheckoutForm() {
               inputMode="numeric"
               autoComplete="tel"
               value={form.phone}
-              onChange={(v) => update("phone", v)}
+              /* R37 (owner): +91 / 91 / 0 prefix type karte hi khud hat jaata hai */
+              onChange={(v) => update("phone", autoFixPhoneInput(v))}
             />
             <Field
               label="Email"

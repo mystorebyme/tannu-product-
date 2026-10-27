@@ -25,7 +25,7 @@ test("R35: Apps Script read timeout 4s hai (900ms par read hamesha timeout hota 
   const sheets = read("apps/web/src/lib/google-sheets.ts");
   assert.match(sheets, /SHEET_READ_TIMEOUT_MS", 4_000/, "env-tunable default 4s");
   assert.doesNotMatch(sheets, /READ_TIMEOUT_MS = 900/, "purana 900ms timeout wapas na aaye");
-  assert.match(sheets, /SHEET_SETTINGS_TTL_MS", 10_000/, "settings TTL 10s (owner ka edit 10s me live)");
+  assert.match(sheets, /SHEET_SETTINGS_TTL_MS", 2_000/, "R37: settings TTL 2s (owner: instant means instant)");
 });
 
 test("R35: read fail ho to last good value rehti hai (cache null nahi hota)", () => {
@@ -72,7 +72,7 @@ test("R35: payment page ka UPI card sheet se live update hota hai (reload ke bin
 test("R35: settings provider fresh=1 support karta hai aur 15s me poll karta hai", () => {
   const provider = read("apps/web/src/components/store-settings-provider.tsx");
   assert.match(provider, /\/api\/settings\?fresh=1/, "fresh mode");
-  assert.match(provider, /POLL_MS = 15_000/, "poll 30s → 15s");
+  assert.match(provider, /POLL_MS = 3_000/, "R37: poll 3s (instant)");
   assert.match(provider, /setLive\(true\)/, "live flag (defaults vs sheet ka farq)");
 });
 
@@ -144,7 +144,8 @@ test("R35: Cloudflare deploy ek command se hota hai (apps/web se, root par wrang
   assert.match(workerConfig, /vinext\/server\/fetch-handler/, "vinext entrypoint");
   // sheet → site real-time knobs Workers par declared hon (process.env sirf declared vars padhta hai)
   assert.match(workerConfig, /SHEET_READ_TIMEOUT_MS: bindings\.text\("4000"\)/);
-  assert.match(workerConfig, /SHEET_SETTINGS_TTL_MS: bindings\.text\("10000"\)/);
+  assert.match(workerConfig, /SHEET_SETTINGS_TTL_MS: bindings\.text\("2000"\)/);
+  assert.match(workerConfig, /SHEET_TRACKING_TTL_MS: bindings\.text\("2000"\)/);
 });
 
 test("R35: GitHub Actions se Worker deploy (manual) — secrets repo me nahi", () => {

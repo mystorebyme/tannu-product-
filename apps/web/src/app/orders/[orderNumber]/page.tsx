@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { headers } from "next/headers";
 import { getOrder } from "@/lib/orders";
+import { mergeSheetTracking, readSheetTracking } from "@/lib/sheet-tracking";
 import { formatDate, formatPrice, imageUrl } from "@/lib/format";
 import { ORDER_STATUS_COPY, siteConfig } from "@/config/site";
 import { SafeImage } from "@/components/safe-image";
@@ -47,7 +48,7 @@ export async function generateMetadata({
 
 export default async function OrderPage({ params }: { params: Promise<{ orderNumber: string }> }) {
   const { orderNumber } = await params;
-  const [order, settings, headerList] = await Promise.all([
+  const [dbOrder, settings, headerList] = await Promise.all([
     getOrder(orderNumber),
     getStoreSettingsFast(),
     headers(),
@@ -56,7 +57,18 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
   const host = headerList.get("x-forwarded-host") ?? headerList.get("host") ?? fallbackHost;
   const proto = headerList.get("x-forwarded-proto") ?? "https";
   const siteUrl = `${proto}://${host}`;
-  if (!order) notFound();
+  if (!dbOrder) notFound();
+  /**
+   * R37 (owner): sheet = order ka DB. `Orders` tab me `Order status` / courier /
+   * AWB badalte hi yahan wahi dikhta hai (5s TTL + background refresh;
+   * `?fresh=1` par bilkul taaza). Payment status hamesha DB se.
+   */
+  const sheet = dbOrder
+    ? await readSheetTracking(dbOrder.orderNumber, dbOrder.phone, {
+        fresh: typeof window === "undefined" && Boolean(process.env.SHEET_TRACKING_FRESH),
+      })
+    : null;
+  const order = dbOrder ? mergeSheetTracking(dbOrder, sheet) : dbOrder;
 
   const etaLabel = estimatedDelivery(order.createdAt);
   /** 5 step + har step ki asli date + cancelled/returned handle (lib/tracking.ts) */

@@ -704,3 +704,43 @@ step me kaam kare, back jaane par bhi, aur wapis usi order me payment par jaane 
       `docs/00-overview/owner-code-map.md`
 - [ ] **Deploy baaki** — Vercel `liksha-clothing` production par ye code jaana zaroori hai
       ( warna na address recommend hoga, na step-3 payment, na sheet ka live UPI)
+
+### R37 — Sheet = order ka DB + phone prefix auto + header/circles fix + Vercel deploy
+
+Owner (27 Oct 2026, voice): Paytm "Payment Alert" screenshot ("direct phone se detect krta hai
+na UPI direct, fix kro"); "prkigothwal@gmail.com se DB connect + wahi se sheet ka Apps Script";
+"header bar fix in desktop"; "Vercel par sheet ke environment add kr dena"; "manoj-Product wali
+`trends-sheets.gs` dekho — ek box me placed/confirmed/shipped, replied/marked reply — DB ko sheet
+se manage karo"; "admin ko mat chhedo, only store + DB sheet"; "instant means instant (phone,
+UPI…)"; "har device comfortable"; "wedding circle me image nahi"; "phone me +91/91/0 auto hatao,
+10 digit"; "sab fix ke baad Vercel par latest deploy + push".
+
+- [x] **Paytm alert**: asli wajah production ka purana `?pay=1` auto-open (R36 me code hata tha,
+      live nahi tha). Ab UPI sirf tap par + naya `upi-risk-hint` (QR / UPI-ID copy raasta);
+      koi app brand nahi (owner rule guard se pin)
+- [x] **Phone prefix**: `lib/phone.ts` → `normaliseIndianPhone` + `autoFixPhoneInput` (type karte
+      hi `+91 / 91 / 0` hat jaate hain); `packages/validation` phoneSchema wahi (server par bhi
+      sirf 10 digit save); checkout payload me saaf number; contact form isi schema se
+- [x] **Wedding circle**: image hardcoded `undefined` thi → `circleImage()` (collection image,
+      fallback pehla product photo); smoke me "saare circles me img" guard
+- [x] **Desktop header**: nav 1fr column se logo par chadh jaati thi → alag centered row
+      (`desktop-nav`), logo hamesha center; mobile drawer unchanged
+- [x] **Sheet = DB** (trends-sheets.gs pattern): `liksha-sheets.gs` **r37-1** me `onEdit` —
+      `Orders!Order status` edit → timeline row (`order.status_sheet`), `Messages!Status` →
+      `Replied`/`Replied at` (marked-reply). Store side naya `lib/sheet-tracking.ts` (fetch +
+      2s TTL + SWR) + `lib/sheet-merge.ts` (pure merge: sheet status/courier/AWB/URL/note +
+      timeline updates; **paymentStatus hamesha DB**); order page + `/api/orders/<n>/public`
+      (`?fresh=1`) merge karte hain
+- [x] **Instant**: settings TTL 10s→**2s**, browser poll 15s→**3s**, tracking TTL **2s**;
+      worker bindings bhi (`cloudflare.config.ts`); payment-context pehle se `no-store`
+- [x] **Vercel env (store only)**: `liksha-clothing` par API se add — `SHEET_READ_TIMEOUT_MS=4000`,
+      `SHEET_SETTINGS_TTL_MS=2000`, `SHEET_TRACKING_TTL_MS=2000` (production+preview).
+      Admin project chheda nahi
+- [x] Tests: naya `tests/unit/round37.test.ts` (13); smoke me +4 checks (desktop-nav, wedding
+      circle img, `+91` phone se order 201, public `?fresh=1`); round35 guards naye knobs par
+- [x] Verify: unit **259/259**, integration 40, sheets 10, db 9 ⇒ **318/318**; lint 0 errors/38
+      warnings; audit sab A; `next build` + `vite build` ✅; Next-prod parity smoke **104/0**,
+      responsive 44/0, breakpoints 48/0, payments 59/0, links 45/0; workerd preview **104/0**
+- [x] Docs: **`docs/00-overview/owner-report-round37.md`**, `google-sheets.md` §4d,
+      `owner-code-map.md`, `apps-script-code.md` (auto-export r37-1)
+- [x] **Deploy**: owner ke kehne par PR #8 merge → `main` → Vercel `liksha-clothing` production

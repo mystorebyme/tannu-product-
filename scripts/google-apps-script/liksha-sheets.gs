@@ -70,7 +70,7 @@
 var TOKEN = 'CHANGE-ME-liksha-token';
 
 /** Code ka version — `?action=health` me dikhta hai. Code badle to isse badhaayein. */
-var CODE_VERSION = 'r31-1';
+var CODE_VERSION = 'r37-1';
 
 /**
  * Sheet ka id (URL me `/d/<ID>/edit`).
@@ -1893,6 +1893,63 @@ function backupNow_() {
   } catch (error) {
     logError_('backupNow', error, null);
     return 'backup fail: ' + (error && error.message ? error.message : error);
+  }
+}
+
+/* ───────────────────────── SHEET = DB (owner, R37) ─────────────────────────
+ * Owner sheet me seedha edit kare to website turant wahi dikhati hai —
+ * trends-sheets.gs wala "ek box me sab" pattern:
+ *   • Orders!`Order status` cell badla → timeline row append
+ *     (`order.status_sheet`) → site ka status + timeline + customer message
+ *     update (placed / confirmed / packed / shipped / delivered / cancelled).
+ *   • Messages!`Status` me "replied" / "done" / "closed" likha → `Replied` = YES
+ *     + `Replied at` = abhi (marked-reply).
+ * Simple trigger hai — install ki zaroorat nahi, sirf **user** edits par chalta
+ * hai (script ke apne writes par nahi), aur error kabhi sheet nahi toda.
+ */
+function onEdit(e) {
+  try {
+    if (!e || !e.range) return;
+    var tab = e.range.getSheet();
+    if (!tab || e.range.getRow() < 2) return;
+    var head = headersOf_(tab);
+    var column = head[e.range.getColumn() - 1];
+    if (!column) return;
+    var name = tab.getName();
+    var row = e.range.getRow();
+
+    if (name === 'Orders' && column === 'Order status') {
+      var idCol = head.indexOf('Order number') + 1;
+      var orderNumber = idCol ? text_(tab.getRange(row, idCol).getValue()) : '';
+      var status = text_(e.value);
+      if (!orderNumber || !status) return;
+      appendRows_([
+        {
+          sheet: 'Orders',
+          row: {
+            Timestamp: now_(),
+            Event: 'order.status_sheet',
+            'Order number': orderNumber,
+            'Order status': status,
+            Notes: 'Sheet se status update (owner)',
+            Source: 'sheet-edit',
+          },
+        },
+      ]);
+      return;
+    }
+
+    if (name === 'Messages' && column === 'Status') {
+      var value = String(e.value || '').trim().toLowerCase();
+      var repliedCol = head.indexOf('Replied') + 1;
+      var atCol = head.indexOf('Replied at') + 1;
+      if (!repliedCol) return;
+      var replied = /repl|done|closed|answer|resolve/.test(value) ? 'YES' : 'NO';
+      tab.getRange(row, repliedCol).setValue(replied);
+      if (atCol) tab.getRange(row, atCol).setValue(replied === 'YES' ? now_() : '');
+    }
+  } catch (error) {
+    // onEdit kabhi sheet na tode
   }
 }
 

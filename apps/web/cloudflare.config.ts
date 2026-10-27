@@ -71,7 +71,8 @@ export default defineConfig({
        *                          page `?fresh=1` se turant padhta hai).
        */
       SHEET_READ_TIMEOUT_MS: bindings.text("4000"),
-      SHEET_SETTINGS_TTL_MS: bindings.text("10000"),
+      SHEET_SETTINGS_TTL_MS: bindings.text("2000"),
+      SHEET_TRACKING_TTL_MS: bindings.text("2000"),
     },
   }),
 });

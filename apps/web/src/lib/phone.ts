@@ -20,6 +20,30 @@ export function whatsappNumber(raw?: string | null, fallback = "918005900581"): 
   return digits;
 }
 
+/**
+ * R37 (owner): customer jo bhi likhe — `+91 98765 43210`, `919876543210`,
+ * `09876543210` — sab se sirf **10 digit** ka mobile number ban jaata hai.
+ * 12 digit starting `91` = country code; 11 digit starting `0` = trunk prefix.
+ * Valid length na ho to `null` (caller validate karega).
+ */
+export function normaliseIndianPhone(raw?: string | null): string | null {
+  let digits = String(raw ?? "").replace(/\D/g, "");
+  if (digits.length === 12 && digits.startsWith("91")) digits = digits.slice(2);
+  else if (digits.length === 11 && digits.startsWith("0")) digits = digits.slice(1);
+  return digits.length === 10 ? digits : null;
+}
+
+/**
+ * Type karte waqt auto-fix: jaise hi prefix poora ho jaaye field me sirf 10 digit
+ * reh jaate hain (`+91 98765…` type karte hi `98765…`). Adhoora input untouched.
+ */
+export function autoFixPhoneInput(value: string): string {
+  const digits = value.replace(/\D/g, "");
+  if (digits.length === 12 && digits.startsWith("91")) return digits.slice(2);
+  if (digits.length === 11 && digits.startsWith("0")) return digits.slice(1);
+  return value;
+}
+
 /** Sirf 10 digit ka local number (display ke liye). */
 export function localPhone(raw?: string | null): string {
   const digits = whatsappNumber(raw);

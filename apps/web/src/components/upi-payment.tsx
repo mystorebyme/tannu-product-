@@ -349,6 +349,17 @@ export function UpiPayment({
               <p className="mt-1.5 text-[10.5px] text-[#8a7a5f]">
                 Button dabate hi UPI app khulegi (amount bhara hua). Na khule to QR scan kariye.
               </p>
+              {/*
+                R37 (owner screenshot): kisi UPI app par kabhi &ldquo;Payment Alert —
+                UPI Risk Policy&rdquo; dikhe (personal VPA par collect request) to customer
+                atke nahi: QR scan / UPI ID copy hamesha upar maujood hai, aur UPI app
+                sirf isi button ke tap par khulti hai (page load par kabhi nahi).
+                (Owner rule: kisi app ka naam nahi — sirf generic wording.)
+              */}
+              <p className="mt-1.5 text-[10.5px] leading-relaxed text-[#8a7a5f]" data-testid="upi-risk-hint">
+                UPI app par &ldquo;Payment Alert&rdquo; dikhe to ghabraiye mat — &ldquo;Pay via
+                Scanning QR&rdquo; chuniye ya upar diya QR scan kariye / UPI ID copy kariye.
+              </p>
             </div>
 
             {statusNote ? (

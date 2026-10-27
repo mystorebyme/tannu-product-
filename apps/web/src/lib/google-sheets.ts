@@ -74,7 +74,8 @@ const WRITE_TIMEOUT_MS = 6_000;
  * Page load ko kabhi block nahi karti — stale value turant jaati hai aur refresh
  * background me hota hai (stale-while-revalidate).
  */
-const SETTINGS_TTL_MS = envNumber("SHEET_SETTINGS_TTL_MS", 10_000);
+/* R37 (owner): "instant means instant" — 10s → 2s. SWR + `?fresh=1` bhi hai. */
+const SETTINGS_TTL_MS = envNumber("SHEET_SETTINGS_TTL_MS", 2_000);
 /** Apps Script/CSV down ho tab bhi **last good** value itni der tak chalegi (defaults par nahi jaayenge). */
 const STALE_MAX_MS = envNumber("SHEET_SETTINGS_STALE_MS", 10 * 60_000);
 

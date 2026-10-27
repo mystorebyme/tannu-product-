@@ -53,6 +53,17 @@ async function main() {
   );
   check("home shows category counts from the live store", /ANARKALI SUIT/i.test(home.text) && /Products/i.test(home.text));
   check("home hero pricing paragraph removed (Round 12)", !/No hidden charges/i.test(home.text));
+  // R37: desktop header bar — nav apni centered row me (logo se overlap nahi)
+  check("home has the desktop nav row", home.text.includes('data-testid="desktop-nav"'));
+  // R37 (owner): "wedding wale circle me image nahi dikh rhi" — ab har circle me img hai
+  const circles = /data-testid="category-circles"[\s\S]*?<\/section>/.exec(home.text)?.[0] ?? "";
+  const circleLinks = (circles.match(/href="\/collections\/[a-z-]+"/g) ?? []).length;
+  const circleImages = (circles.match(/<img/g) ?? []).length;
+  check(
+    "home wedding circle me image hai (saare circles me)",
+    circles.includes("/collections/wedding-collection") && circleImages >= circleLinks && circleLinks >= 7,
+    `links ${circleLinks} images ${circleImages}`,
+  );
   check("tab title carries the brand name", /<title>[^<]*Designer Clothing[^<]*<\/title>/i.test(home.text));
 
   const manifest = await get("/manifest.webmanifest");
@@ -168,11 +179,27 @@ async function main() {
   const orderBody = await order.json();
   check("order created", order.status === 201, `status ${order.status} ${JSON.stringify(orderBody).slice(0, 140)}`);
 
+  // R37 (owner): "+91 / 91 / 0 prefix accept karo, 10 digit save karo"
+  const prefixedOrder = await fetch(`${BASE}/api/orders`, {
+    method: "POST",
+    headers: { "content-type": "application/json", "idempotency-key": `smoke-prefix-${Date.now()}` },
+    body: JSON.stringify({ ...orderPayload, phone: "+91 98765 43210" }),
+  });
+  const prefixedBody = await prefixedOrder.json();
+  check(
+    "order with +91 prefixed phone accepted",
+    prefixedOrder.status === 201 && Boolean(prefixedBody.orderNumber),
+    `status ${prefixedOrder.status} ${JSON.stringify(prefixedBody).slice(0, 120)}`,
+  );
+
   if (orderBody.orderNumber) {
     const page = await get(`/orders/${orderBody.orderNumber}`);
     check("order page 200", page.status === 200, `status ${page.status}`);
     check("order page shows number", page.text.includes(orderBody.orderNumber));
     check("order page has a tracking timeline", page.text.includes('data-testid="order-tracking"'));
+    // R37: sheet = order ka DB — public tracking `?fresh=1` par bhi 200 deta hai
+    const publicFresh = await get(`/api/orders/${orderBody.orderNumber}/public?fresh=1`);
+    check("public tracking fresh read 200", publicFresh.status === 200, `status ${publicFresh.status}`);
     // R32 (owner): customer page se invoice download abhi band — sirf tracking.
     check(
       "order page has no invoice download (R32: only tracking)",

@@ -64,6 +64,8 @@ Repo me **do Next.js apps** hain (ek hi repo, do deploy):
 | Cart `/cart` | `apps/web/src/app/cart/page.tsx` + `components/cart-provider.tsx` |
 | Checkout (step 1–3: delivery → review → **payment**) `/checkout` | `apps/web/src/app/checkout/page.tsx` + `components/checkout-form.tsx` + `components/checkout-payment-step.tsx` |
 | Saved delivery details (browser cache) | `apps/web/src/lib/checkout-details.ts` |
+| **Sheet = order ka DB (R37)** — status/courier/AWB/note sheet se merge | `apps/web/src/lib/sheet-tracking.ts` + `apps/web/src/lib/sheet-merge.ts` (Apps Script: `scripts/google-apps-script/liksha-sheets.gs` → `onEdit` + `?action=timeline`) |
+| Phone prefix auto-fix (`+91`/`91`/`0` → 10 digit) | `apps/web/src/lib/phone.ts` + `packages/validation/index.ts` (`phoneSchema`) |
 | Step 3 ka data API | `apps/web/src/app/api/orders/[orderNumber]/payment-context/route.ts` |
 | Order confirm / tracking `/orders/[orderNumber]` | `apps/web/src/app/orders/[orderNumber]/page.tsx` |
 | Payment deep link (WhatsApp/email/QR) `/orders/[orderNumber]/pay` | `apps/web/src/app/orders/[orderNumber]/pay/page.tsx` + `components/upi-payment.tsx` |

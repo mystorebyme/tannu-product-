@@ -1,5 +1,6 @@
 import { preflight, withCors } from "@/lib/cors";
 import { getOrder } from "@/lib/orders";
+import { mergeSheetTracking, readSheetTracking } from "@/lib/sheet-tracking";
 
 export const dynamic = "force-dynamic";
 
@@ -18,10 +19,16 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(request: Request, context: { params: Promise<{ orderNumber: string }> }) {
   const { orderNumber } = await context.params;
-  const order = await getOrder(orderNumber);
-  if (!order) {
+  const dbOrder = await getOrder(orderNumber);
+  if (!dbOrder) {
     return withCors(Response.json({ error: "Order nahi mila" }, { status: 404 }), request);
   }
+  // R37: sheet = order ka DB — status/tracking sheet se (turant), baaki DB se
+  const fresh = new URL(request.url).searchParams.get("fresh") === "1";
+  const order = mergeSheetTracking(
+    dbOrder,
+    await readSheetTracking(dbOrder.orderNumber, dbOrder.phone, { fresh }),
+  );
 
   const digits = order.phone.replace(/\D/g, "");
   const payload = {

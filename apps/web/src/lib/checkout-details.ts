@@ -16,6 +16,8 @@
  * rukni nahi chahiye.
  */
 
+import { normaliseIndianPhone } from "./phone";
+
 export type CheckoutDetails = {
   customerName: string;
   email: string;
@@ -76,9 +78,7 @@ export function normaliseCheckoutDetails(input: unknown, now: Date = new Date())
    * autofill "+91 98765 43210" ya "09876543210" de deta hai, isliye country code /
    * leading zero utaar kar 10 digit banate hain.
    */
-  let digits = details.phone.replace(/\D/g, "");
-  if (digits.length === 12 && digits.startsWith("91")) digits = digits.slice(2);
-  else if (digits.length === 11 && digits.startsWith("0")) digits = digits.slice(1);
+  const digits = normaliseIndianPhone(details.phone) ?? "";
 
   const usable =
     details.customerName.length >= 2 &&
