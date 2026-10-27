@@ -27,7 +27,7 @@ import {
  *   • READ  — `?action=reviews` (approved-only) — 30s TTL + stale-while-revalidate
  *             + last-good fallback. Sheet down → purane baked (Trustoo-sync)
  *             reviews dikhte rehte hain; customer ko kabhi error nahi.
- *   • SEED  — Reviews tab KHAALI mile (owner ne r44-1 paste kiya) to site apne
+ *   • SEED  — Reviews tab KHAALI mile (owner ne r45-1 paste kiya) to site apne
  *             purane baked reviews ek hi baar sheet me bhar deti hai (`reviews_seed`,
  *             sab `approved`) — uske baad sheet hi source of truth hai: row
  *             delete = review site se gaya.
@@ -208,7 +208,7 @@ async function fetchReviews(): Promise<SheetReview[] | null> {
   }
   const reviews = Array.isArray(result.data.reviews) ? result.data.reviews : [];
   if (result.data.empty) {
-    // Reviews tab khaali — owner ne r44-1 paste kiya par reviews abhi sheet me
+    // Reviews tab khaali — owner ne r45-1 paste kiya par reviews abhi sheet me
     // nahi. Site apne purane (Trustoo-sync) reviews khud seed kar deti hai (ek
     // baar, background me). Tab tak baked reviews dikhte rehte hain.
     const major = Number(/^r(\d+)/.exec(String(result.data.version ?? ""))?.[1] ?? 0);

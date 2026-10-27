@@ -1,7 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { siteConfig } from "@/config/site";
-import { whatsappNumber } from "@/lib/phone";
+import { SupportChannels } from "@/components/contact-details";
 
 /**
  * Order tracking ka apna "not found" — global 404 ki jagah customer ko saaf
@@ -14,7 +13,6 @@ import { whatsappNumber } from "@/lib/phone";
 export const metadata: Metadata = { title: "Order nahi mila", robots: { index: false, follow: false } };
 
 export default function OrderNotFound() {
-  const wa = siteConfig.whatsapp.replace(/\D/g, "").slice(-10);
   return (
     <div className="container-liksha py-14 lg:py-20" data-testid="order-not-found">
       <div className="mx-auto max-w-[620px] border border-[#eee6de] bg-[#faf8f5] p-6 text-center sm:p-9">
@@ -39,19 +37,13 @@ export default function OrderNotFound() {
           >
             Try another number
           </Link>
-          <a
-            href={`https://wa.me/${whatsappNumber(wa)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 border border-[#25D366] px-6 py-3 text-[11px] font-semibold tracking-[.14em] text-[#128c4b] uppercase"
-          >
-            WhatsApp support
-          </a>
+          {/* R45: WhatsApp number sirf sheet se — khali ho to button dikhta nahi */}
+          <SupportChannels />
         </div>
 
         <p className="mt-4 text-[11.5px] leading-relaxed text-[#8a8078]">
           Order kiya tha aur number bilkul sahi hai? WhatsApp par order number bhejiye — team 24 ghante
-          me status bata degi. Support: <strong>{siteConfig.phone}</strong>
+          me status bata degi.
         </p>
       </div>
     </div>

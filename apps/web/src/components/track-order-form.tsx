@@ -105,14 +105,17 @@ export function TrackOrderForm() {
                 {liveStatus === "up" ? "Open live tracking" : "Open live tracking ↗"}
               </a>
             )}
-            <a
-              href={`https://wa.me/${whatsappNumber(wa)}?text=${encodeURIComponent(`Hi Designer Clothing, please share the status of order ${resolved}.`)}`}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex h-10 items-center bg-[#25D366] px-4 text-[10.5px] font-semibold tracking-[.12em] text-white uppercase"
-            >
-              WhatsApp us
-            </a>
+            {/* R45: number sheet se khali ho to button nahi */}
+            {whatsappNumber(wa) ? (
+              <a
+                href={`https://wa.me/${whatsappNumber(wa)}?text=${encodeURIComponent(`Hi Designer Clothing, please share the status of order ${resolved}.`)}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-10 items-center bg-[#25D366] px-4 text-[10.5px] font-semibold tracking-[.12em] text-white uppercase"
+              >
+                WhatsApp us
+              </a>
+            ) : null}
           </div>
           <p className="mt-2 text-[11px] text-[#8a8078]">
             Ya <Link href="/pages/contact" className="underline">contact page</Link> se message bhejiye — team

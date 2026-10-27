@@ -357,8 +357,10 @@ export function CheckoutForm() {
     return `${LIVE_STORE_URL.replace(/\/+$/, "")}/checkout`;
   }
 
-  /** static preview / server down — poora order WhatsApp par (owner usi se confirm karta hai) */
+  /** static preview / server down — poora order WhatsApp par (owner usi se confirm karta hai). Number set nahi hai to "". */
   function whatsappOrderLink(): string {
+    const wa = whatsappNumber(whatsapp);
+    if (!wa) return "";
     const itemLines = lines
       .map((line) => `• ${line.title} — size ${line.size}${line.colour ? `, ${line.colour}` : ""} × ${line.quantity}`)
       .join("\n");
@@ -379,7 +381,7 @@ export function CheckoutForm() {
     ]
       .filter(Boolean)
       .join("\n");
-    return `https://wa.me/${whatsappNumber(whatsapp.replace(/\D/g, "").slice(-10))}?text=${encodeURIComponent(text)}`;
+    return `https://wa.me/${wa}?text=${encodeURIComponent(text)}`;
   }
 
   /**
@@ -827,9 +829,9 @@ export function CheckoutForm() {
               <path d="M9 12l2 2 4-4" />
             </svg>
             <p className="text-[12.5px] leading-relaxed text-[#4a423b]" data-testid="prepaid-note">
-              Prepaid order. <strong>Place order</strong> dabate hi step 3 (payment) isi page par
-              khulega — UPI QR, &quot;Pay on UPI&quot; button aur confirm. Payment seedha store
-              account me jaata hai, koi gateway charge nahi.
+              Prepaid order. <strong>Place order</strong> dabate hi payment isi page par khulega —
+              UPI se pay kariye aur confirm dabaiye. Payment seedha store account me jaata hai,
+              koi extra charge nahi.
             </p>
           </div>
         </section>
@@ -906,9 +908,8 @@ export function CheckoutForm() {
                 </svg>
                 <p className="text-[12.5px] leading-relaxed text-[#4a423b]" data-testid="prepaid-note">
                   Prepaid order. <strong>Place order</strong> dabate hi order number banega aur
-                  payment step 3 isi page par khulega (alag page nahi). UPI app tab hi khulti hai
-                  jab aap &quot;Pay on UPI&quot; dabate hain. Payment confirm hone par hi order
-                  confirm hoga.
+                  payment isi page par khulega. &quot;Pay on UPI&quot; dabane par UPI app khulti
+                  hai — pay karke confirm dabaiye. Payment confirm hone par hi order confirm hoga.
                 </p>
               </div>
             </section>
@@ -962,14 +963,15 @@ export function CheckoutForm() {
           </div>
         </div>
 
-        {error ? <p className="mt-3 text-[11.5px] text-[#b3261e]">{error}</p> : null}
+        {/* Jab fallback box khula ho to message wahin dikhta hai — yahan duplicate nahi (R45). */}
+        {error && !fallbackReason ? <p className="mt-3 text-[11.5px] text-[#b3261e]">{error}</p> : null}
 
         {/*
           Fallback only — customer ko checkout par UPI ID / QR / "pay here" kabhi
           nahi dikhta (owner rule: payment sirf 3rd step par). Yahan sirf itna ki
           order save nahi hua to kya karein.
         */}
-        {fallbackHref ? (
+        {fallbackReason ? (
           <div
             className="mt-3 border border-[#e7ddd2] bg-white p-3"
             data-testid="checkout-fallback"
@@ -981,12 +983,16 @@ export function CheckoutForm() {
               </p>
             ) : (
               <p className="text-[11.5px] leading-relaxed text-[#6b6259]">
-                Order abhi complete nahi hua. <strong>Dobara try</strong> kariye — ya WhatsApp par
-                order bhej dijiye, team turant confirm karegi.
+                {error ?? (
+                  <>
+                    Order abhi complete nahi hua. <strong>Dobara try</strong> kariye
+                    {fallbackHref ? " — ya WhatsApp par order bhej dijiye, team turant confirm karegi" : ""}.
+                  </>
+                )}
               </p>
             )}
             <div className="mt-2 flex flex-wrap gap-2">
-              {fallbackReason === "preview" ? (
+              {fallbackReason === "preview" && fallbackHref ? (
                 <a
                   href={fallbackHref}
                   className="inline-flex h-9 items-center bg-[#862222] px-3 text-[10px] font-semibold tracking-[.12em] text-white uppercase"
@@ -997,19 +1003,25 @@ export function CheckoutForm() {
                 <>
                   <button
                     type="button"
-                    onClick={() => setFallbackHref(null)}
+                    onClick={() => {
+                      setFallbackHref(null);
+                      setFallbackReason(null);
+                      setError(null);
+                    }}
                     className="inline-flex h-9 items-center border border-[#862222] px-3 text-[10px] font-semibold tracking-[.12em] text-[#862222] uppercase"
                   >
                     Try again
                   </button>
-                  <a
-                    href={fallbackHref}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex h-9 items-center bg-[#25D366] px-3 text-[10px] font-semibold tracking-[.12em] text-white uppercase"
-                  >
-                    WhatsApp par bhejein
-                  </a>
+                  {fallbackHref ? (
+                    <a
+                      href={fallbackHref}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex h-9 items-center bg-[#25D366] px-3 text-[10px] font-semibold tracking-[.12em] text-white uppercase"
+                    >
+                      WhatsApp par bhejein
+                    </a>
+                  ) : null}
                 </>
               )}
             </div>

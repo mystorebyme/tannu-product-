@@ -86,12 +86,14 @@ export function SiteFooter() {
           <div>
             <h3 className="text-[15px] font-medium text-white">Contact Us</h3>
             <ul className="mt-4 space-y-2.5 text-[13.5px] text-[#ececec]">
+              {/* R45: sheet me number khali = row dikhti hi nahi */}
+              {whatsappNumber(whatsapp) ? (
               <li className="flex items-start gap-2">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" className="mt-0.5 shrink-0" aria-hidden>
                   <path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z" />
                 </svg>
                 <a
-                  href={`https://wa.me/${whatsappNumber(whatsapp.replace(/\D/g, "").slice(-10))}`}
+                  href={`https://wa.me/${whatsappNumber(whatsapp)}`}
                   target="_blank"
                   rel="noreferrer"
                   className="transition hover:text-[#e1d256]"
@@ -99,20 +101,21 @@ export function SiteFooter() {
                   WhatsApp {whatsapp}
                 </a>
               </li>
+              ) : null}
               {/* owner rule: site par support email kahin nahi — sirf WhatsApp/phone */}
+              {whatsappNumber(supportPhone) ? (
               <li className="flex items-start gap-2">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" className="mt-0.5 shrink-0" aria-hidden>
                   <path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.6.1.4 0 .7-.2 1l-2.3 2.2Z" />
                 </svg>
                 <a
-                  href={`https://wa.me/${whatsappNumber(supportPhone.replace(/\D/g, "").slice(-10))}`}
-                  target="_blank"
-                  rel="noreferrer"
+                  href={`tel:+91${whatsappNumber(supportPhone).slice(-10)}`}
                   className="transition hover:text-[#e1d256]"
                 >
-                  WhatsApp {supportPhone}
+                  Call {supportPhone}
                 </a>
               </li>
+              ) : null}
             </ul>
 
             <p className="mt-5 text-[15px] font-medium text-white">Follow Us :</p>
@@ -126,9 +129,10 @@ export function SiteFooter() {
                 </svg>
                 {INSTAGRAM_URL}
               </span>
-              {/* WhatsApp — customer isi par order/query bhejta hai */}
+              {/* WhatsApp — customer isi par order/query bhejta hai (R45: sheet khali = pill nahi) */}
+              {whatsappNumber(whatsapp) ? (
               <a
-                href={`https://wa.me/${whatsappNumber(whatsapp.replace(/\D/g, "").slice(-10))}`}
+                href={`https://wa.me/${whatsappNumber(whatsapp)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Chat on WhatsApp"
@@ -140,6 +144,7 @@ export function SiteFooter() {
                 </svg>
                 WhatsApp
               </a>
+              ) : null}
             </div>
           </div>
 
@@ -201,18 +206,24 @@ export function SiteFooter() {
               ) : null}
               {status === "error" ? (
                 <p className="mt-1.5 text-[11.5px] text-[#ffd6cf]">
-                  Signup abhi save nahi hua.{" "}
-                  <a
-                    href={`https://wa.me/${whatsappNumber(whatsapp.replace(/\D/g, "").slice(-10))}?text=${encodeURIComponent(
-                      `Hi Designer Clothing! Please add me to the sale list: ${email}`,
-                    )}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="underline"
-                  >
-                    WhatsApp par email bhejein
-                  </a>
-                  .
+                  Signup abhi save nahi hua.
+                  {/* R45: number sheet se khali ho to WhatsApp link nahi */}
+                  {whatsappNumber(whatsapp) ? (
+                    <>
+                      {" "}
+                      <a
+                        href={`https://wa.me/${whatsappNumber(whatsapp)}?text=${encodeURIComponent(
+                          `Hi Designer Clothing! Please add me to the sale list: ${email}`,
+                        )}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="underline"
+                      >
+                        WhatsApp par email bhejein
+                      </a>
+                      .
+                    </>
+                  ) : null}
                 </p>
               ) : null}
             </form>

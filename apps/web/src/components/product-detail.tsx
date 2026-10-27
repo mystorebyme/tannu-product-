@@ -393,8 +393,10 @@ export function ProductDetail({
           >
             {sizeSoldOut || productSoldOut ? "Sold out" : "Buy it now"}
           </button>
+          {/* R45: WhatsApp number sirf sheet se — khali ho to button dikhta nahi */}
+          {whatsappNumber(whatsapp) ? (
           <a
-            href={`https://wa.me/${whatsappNumber(whatsapp.replace(/\D/g, "").slice(-10))}?text=${encodeURIComponent(
+            href={`https://wa.me/${whatsappNumber(whatsapp)}?text=${encodeURIComponent(
               [
                 `Hi Designer Clothing, I want to order:`,
                 `${product.title}`,
@@ -415,6 +417,7 @@ export function ProductDetail({
             </svg>
             Order on WhatsApp
           </a>
+          ) : null}
         </div>
 
         <p className="mt-3 text-[11px] tracking-[.06em] text-[#8a8078]">

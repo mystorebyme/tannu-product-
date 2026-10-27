@@ -277,9 +277,9 @@ export function UpiPayment({
         </div>
         <div className="px-4 py-4 sm:px-5" data-testid="upi-unavailable">
           <p className="text-[12.5px] leading-relaxed text-[#4a423b]">
-            Payment settings abhi load nahi ho rahi (UPI ID store ki sheet se aati hai).
-            Page ek-do baar refresh kariye — phir bhi na chale to WhatsApp par order
-            number <strong>{orderNumber}</strong> bhej dijiye, team turant madad karegi.
+            Payment settings abhi load nahi ho rahi. Page ek-do baar refresh kariye —
+            phir bhi na chale to WhatsApp par order number <strong>{orderNumber}</strong>{" "}
+            bhej dijiye, team turant madad karegi.
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <button
@@ -462,15 +462,18 @@ export function UpiPayment({
                 </div>
                 {error ? <p className="text-[11px] text-[#b3261e]">{error}</p> : null}
                 <div className="flex flex-wrap items-center gap-3 pt-0.5">
-                  <a
-                    href={`https://wa.me/${whatsappNumber(wa)}?text=${waText}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    data-testid="upi-whatsapp-screenshot"
-                    className="text-[10.5px] font-semibold tracking-[.06em] text-[#1b7a3e] uppercase underline"
-                  >
-                    Screenshot WhatsApp par bhejein
-                  </a>
+                  {/* R45: WhatsApp number sirf sheet se — khali ho to link nahi */}
+                  {whatsappNumber(wa) ? (
+                    <a
+                      href={`https://wa.me/${whatsappNumber(wa)}?text=${waText}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      data-testid="upi-whatsapp-screenshot"
+                      className="text-[10.5px] font-semibold tracking-[.06em] text-[#1b7a3e] uppercase underline"
+                    >
+                      Screenshot WhatsApp par bhejein
+                    </a>
+                  ) : null}
                   <button
                     type="button"
                     onClick={reportFailed}

@@ -33,8 +33,10 @@ export const DEFAULT_PUBLIC_SETTINGS: PublicSettings = {
   /* R38: UPI sirf sheet se — koi hardcoded payee default nahi (khaali = payment paused UI). */
   upiId: "",
   upiName: "Designer Clothing",
-  supportPhone: "8005900581",
-  whatsapp: "8005900581",
+  // R45 (owner): phone/WhatsApp **sirf sheet se** — API na chale to khaali,
+  // UI link chhupa deta hai (koi hardcoded number nahi).
+  supportPhone: "",
+  whatsapp: "",
   freeShipping: true,
 };
 

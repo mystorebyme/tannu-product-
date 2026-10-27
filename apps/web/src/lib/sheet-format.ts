@@ -24,7 +24,10 @@ export type SheetSettings = {
 function text(value: unknown, max = 240): string | undefined {
   if (typeof value !== "string") return undefined;
   const clean = value.replace(/\s+/g, " ").trim();
-  return clean ? clean.slice(0, max) : undefined;
+  // R45 (owner): khaali string = owner ne sheet me value jaan-boojh kar clear/delete
+  // ki — ye "" site tak jaana chahiye, warna purana fallback dikhta rahega.
+  // undefined sirf tab jab key sheet response me thi hi nahi (purana script).
+  return clean.slice(0, max);
 }
 
 /** "6" / 6 → 6 (1…max); galat/khaali → undefined (default chalta rahe) */

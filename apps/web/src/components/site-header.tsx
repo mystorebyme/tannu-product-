@@ -166,9 +166,11 @@ export function SiteHeader() {
     <>
       <div className="bg-[#7d1a1a] text-white">
         <div className="mx-auto flex min-h-9 max-w-[1400px] items-center justify-between gap-3 px-4 py-1.5">
-          {/* WhatsApp hi contact option hai — call nahi (owner request) */}
+          {/* WhatsApp hi contact option hai — call nahi (owner request).
+              R45: number sirf sheet se — khali ho to link dikhta nahi. */}
+          {whatsappNumber(supportPhone) ? (
           <a
-            href={`https://wa.me/${whatsappNumber(supportPhone.replace(/\D/g, "").slice(-10))}`}
+            href={`https://wa.me/${whatsappNumber(supportPhone)}`}
             target="_blank"
             rel="noreferrer"
             className="hidden shrink-0 items-center gap-1.5 text-[11px] tracking-[.06em] md:flex"
@@ -178,6 +180,7 @@ export function SiteHeader() {
             </svg>
             WhatsApp {supportPhone.replace(/\D/g, "").slice(-10)}
           </a>
+          ) : null}
 
           {/* rotating announcement — sab screens par (mobile par akela) */}
           <p

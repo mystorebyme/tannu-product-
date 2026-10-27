@@ -2,12 +2,18 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
+import { useStoreSettings } from "@/components/store-settings-provider";
+import { whatsappNumber } from "@/lib/phone";
 
 /**
  * Order page par server/DB error (Render down, Postgres unreachable) — user ko
  * generic crash ki jagah seedha WhatsApp raasta dikhta hai.
+ * R45: WhatsApp number **sirf sheet se** — khaali ho to button dikhta nahi
+ * (pehle yahan hardcoded number tha).
  */
 export default function OrderError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+  const { whatsapp, supportPhone } = useStoreSettings();
+  const wa = whatsappNumber(whatsapp || supportPhone);
   useEffect(() => {
     console.warn("order page error", error.message);
   }, [error]);
@@ -27,14 +33,16 @@ export default function OrderError({ error, reset }: { error: Error & { digest?:
           >
             Try again
           </button>
-          <a
-            href="https://wa.me/918005900581?text=Hi%2C%20mera%20order%20page%20load%20nahi%20ho%20raha."
-            target="_blank"
-            rel="noreferrer"
-            className="bg-[#25D366] px-6 py-3 text-[11px] font-semibold tracking-[.14em] text-white uppercase"
-          >
-            WhatsApp support
-          </a>
+          {wa ? (
+            <a
+              href={`https://wa.me/${wa}?text=${encodeURIComponent("Hi, mera order page load nahi ho raha.")}`}
+              target="_blank"
+              rel="noreferrer"
+              className="bg-[#25D366] px-6 py-3 text-[11px] font-semibold tracking-[.14em] text-white uppercase"
+            >
+              WhatsApp support
+            </a>
+          ) : null}
         </div>
         <p className="mt-5 text-[11.5px] text-[#8a8078]">
           <Link href="/track-order" className="text-[#862222] underline">

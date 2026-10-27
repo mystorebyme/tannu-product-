@@ -66,13 +66,16 @@ export function ProductReviews({
             (max 8 — sheet me Image 1…8 alag columns).
           */}
           <ReviewForm productHandle={productHandle} />
-          <p className="mt-3 text-[11.5px] leading-relaxed text-[#8a8078]">
-            Ya{" "}
-            <a href={whatsappReview} target="_blank" rel="noopener noreferrer" className="font-medium text-[#862222] underline">
-              WhatsApp par review bhejiye
-            </a>{" "}
-            — team publish kar degi.
-          </p>
+          {/* R45: number sheet se khali ho to WhatsApp line dikhti hi nahi */}
+          {whatsappNumber(wa) ? (
+            <p className="mt-3 text-[11.5px] leading-relaxed text-[#8a8078]">
+              Ya{" "}
+              <a href={whatsappReview} target="_blank" rel="noopener noreferrer" className="font-medium text-[#862222] underline">
+                WhatsApp par review bhejiye
+              </a>{" "}
+              — team publish kar degi.
+            </p>
+          ) : null}
         </div>
       ) : null}
 

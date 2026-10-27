@@ -10,7 +10,8 @@ import { whatsappNumber } from "@/lib/phone";
 
 const money = (paise: number) => `Rs. ${(paise / 100).toLocaleString("en-IN")}`;
 
-export const WHATSAPP_NUMBER = "918005900581";
+// R45 (owner): hardcoded WhatsApp number **poora hata diya** — link banane wale
+// callers sheet/settings ka live number bhejte hain; number khali = link "" (UI chhupa deta hai).
 
 /**
  * Site ka apna live URL — WhatsApp message me **hamari** site ka link jaata hai,
@@ -28,9 +29,11 @@ export function productUrl(handle: string): string {
   return `${currentSiteUrl()}/products/${handle}`;
 }
 
-/** wa.me link — number me country code zaroori hai (dekho `phone.ts`) */
-export function whatsappLink(message: string, phone = WHATSAPP_NUMBER): string {
-  return `https://wa.me/${whatsappNumber(phone, WHATSAPP_NUMBER)}?text=${encodeURIComponent(message)}`;
+/** wa.me link — number me country code zaroori hai (dekho `phone.ts`). Khaali number = "" (R45). */
+export function whatsappLink(message: string, phone = ""): string {
+  const num = whatsappNumber(phone);
+  if (!num) return "";
+  return `https://wa.me/${num}?text=${encodeURIComponent(message)}`;
 }
 
 export function orderWhatsAppMessage(order: Order, origin = siteConfig.url): string {
@@ -69,8 +72,8 @@ export function orderWhatsAppMessage(order: Order, origin = siteConfig.url): str
   return lines.join("\n");
 }
 
-export function orderWhatsAppLink(order: Order, origin = siteConfig.url): string {
-  return whatsappLink(orderWhatsAppMessage(order, origin));
+export function orderWhatsAppLink(order: Order, origin = siteConfig.url, phone = ""): string {
+  return whatsappLink(orderWhatsAppMessage(order, origin), phone);
 }
 
 /** Cart se seedha WhatsApp par enquiry (order place karne se pehle bhi). */

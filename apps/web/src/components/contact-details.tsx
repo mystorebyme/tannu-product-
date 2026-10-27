@@ -11,6 +11,9 @@ export function ContactDetails() {
   const { whatsapp } = useStoreSettings();
   const wa = whatsapp.replace(/\D/g, "").slice(-10);
 
+  // R45 (owner): number sheet se khali/delete = yahan kuch nahi dikhta
+  if (!whatsappNumber(wa)) return null;
+
   return (
     <div className="grid gap-3 sm:grid-cols-3" data-testid="contact-details">
       <a
@@ -51,6 +54,8 @@ export function ContactDetails() {
 export function SupportChannels({ className = "" }: { className?: string }) {
   const { whatsapp } = useStoreSettings();
   const wa = whatsapp.replace(/\D/g, "").slice(-10);
+  // R45: sheet me number khali = support buttons dikhte hi nahi
+  if (!whatsappNumber(wa)) return null;
   return (
     <div className={`flex flex-wrap gap-2 ${className}`}>
       <a
@@ -70,5 +75,23 @@ export function SupportChannels({ className = "" }: { className?: string }) {
         Order help
       </a>
     </div>
+  );
+}
+
+/**
+ * R45: chhoti "WhatsApp …" help line (account/track pages) — number **sirf
+ * sheet se**; owner ne khali/delete kiya to line dikhti hi nahi.
+ */
+export function WhatsAppHelpLine({ label, className = "" }: { label: string; className?: string }) {
+  const { whatsapp } = useStoreSettings();
+  const num = whatsappNumber(whatsapp);
+  if (!num) return null;
+  return (
+    <p className={`text-[11px] text-[#8a8078] ${className}`.trim()}>
+      {label}{" "}
+      <a href={`https://wa.me/${num}`} target="_blank" rel="noreferrer" className="text-[#862222]">
+        {whatsapp}
+      </a>
+    </p>
   );
 }

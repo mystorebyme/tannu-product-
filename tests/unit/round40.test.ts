@@ -124,7 +124,7 @@ test("R40: google-sheets — scriptGet/scriptPost/version-check/auto-heal, expec
 
 test("R40: script — sheet id sirf Script Properties, sheet_set bootstrap, order_state/orders_state", () => {
   const gs = read("scripts/google-apps-script/liksha-sheets.gs");
-  assert.match(gs, /var CODE_VERSION = 'r4[234]-1';/);
+  assert.match(gs, /var CODE_VERSION = 'r4[2345]-1';/);
   assert.ok(!gs.includes(FINAL_SHEET_ID), "sheet id code me kahin nahi");
   assert.ok(!gs.includes("var SPREADSHEET_ID"), "SPREADSHEET_ID constant gaya");
   assert.ok(!gs.includes("SHEET_ID_FALLBACK ="), "fallback constant gaya");

@@ -1099,7 +1099,7 @@ test("R39: browser se plain /exec → HTML control panel (JSON nahi)", () => {
   assert.equal(typeof out.getContent, "function", "HtmlOutput mila");
   const html = out.getContent();
   assert.match(html, /sheet control panel/i);
-  assert.match(html, /r4[234]-1/);
+  assert.match(html, /r4[2345]-1/);
   assert.match(html, /Admin Note/);
   assert.match(html, /Waiting for confirmation/);
   assert.match(html, /designerclothing\.fashion/);
@@ -1297,7 +1297,7 @@ test("R42: GET/POST ?action=dropdowns — token ke saath chalta hai, bina token 
 
   const allowed = sandbox.doGet({ parameter: { action: "dropdowns", token: "test-token" } }).getJson();
   assert.equal(allowed.ok, true);
-  assert.equal(allowed.version, "r44-1");
+  assert.equal(allowed.version, "r45-1");
   assert.ok(allowed.applied >= 10, "saare tabs ke columns apply hue");
   assert.ok(orders.validations.length > before, "Orders par validation dobara lagi (idempotent)");
 
@@ -1352,7 +1352,7 @@ test("R43: ?action=catalog — token ke saath Products rows, bina token nahi", (
 
   const reply = sandbox.doGet({ parameter: { action: "catalog", token: "test-token" } }).getJson();
   assert.equal(reply.ok, true);
-  assert.equal(reply.version, "r44-1");
+  assert.equal(reply.version, "r45-1");
   assert.equal(reply.count, 1);
   assert.equal(reply.products[0].Id, "td-9001");
   assert.equal(String(reply.products[0].Title), "Test Anarkali");

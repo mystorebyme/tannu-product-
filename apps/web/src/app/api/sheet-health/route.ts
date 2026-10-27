@@ -84,7 +84,7 @@ export async function GET() {
       // save/read hote hain. Full fidelity (Order JSON snapshot, order_state,
       // sheet_set/auto-heal, Admin Note column, R42 dropdowns) ke liye latest
       // script paste karein: scripts/google-apps-script/liksha-sheets.gs (r42-1).
-      warnings.push(`Script ka purana version chal raha hai (${health.version}) — orders/products sheet me save ho rahe hain (compat mode), par Order JSON snapshot/dropdowns/Products catalog jaisi poori taakat ke liye latest script (r44-1) paste kariye: repo ki scripts/google-apps-script/liksha-sheets.gs → Apps Script → Deploy → New version.`);
+      warnings.push(`Script ka purana version chal raha hai (${health.version}) — orders/products sheet me save ho rahe hain (compat mode), par Order JSON snapshot/dropdowns/Products catalog jaisi poori taakat ke liye latest script (r45-1) paste kariye: repo ki scripts/google-apps-script/liksha-sheets.gs → Apps Script → Deploy → New version.`);
     }
     if (health.tokenSet === false) {
       help.push("Script ka TOKEN set nahi — browser me <webapp URL>?action=set_token&token=<Vercel GOOGLE_SHEETS_TOKEN> kholiye.");

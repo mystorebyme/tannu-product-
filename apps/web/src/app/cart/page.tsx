@@ -132,6 +132,8 @@ export default function CartPage() {
             >
               Proceed to checkout
             </Link>
+            {/* R45: WhatsApp number sirf sheet se — khali ho to button nahi */}
+            {whatsappLink(cartWhatsAppMessage(lines), whatsapp) ? (
             <a
               href={whatsappLink(cartWhatsAppMessage(lines), whatsapp)}
               target="_blank"
@@ -144,6 +146,7 @@ export default function CartPage() {
               </svg>
               Order on WhatsApp
             </a>
+            ) : null}
             <p className="mt-2.5 text-center text-[10.5px] text-[#8a8078]">
               100% secure prepaid payment · UPI, cards & netbanking
             </p>

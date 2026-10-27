@@ -57,6 +57,8 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
   const host = headerList.get("x-forwarded-host") ?? headerList.get("host") ?? fallbackHost;
   const proto = headerList.get("x-forwarded-proto") ?? "https";
   const siteUrl = `${proto}://${host}`;
+  // R45: WhatsApp number sirf sheet se — khali ho to "Confirm on WhatsApp" CTA dikhta nahi
+  const waPhone = settings.whatsapp || settings.supportPhone;
   if (!dbOrder) notFound();
   /**
    * R37 (owner): sheet = order ka DB. `Orders` tab me `Order status` / courier /
@@ -112,8 +114,9 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
                     ? "Payment fail hui thi. Neeche se dobara payment kar sakte hain."
                     : "Order reserved hai. Payment complete karte hi order confirm ho jayega."}
           </p>
+          {waPhone ? (
           <a
-            href={orderWhatsAppLink(order, siteUrl)}
+            href={orderWhatsAppLink(order, siteUrl, waPhone)}
             target="_blank"
             rel="noopener noreferrer"
             data-testid="confirm-whatsapp"
@@ -124,6 +127,7 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
             </svg>
             Confirm order on WhatsApp
           </a>
+          ) : null}
           <p className="mt-1.5 text-[11px] text-[#8a8078]">
             This button sends your order number, every item with size and quantity, and the total on WhatsApp.
           </p>
@@ -369,14 +373,16 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
           >
             Continue shopping
           </Link>
-          <a
-            href={orderWhatsAppLink(order, siteUrl)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="border border-[#862222] px-7 py-3 text-[11px] font-semibold tracking-[.16em] text-[#862222] uppercase"
-          >
-            Send order on WhatsApp
-          </a>
+          {waPhone ? (
+            <a
+              href={orderWhatsAppLink(order, siteUrl, waPhone)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="border border-[#862222] px-7 py-3 text-[11px] font-semibold tracking-[.16em] text-[#862222] uppercase"
+            >
+              Send order on WhatsApp
+            </a>
+          ) : null}
         </div>
       </div>
     </div>

@@ -83,7 +83,7 @@ export function CheckoutPaymentStep({
 
       {loading ? (
         <p className="mt-3 border border-[#eee6de] bg-white px-3 py-2.5 text-[11.5px] text-[#8a8078]" data-testid="payment-context-loading">
-          Payment details load ho rahi hain… (UPI ID owner ki sheet se aati hai)
+          Payment details load ho rahi hain…
         </p>
       ) : null}
 

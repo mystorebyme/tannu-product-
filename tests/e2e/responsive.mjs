@@ -146,7 +146,8 @@ check(
   "instagram is not a clickable link yet (owner rule)",
   !/href="https:\/\/www\.instagram\.com/.test(home.text),
 );
-check("footer whatsapp link is live", /href="https:\/\/wa\.me\/918005900581/.test(home.text));
+// R45: WhatsApp number sirf sheet se — dev me sheet nahi, isliye footer me hardcoded link nahi
+check("footer me hardcoded whatsapp link nahi (R45)", !/wa\.me\/918005900581/.test(home.text));
 check("no dummy facebook/pinterest links", !home.text.includes("facebook.com") && !home.text.includes("pinterest.com"));
 
 /* 6. collections index (SHOP landing) ------------------------------------- */

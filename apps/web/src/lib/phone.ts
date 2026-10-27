@@ -9,7 +9,11 @@
  */
 
 /** `wa.me` ke liye number — hamesha country code ke saath (India = 91). */
-export function whatsappNumber(raw?: string | null, fallback = "918005900581"): string {
+/**
+ * Owner rule (R45): koi hardcoded contact fallback NAHI — sheet me number
+ * khali hai to `""` return hota hai aur UI us link ko chhupa deta hai.
+ */
+export function whatsappNumber(raw?: string | null, fallback = ""): string {
   const digits = String(raw ?? "").replace(/\D/g, "");
   if (!digits) return fallback;
   if (digits.length === 10) return `91${digits}`;
@@ -50,8 +54,10 @@ export function localPhone(raw?: string | null): string {
   return digits.slice(-10);
 }
 
-/** Poora wa.me link (optional pre-filled message ke saath). */
+/** Poora wa.me link (optional pre-filled message ke saath). R45: number khali = "" (link mat banao). */
 export function whatsappHref(raw?: string | null, message?: string): string {
-  const base = `https://wa.me/${whatsappNumber(raw)}`;
+  const num = whatsappNumber(raw);
+  if (!num) return "";
+  const base = `https://wa.me/${num}`;
   return message ? `${base}?text=${encodeURIComponent(message)}` : base;
 }

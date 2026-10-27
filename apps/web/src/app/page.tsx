@@ -101,8 +101,11 @@ export default async function HomePage() {
     url: siteConfig.url,
     image: siteConfig.ogImage,
     description: siteConfig.description,
-    telephone: siteConfig.phone,
-    email: siteConfig.email,
+    // R45: static config me contact number/email khali hain (sirf sheet se aate
+    // hain — StoreStructuredData settings-driven telephone bhejta hai), isliye
+    // khaali values JSON-LD me daalte hi nahi.
+    ...(siteConfig.phone ? { telephone: siteConfig.phone } : {}),
+    ...(siteConfig.email ? { email: siteConfig.email } : {}),
     // owner request: public page par local address nahi (sirf country)
     address: { "@type": "PostalAddress", addressCountry: "IN" },
     priceRange: "₹499 - ₹699",

@@ -87,7 +87,7 @@ var TOKEN = 'CHANGE-ME-liksha-token';
 var TOKEN_PLACEHOLDER = 'CHANGE-ME-liksha-token';
 
 /** Code ka version — `?action=health` me dikhta hai. Code badle to isse badhaayein. */
-var CODE_VERSION = 'r44-1';
+var CODE_VERSION = 'r45-1';
 
 /**
  * R40 (owner rule): sheet ka id **code me kahin nahi** — sirf Script Properties
@@ -220,8 +220,10 @@ var HEADERS = {
 
 /** Settings tab ke default rows (sirf tab khaali ho tab likhe jaate hain). */
 var DEFAULT_SETTINGS = [
-  ['support_phone', '8005900581'],
-  ['whatsapp', '8005900581'],
+  // R45 (owner): contact number/UPI **sirf sheet se** — seed me bhi koi
+  // hardcoded number nahi. Owner bharega tabhi site par dikhega.
+  ['support_phone', ''],
+  ['whatsapp', ''],
   // Owner rule: support email site/admin par kahin dikhta nahi — khaali rakha hai.
   ['support_email', ''],
   // UPI **sirf owner bharta hai** — koi default nahi. Khaali hai to website
@@ -1558,7 +1560,21 @@ function appendRows_(rows) {
       });
       if (!values.length) return;
       var start = Math.max(2, sheet.getLastRow() + 1);
-      sheet.getRange(start, 1, values.length, headers.length).setValues(values);
+      try {
+        sheet.getRange(start, 1, values.length, headers.length).setValues(values);
+      } catch (writeError) {
+        // R45 (owner ka live bug): Orders ke Status column par owner ki banayi
+        // purani data-validation (list [confirmed, Pending], allowInvalid=false)
+        // script ke append rok deti hai — "Cell E50 violates data validation".
+        // Apne dropdowns (allowInvalid=true) dobara lagao aur ek baar retry karo,
+        // taaki order save na ruke. Repair na ho paye to error waise hi upar jaata hai.
+        if (!/validation|invalid/i.test(String((writeError && writeError.message) || writeError))) {
+          throw writeError;
+        }
+        Logger.log('appendRows_: validation error mila — dropdowns repair karke retry (' + name + ')');
+        applyValidations_();
+        sheet.getRange(start, 1, values.length, headers.length).setValues(values);
+      }
       written += values.length;
     });
   } catch (error) {
@@ -3165,10 +3181,17 @@ function doGet(e) {
   try {
     if (action === 'settings') {
       var all = readSettings_();
+      // R45 (owner): "sheet se delete kiya to site se bhi turant jaana chahiye" —
+      // jo public key sheet me nahi mili (row delete ya value khali), use '' bhejo.
+      // Isse website ko pata chalta hai ki owner ne jaan-boojh kar khali kiya hai;
+      // purana/hardcoded fallback nahi dikhega.
+      PUBLIC_SETTING_KEYS.forEach(function (key) {
+        if (all[key] === undefined) all[key] = '';
+      });
       if (authed) return json_({ ok: true, version: CODE_VERSION, settings: all, time: now_() });
       var pub = {};
       PUBLIC_SETTING_KEYS.forEach(function (key) {
-        if (all[key] !== undefined) pub[key] = all[key];
+        pub[key] = all[key];
       });
       return json_({ ok: true, version: CODE_VERSION, settings: pub, public: true, time: now_() });
     }

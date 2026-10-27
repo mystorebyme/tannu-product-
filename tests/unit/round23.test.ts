@@ -102,6 +102,7 @@ test("WhatsApp link me country code hamesha lagta hai (wa.me/91…)", () => {
   assert.equal(whatsappNumber("+91 80059 00581"), "918005900581");
   assert.equal(whatsappNumber("918005900581"), "918005900581");
   assert.equal(whatsappNumber("08005900581"), "918005900581");
-  assert.equal(whatsappNumber(""), "918005900581");
+  // R45 (owner): khaali number = "" — koi hardcoded fallback nahi (UI link chhupa deta hai)
+  assert.equal(whatsappNumber(""), "");
   assert.equal(whatsappHref("8005900581", "hi"), "https://wa.me/918005900581?text=hi");
 });

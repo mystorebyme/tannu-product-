@@ -14,8 +14,11 @@ export function WhatsAppLink({
   message?: string;
 }) {
   const { whatsapp } = useStoreSettings();
+  const href = whatsappLink(message ?? "Hi! I need help with my order.", whatsapp);
+  // R45: sheet me number khali = CTA dikhta hi nahi
+  if (!href) return null;
   return (
-    <a href={whatsappLink(message ?? "Hi! I need help with my order.", whatsapp)} target="_blank" rel="noreferrer" className={className} data-testid="whatsapp-link">
+    <a href={href} target="_blank" rel="noreferrer" className={className} data-testid="whatsapp-link">
       {label}
     </a>
   );
