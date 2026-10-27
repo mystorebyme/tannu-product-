@@ -30,7 +30,8 @@ export type PublicSettings = {
 
 export const DEFAULT_PUBLIC_SETTINGS: PublicSettings = {
   announcement: "",
-  upiId: "dhakadgourav@fam",
+  /* R38: UPI sirf sheet se — koi hardcoded payee default nahi (khaali = payment paused UI). */
+  upiId: "",
   upiName: "Designer Clothing",
   supportPhone: "8005900581",
   whatsapp: "8005900581",

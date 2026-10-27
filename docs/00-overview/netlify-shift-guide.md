@@ -23,7 +23,7 @@
               ▼                     ▼                     ▼
       Supabase Postgres      Google Sheet + Apps          WhatsApp 8005900581
       (orders, messages,      Script (owner ka            
-       reviews, traffic)      control panel)              UPI: dhakadgourav@fam
+       reviews, traffic)      control panel)              UPI: sheet (upi_id) se
 
                         ┌──────────────────────────────┐
    owner ─────────────► │  Netlify site #2  (admin)     │  apps/admin
@@ -91,7 +91,7 @@ Scope: **All** (Production + Deploy previews + Branch deploys).
 | # | Key | Value (kya likhna hai) |
 |---|---|---|
 | 1 | `NEXT_PUBLIC_SITE_URL` | Abhi: `https://liksha-clothing.netlify.app` · Domain aane par: `https://likshaclothing.com` |
-| 2 | `STORE_UPI_ID` | `dhakadgourav@fam` |
+| 2 | `STORE_UPI_ID` | optional emergency fallback — production me R38 se **delete** (UPI sirf sheet se) |
 | 3 | `STORE_UPI_NAME` | `Designer Clothing` |
 | 4 | `ADMIN_API_TOKEN` | **Vercel se copy** (liksha-web project). Admin site me **bilkul same** daalna hai |
 | 5 | `GOOGLE_SHEETS_WEBAPP_URL` | **Vercel se copy** (`https://script.google.com/macros/s/…/exec`) |
@@ -409,7 +409,7 @@ Env galat lagane par bhi purana deploy turant wapas live ho jaata hai.
 | Orders ban rahe hain par **Sheet khaali** | `GOOGLE_SHEETS_*` galat, ya Apps Script ka purana deploy | `?action=health&token=…` se version check, Apps Script **New version** deploy |
 | Admin par **401** | `ADMIN_API_TOKEN` dono sites par alag | Dono jagah same token, redeploy |
 | Admin me orders **khali** | `STORE_API_URL` nahi | Site #1 ka URL daalein |
-| Payment page par QR nahi | `STORE_UPI_ID` missing | `dhakadgourav@fam` + redeploy |
+| Payment page par QR nahi | sheet ka `upi_id` khaali / script down | `/api/sheet-health` kholiye → `help[]` ka fix kariye; Settings tab me `upi_id` bhariye |
 | Contact form theek par **message admin me nahi** | DB vs API base | `DATABASE_URL` check, admin `STORE_API_URL` check |
 | Images nahi khul rahi | CSP/remotePatterns | `next.config.ts` me `cdn.shopify.com` already allowed — build cache clear karein |
 | Domain par **"Not Secure"** | certificate issue nahi hua | Netlify → HTTPS → **Verify DNS → Provision certificate** (DNS pehle sahi hona chahiye) |

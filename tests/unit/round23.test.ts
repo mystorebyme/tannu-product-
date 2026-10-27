@@ -58,7 +58,7 @@ test("Sheet ki published Settings CSV se settings parse hoti hain", () => {
     "support_phone,8005900581",
     "whatsapp,8005900581",
     "support_email,Info.likshaclothing@gmail.com",
-    "upi_id,dhakadgourav@fam",
+    "upi_id,teststore@upi",
     "upi_name,Designer Clothing",
     "announcement,Diwali Sale — Flat 70% OFF",
     "free_shipping,true",
@@ -67,7 +67,7 @@ test("Sheet ki published Settings CSV se settings parse hoti hain", () => {
   const settings = parseSettingsCsv(csv);
   assert.ok(settings);
   assert.equal(settings?.supportPhone, "8005900581");
-  assert.equal(settings?.upiId, "dhakadgourav@fam");
+  assert.equal(settings?.upiId, "teststore@upi");
   assert.equal(settings?.upiName, "Designer Clothing");
   assert.equal(settings?.freeShipping, true);
   // khaali value default ko overwrite na kare

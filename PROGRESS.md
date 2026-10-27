@@ -744,3 +744,38 @@ UPI…)"; "har device comfortable"; "wedding circle me image nahi"; "phone me +9
 - [x] Docs: **`docs/00-overview/owner-report-round37.md`**, `google-sheets.md` §4d,
       `owner-code-map.md`, `apps-script-code.md` (auto-export r37-1)
 - [x] **Deploy**: owner ke kehne par PR #8 merge → `main` → Vercel `liksha-clothing` production
+
+## Round 38 (27 Oct 2026) — "dhakadgourav@fam code se hatao; sheet hi DB; Apps Script future-proof"
+
+Owner (deploy ke baad bhi): purana payee VPA abhi bhi dikh raha tha, redeploy ke baad
+order/checkout sheet me show nahi ho rahe the, contact messages nahi aa rahe the —
+aur Apps Script aisa chahiye "jisko change krne ki jrurat na pde".
+
+- [x] **Purana payee VPA 4 jagah se hataya**: `store-settings.ts` default (env ?? ""),
+      provider default (""), admin `data.ts` (""), Apps Script `DEFAULT_SETTINGS` + demo
+      rows (''); Vercel env `STORE_UPI_ID` delete. UPI ka ek hi source: sheet `upi_id`.
+      Khaali ho to payment page honest pause (`upi-unavailable`) — galat payee nahi.
+- [x] **Root causes (orders sheet me kyun nahi aa rahe the)**: (1) Vercel + script dono
+      par token = public placeholder `CHANGE-ME-liksha-token`; (2) sheet access na milne
+      par script chup-chaap **anaath sheet** bana kar usme likhti thi; (3) write failures
+      kahin dikhte hi nahi the.
+- [x] **Apps Script r38-1**: token **Script Properties** me (`?action=set_token`, ek baar;
+      placeholder kabhi authorize nahi), `?action=adopt` (bound sheet apnao), public
+      `settings`(subset)/`health`/`version`/`ping`, `healthReport_` (tokenSet/tokenOk/
+      sheetFound/sheetId/upiSet/problems Hinglish fix), book_() loud `sheet_access_denied`
+      (anaath sheet band), duplicate `guard_` hataya, header recipe naya.
+- [x] **Site**: `/api/sheet-health` public report-card (settings source/age, script health,
+      last write, ordersStore, help[]; secret-safe, 30s cache); `appendSheetRows` retry +
+      `sheetWriteInfo()` + token redaction; `expectedSheetId()` env override
+      (`SHEET_EXPECTED_ID`); admin/sheet + selftest routes helper par.
+- [x] **Vercel env** (deploy ke waqt): `STORE_UPI_ID` delete; `GOOGLE_SHEETS_TOKEN`
+      rotate (naya 48-char; script me set_token URL se). `liksha-admin` untouched.
+- [x] Tests: `round38.test.ts` (8 guards), apps-script harness key-aware props +
+      placeholder/set_token/adopt/loud-error tests, round23/27/37 + sale-payments updates,
+      smoke me sheet-health checks, payments me "purana payee nahi" + env-VPA checks;
+      CI storefront env me `STORE_UPI_ID=likshastore@upi` (tests ke liye neutral).
+- [x] Docs: `google-sheets.md` §4e, `apps-script-code.md` (auto-export r38-1),
+      `owner-code-map.md`, `live-vercel-supabase.md`, `netlify-shift-guide.md`,
+      **`owner-report-round38.md`**.
+- [ ] Gates + deploy: typecheck ✅; unit 270/270 ✅; test:all/lint/audit/builds; Next-prod
+      parity + workerd smoke; PR → merge → Vercel production.

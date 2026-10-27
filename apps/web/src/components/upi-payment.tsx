@@ -261,6 +261,58 @@ export function UpiPayment({
   const paid = paymentStatus === "paid";
 
   /**
+   * R38 (owner): UPI ID **sirf sheet** se aati hai — code me koi hardcoded payee
+   * default nahi bacha. Sheet se value nahi mili (script down / Settings tab me
+   * `upi_id` khaali) to payment honestly pause dikhaate hain — galat payee par
+   * paisa jaane se ye kahin behtar hai. Live settings aate hi (3s poll) ye block
+   * apne aap normal payment UI ban jaata hai.
+   */
+  if (!paid && !payeeVpa) {
+    return (
+      <div className="mt-4 overflow-hidden border border-[#e6d3a8] bg-[#fdf9ee]" data-testid="upi-payment">
+        <div className="border-b border-[#ecd9b0] bg-[#f8efd9] px-4 py-2.5 sm:px-5">
+          <h2 className="text-[11px] font-semibold tracking-[.14em] text-[#8a6a1f] uppercase">
+            Pay {formatPrice(amount)} via UPI
+          </h2>
+        </div>
+        <div className="px-4 py-4 sm:px-5" data-testid="upi-unavailable">
+          <p className="text-[12.5px] leading-relaxed text-[#4a423b]">
+            Payment settings abhi load nahi ho rahi (UPI ID store ki sheet se aati hai).
+            Page ek-do baar refresh kariye — phir bhi na chale to WhatsApp par order
+            number <strong>{orderNumber}</strong> bhej dijiye, team turant madad karegi.
+          </p>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={recheckStatus}
+              className="inline-flex h-8 items-center border border-[#e0cf9f] bg-white px-2.5 text-[10px] font-semibold tracking-[.08em] text-[#6b5214] uppercase"
+              data-testid="upi-recheck"
+            >
+              Check status
+            </button>
+            {wa ? (
+              <a
+                href={`https://wa.me/91${wa}?text=${encodeURIComponent(`Hi Designer Clothing, payment settings load nahi ho rahi — order ${orderNumber} (${formatPrice(amount)}). Madad chahiye.`)}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex h-8 items-center border border-[#e0cf9f] bg-white px-2.5 text-[10px] font-semibold tracking-[.08em] text-[#6b5214] uppercase"
+                data-testid="upi-help-whatsapp"
+              >
+                WhatsApp par madad
+              </a>
+            ) : null}
+          </div>
+          {statusNote ? (
+            <p className="mt-2 border border-[#e6d3a8] bg-[#fbf3df] px-2.5 py-2 text-[11px] leading-relaxed text-[#7a5c14]">
+              {statusNote}
+            </p>
+          ) : null}
+        </div>
+      </div>
+    );
+  }
+
+  /**
    * Owner (R36): payment step khulte hi UPI app par **redirect nahi**. Pehle
    * `?pay=1` dekh kar mobile me 250ms baad intent khud chal jaata tha — customer
    * ko bina chhue app chooser khul jaata tha. Ab sirf neeche wala "Pay on UPI"

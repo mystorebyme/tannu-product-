@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { EXPECTED_SHEET_ID , SHEET_REQUEST_HEADERS } from "@/lib/google-sheets";
+import { expectedSheetId, SHEET_REQUEST_HEADERS } from "@/lib/google-sheets";
 
 /**
  * Sheet write selftest — **sirf debugging ke liye**, secret key ke bina band.
@@ -82,15 +82,15 @@ export async function GET(request: Request) {
       result.book = {
         name: parsed.spreadsheet ?? null,
         id: parsed.spreadsheetId ?? null,
-        expectedId: EXPECTED_SHEET_ID,
-        match: parsed.spreadsheetId ? parsed.spreadsheetId === EXPECTED_SHEET_ID : null,
+        expectedId: expectedSheetId(),
+        match: parsed.spreadsheetId ? parsed.spreadsheetId === expectedSheetId() : null,
         rows: Object.fromEntries((parsed.sheets ?? []).map((entry) => [entry.name ?? "?", Number(entry.rows ?? 0)])),
         // r25-1 (ya usse naya) = New version deploy hua; `null` = purana code chal raha hai
         codeVersion: parsed.codeVersion ?? parsed.version ?? null,
         scriptError: parsed.error ?? null,
       };
     } catch {
-      result.book = { parseError: true, expectedId: EXPECTED_SHEET_ID };
+      result.book = { parseError: true, expectedId: expectedSheetId() };
     }
   } catch (error) {
     result.read = { error: (error as Error).message, ms: Date.now() - startedRead };

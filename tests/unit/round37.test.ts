@@ -157,7 +157,8 @@ test("R37: sheet script me onEdit — status edit → timeline row, message → 
   assert.match(script, /order\.status_sheet/, "status edit timeline row banata hai");
   assert.match(script, /Messages' && column === 'Status'/, "Messages!Status edit pakadta hai");
   assert.match(script, /Replied at/, "marked reply timestamp");
-  assert.match(script, /var CODE_VERSION = 'r37-1'/, "version bump");
+  // R38: version stamp har round me bump hota hai — format barkaraar rahe
+  assert.match(script, /var CODE_VERSION = 'r\d+-\d+';/, "version stamp");
   // timeline endpoint site ke liye maujood (phone-gated privacy)
   assert.match(script, /action === 'timeline'/, "timeline action");
 });

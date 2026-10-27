@@ -65,6 +65,8 @@ Repo me **do Next.js apps** hain (ek hi repo, do deploy):
 | Checkout (step 1–3: delivery → review → **payment**) `/checkout` | `apps/web/src/app/checkout/page.tsx` + `components/checkout-form.tsx` + `components/checkout-payment-step.tsx` |
 | Saved delivery details (browser cache) | `apps/web/src/lib/checkout-details.ts` |
 | **Sheet = order ka DB (R37)** — status/courier/AWB/note sheet se merge | `apps/web/src/lib/sheet-tracking.ts` + `apps/web/src/lib/sheet-merge.ts` (Apps Script: `scripts/google-apps-script/liksha-sheets.gs` → `onEdit` + `?action=timeline`) |
+| **Sheet pipeline report card (R38)** — owner browser me khud diagnose kare | `apps/web/src/app/api/sheet-health/route.ts` (public) + script ka `?action=health`; likhne ka hisaab `sheetWriteInfo()` (`lib/google-sheets.ts` retry ke saath) |
+| **Token paste-proof (R38)** — script ka token Script Properties me | `liksha-sheets.gs` → `effectiveToken_` + `?action=set_token` (ek baar) + `?action=adopt` (bound sheet apnao); UPI sirf sheet se — payment pause state `components/upi-payment.tsx` (`upi-unavailable`) |
 | Phone prefix auto-fix (`+91`/`91`/`0` → 10 digit) | `apps/web/src/lib/phone.ts` + `packages/validation/index.ts` (`phoneSchema`) |
 | Step 3 ka data API | `apps/web/src/app/api/orders/[orderNumber]/payment-context/route.ts` |
 | Order confirm / tracking `/orders/[orderNumber]` | `apps/web/src/app/orders/[orderNumber]/page.tsx` |
@@ -127,7 +129,7 @@ components/store-settings-provider.tsx  → poore site par context
 | `support_phone` | footer/contact me number (8005900581) |
 | `whatsapp` | WhatsApp button ka number |
 | `support_email` | email |
-| `upi_id` | payment page ka UPI (`dhakadgourav@fam`) |
+| `upi_id` | payment page ka UPI — **sirf owner ki sheet se** (R38: koi code default nahi) |
 | `upi_name` | UPI app me dikhne wala payee naam |
 | `announcement` | top announcement bar |
 | `gstin` | invoice par GSTIN |

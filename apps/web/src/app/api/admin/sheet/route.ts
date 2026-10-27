@@ -1,6 +1,6 @@
 import { getStoreSettings, storeSettingsInfo } from "@/lib/store-settings";
 import {
-  EXPECTED_SHEET_ID,
+  expectedSheetId,
   readSheetHealth,
   readSheetRecent,
   readSheetSettings,
@@ -56,8 +56,8 @@ export async function GET(request: Request) {
      * warning aata hai (warna data chup-chaap kisi copy me chala jaata hai).
      */
     health,
-    expectedSheetId: EXPECTED_SHEET_ID,
-    sheetMismatch: Boolean(health?.spreadsheetId && health.spreadsheetId !== EXPECTED_SHEET_ID),
+    expectedSheetId: expectedSheetId(),
+    sheetMismatch: Boolean(health?.spreadsheetId && health.spreadsheetId !== expectedSheetId()),
     // sheet ka URL/token frontend par kabhi nahi jaata
     sheet: null,
     recent: {

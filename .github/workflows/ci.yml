@@ -81,6 +81,10 @@ jobs:
           # smoke suite admin parity (note/payment/invoice) bhi check karti hai
           ADMIN_API_TOKEN: dev-admin-token
           OTP_DEV_MODE: "on"
+          # R38: production me UPI sirf sheet se aata hai (koi code default nahi).
+          # CI me sheet configured nahi hoti — isliye payment-flow tests ke liye
+          # ek neutral test VPA env se dete hain (asli payee ka koi hardcode nahi).
+          STORE_UPI_ID: likshastore@upi
 
       - name: Wait for server
         run: npx wait-on http://localhost:3000/api/health --timeout 120000

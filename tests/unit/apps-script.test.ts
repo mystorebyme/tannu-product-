@@ -162,13 +162,14 @@ function loadScript(
         return book;
       },
       WrapStrategy: { WRAP: "wrap", CLIP: "clip" },
-      openById: () => {
+      openById: (id: string) => {
         /**
          * Owner ka asli case: script `prkigothwal@gmail.com` se chalti hai aur sheet
          * doosre account ki hai → Google "You do not have permission to access the
-         * requested document" deta hai.
+         * requested document" deta hai. (createOwnSheet ki nayi sheet hamesha khulti
+         * hai — real Apps Script jaisa.)
          */
-        if (options.openByIdFails) {
+        if (options.openByIdFails && id !== "test-sheet-id") {
           throw new Error("You do not have permission to access the requested document.");
         }
         return book;
@@ -193,13 +194,20 @@ function loadScript(
     },
     LockService: { getScriptLock: () => ({ waitLock: () => true, releaseLock: () => {} }) },
     PropertiesService: {
-      getScriptProperties: () => ({
-        getProperty: () => options.propertySheetId ?? null,
-        setProperty: (key: string, value: string) => {
-          (options as Record<string, unknown>).propertySheetId = value;
-          (options as Record<string, unknown>).savedProperty = `${key}=${value}`;
-        },
-      }),
+      /** R38: props key-aware hain — script ab TOKEN bhi Script Properties se padhti hai. */
+      getScriptProperties: () => {
+        const opts = options as Record<string, unknown>;
+        const props = (opts.props ?? (opts.props = {})) as Record<string, string>;
+        if (options.propertySheetId && props.SHEET_ID === undefined) props.SHEET_ID = options.propertySheetId;
+        return {
+          getProperty: (key: string) => props[key] ?? null,
+          setProperty: (key: string, value: string) => {
+            props[key] = value;
+            opts.savedProperty = `${key}=${value}`;
+            if (key === "SHEET_ID") opts.propertySheetId = value;
+          },
+        };
+      },
     },
     Utilities: {
       formatDate: () => "25-Oct-2026 12:00:00",
@@ -316,20 +324,120 @@ test("settings_save sirf di gayi keys update karta hai", () => {
   assert.equal(payload.ok, true);
   assert.equal(payload.settings.support_phone, "8005900581");
   assert.equal(payload.settings.announcement, "Diwali Sale");
-  // pehle se maujood upi_id delete nahi hui
-  assert.equal(payload.settings.upi_id, "dhakadgourav@fam");
+  // R38: koi default UPI seed nahi hoti — settings_save ne upi_id invent nahi kiya
+  assert.equal(payload.settings.upi_id ?? "", "");
   assert.ok(sheets.find((sheet) => sheet.getName() === "Settings")!.rows.length >= 3);
 });
 
-test("doGet health/settings/recent — token ke bina kuch nahi", () => {
+test("doGet R38 — settings/health public (safe), baaki sab token-gated", () => {
   const { sandbox } = loadScript();
   sandbox.setup();
-  assert.equal(sandbox.doGet({ parameter: {} }).getJson().ok, false);
+
+  // private action bina token band
+  assert.equal(sandbox.doGet({ parameter: { action: "recent", sheet: "Orders" } }).getJson().ok, false);
+
+  // settings PUBLIC hai — token set hone se pehle bhi website UPI padh sake
+  const pub = sandbox.doGet({ parameter: { action: "settings" } }).getJson();
+  assert.equal(pub.ok, true);
+  assert.equal(pub.public, true);
+  assert.equal(pub.settings.admin_url, undefined, "admin_url public subset me nahi");
+  assert.equal(pub.settings.upi_id ?? "", "", "R38: koi default UPI seed nahi hoti");
+
+  // owner sheet me UPI bharta hai → public + full dono me wahi aata hai
+  sandbox.writeSettings_({ upi_id: "mystore@upi", admin_url: "https://admin.example" });
+  const full = sandbox.doGet({ parameter: { action: "settings", token: "test-token" } }).getJson();
+  assert.equal(full.settings.upi_id, "mystore@upi");
+  assert.equal(full.settings.admin_url, "https://admin.example");
+  const pubAfter = sandbox.doGet({ parameter: { action: "settings" } }).getJson();
+  assert.equal(pubAfter.settings.upi_id, "mystore@upi");
+  assert.equal(pubAfter.settings.admin_url, undefined);
+
+  // health public (safe fields); sheet naam/URL/counts sirf token ke saath
+  const openHealth = sandbox.doGet({ parameter: { action: "health" } }).getJson();
+  assert.equal(openHealth.ok, true);
+  assert.equal(openHealth.tokenOk, false);
+  assert.equal(openHealth.sheetFound, true);
+  assert.equal(openHealth.sheetId, "test-sheet-id");
+  assert.equal(openHealth.spreadsheetId, "test-sheet-id");
+  assert.equal(openHealth.spreadsheetUrl, "");
+  assert.equal(openHealth.upiSet, true);
+
+  const authHealth = sandbox.doGet({ parameter: { action: "health", token: "test-token" } }).getJson();
+  assert.equal(authHealth.tokenOk, true);
+  assert.ok(authHealth.sheets.some((sheet: { name: string }) => sheet.name === "Checkout"));
+  assert.ok(String(authHealth.spreadsheetUrl).includes("test-sheet-id"));
+});
+
+test("R38: placeholder token se koi protected action nahi chalta (public repo wali value)", () => {
+  const { sandbox, sheets } = loadScript("CHANGE-ME-liksha-token");
+  sandbox.setup();
+  const res = sandbox
+    .doPost({
+      postData: {
+        contents: JSON.stringify({
+          token: "CHANGE-ME-liksha-token",
+          action: "append",
+          rows: [{ sheet: "Orders", row: { Event: "order.placed", "Order number": "LK-HACK" } }],
+        }),
+      },
+    })
+    .getJson();
+  assert.equal(res.ok, false, "placeholder token authorize nahi hona chahiye");
+  assert.match(String(res.fix), /set_token/, "fix me set_token URL batana chahiye");
+  assert.equal(sheets.find((sheet) => sheet.getName() === "Orders")!.rows.length, 1, "koi row nahi likhi gayi");
+  // public reads phir bhi khule hain
+  assert.equal(sandbox.doGet({ parameter: { action: "settings" } }).getJson().ok, true);
+  assert.equal(sandbox.doGet({ parameter: { action: "health" } }).getJson().tokenSet, false);
+});
+
+test("R38: set_token — fresh install par save, baad me old ke bina change nahi", () => {
+  const { sandbox } = loadScript("CHANGE-ME-liksha-token");
+
+  const weak = sandbox.doGet({ parameter: { action: "set_token", token: "chota" } }).getJson();
+  assert.equal(weak.ok, false, "20+ character zaroori");
+
+  const placeholder = sandbox.doGet({ parameter: { action: "set_token", token: "CHANGE-ME-liksha-token" } }).getJson();
+  assert.equal(placeholder.ok, false, "public placeholder dobara set nahi ho sakta");
+
+  const fresh = sandbox.doGet({ parameter: { action: "set_token", token: "fresh-secret-token-1234567890" } }).getJson();
+  assert.equal(fresh.ok, true);
+  assert.equal(fresh.tokenSet, true);
+
+  // ab wahi token protected actions kholta hai; placeholder band
+  const authed = sandbox.doGet({ parameter: { action: "recent", sheet: "Orders", token: "fresh-secret-token-1234567890" } }).getJson();
+  assert.equal(authed.ok, true);
+  assert.equal(sandbox.doGet({ parameter: { action: "recent", sheet: "Orders", token: "CHANGE-ME-liksha-token" } }).getJson().ok, false);
+
+  // set token badalna ho to `old` chahiye
+  const noOld = sandbox.doGet({ parameter: { action: "set_token", token: "another-secret-token-0987654321" } }).getJson();
+  assert.equal(noOld.ok, false);
+  const withOld = sandbox
+    .doGet({ parameter: { action: "set_token", token: "another-secret-token-0987654321", old: "fresh-secret-token-1234567890" } })
+    .getJson();
+  assert.equal(withOld.ok, true);
+  assert.equal(sandbox.doGet({ parameter: { action: "version", token: "another-secret-token-0987654321" } }).getJson().ok, true);
+});
+
+test("R38: adopt — bound sheet hi website ki sheet ban jaati hai (SHEET_ID property)", () => {
+  // configured (purani) sheet access nahi — script owner ki sheet se bound hai
+  const { sandbox } = loadScript("test-token", { openByIdFails: true });
+  const adopted = sandbox.doGet({ parameter: { action: "adopt", token: "test-token" } }).getJson();
+  assert.equal(adopted.ok, true);
+  assert.equal(adopted.adopted.id, "test-sheet-id");
+
   const health = sandbox.doGet({ parameter: { action: "health", token: "test-token" } }).getJson();
-  assert.equal(health.ok, true);
-  assert.ok(health.sheets.some((sheet: { name: string }) => sheet.name === "Checkout"));
-  const settings = sandbox.doGet({ parameter: { action: "settings", token: "test-token" } }).getJson();
-  assert.equal(settings.settings.upi_id, "dhakadgourav@fam");
+  assert.equal(health.sheetFound, true);
+  assert.equal(health.sheetId, "test-sheet-id");
+
+  // adopt ke baad append usi sheet me jaata hai
+  const res = sandbox
+    .doPost({
+      postData: {
+        contents: JSON.stringify({ token: "test-token", action: "append", rows: [{ sheet: "Audit", row: { Actor: "t", Action: "x" } }] }),
+      },
+    })
+    .getJson();
+  assert.equal(res.ok, true);
 });
 
 test("script me UPI brand naam ya secret hardcode nahi hai", () => {
@@ -337,6 +445,12 @@ test("script me UPI brand naam ya secret hardcode nahi hai", () => {
   assert.ok(!/Google Pay|PhonePe|Paytm|BHIM/i.test(source), "UPI brand naam nahi hone chahiye");
   assert.ok(source.includes("CHANGE-ME-liksha-token"), "token placeholder rakha ho");
   assert.ok(!/AKfycb/.test(source), "koi asli deployment id hardcode nahi");
+  // R38 (owner): purana payee VPA code me kahin nahi — UPI sirf sheet se
+  assert.ok(!/dhakadgourav/i.test(source), "purana payee hardcode nahi");
+  assert.ok(source.includes("function effectiveToken_"), "token Script Properties se padhta hai");
+  assert.ok(source.includes("action === 'set_token'"), "set_token action maujood hai");
+  assert.ok(source.includes("action === 'adopt'"), "adopt action maujood hai");
+  assert.equal((source.match(/function guard_/g) ?? []).length, 1, "guard_ ek hi baar define ho");
 });
 
 /**
@@ -377,7 +491,7 @@ const sampleOrder = {
 test("website jo column bhejti hai wo sab sheet HEADERS me maujood hain", () => {
   const { sandbox } = loadScript();
 
-  const ordersKeys = Object.keys(orderSheetRow(sampleOrder, "order.placed", { "UPI ID": "dhakadgourav@fam" }));
+  const ordersKeys = Object.keys(orderSheetRow(sampleOrder, "order.placed", { "UPI ID": "teststore@upi" }));
   for (const key of ordersKeys) {
     assert.ok(headersOf(sandbox, "Orders").includes(key), `Orders me column nahi: ${key}`);
     assert.ok(headersOf(sandbox, "Payments").includes(key), `Payments me column nahi: ${key}`);
@@ -463,7 +577,7 @@ test("timeline action — order + phone se 5 step tracking", () => {
 test("row ke saare values asli sheet me land karte hain (order.placed)", () => {
   const { sandbox, sheets } = loadScript();
   sandbox.setup();
-  const row = orderSheetRow(sampleOrder, "order.placed", { "UPI ID": "dhakadgourav@fam" });
+  const row = orderSheetRow(sampleOrder, "order.placed", { "UPI ID": "teststore@upi" });
   sandbox.appendRows_([{ sheet: "Orders", row }]);
 
   const orders = sheets.find((sheet) => sheet.getName() === "Orders")!;
@@ -473,7 +587,7 @@ test("row ke saare values asli sheet me land karte hain (order.placed)", () => {
   assert.equal(column("Order number"), "LK-ABC123");
   assert.equal(column("State"), "Rajasthan");
   assert.equal(column("Total"), 499);
-  assert.equal(column("UPI ID"), "dhakadgourav@fam");
+  assert.equal(column("UPI ID"), "teststore@upi");
   assert.equal(column("Tracking courier"), "Delhivery");
   assert.equal(column("Item details"), "Anarkali (M) x1");
   // koi value drop nahi hui
@@ -745,18 +859,25 @@ test("v3: galat token par naye endpoints bhi block hain", () => {
   assert.equal(invoices.rows.length, 1, "sirf header");
 });
 
-test("v3: sheet share nahi hai to script khud apni sheet bana leti hai (permission-proof)", () => {
-  // Owner ka case: sheet doosre account ki thi → pehle har call fail hoti thi.
-  // Ab book_() nayi sheet bana kar Script Properties me id save kar deta hai.
-  const { sandbox, sheets, book } = loadScript("test-token", {
+test("R38: sheet access nahi to ANAATH sheet nahi banti — loud error + health me saaf pata", () => {
+  // Owner ka asli complaint: "order kiya par sheet me kuch show nahi ho raha".
+  // Purana behaviour chup-chaap nayi sheet bana deta tha (data gayab). Ab:
+  const { sandbox } = loadScript("test-token", {
     openByIdFails: true,
     activeIsNull: true,
   });
-  const result = sandbox.setup();
-  assert.ok(Array.isArray(result), "setup chalta hai (crash nahi)");
-  assert.ok(sheets.length >= 16, "nayi sheet me saare tabs ban gaye");
-  // nayi sheet ban gayi aur usme saara kaam ho gaya
-  assert.ok(book && typeof book.getName === "function");
+  assert.throws(() => sandbox.setup(), /sheet_access_denied/, "book_ loud error deta hai");
+  const health = sandbox.doGet({ parameter: { action: "health" } }).getJson();
+  assert.equal(health.ok, true);
+  assert.equal(health.sheetFound, false);
+  assert.match(String(health.problems.join(" ")), /Sheet access nahi/);
+  const write = sandbox
+    .doPost({
+      postData: { contents: JSON.stringify({ token: "test-token", action: "append", rows: [{ sheet: "Orders", row: { Event: "x" } }] }) },
+    })
+    .getJson();
+  assert.equal(write.ok, false, "write fail hota hai (chup-chaap kahin nahi likhta)");
+  assert.match(String(write.hint ?? write.error), /Share|bound/i);
 });
 
 test("v3: doctor permission problem ko pakadta hai aur account batata hai", () => {

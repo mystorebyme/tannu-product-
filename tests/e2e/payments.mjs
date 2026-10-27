@@ -97,6 +97,9 @@ check("payment page keeps the UPI block here (not checkout)", payHtml.includes('
 check("payment page has a single 'Open UPI app' button", payHtml.includes('data-testid="upi-open"'));
 check("payment page has a UPI deep link (mobile app chooser)", /upi:\/\/pay/.test(payHtml));
 check("payment page names no UPI app brand", !/Google Pay|PhonePe|Paytm|BHIM/i.test(payHtml));
+/* R38 (owner): purana payee VPA page par kahin nahi — UPI sirf sheet/env se aati hai. */
+check("payment page par purana hardcoded payee nahi", !/dhakadgourav/i.test(payHtml));
+check("payment page ka UPI env/sheet se aaya", payHtml.includes("likshastore@upi"));
 
 // 3a. owner (R32): "payment ke baad aage badhne ke liye yahan click kariye" —
 // order details ka link highlight hai, aur invoice download abhi band hai.

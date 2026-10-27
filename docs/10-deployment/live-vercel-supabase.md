@@ -33,7 +33,7 @@ Monorepo hone ke kaaran install/build repo root se chalta hai (`cd ../..`), outp
 | `DATABASE_URL` | Supabase **session pooler** (port 5432): `postgresql://postgres.<ref>:<password>@aws-0-ap-south-1.pooler.supabase.com:5432/postgres` |
 | `NEXT_PUBLIC_SITE_URL` | `https://liksha-clothing.vercel.app` (domain lagne par `https://www.likshaclothing.com`) |
 | `ADMIN_API_TOKEN` | random long string — **admin project me wahi** hona chahiye |
-| `STORE_UPI_ID` | `dhakadgourav@fam` (owner UPI) |
+| `STORE_UPI_ID` | ❌ **R38 me delete** — UPI sirf sheet ke `upi_id` se aati hai (koi fallback payee nahi) |
 | `STORE_UPI_NAME` | owner ke UPI account ka naam |
 | `UPI_RETURN_SECRET` | random (UPI return callback signing) |
 | `GOOGLE_SHEETS_WEBAPP_URL` / `GOOGLE_SHEETS_TOKEN` | optional — owner ki sheet settings |

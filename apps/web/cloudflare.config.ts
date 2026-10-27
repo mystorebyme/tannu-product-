@@ -61,8 +61,8 @@ export default defineConfig({
        * Sheet → site **real-time** knobs (R35).
        *
        * Workers par `process.env` sirf wahi padh sakta hai jo yahan declare ho,
-       * isliye ye do values config me hain. UPI ID khud **sheet se** aata hai
-       * (`GOOGLE_SHEETS_WEBAPP_URL`) — env sirf fallback hai, isliye yahan nahi.
+       * isliye ye values config me hain. UPI ID khud **sheet se** aata hai
+       * (`GOOGLE_SHEETS_WEBAPP_URL`); `STORE_UPI_ID` sirf emergency fallback hai.
        *
        *   SHEET_READ_TIMEOUT_MS  Apps Script `doGet` cold start par 1–4s leta hai;
        *                          900ms par read hamesha timeout hota tha aur site
@@ -73,6 +73,15 @@ export default defineConfig({
       SHEET_READ_TIMEOUT_MS: bindings.text("4000"),
       SHEET_SETTINGS_TTL_MS: bindings.text("2000"),
       SHEET_TRACKING_TTL_MS: bindings.text("2000"),
+      /**
+       * R38: UPI ka **ek hi source sheet hai** (`upi_id`). `STORE_UPI_ID` sirf
+       * emergency fallback hai — par fallback declare hi na ho to Workers par
+       * kabhi kaam hi nahi karta (Vercel/Next se parity toot ti hai). Workers par
+       * text bindings `.dev.vars` se override nahi hote, isliye value **build ke
+       * waqt** shell env se bake hoti hai (local preview/tests ke liye); production
+       * Workers build me env nahi hota → default khaali → sheet hi sab kuch.
+       */
+      STORE_UPI_ID: bindings.text(process.env.STORE_UPI_ID?.trim() ?? ""),
     },
   }),
 });
