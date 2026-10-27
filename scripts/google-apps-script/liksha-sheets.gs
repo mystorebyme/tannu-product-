@@ -14,6 +14,7 @@
  *                 snapshot — **R40: sheet hi orders ka DB hai** (koi Supabase nahi)
  *   OrderItems  → order ki har item alag row me (size, colour, qty, price)
  *   Payments    → payment pending / UTR submitted / claimed / verified / failed
+ *                 (R42: status columns me **dropdown** — setup/repair/`?action=dropdowns`)
  *   Invoices    → GST invoice (taxable value, CGST/SGST/IGST, invoice number)
  *   Shipments   → courier, AWB, tracking URL, dispatch/delivery status
  *   Checkout    → funnel: checkout khula → review → order placed → order failed
@@ -83,7 +84,7 @@ var TOKEN = 'CHANGE-ME-liksha-token';
 var TOKEN_PLACEHOLDER = 'CHANGE-ME-liksha-token';
 
 /** Code ka version — `?action=health` me dikhta hai. Code badle to isse badhaayein. */
-var CODE_VERSION = 'r40-1';
+var CODE_VERSION = 'r42-1';
 
 /**
  * R40 (owner rule): sheet ka id **code me kahin nahi** — sirf Script Properties
@@ -219,6 +220,63 @@ var MONEY_COLUMNS = {
   Invoices: ['Taxable value', 'CGST', 'SGST', 'IGST', 'Shipping', 'Discount', 'Total'],
   Inventory: ['Stock'],
 };
+
+/* ───────────────────────── R42: DROPDOWN (DATA VALIDATION) ─────────────────────────
+ * Owner: "dropdown data validation lga do payment mai … jis column mai jrurat hai
+ * sabhi mai add kr". Status-type columns me dropdown — owner se galti se galat
+ * value type na ho, aur website ko saaf values milein.
+ *
+ * `setAllowInvalid(true)` jaan-boojh kar: dropdown **suvidha** hai, taala nahi.
+ * Website/script doosri value likhein (jaise free-text status) to sheet accept
+ * karti hai (sirf warning) — warna automation toot jaata. Site wala
+ * `sheetStatusToOrderStatus` free text ko waise bhi map kar leta hai.
+ *
+ * Lagne ke 3 tareeke: (1) `setup`/`repair` ke saath khud, (2) /exec panel ka
+ * "Dropdowns lagao" form, (3) `?action=dropdowns&token=…` (website bhi r42+
+ * detect karke ek baar khud chala deti hai — sheet-health probe se).
+ */
+var ORDER_DROPDOWN = ['placed', 'confirmed', 'packed', 'shipped', 'delivered', 'cancelled', 'returned'];
+var PAYMENT_DROPDOWN = ['pending', 'processing', 'paid', 'failed', 'refunded'];
+var VALIDATIONS = {
+  Orders: { 'Order status': ORDER_DROPDOWN, 'Payment status': PAYMENT_DROPDOWN, 'Payment method': ['prepaid', 'cod'] },
+  Payments: { 'Order status': ORDER_DROPDOWN, 'Payment status': PAYMENT_DROPDOWN, 'Payment method': ['prepaid', 'cod'] },
+  OrderItems: { Status: ORDER_DROPDOWN },
+  Shipments: { Status: ORDER_DROPDOWN.concat(['in_transit', 'out_for_delivery']) },
+  Invoices: { Type: ['gst', 'manual'] },
+  Messages: { Status: ['new', 'replied', 'handled'] },
+  Newsletter: { Status: ['subscribed', 'unsubscribed'] },
+  Reviews: { Status: ['pending', 'approved', 'rejected'], Verified: ['yes', 'no'] },
+  Coupons: { Type: ['percent', 'flat'], Active: ['yes', 'no'] },
+  Inventory: { 'Low stock alert': ['yes', 'no'] },
+};
+
+/** Dropdown kitni rows par pehle se lage — nayi rows range me khud cover ho jaati hain. */
+var VALIDATION_ROWS = 3000;
+
+/** Saare status-columns me dropdown laga do (idempotent — dobara chalane par same rule). */
+function applyValidations_() {
+  var applied = 0;
+  Object.keys(VALIDATIONS).forEach(function (name) {
+    var sheet;
+    try {
+      sheet = sheet_(name);
+    } catch (ignored) {
+      return; // tab khul nahi rahi — baaki columns par kaam chalta rahe
+    }
+    var headers = headersOf_(sheet);
+    Object.keys(VALIDATIONS[name]).forEach(function (column) {
+      var index = headers.indexOf(column);
+      if (index < 0) return;
+      var rule = SpreadsheetApp.newDataValidation()
+        .requireValueInList(VALIDATIONS[name][column], true)
+        .setAllowInvalid(true)
+        .build();
+      sheet.getRange(2, index + 1, VALIDATION_ROWS, 1).setDataValidation(rule);
+      applied += 1;
+    });
+  });
+  return applied;
+}
 
 /** Timestamp column — date format lagta hai. */
 var TIMESTAMP_COLUMN = 'Timestamp';
@@ -877,6 +935,7 @@ function setup_() {
   });
 
   refreshDashboard_();
+  applyValidations_(); // R42: naye/baaki tabs me status-dropdowns
   noteSync_('script', 'setup', created.length, 'ok', 'tabs: ' + created.join(', '));
   try {
     book_().toast('Liksha sheets ready ✔ (' + Object.keys(HEADERS).length + ' tabs)', 'setup', 6);
@@ -899,6 +958,7 @@ function repairHeaders_() {
     ensureHeaders_(sheet, name);
     if (headersOf_(sheet).join('|') !== before) fixed.push(name);
   });
+  applyValidations_(); // R42: headers theek hue to dropdowns bhi taaza
   book_().toast('Headers check ho gaye ✔ (' + (fixed.length ? fixed.join(', ') : 'sab sahi') + ')', 'repair', 6);
   return fixed;
 }
@@ -2291,6 +2351,17 @@ function controlPanel_() {
     '<label>Token (SHEET_ID pehle se set hai to zaroori, warna khaali chhodiye)' +
     '<input name="token" type="password" placeholder="Vercel GOOGLE_SHEETS_TOKEN"></label>' +
     '<button type="submit">Sheet set karo</button></form>';
+  /**
+   * R42: dropdown (data validation) lagane ka form — token daaliye, submit.
+   * Website r42+ detect karke khud bhi ek baar chala deti hai, par manual
+   * button hamesha rahega (naye tabs / reset ke baad kaam aata hai).
+   */
+  var dropdownForm =
+    '<form class="setform" method="GET" action="">' +
+    '<input type="hidden" name="action" value="dropdowns">' +
+    '<label>Status columns me dropdown lagao (Order status, Payment status, Messages, Coupons…)' +
+    '<input name="token" type="password" placeholder="Vercel GOOGLE_SHEETS_TOKEN" required></label>' +
+    '<button type="submit">Dropdowns lagao</button></form>';
   var html = '' +
     '<!DOCTYPE html><html lang="hi"><head><meta charset="utf-8">' +
     '<title>Liksha sheet panel · ' + esc_(report.version) + '</title>' +
@@ -2321,8 +2392,8 @@ function controlPanel_() {
     '<a class="btn solid" href="' + esc_(storeUrl) + '">Website kholo</a>' +
     (adminUrl ? '<a class="btn" href="' + esc_(adminUrl) + '">Admin panel</a>' : '') +
     '<a class="btn" href="' + esc_(storeUrl) + '/api/sheet-health">Site ka sheet-health</a>' +
-    '</div>' +
-    '<div class="hint"><b>R40: orders isi sheet me save hote hain</b> (Orders tab ka <b>Order JSON</b> column = poora order; koi Supabase/DB nahi). Customer ko message dikhana ho to order ki row ka <b>Admin Note</b> column bhar dijiye — 2 second me order page par dikhega (khaali ho to default “Waiting for confirmation”). Status badalna ho to <b>Order status</b> column edit kariye. Sheet badalni ho to upar wala form dobara — code/paste kuch nahi badlega.</div>' +
+    '</div>' + dropdownForm +
+    '<div class="hint"><b>R40: orders isi sheet me save hote hain</b> (Orders tab ka <b>Order JSON</b> column = poora order; koi Supabase/DB nahi). Customer ko message dikhana ho to order ki row ka <b>Admin Note</b> column bhar dijiye — 2 second me order page par dikhega (khaali ho to default “Waiting for confirmation”). Status badalna ho to <b>Order status</b> column edit kariye. Sheet badalni ho to upar wala form dobara — code/paste kuch nahi badlega.<br><br><b>R42: dropdown</b> — “Dropdowns lagao” form se (ya setup/repair ke saath khud) status columns me dropdown lag jaate hain: payment <b>pending/processing</b> ho to site order page par “Complete payment” button dikhati hai, <b>paid</b> karte hi button hat jaata hai.</div>' +
     '</div></body></html>';
   return HtmlService.createHtmlOutput(html)
     .setTitle('Liksha sheet panel')
@@ -2412,6 +2483,25 @@ function doGet(e) {
       version: CODE_VERSION,
       sheet: { id: wantId, name: target.getName(), url: target.getUrl() },
       note: 'Ab website isi sheet ko padhegi/usme likhegi. Id Script Properties me safe hai — code dobara paste karne par bhi nahi mit-ti.',
+    });
+  }
+
+  /**
+   * R42 `dropdowns` — status-columns me dropdown (data validation) laga do.
+   * Token zaroori (sheet UI badalti hai). Panel ke form se ya seedha URL se:
+   * `<webapp URL>?action=dropdowns&token=…`
+   */
+  if (action === 'dropdowns') {
+    if (!authed) {
+      return json_({ ok: false, version: CODE_VERSION, error: 'token chahiye — ?action=dropdowns&token=…', fix: tokenFix_() });
+    }
+    var appliedDropdowns = applyValidations_();
+    try { noteAudit_('owner', 'dropdowns', appliedDropdowns + ' columns', 'data validation'); } catch (ignored) {}
+    return json_({
+      ok: true,
+      version: CODE_VERSION,
+      applied: appliedDropdowns,
+      note: 'Order status / Payment status / Payment method / Messages / Newsletter / Reviews / Coupons / Inventory — dropdown lag gaye. Galat purani values sheet me hi rahengi (dropdown sirf nayi entry me madad karta hai).',
     });
   }
 
@@ -2648,6 +2738,13 @@ function doPost(e) {
 
     if (action === 'repair') {
       return json_({ ok: true, fixed: repairHeaders() });
+    }
+
+    // R42: status-columns me dropdown (data validation) — owner button ya site khud
+    if (action === 'dropdowns') {
+      var dropdowns = applyValidations_();
+      try { noteAudit_(body.actor || 'owner', 'dropdowns', dropdowns + ' columns', 'data validation'); } catch (ignored) {}
+      return json_({ ok: true, version: CODE_VERSION, applied: dropdowns });
     }
 
     if (action === 'test') {

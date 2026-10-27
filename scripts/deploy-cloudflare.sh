@@ -22,7 +22,7 @@
 # Env:
 #   SKIP_INSTALL=1  → npm ci chhodo (deps pehle se install hain, jaise CI me)
 #
-# Poora guide: docs/09-devops/cloudflare-workers.md §7
+# Poora guide: yahi script + .github/workflows/cloudflare-worker.yml (manual dispatch)
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -54,6 +54,6 @@ cat <<'EOF'
   Ab check kariye (Worker ke URL par):
     /api/health        → "runtime":"cloudflare-workers", "storage":"postgres", "durable":true
     /api/settings      → data.upiId = owner ki sheet wala UPI, meta.sheetSource = "apps-script"
-  `durable:true` na dikhe to DATABASE_URL secret set kariye — warna orders memory me
-  jaate hain (restart par gayab). Detail: docs/09-devops/cloudflare-workers.md
+  `durable:true` na dikhe to GOOGLE_SHEETS_WEBAPP_URL + GOOGLE_SHEETS_TOKEN secrets set
+  kariye — orders Google Sheet me save hote hain (R40+: koi DATABASE_URL nahi).
 EOF

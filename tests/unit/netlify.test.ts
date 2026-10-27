@@ -74,15 +74,6 @@ test("CSP me koi third-party gateway nahi (sirf apni site)", () => {
   assert.match(config, /frame-src 'none'/);
 });
 
-test("Netlify shift guide maujood hai — domain ke exact records ke saath", () => {
-  const guide = read("docs/00-overview/netlify-shift-guide.md");
-  assert.match(guide, /75\.2\.60\.5/); // apex A record
-  assert.match(guide, /www/); // CNAME www
-  assert.match(guide, /STORE_API_URL/);
-  assert.match(guide, /apps\/web/);
-  assert.match(guide, /apps\/admin/);
-});
-
 test("Netlify env templates maujood hain (2 sites, copy-paste import ke liye)", () => {
   const web = read("infra/netlify/web.env.example");
   for (const key of [

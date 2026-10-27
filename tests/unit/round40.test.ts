@@ -120,11 +120,11 @@ test("R40: google-sheets — scriptGet/scriptPost/version-check/auto-heal, expec
   assert.match(lib, /endpoint\.searchParams\.set\("expected", expected\)/, "health probe expected id bhejta hai");
 });
 
-/* ── 2. Script r40-1 guards ───────────────────────────────────────────────── */
+/* ── 2. Script r40+ guards ───────────────────────────────────────────────── */
 
 test("R40: script — sheet id sirf Script Properties, sheet_set bootstrap, order_state/orders_state", () => {
   const gs = read("scripts/google-apps-script/liksha-sheets.gs");
-  assert.match(gs, /var CODE_VERSION = 'r40-1';/);
+  assert.match(gs, /var CODE_VERSION = 'r42-1';/);
   assert.ok(!gs.includes(FINAL_SHEET_ID), "sheet id code me kahin nahi");
   assert.ok(!gs.includes("var SPREADSHEET_ID"), "SPREADSHEET_ID constant gaya");
   assert.ok(!gs.includes("SHEET_ID_FALLBACK ="), "fallback constant gaya");

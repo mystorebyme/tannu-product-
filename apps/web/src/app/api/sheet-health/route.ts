@@ -56,7 +56,7 @@ export async function GET() {
   const warnings: string[] = [];
 
   if (!configured) {
-    help.push("Vercel me GOOGLE_SHEETS_WEBAPP_URL set nahi — sheet pipeline band hai (docs/09-devops/google-sheets.md).");
+    help.push("Vercel me GOOGLE_SHEETS_WEBAPP_URL set nahi — sheet pipeline band hai.");
   }
   if (health && !health.ok) {
     const probeTimedOut = /timeout|abort/i.test(String(health.error ?? ""));
@@ -76,8 +76,9 @@ export async function GET() {
     if (major && major < 40) {
       // R41: purana script **failure nahi** — orders compat mode me sheet me hi
       // save/read hote hain. Full fidelity (Order JSON snapshot, order_state,
-      // sheet_set/auto-heal, Admin Note column) ke liye r40-1 paste karein.
-      warnings.push(`Script ka purana version chal raha hai (${health.version}) — orders sheet me save ho rahe hain (compat mode), par Order JSON snapshot/Admin Note/sheet_set auto-heal jaisi poori taakat ke liye r40-1 paste kariye (docs/00-overview/apps-script-code.md → Deploy → New version).`);
+      // sheet_set/auto-heal, Admin Note column, R42 dropdowns) ke liye latest
+      // script paste karein: scripts/google-apps-script/liksha-sheets.gs (r42-1).
+      warnings.push(`Script ka purana version chal raha hai (${health.version}) — orders sheet me save ho rahe hain (compat mode), par Order JSON snapshot/Admin Note/sheet_set auto-heal/dropdowns jaisi poori taakat ke liye latest script (r42-1) paste kariye: repo ki scripts/google-apps-script/liksha-sheets.gs → Apps Script → Deploy → New version.`);
     }
     if (health.tokenSet === false) {
       help.push("Script ka TOKEN set nahi — browser me <webapp URL>?action=set_token&token=<Vercel GOOGLE_SHEETS_TOKEN> kholiye.");

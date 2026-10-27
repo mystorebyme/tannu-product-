@@ -28,6 +28,8 @@ function makeSheet(name: string, id: number, grid: Grid = []) {
   const sheet = {
     name,
     rows: grid,
+    /** R42: setDataValidation calls ka record — dropdown tests isi se assert karte hain */
+    validations: [] as { row: number; column: number; numRows: number; rule: { list?: string[]; allowInvalid?: boolean } }[],
     getSheetId: () => id,
     getName: () => name,
     getLastRow: () => sheet.rows.length,
@@ -86,6 +88,10 @@ function makeSheet(name: string, id: number, grid: Grid = []) {
       setWrapStrategy: () => api,
       setNumberFormat: () => api,
       createFilter: () => api,
+      setDataValidation: (rule: { list?: string[]; allowInvalid?: boolean }) => {
+        sheet.validations.push({ row, column, numRows, rule });
+        return api;
+      },
     };
     return api;
   }
@@ -162,6 +168,20 @@ function loadScript(
         return book;
       },
       WrapStrategy: { WRAP: "wrap", CLIP: "clip" },
+      /** R42: dropdown (data validation) builder — rule build karke range ko deta hai */
+      newDataValidation: () => {
+        const builder: { list?: string[]; allowInvalid?: boolean; requireValueInList?: unknown; setAllowInvalid?: unknown; build?: unknown } = {};
+        builder.requireValueInList = (list: string[]) => {
+          builder.list = list;
+          return builder;
+        };
+        builder.setAllowInvalid = (allow: boolean) => {
+          builder.allowInvalid = allow;
+          return builder;
+        };
+        builder.build = () => ({ list: builder.list, allowInvalid: builder.allowInvalid });
+        return builder;
+      },
       openById: (id: string) => {
         /**
          * Owner ka asli case: script `prkigothwal@gmail.com` se chalti hai aur sheet
@@ -616,12 +636,6 @@ test("row ke saare values asli sheet me land karte hain (order.placed)", () => {
     })
     .filter(Boolean);
   assert.deepEqual(dropped, []);
-});
-
-test("owner doc (apps-script-code.md) script ke saath sync hai", () => {
-  const gs = fs.readFileSync(path.join(process.cwd(), "scripts/google-apps-script/liksha-sheets.gs"), "utf8").trimEnd();
-  const doc = fs.readFileSync(path.join(process.cwd(), "docs/00-overview/apps-script-code.md"), "utf8");
-  assert.ok(doc.includes(gs), "doc purani hai — `npm run apps-script:export` chalaiye");
 });
 
 test("R40: fresh paste (SHEET_ID khaali) → loud error; sheet_set se turant fix — copy sheet me kabhi nahi likhta", () => {
@@ -1083,10 +1097,13 @@ test("R39: browser se plain /exec → HTML control panel (JSON nahi)", () => {
   assert.equal(typeof out.getContent, "function", "HtmlOutput mila");
   const html = out.getContent();
   assert.match(html, /sheet control panel/i);
-  assert.match(html, /r40-1/);
+  assert.match(html, /r42-1/);
   assert.match(html, /Admin Note/);
   assert.match(html, /Waiting for confirmation/);
   assert.match(html, /designerclothing\.fashion/);
+  // R42: panel par dropdown lagane ka form bhi hai
+  assert.match(html, /Dropdowns lagao/);
+  assert.match(html, /value="dropdowns"/);
 
   // site ka contract nahi toota: action=settings abhi bhi JSON deta hai
   const settings = sandbox.doGet({ parameter: { action: "settings" } }).getJson();
@@ -1233,4 +1250,58 @@ test("R41: compat contract — action=order tab-wise rows deta hai (bina Order J
   const recent = sandbox.doGet({ parameter: { action: "recent", token: "test-token", sheet: "Orders", limit: 10 } }).getJson();
   assert.equal(recent.ok, true);
   assert.equal(recent.rows[0]["Order status"], "confirmed", "recent newest-first deta hai (site group karke reverse karti hai)");
+});
+
+/* ───────────────────────── R42: dropdown (data validation) ─────────────────────────
+ * Owner: "dropdown data validation lga do payment mai … jis column mai jrurat hai
+ * sabhi mai add kr". Script side: VALIDATIONS map + applyValidations_ + setup/repair
+ * me auto + GET/POST `dropdowns` action (token ke saath) + panel form.
+ */
+test("R42: setup() status columns me dropdown lagata hai (allowInvalid = automation safe)", () => {
+  const { sandbox, sheets } = loadScript();
+  sandbox.setup();
+
+  const orders = sheets.find((sheet) => sheet.getName() === "Orders");
+  assert.ok(orders, "Orders tab bana");
+  assert.ok(orders!.validations.length >= 3, `Orders me >=3 dropdown (mile ${orders!.validations.length})`);
+  for (const validation of orders!.validations) {
+    assert.equal(validation.row, 2, "header row par validation nahi");
+    assert.equal(validation.numRows, 3000, "nayi rows range me cover");
+    assert.equal(validation.rule.allowInvalid, true, "allowInvalid — site/script ki free values block nahi");
+    assert.ok(Array.isArray(validation.rule.list) && validation.rule.list!.length > 0);
+  }
+  const lists = orders!.validations.map((validation) => (validation.rule.list ?? []).join(","));
+  assert.ok(lists.some((list) => list.includes("paid") && list.includes("pending")), "Payment status dropdown");
+  assert.ok(lists.some((list) => list.includes("placed") && list.includes("shipped")), "Order status dropdown");
+  assert.ok(lists.some((list) => list === "prepaid,cod"), "Payment method dropdown");
+
+  // "jis column mai jrurat hai sabhi mai" — baaki tabs bhi
+  const messages = sheets.find((sheet) => sheet.getName() === "Messages")!;
+  assert.ok(messages.validations.some((v) => (v.rule.list ?? []).includes("replied")), "Messages Status dropdown");
+  const coupons = sheets.find((sheet) => sheet.getName() === "Coupons")!;
+  assert.ok(coupons.validations.some((v) => (v.rule.list ?? []).includes("percent")), "Coupons Type dropdown");
+  const payments = sheets.find((sheet) => sheet.getName() === "Payments")!;
+  assert.ok(payments.validations.length >= 3, "Payments tab ke status columns me bhi dropdown");
+});
+
+test("R42: GET/POST ?action=dropdowns — token ke saath chalta hai, bina token nahi", () => {
+  const { sandbox, sheets } = loadScript();
+  sandbox.setup();
+  const orders = sheets.find((sheet) => sheet.getName() === "Orders")!;
+  const before = orders.validations.length;
+
+  const denied = sandbox.doGet({ parameter: { action: "dropdowns" } }).getJson();
+  assert.equal(denied.ok, false, "bina token mana");
+
+  const allowed = sandbox.doGet({ parameter: { action: "dropdowns", token: "test-token" } }).getJson();
+  assert.equal(allowed.ok, true);
+  assert.equal(allowed.version, "r42-1");
+  assert.ok(allowed.applied >= 10, "saare tabs ke columns apply hue");
+  assert.ok(orders.validations.length > before, "Orders par validation dobara lagi (idempotent)");
+
+  const posted = sandbox.doPost({
+    postData: { contents: JSON.stringify({ token: "test-token", action: "dropdowns", actor: "site-auto" }) },
+  }).getJson();
+  assert.equal(posted.ok, true, "site ka scriptPost('dropdowns') bhi chalta hai");
+  assert.ok(posted.applied >= 10);
 });

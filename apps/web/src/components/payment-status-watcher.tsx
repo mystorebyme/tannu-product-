@@ -28,6 +28,15 @@ const COPY: Record<string, { label: string; note: string; tone: string }> = {
     note: "Paisa cut nahi hua ya payment fail hui — dobara try kariye ya WhatsApp par batayein.",
     tone: "border-[#f0c9c5] bg-[#fdf5f4] text-[#a3312a]",
   },
+  /**
+   * R42: refunded ki apni copy — pehle ye "Payment pending" wali fallback me
+   * girta tha ("UPI se pay kariye") jo refund ke baad galat message hai.
+   */
+  refunded: {
+    label: "Refund ho gaya",
+    note: "Aapka paisa wapas kar diya gaya hai — 5–7 working days me account me dikh jayega.",
+    tone: "border-[#cfe6d4] bg-[#f3faf4] text-[#2f7a3f]",
+  },
 };
 
 /**
@@ -53,7 +62,8 @@ export function PaymentStatusWatcher({
 
   useEffect(() => {
     if (!API_AVAILABLE) return;
-    if (status === "paid") return;
+    // paid/refunded = paisa ka faisla ho gaya — ab poll karne ka matlab nahi (R42)
+    if (status === "paid" || status === "refunded") return;
     let cancelled = false;
     let timer: number | undefined;
 
@@ -72,7 +82,7 @@ export function PaymentStatusWatcher({
           onStatusChange?.(next);
           router.refresh();
         }
-        if (next === "paid") return;
+        if (next === "paid" || next === "refunded") return;
       } catch {
         /* offline — agle poll par try */
       }

@@ -5,7 +5,7 @@ import { getAuth, type Auth } from "firebase/auth";
 
 /**
  * Firebase web config (client ke liye public hoti hai — koi secret nahi).
- * Setup: docs/07-security/phone-otp.md
+ * Setup: Firebase console → Phone auth → web config (env me keys).
  */
 const config = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,

@@ -255,7 +255,7 @@ export default async function CustomersPage({
       </div>
       <div className="notice" style={{ marginTop: 14 }}>
         DPDP note: customer data sirf order fulfil karne aur support ke liye use karein. Erasure request
-        aane par yeh record delete karna hoga — process `docs/07-security/india-compliance-dpdp.md` me hai.
+        aane par yeh record (aur sheet ki related rows) owner se confirm karke delete karein.
       </div>
     </>
   );

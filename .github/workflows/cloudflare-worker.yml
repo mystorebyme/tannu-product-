@@ -4,7 +4,7 @@ name: Cloudflare Worker (storefront)
 #
 # Manual (`workflow_dispatch`) rakha hai — production DNS abhi Vercel par hai, isliye
 # har push par Worker deploy nahi hota. Jab owner Workers par cutover kare, tab
-# `on.push` add kar dein (docs/09-devops/cloudflare-workers.md §7).
+# `on.push` add kar dein (deploy steps: scripts/deploy-cloudflare.sh).
 #
 # Zaroori secrets (repo → Settings → Secrets and variables → Actions):
 #   CLOUDFLARE_API_TOKEN   — Worker deploy permission (Workers Scripts: Edit)

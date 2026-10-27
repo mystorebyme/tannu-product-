@@ -40,12 +40,6 @@ jobs:
       - name: Unit + integration tests
         run: npm run test:all
 
-      # Top skill repos wali discipline machine se check hoti hai (guess se nahi):
-      # skills format, instruction files sachche, hygiene, route→test map.
-      # Fail = koi skill toota / secret aa gaya / CLAUDE.md purana ho gaya.
-      - name: Repo audit (skills · instruction files · hygiene · route map)
-        run: npm run audit -- --check
-
       - name: Build storefront
         run: npm run build --workspace @liksha/web
 

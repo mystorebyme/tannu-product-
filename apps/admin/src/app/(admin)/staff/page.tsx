@@ -33,7 +33,7 @@ export default function StaffPage() {
       </div>
       <div className="notice">
         Phase 1 me ek hi owner login hai. Multi-user staff accounts (invite + role + 2FA) Phase 2 me
-        aayenge — design `docs/07-security/authorization-rbac.md` me hai.
+        aayenge.
       </div>
     </>
   );

@@ -139,7 +139,13 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
         {order.paymentMethod !== "cod" ? (
           <div className="mt-4" data-testid="order-payment-block">
             <PaymentStatusWatcher orderNumber={order.orderNumber} initialStatus={order.paymentStatus} />
-            {order.paymentStatus !== "paid" ? (
+            {/*
+              R42 (owner): "Complete payment" tabhi jab paisa baaki ho —
+              pending/processing (aur failed par "Retry"). paid/refunded par
+              button **hata** rehta hai; cancelled/returned order par bhi nahi
+              dikhta (order hi khatam hai to payment kis cheez ki?).
+            */}
+            {order.paymentStatus !== "paid" && order.paymentStatus !== "refunded" && !stopped ? (
               <div className="mt-3 flex flex-wrap items-center gap-3 border border-[#e9dfd4] bg-white px-4 py-3">
                 <Link
                   href={`/orders/${order.orderNumber}/pay`}

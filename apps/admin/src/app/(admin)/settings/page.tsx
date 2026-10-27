@@ -129,7 +129,7 @@ export default async function SettingsPage() {
             Settings database me save hoti hain aur audit log me record hoti hain. Agar Google Sheet
             configured hai (<code>GOOGLE_SHEETS_WEBAPP_URL</code>) to <strong>Settings sheet ki value</strong>{" "}
             jeetti hai — owner wahan se phone, email, UPI ID aur announcement bina redeploy badal sakta hai.
-            Detail: <code>docs/09-devops/google-sheets.md</code>.
+            Detail: site ka <code>/api/sheet-health</code>.
           </p>
         </div>
       </form>
