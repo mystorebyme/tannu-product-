@@ -748,6 +748,16 @@ export async function readSheetHealth(): Promise<SheetHealth | null> {
       problems?: string[];
     };
     if (!payload?.ok) throw new Error("script ne ok:false diya");
+    /**
+     * R41: script r40+ hai par `SHEET_EXPECTED_ID` se doosri sheet pakde hue hai
+     * (idMatch:false — jaise purane `adopt` se props badal gaye) → `sheet_set` se
+     * auto-heal (10-min rate limit healSheetConfig me). Purane script (r38-1) par
+     * sheet_set hota hi nahi — wahan sirf report (sheet-health ka help line).
+     */
+    const healMajor = Number(/^r(\d+)/.exec(String(payload.version ?? ""))?.[1] ?? 0);
+    if (expected && payload.idMatch === false && healMajor >= 40) {
+      void healSheetConfig().catch(() => {});
+    }
     const rows: Record<string, number> = {};
     for (const entry of payload.sheets ?? []) {
       if (entry?.name) rows[entry.name] = Number(entry.rows ?? 0);

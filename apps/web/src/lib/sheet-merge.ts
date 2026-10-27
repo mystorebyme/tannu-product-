@@ -232,7 +232,20 @@ export function orderFromSheetRows(orderNumber: string, rows: SheetRow[]): Order
   const latest = list[list.length - 1];
   if (!latest) return null;
   const first = list[0] ?? latest;
-  const itemsText = String(latest["Item details"] ?? "");
+  /**
+   * R41: onEdit ki sparse rows (`order.status_sheet` — sirf status/number bhara)
+   * latest ban sakti hain, isliye har human column **last non-empty** scan se
+   * padho (trackingFromRows wala rule). Warna owner ke sheet-status-edit ke baad
+   * compat reconstruct me customer/total/items khaali ho jaate.
+   */
+  const lastNonEmpty = (column: string): string => {
+    for (let i = list.length - 1; i >= 0; i -= 1) {
+      const value = String(list[i]?.[column] ?? "").trim();
+      if (value) return value;
+    }
+    return "";
+  };
+  const itemsText = lastNonEmpty("Item details");
   const items = itemsText
     .split("|")
     .map((part) => part.trim())
@@ -248,9 +261,9 @@ export function orderFromSheetRows(orderNumber: string, rows: SheetRow[]): Order
         price: 0,
       };
     });
-  const status = (sheetStatusToOrderStatus(latest["Order status"]) ?? "placed") as OrderStatus;
+  const status = (sheetStatusToOrderStatus(lastNonEmpty("Order status")) ?? "placed") as OrderStatus;
   /** sheet ka koi bhi text → valid PaymentStatus (galat/ khaali = pending) */
-  const payRaw = String(latest["Payment status"] ?? "").trim().toLowerCase();
+  const payRaw = lastNonEmpty("Payment status").toLowerCase();
   const paymentStatus: Order["paymentStatus"] = ["pending", "processing", "paid", "failed", "refunded"].includes(payRaw)
     ? (payRaw as Order["paymentStatus"])
     : "pending";
@@ -264,33 +277,33 @@ export function orderFromSheetRows(orderNumber: string, rows: SheetRow[]): Order
       meta: String(row.Notes ?? "") ? { note: String(row.Notes ?? "") } : undefined,
     }))
     .reverse();
-  const courier = String(latest["Tracking courier"] ?? "").trim() || null;
-  const awb = String(latest.AWB ?? "").trim() || null;
-  const url = String(latest["Tracking URL"] ?? "").trim() || null;
+  const courier = lastNonEmpty("Tracking courier") || null;
+  const awb = lastNonEmpty("AWB") || null;
+  const url = lastNonEmpty("Tracking URL") || null;
   return {
     id: orderNumber,
     orderNumber,
     createdAt,
-    customerName: String(latest.Customer ?? ""),
-    email: String(latest.Email ?? ""),
-    phone: String(latest.Phone ?? ""),
-    address: String(latest.Address ?? ""),
-    city: String(latest.City ?? ""),
-    state: String(latest.State ?? ""),
-    pincode: String(latest.Pincode ?? ""),
-    notes: String(latest.Notes ?? "") || null,
+    customerName: lastNonEmpty("Customer"),
+    email: lastNonEmpty("Email"),
+    phone: lastNonEmpty("Phone"),
+    address: lastNonEmpty("Address"),
+    city: lastNonEmpty("City"),
+    state: lastNonEmpty("State"),
+    pincode: lastNonEmpty("Pincode"),
+    notes: lastNonEmpty("Notes") || null,
     items,
-    subtotal: rupeesToPaise(latest.Subtotal),
-    discount: rupeesToPaise(latest.Discount),
+    subtotal: rupeesToPaise(lastNonEmpty("Subtotal")),
+    discount: rupeesToPaise(lastNonEmpty("Discount")),
     shipping: 0,
-    total: rupeesToPaise(latest.Total),
-    couponCode: String(latest.Coupon ?? "") || null,
+    total: rupeesToPaise(lastNonEmpty("Total")),
+    couponCode: lastNonEmpty("Coupon") || null,
     paymentMethod: "prepaid",
     paymentStatus,
     payment: {
       gateway: "sheet",
-      reference: String(latest["Payment reference"] ?? "") || null,
-      amount: rupeesToPaise(latest.Total),
+      reference: lastNonEmpty("Payment reference") || null,
+      amount: rupeesToPaise(lastNonEmpty("Total")),
       status: paymentStatus,
       createdAt,
       verifiedAt: null,
@@ -335,3 +348,34 @@ export function parseOrderState(state: OrderState | null | undefined): Order | n
   return overlay ? mergeSheetTracking(base, overlay) : base;
 }
 
+
+/* ───────────────────────── R41: purane script ke saath compat ─────────────────────────
+ * Owner ka live script r40 se purana ho (jaise r38-1) to `order_state`/`orders_state`
+ * nahi hote — par `?action=order` (orderStory_: tab-wise rows) aur `?action=recent`
+ * (newest-first rows) hamesha se hain. Site unhi se orders reconstruct karti hai:
+ * orders sheet me **tab bhi** save/read hote hain (compat mode), r40-1 paste ke baad
+ * full fidelity (Order JSON snapshot) apne aap chalu.
+ */
+
+/**
+ * `?action=recent&sheet=Orders` ki rows (newest-first) ko order number ke hisaab
+ * se group karo. Har group **chronological** (purani→nayi) return hota hai kyunki
+ * `orderFromSheetRows` last row ko latest maanta hai. Group ka order newest-first
+ * hi rehta hai (Map insertion order = recent ka order).
+ */
+export function groupOrdersFromRecentRows(
+  rows: SheetRow[],
+): { orderNumber: string; rows: SheetRow[] }[] {
+  const groups = new Map<string, SheetRow[]>();
+  for (const row of rows ?? []) {
+    const orderNumber = String(row?.["Order number"] ?? "").trim().toUpperCase();
+    if (!orderNumber) continue;
+    const list = groups.get(orderNumber);
+    if (list) list.push(row);
+    else groups.set(orderNumber, [row]);
+  }
+  return [...groups.entries()].map(([orderNumber, list]) => ({
+    orderNumber,
+    rows: list.reverse(),
+  }));
+}

@@ -294,8 +294,10 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
      */
     const ready = await sheetOrdersReady();
     if (!ready.ready) {
+      // R41: customer ko andar ki problem (sheet/store/script) mat dikhao —
+      // friendly line + WhatsApp raasta. Technical reason sheet-health/logs me.
       throw new OrderError(
-        "Order abhi save nahi ho sakta — sheet store ready nahi hai. WhatsApp par order bhej dijiye, team turant confirm karegi.",
+        "Order abhi complete nahi hua. Thodi der me dobara try kariye, ya WhatsApp par order bhej dijiye — team turant confirm karegi.",
         503,
         "sheet_store_not_ready",
       );
@@ -303,7 +305,7 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
     const saved = await persistOrderEvent(order, "order.placed", { items: true });
     if (!saved.ok) {
       throw new OrderError(
-        "Order sheet me save nahi hua — order nahi bana. Dobara try kariye, ya WhatsApp par order bhej dijiye (team turant confirm karegi).",
+        "Order abhi complete nahi hua. Dobara try kariye, ya WhatsApp par order bhej dijiye — team turant confirm karegi.",
         502,
         "sheet_write_failed",
       );

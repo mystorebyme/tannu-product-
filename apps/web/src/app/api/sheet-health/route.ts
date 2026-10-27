@@ -74,7 +74,10 @@ export async function GET() {
   if (health?.ok) {
     const major = Number(/^r(\d+)/.exec(String(health.version ?? ""))?.[1] ?? 0);
     if (major && major < 40) {
-      help.push(`Script ka purana version chal raha hai (${health.version}) — r40-1 paste kariye (docs/00-overview/apps-script-code.md): Deploy → Manage deployments → ✏️ → New version → Deploy. R40 se orders **sheet me hi save hote hain** (Order JSON column) — purane script par order save nahi hoga.`);
+      // R41: purana script **failure nahi** — orders compat mode me sheet me hi
+      // save/read hote hain. Full fidelity (Order JSON snapshot, order_state,
+      // sheet_set/auto-heal, Admin Note column) ke liye r40-1 paste karein.
+      warnings.push(`Script ka purana version chal raha hai (${health.version}) — orders sheet me save ho rahe hain (compat mode), par Order JSON snapshot/Admin Note/sheet_set auto-heal jaisi poori taakat ke liye r40-1 paste kariye (docs/00-overview/apps-script-code.md → Deploy → New version).`);
     }
     if (health.tokenSet === false) {
       help.push("Script ka TOKEN set nahi — browser me <webapp URL>?action=set_token&token=<Vercel GOOGLE_SHEETS_TOKEN> kholiye.");
@@ -104,9 +107,10 @@ export async function GET() {
   if (!settings?.upiId) {
     help.push("Website ke paas abhi koi UPI ID nahi hai (sheet + fallback dono khaali) — payment page 'load nahi ho rahi' dikhata rahega.");
   }
-  /** R40: orders ka store sheet hai — ready na ho to order save hi nahi hoga. */
+  /** R41: ready:false sirf tab hota hai jab sheet env hi set nahi (mode 'none') —
+   * purane script par bhi orders compat mode me sheet me hi jaate hain. */
   if (orderStore && orderStore.backend === "sheet" && !orderStore.ready) {
-    help.push(`Orders sheet me save nahi ho payenge: ${orderStore.reason} — script r40-1 paste karke New version deploy kariye.`);
+    help.push(`Orders sheet me save nahi ho payenge: ${orderStore.reason} — Vercel me GOOGLE_SHEETS_WEBAPP_URL + GOOGLE_SHEETS_TOKEN set karke redeploy kariye.`);
   }
 
   return Response.json(
@@ -116,7 +120,7 @@ export async function GET() {
       ms: Date.now() - started,
       ordersStore: orderStore?.backend ?? "json",
       sheetOrders: orderStore
-        ? { ready: orderStore.ready, reason: orderStore.reason || null, version: orderStore.version }
+        ? { ready: orderStore.ready, mode: orderStore.mode, reason: orderStore.reason || null, version: orderStore.version }
         : null,
       sheet: {
         configured,

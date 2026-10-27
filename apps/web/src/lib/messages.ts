@@ -148,7 +148,10 @@ export async function listMessages(limit = 100): Promise<ContactMessage[]> {
     if (result.ok && Array.isArray(result.data.rows)) {
       return result.data.rows
         .map((row) => ({
-          id: String(row["Message ID"] ?? ""),
+          // r40+ script: Message ID column hai. Purane script (r38-1) par column
+          // hi nahi — Timestamp+Email se id banao taaki admin list chalti rahe
+          // (reply-mark purane script par limited hai; r40-1 paste se poora).
+          id: String(row["Message ID"] ?? "") || `row:${String(row.Timestamp ?? "")}|${String(row.Email ?? "")}`,
           createdAt: String(row.Timestamp ?? ""),
           name: String(row.Name ?? ""),
           email: String(row.Email ?? ""),

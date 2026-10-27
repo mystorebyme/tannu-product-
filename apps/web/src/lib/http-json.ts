@@ -11,7 +11,9 @@ function statusMessage(status: number): string {
   if (status === 401 || status === 403) return "Session expire ho gaya — page refresh karke dobara try kariye.";
   if (status === 404) return "Service nahi mili — thodi der baad try kariye.";
   if (status === 429) return "Bohot zyada requests — ek minute baad try kariye.";
-  if (status >= 500) return "Server par problem hai — thodi der baad try kariye ya WhatsApp par order kar dijiye.";
+  // R41 (owner): customer ko "server problem" jaisi andar ki baat mat dikhao —
+  // friendly line + WhatsApp raasta. Asli problem /api/sheet-health par owner dekhta hai.
+  if (status >= 500) return "Kaam abhi complete nahi hua — thodi der baad try kariye ya WhatsApp par order bhej dijiye, team turant confirm karegi.";
   return "Request poori nahi hui — dobara try kariye.";
 }
 
@@ -20,7 +22,7 @@ export async function readJson<T>(response: Response): Promise<JsonResult<T>> {
   try {
     text = await response.text();
   } catch {
-    return { data: null, error: "Server se reply nahi aaya. Internet check karke dobara try kariye." };
+    return { data: null, error: "Reply nahi padha ja saka. Internet check karke dobara try kariye." };
   }
 
   const trimmed = text.trim();
@@ -31,7 +33,7 @@ export async function readJson<T>(response: Response): Promise<JsonResult<T>> {
     return {
       data: null,
       error: response.ok
-        ? "Server ne galat reply bheja — page refresh kariye ya WhatsApp par order kar dijiye."
+        ? "Reply sahi nahi tha — page refresh kariye ya WhatsApp par order bhej dijiye."
         : statusMessage(response.status),
     };
   }
@@ -65,7 +67,7 @@ export async function postJson<T>(
       status: 0,
       error:
         name === "TimeoutError" || name === "AbortError"
-          ? "Server se reply nahi aaya (timeout). WhatsApp par order bhej dijiye — hum turant confirm karenge."
+          ? "Order abhi complete nahi hua (timeout). WhatsApp par order bhej dijiye — hum turant confirm karenge."
           : "Network error — internet check kariye ya WhatsApp par order bhej dijiye.",
     };
   }

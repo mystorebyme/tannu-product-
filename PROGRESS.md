@@ -234,7 +234,7 @@ R21 ke live verification ke baad teen cheezein tight kee gayin (koi naya feature
 Owner ke 5 asks, sab ek hi round me:
 
 - **State ↔ pincode:** naya `apps/web/src/lib/state-match.ts` (36 states/UTs + alias:
-  J&K / Orissa / Pondicherry / Uttaranchal). `checkout-form.tsx` mismatch par step 1→2 roktа hai
+  J&K / Orissa / Pondicherry / Uttaranchal). `checkout-form.tsx` mismatch par step 1→2 rokta hai
   aur **ek tap me sahi state** bhar deta hai (`data-testid="state-mismatch"` / `"state-fix"`).
   Server bhi mana karta hai — `createOrder` me `state_mismatch` (400) taaki GST place-of-supply galat na jaye.
 - **Speed (payment page + order create):** DB mode me order fetch = **1 row** (`orders-pg.loadOrder`,
@@ -883,3 +883,47 @@ me), aur repeat checkout par **purana cached order** dikhne ka bug.
       `/api/sheet-health` `ok:true`. Owner ke 2 kadam: **r40-1 paste → New version →
       Deploy** (r39-1 ka baaki paste bhi isi me cover) aur sheet confirm — `/exec` panel
       form se ya auto-heal (`SHEET_EXPECTED_ID`) khud `sheet_set` kar dega.
+
+## Round 41 — 27 Oct 2026 (compat mode: r38-1 script par bhi orders + friendly customer errors)
+
+Owner ki 4 shikayatein: (1) *"ye direct mt baya kro ki kya problem hai server problem ok sabhi
+jgha ok fix kro"* (customer ko technical/server errors mat dikhao), (2) *"abhi bi sheet mai nhai
+aa rha hai fix kro yrr"* (r40-1 paste nahi hua — live script abhi bhi r38-1, aur R40 ka
+version-gate orders ko mana kar raha tha), (3) UPI ID mismatch — sheet me fix kiya, site par
+purana dikhna, (4) messages/newsletter/checkout events sheet me nahi aa rahe.
+
+- [x] **Compat mode** (`SheetOrdersMode = full | compat | none`, orders-sheet.ts): purane script
+      (r38/r39) par bhi orders imandari se save + read — write wahi `append` (r38 ka appendRows_
+      unknown `Order JSON` key DROP karta hai par row likhta hai), single read `action=order`
+      (**findRows_ bottom-up ⇒ rows newest-first** — site reverse karti hai) →
+      `orderFromSheetRows`, admin list `action=recent&sheet=Orders&limit=200` →
+      `groupOrdersFromRecentRows` (sheet-merge.ts, naya). Version padha hi na ja sake →
+      **optimistic compat** (write sach me fail ho to saaf error; jhoothi success nahi).
+      Full mode (r40+) ka path unchanged.
+- [x] **orderFromSheetRows hardening**: har human column (Customer/Phone/Total/Item details/…)
+      ab **last-non-empty** scan se (trackingFromRows wala rule) — `onEdit` ki sparse
+      status-row latest ho to bhi customer/total/items gayab nahi hote. Status free-text map,
+      paymentStatus whitelist.
+- [x] **Friendly errors sab customer touchpoints par**: orders.ts 503/502 copy, http-json.ts
+      (status ≥500, reply padha na gaya, HTML reply), checkout fallback banner
+      (`data-testid="checkout-fallback"` barkarar) — sab jagah "Order abhi complete nahi hua…
+      WhatsApp par order bhej dijiye". Technical wording sirf owner-side (sheet-health/logs/
+      admin `writeAll` message).
+- [x] **sheet-health upgrade**: payload me `sheetOrders.mode` (full/compat/none); major<40 ab
+      `warnings` me (compat wording) — help me nahi; `!ready` help = seedha env-fix
+      (GOOGLE_SHEETS_WEBAPP_URL+TOKEN + redeploy); **r40+ par `idMatch:false` → auto
+      `sheet_set` heal** fire-and-forget (10-min rate limit) — r38 par sirf report.
+- [x] **Messages id fallback**: purane 7-col Messages tab (no `Message ID`) → synthetic id
+      `row:<Timestamp>|<Email>` — admin list crash nahi, replied-mark graceful degrade.
+- [x] Tests: unit **303/303** (round41.test.ts 9 naye + apps-script harness me r38 compat
+      contract: newest-first rows, sparse onEdit row, reverse-reconstruct), test:all **362**,
+      typecheck web+admin 0, lint web 0 err/34 warn, next + vinext build ✅; Next-prod parity:
+      smoke **111/0**, payments 61/0, links 40/0, round16 35/0, responsive 44/0, breakpoints
+      48/0; workerd parity: smoke **111/0**, payments 61/0 (`.dev.vars` apps/web me bhi chahiye
+      — worker root wahin hai).
+- [x] Docs: `google-sheets.md` **§4h** (compat table + friendly-error rule + auto-heal),
+      `owner-report-round41.md` (naya), PROGRESS (ye entry).
+- [ ] Deploy: **ek hi PR** → squash merge → storefront production deploy → verify
+      `/api/health` (`ordersStore:"sheet"`) + `/api/sheet-health` (`sheetOrders.mode:"compat"`,
+      `idMatch:true`, upiLoaded) → owner report + 3 self-check (`<exec>?action=settings` —
+      script ki apni sheet view; `/api/sheet-health`; full mode ke liye r40-1 paste).
