@@ -77,7 +77,7 @@ test("R38-3: payment UI khaali UPI par honestly pause karta hai (galat payee nah
   const upi = read("apps/web/src/components/upi-payment.tsx");
   assert.match(upi, /if \(!paid && !payeeVpa\)/, "empty-VPA branch maujood hai");
   assert.match(upi, /data-testid="upi-unavailable"/, "paused state ka testid");
-  assert.match(upi, /load nahi ho rahi/, "customer ko saaf message");
+  assert.match(upi, /are not loading right now/, "customer ko saaf message (R46: English)");
   // QR/deep-link isi branch ke baad hi bante hain — khaali VPA par upi:// nahi
   const branchIndex = upi.indexOf("!payeeVpa");
   const openIndex = upi.indexOf('data-testid="upi-open"');

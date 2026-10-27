@@ -75,21 +75,21 @@ test("R33: checkout order place par snapshot save karta hai (back ke liye)", () 
   assert.match(form, /readPlacedOrder\(resumeOrderNumber\)/);
   assert.match(form, /data-testid="review-continue-payment"/);
   // resume mode me dobara order nahi banta
-  assert.match(form, /if \(resumed\) \{\s*goToPayment\(resumed\.orderNumber\);/);
+  assert.match(form, /if \(resumed\) \{\s*goToPlaced\(resumed\.orderNumber/);
   // browser back bhi review par aaye (R36: goToPayment me replaceState + pushState)
   assert.match(form, /window\.history\.replaceState\(\{\}, "", reviewUrl\(target\)\)/);
   assert.match(form, /data-testid="review-loading"/);
 });
 
-test("R33: checkout 3 step — delivery → review → payment", () => {
+test("R33: checkout 3 step — delivery → review → confirmation (R46)", () => {
   const form = read("apps/web/src/components/checkout-form.tsx");
   const delivery = form.indexOf('label: "Delivery"');
   const review = form.indexOf('label: "Review"');
-  const payment = form.indexOf('label: "Payment"');
-  assert.ok(delivery > 0 && review > delivery && payment > review, "step order delivery → review → payment");
+  const whatsapp = form.indexOf('label: "WhatsApp"');
+  assert.ok(delivery > 0 && review > delivery && whatsapp > review, "step order delivery → review → whatsapp");
   // R36: payment step 3 checkout ke **andar** hai — alag page par redirect nahi
-  assert.match(form, /paymentUrl\(target\)/);
-  assert.match(form, /data-testid="checkout-payment-step"/);
+  assert.match(form, /placedUrl\(target\)/);
+  assert.match(form, /data-testid="checkout-placed-step"/);
   assert.doesNotMatch(form, /\?pay=1/);
 });
 

@@ -1,4 +1,5 @@
 import { catalogMeta } from "@/lib/store";
+import { catalogSheetInfo } from "@/lib/catalog-sheet";
 import { dbEnabled, ensureSchema, query } from "@/lib/db";
 import { ordersBackend } from "@/lib/orders-sheet";
 import { isCloudflareWorkers, isEphemeralStorage } from "@/lib/fs-runtime";
@@ -27,6 +28,8 @@ export async function GET() {
     }
   }
 
+  const catalogInfo = catalogSheetInfo();
+
   return Response.json(
     {
       data: {
@@ -35,7 +38,9 @@ export async function GET() {
         // deployment identity — CI isse "mera build live hai?" check karta hai
         commit: (process.env.VERCEL_GIT_COMMIT_SHA ?? "local").slice(0, 7),
         catalogBuiltAt: catalogMeta.builtAt,
-        products: catalogMeta.productCount,
+        // R43: catalog sheet (Products tab) se live hai to count/source wahi se
+        catalog: catalogInfo,
+        products: catalogInfo.count || catalogMeta.productCount,
         // orders ka backend (R40): sheet (production) / postgres / json (local dev)
         ordersStore: ordersBackend(),
         db,

@@ -64,6 +64,9 @@ for (const product of products) {
       fail(`${product.handle}: compareAtPrice must be > price`);
     }
   }
+  /* R44 ka hidden payment-test product (₹0.10, sirf direct link) intentionally
+   * minimal hai — image/size/description jaisi listing checks uspar lagu nahi. */
+  if (product.hidden === true) continue;
   if (!product.images?.length) fail(`${product.handle}: no image`);
   if (!product.sizes?.length) fail(`${product.handle}: no sizes`);
   for (const size of product.sizes ?? []) {
@@ -146,9 +149,41 @@ if (fs.existsSync(path.join(LIVE_DIR, "products.json"))) {
   for (const product of likshaProducts) {
     for (const collection of product.collections ?? []) likshaCounts[collection] = (likshaCounts[collection] ?? 0) + 1;
   }
+
+  /* R49: owner ki apni curation (admin overrides — jaise Trending me best-score
+     products daalna) live snapshot se aage ja sakti hai. Expected counts me
+     overrides ke collections-patch ka delta jodo — parity tabhi fail ho jab
+     bina curation ke drift ho. */
+  let overrideProducts = {};
+  try {
+    overrideProducts =
+      JSON.parse(fs.readFileSync(path.join(ROOT, "database/seeds/admin/overrides.json"), "utf8")).products ?? {};
+  } catch {
+    overrideProducts = {};
+  }
+  const expectedCounts = {};
   for (const [handle, handles] of Object.entries(membership)) {
     if (handle === "frontpage") continue; // home-page grouping, nav collection nahi
-    const expected = handles.length;
+    expectedCounts[handle] = handles.length;
+  }
+  const likshaByHandle = new Map(likshaProducts.map((product) => [product.handle, product]));
+  for (const [handle, patch] of Object.entries(overrideProducts)) {
+    if (!patch || !Array.isArray(patch.collections)) continue;
+    const product = likshaByHandle.get(handle);
+    if (!product) continue; // extra products parity me count hi nahi hote
+    const liveCollections = new Set(
+      Object.entries(membership)
+        .filter(([collection, handles]) => collection !== "frontpage" && handles.includes(product.sourceHandle))
+        .map(([collection]) => collection),
+    );
+    for (const collection of new Set(patch.collections)) {
+      if (!liveCollections.has(collection)) expectedCounts[collection] = (expectedCounts[collection] ?? 0) + 1;
+    }
+    for (const collection of liveCollections) {
+      if (!patch.collections.includes(collection)) expectedCounts[collection] = (expectedCounts[collection] ?? 0) - 1;
+    }
+  }
+  for (const [handle, expected] of Object.entries(expectedCounts)) {
     const actual = likshaCounts[handle] ?? 0;
     if (expected !== actual) fail(`collection ${handle}: ${actual}/${expected} products match the live store`);
   }

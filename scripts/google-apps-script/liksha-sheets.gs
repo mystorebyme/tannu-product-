@@ -8,8 +8,11 @@
  * hai / sheet se settings padhta hai. Koi 3rd party service nahi, koi paid tool
  * nahi — sirf Google Apps Script (free).
  *
- * ── KAAM (16 tabs) ────────────────────────────────────────────────────────────
+ * ── KAAM (17 tabs) ────────────────────────────────────────────────────────────
  *   Settings    → phone / WhatsApp / email / UPI / announcement / GSTIN (site 15s me padhti hai)
+ *   Products    → **R43: sheet hi catalog ka DB hai** — saare products yahan list;
+ *                 owner row add/delete kare, price/image badle → site par live
+ *                 (site `?action=catalog` se padhti hai; khaali tab ko khud seed karti hai)
  *   Orders      → har order + har status change (append-only timeline) + `Order JSON`
  *                 snapshot — **R40: sheet hi orders ka DB hai** (koi Supabase nahi)
  *   OrderItems  → order ki har item alag row me (size, colour, qty, price)
@@ -84,7 +87,7 @@ var TOKEN = 'CHANGE-ME-liksha-token';
 var TOKEN_PLACEHOLDER = 'CHANGE-ME-liksha-token';
 
 /** Code ka version — `?action=health` me dikhta hai. Code badle to isse badhaayein. */
-var CODE_VERSION = 'r42-1';
+var CODE_VERSION = 'r46-1';
 
 /**
  * R40 (owner rule): sheet ka id **code me kahin nahi** — sirf Script Properties
@@ -102,7 +105,7 @@ var CODE_VERSION = 'r42-1';
  * **naam** se dhoondhe jaate hain (naam humare apne hain — Orders, Settings, …).
  */
 var GIDS = {
-  Settings: null, Orders: null, Payments: null, Messages: null, Newsletter: null,
+  Settings: null, Products: null, Orders: null, Payments: null, Messages: null, Newsletter: null,
   OrderItems: null, Invoices: null, Shipments: null, Checkout: null, Reviews: null,
   Coupons: null, Inventory: null, Audit: null, Errors: null, Dashboard: null, Sync: null,
 };
@@ -130,6 +133,24 @@ var ERRORS_KEEP = 2000;
  *   • Naya column yahan add karne par purani sheet me bhi apne aap jud jaata hai.
  */
 var HEADERS = {
+  /**
+   * R43 (owner): "jitne bi product hai vo saare sheet me list kr do … price
+   * change krte hi site pr visible ho jaye … product ki id se search kar sake …
+   * koi bi new product add kr paye" — Products tab = catalog ka database.
+   *   • Id          = product ka handle/URL-id (isi se site product kholta hai)
+   *   • Price       = rupees me (599 ya 599.00) — site paise me badal leti hai
+   *   • Main image  = pehli/photo URL; Images = baaki gallery (| se alag)
+   *   • Sizes       = | se alag (jaise XS [34]|S [36]|M [38])
+   *   • Status      = active / hidden (dropdown) — hidden product site par nahi dikhta
+   *   • Row delete  = product site se hat jaata hai
+   * Site khaali tab ko apne catalog se khud bhar deti hai (?action=products_seed
+   * site bhejti hai; script sirf KHAALI tab par likhta hai — owner data safe).
+   */
+  Products: [
+    'Timestamp', 'Id', 'Title', 'Price', 'Compare-at price', 'Main image', 'Images',
+    'Collections', 'Category', 'Fabric', 'Colour', 'Sizes', 'In stock', 'Featured',
+    'Status', 'Description', 'Source', 'Updated by',
+  ],
   Orders: [
     'Timestamp', 'Event', 'Order number', 'Order status', 'Payment status', 'Payment method',
     'Payment reference', 'UPI ID', 'Total', 'Subtotal', 'Discount', 'Coupon', 'Items',
@@ -165,9 +186,23 @@ var HEADERS = {
     'Replied', 'Replied at', 'Source page', 'Message ID',
   ],
   Newsletter: ['Timestamp', 'Email', 'Source', 'Status'],
+  /**
+   * R44 (owner): "review mai image bi add kr shke … ek product id 2381 mai
+   * review mai 8 image hai to iss row mai 8 coloum honge unme alag url honge …
+   * review delet krte hi vi delet ho jana chiye".
+   *   • Review ID = RV-… unique id (panel/site isi se approve/delete karte hain)
+   *   • Status    = pending / approved / rejected (dropdown) — sirf `approved`
+   *                 site par dikhta hai; owner approve karte hi live
+   *   • Image 1…8 = har image ka apna URL column (Photo URL purana single column)
+   *   • Row delete ya review_delete → review site se turant gaya
+   * Site khaali tab ko apne purane (Trustoo-sync) reviews se khud bhar deti hai
+   * (`reviews_seed`, sirf KHAALI tab par) — uske baad sheet hi source of truth.
+   */
   Reviews: [
-    'Timestamp', 'Product', 'Handle', 'Customer', 'Rating', 'Title', 'Review',
-    'Verified', 'Status', 'Photo URL', 'Order number',
+    'Timestamp', 'Review ID', 'Product', 'Handle', 'Customer', 'City', 'Rating',
+    'Title', 'Review', 'Verified', 'Status', 'Photo URL',
+    'Image 1', 'Image 2', 'Image 3', 'Image 4', 'Image 5', 'Image 6', 'Image 7', 'Image 8',
+    'Order number', 'Updated',
   ],
   Coupons: [
     'Timestamp', 'Code', 'Type', 'Value', 'Min order', 'Max uses', 'Used',
@@ -185,8 +220,10 @@ var HEADERS = {
 
 /** Settings tab ke default rows (sirf tab khaali ho tab likhe jaate hain). */
 var DEFAULT_SETTINGS = [
-  ['support_phone', '8005900581'],
-  ['whatsapp', '8005900581'],
+  // R45 (owner): contact number/UPI **sirf sheet se** — seed me bhi koi
+  // hardcoded number nahi. Owner bharega tabhi site par dikhega.
+  ['support_phone', ''],
+  ['whatsapp', ''],
   // Owner rule: support email site/admin par kahin dikhta nahi — khaali rakha hai.
   ['support_email', ''],
   // UPI **sirf owner bharta hai** — koi default nahi. Khaali hai to website
@@ -204,6 +241,10 @@ var DEFAULT_SETTINGS = [
   ['support_hours', 'Monday to Saturday, 10:00 AM – 8:00 PM IST'],
   ['return_window_days', '7'],
   ['instagram', 'https://www.instagram.com/designer_clothing_9'],
+  // R44 (owner): "estimited delivery date bi sheet se change honi chiye" —
+  // days = placed + itne din; text bhara ho to order page par wahi line dikhti hai.
+  ['delivery_estimate_days', '6'],
+  ['delivery_estimate_text', ''],
 ];
 
 /** Dashboard me jo metrics har baar likhe jaate hain. */
@@ -214,6 +255,7 @@ var DASHBOARD_METRICS = [
 
 /** Money columns — in par ₹ format lagta hai (sirf naye tab banne par). */
 var MONEY_COLUMNS = {
+  Products: ['Price', 'Compare-at price'],
   Orders: ['Total', 'Subtotal', 'Discount'],
   Payments: ['Total', 'Subtotal', 'Discount'],
   OrderItems: ['Price', 'Line total'],
@@ -238,6 +280,13 @@ var MONEY_COLUMNS = {
 var ORDER_DROPDOWN = ['placed', 'confirmed', 'packed', 'shipped', 'delivered', 'cancelled', 'returned'];
 var PAYMENT_DROPDOWN = ['pending', 'processing', 'paid', 'failed', 'refunded'];
 var VALIDATIONS = {
+  // R43: Products tab — owner ko har column me saaf choices dikhein
+  Products: {
+    Status: ['active', 'hidden'],
+    'In stock': ['yes', 'no'],
+    Featured: ['yes', 'no'],
+    Category: ['anarkali', 'lehnga', 'printed', 'saree', 'gown', 'sharara', 'other'],
+  },
   Orders: { 'Order status': ORDER_DROPDOWN, 'Payment status': PAYMENT_DROPDOWN, 'Payment method': ['prepaid', 'cod'] },
   Payments: { 'Order status': ORDER_DROPDOWN, 'Payment status': PAYMENT_DROPDOWN, 'Payment method': ['prepaid', 'cod'] },
   OrderItems: { Status: ORDER_DROPDOWN },
@@ -245,7 +294,7 @@ var VALIDATIONS = {
   Invoices: { Type: ['gst', 'manual'] },
   Messages: { Status: ['new', 'replied', 'handled'] },
   Newsletter: { Status: ['subscribed', 'unsubscribed'] },
-  Reviews: { Status: ['pending', 'approved', 'rejected'], Verified: ['yes', 'no'] },
+  Reviews: { Status: ['pending', 'approved', 'rejected'], Verified: ['yes', 'no'], Rating: ['1', '2', '3', '4', '5'] },
   Coupons: { Type: ['percent', 'flat'], Active: ['yes', 'no'] },
   Inventory: { 'Low stock alert': ['yes', 'no'] },
 };
@@ -430,6 +479,8 @@ var PUBLIC_SETTING_KEYS = [
   'store_name', 'announcement', 'support_phone', 'phone', 'whatsapp', 'whatsapp_number',
   'upi_id', 'upi_name', 'gstin', 'free_shipping', 'order_prefix', 'prepaid_only',
   'support_hours', 'return_window_days', 'instagram',
+  // R44: delivery estimate site par dikhta hai — public
+  'delivery_estimate_days', 'delivery_estimate_text',
 ];
 
 /* ═══════════════════════════ 4. SHEET ACCESS ════════════════════════════════ */
@@ -751,10 +802,11 @@ var COLUMN_WIDTHS = {
 var TEXT_COLUMNS = ['Phone', 'Pincode', 'AWB', 'Order number', 'Invoice number', 'SKU', 'Code', 'Message ID', 'GSTIN', 'UPI ID', 'Payment reference'];
 
 /** Wrap wale columns (lambe text) */
-var WRAP_COLUMNS = ['Item details', 'Notes', 'Message', 'Review', 'Address', 'Details', 'Payload', 'Note', 'Title', 'Order JSON', 'Invoice JSON'];
+var WRAP_COLUMNS = ['Item details', 'Notes', 'Message', 'Review', 'Address', 'Details', 'Payload', 'Note', 'Title', 'Order JSON', 'Invoice JSON', 'Description', 'Images'];
 
 /** Money columns — in par ₹ format lagta hai (sirf naye tab banne par). */
 var MONEY_COLUMNS = {
+  Products: ['Price', 'Compare-at price'],
   Orders: ['Total', 'Subtotal', 'Discount'],
   Payments: ['Total', 'Subtotal', 'Discount'],
   OrderItems: ['Price', 'Line total'],
@@ -1060,6 +1112,68 @@ function findRows_(name, column, value, limit) {
     }
   }
   return out;
+}
+
+/**
+ * R43: Products tab ki **saari** rows (upar se neeche — owner ka order hi site
+ * ka order hai; naye products owner jahan daale wahan dikhte hain).
+ */
+function productRows_(limit) {
+  if (!HEADERS.Products) return [];
+  var sheet = sheet_('Products');
+  var last = sheet.getLastRow();
+  if (last < 2) return [];
+  var headers = headersOf_(sheet);
+  var count = Math.min(last - 1, limit || 2000);
+  var values = sheet.getRange(2, 1, count, headers.length).getValues();
+  return values.map(function (row) {
+    var object = {};
+    for (var i = 0; i < headers.length; i += 1) {
+      object[headers[i]] = row[i] === null || row[i] === undefined ? '' : row[i];
+    }
+    return object;
+  });
+}
+
+/**
+ * R43: website ka build-time catalog → Products tab (sirf jab tab KHAALI ho —
+ * owner ka data kabhi override nahi hota). Ek hi baar chalta hai; uske baad
+ * sheet hi source of truth hai (site dobara seed nahi karti).
+ */
+function seedProducts_(rows) {
+  var list = Array.isArray(rows) ? rows : [];
+  if (!list.length) return { ok: false, version: CODE_VERSION, error: 'products ki rows chahiye' };
+  var sheet = sheet_('Products');
+  var headers = headersOf_(sheet);
+  if (sheet.getLastRow() >= 2) {
+    return { ok: true, version: CODE_VERSION, seeded: 0, skipped: true, reason: 'Products tab me pehle se rows hain — owner ka data override nahi kiya' };
+  }
+  var lock = LockService.getScriptLock();
+  lock.waitLock(LOCK_WAIT_MS);
+  var written = 0;
+  try {
+    // lock milne ke baad dobara check — beech me kisi aur ne bhar diya ho to skip
+    if (sheet.getLastRow() >= 2) {
+      return { ok: true, version: CODE_VERSION, seeded: 0, skipped: true, reason: 'Products tab bhara hua hai' };
+    }
+    var values = list.map(function (row) {
+      return headers.map(function (column) {
+        return cell_(row && row[column]);
+      });
+    });
+    var CHUNK = 100;
+    for (var start = 0; start < values.length; start += CHUNK) {
+      var slice = values.slice(start, start + CHUNK);
+      sheet.getRange(2 + written, 1, slice.length, headers.length).setValues(slice);
+      written += slice.length;
+    }
+  } catch (error) {
+    logError_('seedProducts_', error, { count: list.length });
+    return { ok: false, version: CODE_VERSION, error: String(error && error.message ? error.message : error), written: written };
+  } finally {
+    lock.releaseLock();
+  }
+  return { ok: true, version: CODE_VERSION, seeded: written, note: 'Products tab website ke catalog se bhar gaya — ab sheet hi source of truth hai. Row badaliye/jodiye/hataiye — site par live dikhega.' };
 }
 
 /** Ek order ki poori kahani — Orders + Items + Payments + Shipments + Invoices. */
@@ -1446,7 +1560,21 @@ function appendRows_(rows) {
       });
       if (!values.length) return;
       var start = Math.max(2, sheet.getLastRow() + 1);
-      sheet.getRange(start, 1, values.length, headers.length).setValues(values);
+      try {
+        sheet.getRange(start, 1, values.length, headers.length).setValues(values);
+      } catch (writeError) {
+        // R45 (owner ka live bug): Orders ke Status column par owner ki banayi
+        // purani data-validation (list [confirmed, Pending], allowInvalid=false)
+        // script ke append rok deti hai — "Cell E50 violates data validation".
+        // Apne dropdowns (allowInvalid=true) dobara lagao aur ek baar retry karo,
+        // taaki order save na ruke. Repair na ho paye to error waise hi upar jaata hai.
+        if (!/validation|invalid/i.test(String((writeError && writeError.message) || writeError))) {
+          throw writeError;
+        }
+        Logger.log('appendRows_: validation error mila — dropdowns repair karke retry (' + name + ')');
+        applyValidations_();
+        sheet.getRange(start, 1, values.length, headers.length).setValues(values);
+      }
       written += values.length;
     });
   } catch (error) {
@@ -1517,25 +1645,313 @@ function addReview_(body) {
       if (existingKey === key) return { ok: true, duplicate: true, written: 0 };
     }
   }
+  var images = normalizeImageList_(body.images);
+  var photo = text_(body.photo || '');
+  var id = reviewId_(product + '|' + customer);
   var written = appendRows_([
     {
       sheet: 'Reviews',
-      row: {
+      row: reviewRow_({
         Timestamp: istNow_(),
+        'Review ID': id,
         Product: product,
         Handle: text_(body.handle || ''),
         Customer: customer,
+        City: text_(body.city || ''),
         Rating: num_(body.rating),
         Title: text_(body.title || ''),
         Review: review,
         Verified: truthy_(body.verified) ? 'yes' : 'no',
         Status: text_(body.status || 'pending'),
-        'Photo URL': text_(body.photo || ''),
+        'Photo URL': photo,
         'Order number': text_(body.orderNumber || ''),
-      },
+        Updated: istNow_(),
+      }, images),
     },
   ]);
-  return { ok: true, duplicate: false, written: written };
+  return { ok: true, duplicate: false, written: written, id: id };
+}
+
+/**
+ * R44: review images → `Image 1`…`Image 8` columns (owner: "8 image hai to
+ * 8 coloum honge unme alag url"). Photo URL (purana single column) bhi bhara
+ * rehta hai — purani site/scripts ke compat ke liye.
+ */
+function reviewRow_(row, images) {
+  var list = images || [];
+  for (var n = 1; n <= 8; n += 1) {
+    row['Image ' + n] = list[n - 1] || '';
+  }
+  if (!row['Photo URL']) row['Photo URL'] = list[0] || '';
+  return row;
+}
+
+/** Unique Review ID — panel/site approve/delete isi se karte hain. */
+function reviewId_(seed) {
+  return ('RV-' + new Date().getTime().toString(36) + '-' + hash_(String(seed || '') + Math.random())).toUpperCase();
+}
+
+/** images: array ya '|'/newline/comma-separated string → clean http(s) URL list (dedup). */
+function normalizeImageList_(value) {
+  var list = Array.isArray(value) ? value : String(value === null || value === undefined ? '' : value).split(/[\n|,]+/);
+  var out = [];
+  list.forEach(function (item) {
+    var url = String(item || '').trim();
+    if (url && /^https?:\/\//i.test(url) && out.indexOf(url) < 0 && out.length < 24) out.push(url);
+  });
+  return out;
+}
+
+/**
+ * R44: Reviews tab ki rows → objects (newest-first). Site approved-only padhti
+ * hai (token ke bina); panel/admin token ke saath sab statuses dekhta hai.
+ */
+function reviewsList_(opts) {
+  opts = opts || {};
+  var sheet = sheet_('Reviews');
+  var last = sheet.getLastRow();
+  if (last < 2) return { empty: true, reviews: [] };
+  var headers = headersOf_(sheet);
+  var idx = {};
+  headers.forEach(function (header, i) { idx[header] = i; });
+  var limit = Math.min(3000, Math.max(1, Number(opts.limit || 200)));
+  var from = Math.max(2, last - 4000 + 1); // bahut badi sheet me poori scan na ho
+  var values = sheet.getRange(from, 1, last - from + 1, headers.length).getValues();
+  var wantStatus = String(opts.status || '').trim().toLowerCase();
+  var wantProduct = String(opts.product || '').trim().toLowerCase();
+  var out = [];
+  for (var i = values.length - 1; i >= 0 && out.length < limit; i -= 1) {
+    var row = values[i];
+    var at = function (column) {
+      var index = idx[column];
+      if (index === undefined) return '';
+      var value = row[index];
+      return value === null || value === undefined ? '' : String(value).trim();
+    };
+    var status = at('Status').toLowerCase();
+    if (wantStatus && status !== wantStatus) continue;
+    var handle = at('Handle');
+    var product = at('Product');
+    if (wantProduct && wantProduct !== handle.toLowerCase() && wantProduct !== product.toLowerCase()) continue;
+    var images = [];
+    var photo = at('Photo URL');
+    if (photo) images.push(photo);
+    for (var n = 1; n <= 8; n += 1) {
+      var url = at('Image ' + n);
+      if (url && images.indexOf(url) < 0) images.push(url);
+    }
+    out.push({
+      id: at('Review ID'),
+      product: product,
+      handle: handle || product,
+      customer: at('Customer'),
+      city: at('City'),
+      rating: Number(row[idx['Rating']]) || 0,
+      title: at('Title'),
+      review: at('Review'),
+      verified: /^yes/i.test(at('Verified')),
+      status: status,
+      images: images,
+      orderNumber: at('Order number'),
+      at: at('Timestamp'),
+      updated: at('Updated'),
+    });
+  }
+  return { empty: false, reviews: out };
+}
+
+/** R44: review approve/reject/edit — Review ID se (panel + site admin API). */
+function updateReview_(body) {
+  var id = String(body.id || '').trim();
+  if (!id) return { ok: false, error: 'Review ID chahiye' };
+  var updates = { Updated: istNow_() };
+  if (body.status !== undefined && String(body.status).trim() !== '') {
+    var status = String(body.status).trim().toLowerCase();
+    if (['pending', 'approved', 'rejected'].indexOf(status) < 0) {
+      return { ok: false, error: 'status pending/approved/rejected me se ho' };
+    }
+    updates.Status = status;
+  }
+  if (body.title !== undefined) updates.Title = text_(body.title);
+  if (body.review !== undefined) updates.Review = text_(body.review);
+  if (body.customer !== undefined) updates.Customer = text_(body.customer);
+  if (body.rating !== undefined && String(body.rating).trim() !== '') {
+    var rating = Math.round(Number(body.rating));
+    if (!(rating >= 1 && rating <= 5)) return { ok: false, error: 'rating 1 se 5 ke beech ho' };
+    updates.Rating = rating;
+  }
+  if (body.verified !== undefined && text_(body.verified) !== '') updates.Verified = truthy_(body.verified) ? 'yes' : 'no';
+  // images khaali chhoda to purani images rehti hain (panel form me optional hai)
+  if (body.images !== undefined && normalizeImageList_(body.images).length) {
+    var list = normalizeImageList_(body.images);
+    for (var n = 1; n <= 8; n += 1) updates['Image ' + n] = list[n - 1] || '';
+  }
+  var updated = updateWhere_('Reviews', 'Review ID', id, updates);
+  if (!updated) return { ok: false, error: 'review nahi mila (Review ID check karein)' };
+  noteAudit_(body.actor || 'panel', 'review_update', id, updates.Status ? 'status=' + updates.Status : 'edit');
+  refreshDashboard_();
+  return { ok: true, updated: updated, id: id };
+}
+
+/** R44: review delete — row hatti hai, site se review turant jata hai. */
+function deleteReview_(id, actor) {
+  var removed = deleteWhere_('Reviews', 'Review ID', String(id || ''));
+  if (!removed) return { ok: false, error: 'review nahi mila (Review ID check karein)' };
+  noteAudit_(actor || 'panel', 'review_delete', String(id), removed + ' rows');
+  refreshDashboard_();
+  return { ok: true, removed: removed };
+}
+
+/** Key column se matching rows delete (Products/Reviews — "delete karte hi site se jaye"). */
+function deleteWhere_(sheetName, keyColumn, keyValue) {
+  var key = String(keyValue === null || keyValue === undefined ? '' : keyValue).trim();
+  if (!key || !HEADERS[sheetName]) return 0;
+  var sheet = sheet_(sheetName);
+  var headers = headersOf_(sheet);
+  var keyIndex = headers.indexOf(keyColumn);
+  var last = sheet.getLastRow();
+  if (keyIndex < 0 || last < 2) return 0;
+  var values = sheet.getRange(2, keyIndex + 1, last - 1, 1).getValues();
+  var needle = key.toLowerCase();
+  var removed = 0;
+  for (var i = values.length - 1; i >= 0; i -= 1) {
+    if (String(values[i][0] || '').trim().toLowerCase() !== needle) continue;
+    sheet.deleteRow(i + 2);
+    removed += 1;
+  }
+  return removed;
+}
+
+/**
+ * R44 (owner): "koi new product list krna hai to uska sb price vgara" — panel/API
+ * se product add ya update (Id unique). Sirf bheje gaye fields badalte hain.
+ */
+function upsertProduct_(body) {
+  var id = text_(body.id || body.handle || '');
+  if (!id) return { ok: false, error: 'product Id chahiye' };
+  var actor = text_(body.actor || 'panel');
+  var existing = findRows_('Products', 'Id', id, 1);
+  /**
+   * Panel form hamesha saare fields bhejta hai (khaali string = "na badle") —
+   * isliye sirf non-empty values hi update hoti hain. Jaan-boojh kar khaali
+   * karna ho to sheet me cell edit kariye (source of truth waise bhi sheet hai).
+   */
+  var setIf = function (column, value) {
+    var text = text_(value);
+    if (text !== '') updates[column] = text;
+  };
+  var updates = {};
+  if (body.title !== undefined) setIf('Title', body.title);
+  if (body.price !== undefined && String(body.price).trim() !== '') {
+    var price = Number(body.price);
+    if (!(price >= 0)) return { ok: false, error: 'price number ho' };
+    updates.Price = price;
+  }
+  if (body.compareAtPrice !== undefined && String(body.compareAtPrice).trim() !== '') {
+    updates['Compare-at price'] = Number(body.compareAtPrice) || '';
+  }
+  if (body.mainImage !== undefined) setIf('Main image', body.mainImage);
+  if (body.images !== undefined && normalizeImageList_(body.images).length) {
+    updates.Images = normalizeImageList_(body.images).join('|');
+  }
+  if (body.collections !== undefined) setIf('Collections', Array.isArray(body.collections) ? body.collections.join('|') : body.collections);
+  if (body.category !== undefined) setIf('Category', body.category);
+  if (body.fabric !== undefined) setIf('Fabric', body.fabric);
+  if (body.colour !== undefined) setIf('Colour', body.colour);
+  if (body.sizes !== undefined) setIf('Sizes', Array.isArray(body.sizes) ? body.sizes.join('|') : body.sizes);
+  if (body.inStock !== undefined && text_(body.inStock)) updates['In stock'] = truthy_(body.inStock) ? 'yes' : 'no';
+  if (body.featured !== undefined && text_(body.featured)) updates.Featured = truthy_(body.featured) ? 'yes' : 'no';
+  if (body.status !== undefined) setIf('Status', String(text_(body.status)).toLowerCase());
+  if (body.description !== undefined) setIf('Description', body.description);
+
+  if (existing.length) {
+    updates['Updated by'] = actor;
+    var updated = updateWhere_('Products', 'Id', id, updates);
+    noteAudit_(actor, 'product_update', id, Object.keys(updates).join(','));
+    return { ok: true, mode: 'update', updated: updated, id: id };
+  }
+
+  // naya product — Title + Price zaroori
+  var title = text_(body.title || '');
+  if (!title) return { ok: false, error: 'naye product ke liye Title zaroori hai' };
+  var newPrice = Number(body.price);
+  if (!(newPrice > 0)) return { ok: false, error: 'naye product ke liye Price zaroori hai (0 se upar)' };
+  var images = normalizeImageList_(body.images);
+  var mainImage = text_(body.mainImage) || images[0] || '';
+  var rest = images.filter(function (url) { return url !== mainImage; });
+  var written = appendRows_([{
+    sheet: 'Products',
+    row: {
+      Timestamp: istNow_(),
+      Id: id,
+      Title: title,
+      Price: newPrice,
+      'Compare-at price': Number(body.compareAtPrice) || '',
+      'Main image': mainImage,
+      Images: rest.join('|'),
+      Collections: text_(Array.isArray(body.collections) ? body.collections.join('|') : (body.collections || '')),
+      Category: text_(body.category || 'other'),
+      Fabric: text_(body.fabric || ''),
+      Colour: text_(body.colour || ''),
+      Sizes: text_(Array.isArray(body.sizes) ? body.sizes.join('|') : (body.sizes || 'Free Size')),
+      'In stock': body.inStock === undefined ? 'yes' : (truthy_(body.inStock) ? 'yes' : 'no'),
+      Featured: truthy_(body.featured) ? 'yes' : 'no',
+      Status: text_(body.status || 'active').toLowerCase(),
+      Description: text_(body.description || ''),
+      Source: 'panel',
+      'Updated by': actor,
+    },
+  }]);
+  noteAudit_(actor, 'product_add', id, title);
+  return { ok: true, mode: 'add', written: written, id: id };
+}
+
+/** R44: product delete — row hatti hai, product site se turant jata hai. */
+function deleteProduct_(id, actor) {
+  var removed = deleteWhere_('Products', 'Id', String(id || ''));
+  if (!removed) return { ok: false, error: 'product nahi mila (Id check karein)' };
+  noteAudit_(actor || 'panel', 'product_delete', String(id), removed + ' rows');
+  return { ok: true, removed: removed };
+}
+
+/**
+ * R44: website ke purane (Trustoo-sync) reviews → Reviews tab (sirf jab tab
+ * KHAALI ho). Uske baad sheet hi source of truth hai — row delete = review gaya.
+ */
+function seedReviews_(rows) {
+  var list = Array.isArray(rows) ? rows : [];
+  if (!list.length) return { ok: false, version: CODE_VERSION, error: 'reviews ki rows chahiye' };
+  var sheet = sheet_('Reviews');
+  var headers = headersOf_(sheet);
+  if (sheet.getLastRow() >= 2) {
+    return { ok: true, version: CODE_VERSION, seeded: 0, skipped: true, reason: 'Reviews tab me pehle se rows hain — owner ka data override nahi kiya' };
+  }
+  var lock = LockService.getScriptLock();
+  lock.waitLock(LOCK_WAIT_MS);
+  var written = 0;
+  try {
+    if (sheet.getLastRow() >= 2) {
+      return { ok: true, version: CODE_VERSION, seeded: 0, skipped: true, reason: 'Reviews tab bhara hua hai' };
+    }
+    var values = list.map(function (row) {
+      return headers.map(function (column) {
+        return cell_(row && row[column]);
+      });
+    });
+    var CHUNK = 100;
+    for (var start = 0; start < values.length; start += CHUNK) {
+      var slice = values.slice(start, start + CHUNK);
+      sheet.getRange(2 + written, 1, slice.length, headers.length).setValues(slice);
+      written += slice.length;
+    }
+  } catch (error) {
+    logError_('seedReviews_', error, { count: list.length });
+    return { ok: false, version: CODE_VERSION, error: String(error && error.message ? error.message : error), written: written };
+  } finally {
+    lock.releaseLock();
+  }
+  refreshDashboard_();
+  return { ok: true, version: CODE_VERSION, seeded: written, note: 'Reviews tab website ke purane reviews se bhar gaya — ab sheet hi source of truth hai.' };
 }
 
 /** Coupon — naya ho to add, purana ho to update (code unique) */
@@ -1562,6 +1978,83 @@ function upsertCoupon_(body) {
   return { ok: true, updated: false, written: appendRows_([{ sheet: 'Coupons', row: row }]) };
 }
 
+/**
+ * R46: Expires cell kai shape me ho sakta hai — sheet ki Date, '31-Dec-2026',
+ * '2026-12-31', '31/12/2026'. Jo parse na ho usse expired **nahi** maante
+ * (coupon galat band na ho). Expired = date ka din poora beet gaya.
+ */
+function couponExpired_(expiresRaw) {
+  if (expiresRaw === null || expiresRaw === undefined || expiresRaw === '') return false;
+  var when = null;
+  if (expiresRaw instanceof Date) {
+    when = expiresRaw;
+  } else {
+    var text = String(expiresRaw).trim();
+    var formats = ['dd-MMM-yyyy', 'yyyy-MM-dd', 'dd/MM/yyyy', 'dd-MMM-yy'];
+    for (var i = 0; i < formats.length; i += 1) {
+      try {
+        when = Utilities.parseDate(text, TIMEZONE, formats[i]);
+        break;
+      } catch (ignored) {}
+    }
+  }
+  if (!when || isNaN(when.getTime())) return false;
+  return when.getTime() + 86400000 < Date.now();
+}
+
+/** R46: Coupons tab → objects (website checkout isi se coupon validate karti hai). */
+function readCoupons_() {
+  var sheet = sheet_('Coupons');
+  var headers = headersOf_(sheet);
+  var last = sheet.getLastRow();
+  if (last < 2) return [];
+  var values = sheet.getRange(2, 1, last - 1, headers.length).getValues();
+  var out = [];
+  values.forEach(function (row) {
+    var get = function (name) {
+      var index = headers.indexOf(name);
+      return index < 0 ? '' : row[index];
+    };
+    var code = text_(get('Code')).toUpperCase();
+    if (!code) return;
+    var maxUses = num_(get('Max uses'));
+    var used = num_(get('Used'));
+    var expiresRaw = get('Expires');
+    var expires = '';
+    if (expiresRaw instanceof Date && !isNaN(expiresRaw.getTime())) {
+      expires = Utilities.formatDate(expiresRaw, TIMEZONE, 'yyyy-MM-dd');
+    } else {
+      expires = text_(expiresRaw);
+    }
+    out.push({
+      code: code,
+      type: String(text_(get('Type'))).toLowerCase() === 'flat' ? 'flat' : 'percent',
+      value: num_(get('Value')),
+      minOrder: num_(get('Min order')),
+      maxUses: maxUses,
+      used: used,
+      active: truthy_(get('Active')),
+      expires: expires,
+      expired: couponExpired_(expiresRaw),
+      exhausted: maxUses > 0 && used >= maxUses,
+    });
+  });
+  return out;
+}
+
+/** R46: coupon wala order place hua → Used +1 (sheet me use-count track). */
+function couponUse_(code) {
+  var clean = text_(code).toUpperCase();
+  if (!clean) return { ok: false, error: 'code chahiye' };
+  var current = null;
+  readCoupons_().forEach(function (coupon) {
+    if (coupon.code === clean) current = coupon;
+  });
+  if (!current) return { ok: false, error: 'coupon nahi mila: ' + clean };
+  var updated = updateWhere_('Coupons', 'Code', clean, { Used: current.used + 1 });
+  return { ok: updated > 0, code: clean, used: current.used + 1, updated: updated };
+}
+
 /** Order status / tracking change — timeline + shipments dono me */
 function orderUpdate_(body) {
   var number = String(body.orderNumber || '').trim();
@@ -1580,6 +2073,8 @@ function orderUpdate_(body) {
         AWB: text_(body.awb || ''),
         'Tracking URL': text_(body.trackingUrl || ''),
         Notes: text_(body.note || ''),
+        // R44: panel ka "comment" seedha Admin Note me — customer ke note-box me dikhta hai
+        'Admin Note': text_(body.adminNote || ''),
         Source: 'admin',
       },
     },
@@ -2172,6 +2667,62 @@ function onEdit(e) {
       return;
     }
 
+    /**
+     * R43 (owner): "jo comment hai maine likha vo show nhi ho rha" — owner
+     * kabhi comment `Notes` column me bhi likh deta hai (sirf Admin Note me
+     * nahi). Notes edit → `order.owner_note` audit row; site isay timeline ke
+     * note-comment me badalti hai (customer ko owner ka message dikhta hai).
+     */
+    if (name === 'Orders' && column === 'Notes') {
+      var cmtIdCol = head.indexOf('Order number') + 1;
+      var cmtOrder = cmtIdCol ? text_(tab.getRange(row, cmtIdCol).getValue()) : '';
+      var cmtText = text_(e.value);
+      if (!cmtOrder || !cmtText) return;
+      var cmtStatusCol = head.indexOf('Order status') + 1;
+      appendRows_([
+        {
+          sheet: 'Orders',
+          row: {
+            Timestamp: now_(),
+            Event: 'order.owner_note',
+            'Order number': cmtOrder,
+            'Order status': cmtStatusCol ? text_(tab.getRange(row, cmtStatusCol).getValue()) : '',
+            Notes: cmtText,
+            Source: 'sheet-edit',
+          },
+        },
+      ]);
+      return;
+    }
+
+    /**
+     * R43: owner ne `Payment status` badla (jaise pending → paid) → audit row,
+     * taaki customer page par "Payment received" turant dikhe aur site ka
+     * payment block sheet ke saath sync rahe.
+     */
+    if (name === 'Orders' && column === 'Payment status') {
+      var payIdCol = head.indexOf('Order number') + 1;
+      var payOrder = payIdCol ? text_(tab.getRange(row, payIdCol).getValue()) : '';
+      var payValue = text_(e.value);
+      if (!payOrder || !payValue) return;
+      var payStatusCol = head.indexOf('Order status') + 1;
+      appendRows_([
+        {
+          sheet: 'Orders',
+          row: {
+            Timestamp: now_(),
+            Event: 'order.payment_sheet',
+            'Order number': payOrder,
+            'Order status': payStatusCol ? text_(tab.getRange(row, payStatusCol).getValue()) : '',
+            'Payment status': payValue,
+            Notes: 'Sheet se payment update (owner)',
+            Source: 'sheet-edit',
+          },
+        },
+      ]);
+      return;
+    }
+
     if (name === 'Messages' && column === 'Status') {
       var value = String(e.value || '').trim().toLowerCase();
       var repliedCol = head.indexOf('Replied') + 1;
@@ -2325,6 +2876,38 @@ function controlPanel_() {
   } catch (ignored) {}
   var storeUrl = String(settings.store_url || 'https://designerclothing.fashion');
   var adminUrl = String(settings.admin_url || '');
+  /**
+   * R44 (owner): "sheet ko khi aache visual se control kre … us page mai sheet
+   * ka pura advance system ho jis se sb kuch bina complexity ke dekha ja shke".
+   * Panel ab sirf sehat nahi — orders/products/reviews/messages/settings sab
+   * yahan se control hote hain. Token script me set hai to forms me khud chala
+   * jata hai (hidden) — owner ko baar-baar paste nahi karna.
+   */
+  var panelToken = '';
+  try {
+    var effToken = effectiveToken_();
+    if (effToken && effToken !== TOKEN_PLACEHOLDER) panelToken = effToken;
+  } catch (ignoredToken) {}
+  var tokenField = panelToken
+    ? '<input type="hidden" name="token" value="' + esc_(panelToken) + '">'
+    : '<label>Token (Vercel GOOGLE_SHEETS_TOKEN)<input name="token" type="password" required></label>';
+  var tokenParam = panelToken ? '&token=' + encodeURIComponent(panelToken) : '';
+  var pendingReviews = [];
+  var newMessages = [];
+  var recentProducts = [];
+  var hiddenProducts = [];
+  try { pendingReviews = reviewsList_({ status: 'pending', limit: 15 }).reviews; } catch (ignoredRev) {}
+  try {
+    newMessages = recentRows_('Messages', 30).filter(function (row) {
+      return !/^yes/i.test(String(row.Replied || '')) && String(row.Message || '').trim();
+    }).slice(0, 10);
+  } catch (ignoredMsg) {}
+  try { recentProducts = recentRows_('Products', 8); } catch (ignoredProd) {}
+  try {
+    hiddenProducts = productRows_(2000).filter(function (row) {
+      return /^hidden/i.test(String(row.Status || '').trim());
+    }).slice(0, 5);
+  } catch (ignoredHidden) {}
   var dot = function (good, label, detail) {
     return (
       '<div class="row"><span class="dot" style="background:' + (good ? '#22c55e' : '#ef4444') + '"></span>' +
@@ -2362,12 +2945,155 @@ function controlPanel_() {
     '<label>Status columns me dropdown lagao (Order status, Payment status, Messages, Coupons…)' +
     '<input name="token" type="password" placeholder="Vercel GOOGLE_SHEETS_TOKEN" required></label>' +
     '<button type="submit">Dropdowns lagao</button></form>';
+
+  /* ── R44 section: ORDERS — status + stage comment yahin se ── */
+  var statusOptions = function (list, current) {
+    var out = '<option value="">— na badle —</option>';
+    list.forEach(function (value) {
+      out += '<option value="' + esc_(value) + '"' + (value === current ? ' selected' : '') + '>' + esc_(value) + '</option>';
+    });
+    return out;
+  };
+  var ordersSection =
+    '<details class="sec" open><summary>Orders — status + comment</summary><div class="inner">' +
+    '<form class="setform" method="GET" action="">' +
+    '<input type="hidden" name="action" value="order_set">' + tokenField +
+    '<label>Order number<input name="orderNumber" type="text" placeholder="LK-XXXXXXXXXX" required></label>' +
+    '<label>Order status<select name="status">' + statusOptions(ORDER_DROPDOWN, '') + '</select></label>' +
+    '<label>Payment status<select name="paymentStatus">' + statusOptions(PAYMENT_DROPDOWN, '') + '</select></label>' +
+    '<label>Comment (Admin Note — customer ke order page par dikhega)<textarea name="adminNote" rows="2" placeholder="Aapka parcel aaj nikal gaya hai…"></textarea></label>' +
+    '<button type="submit">Order update karo</button></form>' +
+    '<p class="tiny">Sheet ke Orders tab me directly edit karne par bhi yahi hota hai (dropdowns ke saath). Comment <b>Admin Note</b> column me likha jata hai — 2 second me customer ke order page par dikhta hai (khaali ho to default “Waiting for confirmation”). Order confirm karte hi prepaid order ka payment verified ho jata hai.</p>' +
+    '</div></details>';
+
+  /* ── R44 section: PRODUCTS — add/edit/delete + links ── */
+  var productRowsHtml = recentProducts.map(function (row) {
+    var id = String(row.Id || '').trim();
+    var link = id ? '<a href="' + esc_(storeUrl + '/products/' + encodeURIComponent(id)) + '" target="_blank">' + esc_(id) + '</a>' : '—';
+    return '<tr><td>' + link + '</td><td>' + esc_(String(row.Title || '').slice(0, 40)) + '</td><td>' + esc_(row.Price) + '</td><td>' + esc_(String(row.Status || 'active')) + '</td></tr>';
+  }).join('');
+  var hiddenHtml = hiddenProducts.length
+    ? hiddenProducts.map(function (row) {
+        var id = String(row.Id || '').trim();
+        return '<div class="tiny">🔒 <b>' + esc_(String(row.Title || id).slice(0, 50)) + '</b> (' + esc_(row.Price) + ') — ' +
+          '<a href="' + esc_(storeUrl + '/products/' + encodeURIComponent(id)) + '" target="_blank">direct link (visitors ko nahi dikhta)</a></div>';
+      }).join('')
+    : '<p class="tiny">Koi hidden/test product nahi. Test product ke liye: Products tab me Status=hidden rakhein — listing/search se chhup jata hai, direct link se khulta hai (₹0.10 wala test product sheet me seeded hai).</p>';
+  var productsSection =
+    '<details class="sec"><summary>Products — add / edit / delete</summary><div class="inner">' +
+    '<form class="setform" method="POST" action="">' +
+    '<input type="hidden" name="action" value="product_upsert">' + tokenField +
+    '<label>Product Id (URL handle — same Id dobara = update)<input name="id" type="text" placeholder="blue-anarkali-suit-set" required></label>' +
+    '<label>Title<input name="title" type="text" placeholder="Blue Anarkali Suit Set"></label>' +
+    '<label>Price (₹)<input name="price" type="number" step="0.01" min="0" placeholder="599"></label>' +
+    '<label>Compare-at price (₹, optional)<input name="compareAtPrice" type="number" step="0.01" min="0"></label>' +
+    '<label>Main image URL<input name="mainImage" type="text" placeholder="https://…"></label>' +
+    '<label>Images — har line me ek URL (jitne chahe webp/jpg link paste karein)<textarea name="images" rows="3" placeholder="https://…&#10;https://…"></textarea></label>' +
+    '<label>Category<select name="category"><option value="">— na badle —</option><option>anarkali</option><option>lehnga</option><option>printed</option><option>saree</option><option>gown</option><option>sharara</option><option>other</option></select></label>' +
+    '<label>Collections (| se alag)<input name="collections" type="text" placeholder="lehnga-choli|new-arrivals"></label>' +
+    '<label>Sizes (| se alag)<input name="sizes" type="text" placeholder="XS [34]|S [36]|M [38]"></label>' +
+    '<label>Fabric<input name="fabric" type="text"></label>' +
+    '<label>Colour<input name="colour" type="text"></label>' +
+    '<label>Status<select name="status"><option value="">— na badle —</option><option>active</option><option>hidden</option></select></label>' +
+    '<label>Featured<select name="featured"><option value="">— na badle —</option><option>yes</option><option>no</option></select></label>' +
+    '<label>In stock<select name="inStock"><option value="">— na badle —</option><option>yes</option><option>no</option></select></label>' +
+    '<label>Description<textarea name="description" rows="2"></textarea></label>' +
+    '<button type="submit">Product save karo</button></form>' +
+    '<form class="setform" method="GET" action="" onsubmit="return confirm(\'Product delete karein? Site se turant hat jayega.\')">' +
+    '<input type="hidden" name="action" value="product_delete">' + tokenField +
+    '<label>Delete — Product Id<input name="id" type="text" placeholder="blue-anarkali-suit-set" required></label>' +
+    '<button type="submit">Product delete karo</button></form>' +
+    '<div class="ovx"><table class="list"><tr><th>Id (link)</th><th>Title</th><th>Price</th><th>Status</th></tr>' +
+    (productRowsHtml || '<tr><td colspan="4" class="tiny">Products tab khaali — website seed karegi ya upar ke form se add karein.</td></tr>') +
+    '</table></div>' +
+    '<p class="tiny" style="margin-top:8px"><b>Hidden/test products:</b></p>' + hiddenHtml +
+    '</div></details>';
+
+  /* ── R44 section: REVIEWS — approve / reject / edit / delete ── */
+  var reviewCards = pendingReviews.map(function (review) {
+    var idParam = encodeURIComponent(review.id || '');
+    var thumbs = (review.images || []).slice(0, 6).map(function (url) {
+      return '<a href="' + esc_(url) + '" target="_blank"><img class="thumb" src="' + esc_(url) + '" alt=""></a>';
+    }).join('');
+    var productLink = review.handle
+      ? '<a href="' + esc_(storeUrl + '/products/' + encodeURIComponent(review.handle)) + '" target="_blank">' + esc_(review.handle) + '</a>'
+      : esc_(review.product);
+    if (!review.id) {
+      return '<div class="rv"><div class="tiny">Purani row — Review ID khaali. Sheet me row delete kar sakte hain.</div>' +
+        '<b>' + esc_(review.customer) + '</b> ' + esc_(review.review.slice(0, 120)) + '</div>';
+    }
+    return '<div class="rv">' +
+      '<div><b>' + esc_(review.customer || 'Customer') + '</b>' + (review.city ? ' <span class="tiny">· ' + esc_(review.city) + '</span>' : '') +
+      ' · ' + esc_(review.rating) + '★ · ' + productLink + '</div>' +
+      (review.title ? '<div><b>' + esc_(review.title) + '</b></div>' : '') +
+      '<div>' + esc_(review.review) + '</div>' +
+      (thumbs ? '<div style="margin-top:6px">' + thumbs + '</div>' : '') +
+      '<div style="margin-top:8px">' +
+      '<a class="btnsm solid" href="?action=review_set&id=' + idParam + '&status=approved' + tokenParam + '">✓ Approve</a>' +
+      '<a class="btnsm gray" href="?action=review_set&id=' + idParam + '&status=rejected' + tokenParam + '">Reject</a>' +
+      '<a class="btnsm gray" href="?action=review_delete&id=' + idParam + tokenParam + '" onclick="return confirm(\'Review delete karein?\')">Delete</a>' +
+      '</div>' +
+      '<details style="margin-top:6px"><summary class="tiny">Edit karke approve karo</summary>' +
+      '<form class="setform" method="POST" action="">' +
+      '<input type="hidden" name="action" value="review_update">' +
+      '<input type="hidden" name="id" value="' + esc_(review.id) + '">' + tokenField +
+      '<input type="hidden" name="status" value="approved">' +
+      '<label>Title<input name="title" type="text" value="' + esc_(review.title) + '"></label>' +
+      '<label>Review text<textarea name="review" rows="3">' + esc_(review.review) + '</textarea></label>' +
+      '<label>Rating<select name="rating">' + [1, 2, 3, 4, 5].map(function (n) {
+        return '<option value="' + n + '"' + (Number(review.rating) === n ? ' selected' : '') + '>' + n + '★</option>';
+      }).join('') + '</select></label>' +
+      '<label>Images (har line ek URL — khaali chhoda to purani images rahengi)<textarea name="images" rows="2"></textarea></label>' +
+      '<button type="submit">Save karke approve karo</button></form></details>' +
+      '</div>';
+  }).join('');
+  var reviewsSection =
+    '<details class="sec"' + (pendingReviews.length ? ' open' : '') + '><summary>Reviews — approve karo' +
+    (pendingReviews.length ? '<span class="badge">' + pendingReviews.length + ' pending</span>' : '') + '</summary><div class="inner">' +
+    (reviewCards || '<p class="tiny">Koi pending review nahi. Naya review aate hi yahan dikhega — approve karte hi product page par live.</p>') +
+    '<p class="tiny" style="margin-top:8px">Sheet ke Reviews tab me Status column se bhi approve/reject kar sakte hain (dropdown: pending/approved/rejected). Sirf approved reviews site par dikhte hain; row delete = review site se gaya.</p>' +
+    '</div></details>';
+
+  /* ── R44 section: MESSAGES — naye message + reply ── */
+  var messageRows = newMessages.map(function (row) {
+    var digits = String(row.Phone || '').replace(/\D/g, '').slice(-10);
+    var waLink = digits
+      ? '<a class="btnsm" target="_blank" href="https://wa.me/91' + esc_(digits) + '?text=' + encodeURIComponent('Namaste ' + String(row.Name || '') + '! Designer Clothing se ' + String(row.Subject || 'aapka message') + ' ke baare me — ') + '">WhatsApp reply</a>'
+      : '';
+    var repliedLink = String(row['Message ID'] || '').trim()
+      ? '<a class="btnsm solid" href="?action=message_replied&id=' + encodeURIComponent(String(row['Message ID']).trim()) + tokenParam + '">Replied ✓</a>'
+      : '';
+    return '<tr><td><b>' + esc_(String(row.Name || '')) + '</b><div class="tiny">' + esc_(String(row.Phone || '')) + ' · ' + esc_(String(row.Timestamp || '')) + '</div></td>' +
+      '<td>' + esc_(String(row.Message || '').slice(0, 160)) + '<div style="margin-top:6px">' + waLink + repliedLink + '</div></td></tr>';
+  }).join('');
+  var messagesSection =
+    '<details class="sec"' + (newMessages.length ? ' open' : '') + '><summary>Messages — naye message' +
+    (newMessages.length ? '<span class="badge">' + newMessages.length + ' naye</span>' : '') + '</summary><div class="inner">' +
+    '<div class="ovx"><table class="list">' +
+    (messageRows || '<tr><td class="tiny">Koi naya message nahi.</td></tr>') +
+    '</table></div>' +
+    '<p class="tiny">Reply WhatsApp par khulega — bhejne ke baad "Replied ✓" daba dijiye, list se hat jayega.</p>' +
+    '</div></details>';
+
+  /* ── R44 section: SETTINGS — delivery estimate etc. ── */
+  var settingsSection =
+    '<details class="sec"><summary>Settings — delivery estimate, announcement, UPI</summary><div class="inner">' +
+    '<form class="setform" method="GET" action="">' +
+    '<input type="hidden" name="action" value="settings_save">' + tokenField +
+    '<label>Estimated delivery — din (order placed + itne din)<input name="delivery_estimate_days" type="number" min="1" max="30" value="' + esc_(settings.delivery_estimate_days || '6') + '"></label>' +
+    '<label>Estimated delivery — exact text (bhara to yahi line dikhegi; khaali = din se calculate)<input name="delivery_estimate_text" type="text" value="' + esc_(settings.delivery_estimate_text || '') + '" placeholder="3 se 5 din me delivery"></label>' +
+    '<label>Announcement (top bar)<input name="announcement" type="text" value="' + esc_(settings.announcement || '') + '"></label>' +
+    '<label>UPI ID (payment isi par aata hai)<input name="upi_id" type="text" value="' + esc_(settings.upi_id || '') + '"></label>' +
+    '<label>Support hours<input name="support_hours" type="text" value="' + esc_(settings.support_hours || '') + '"></label>' +
+    '<button type="submit">Settings save karo</button></form>' +
+    '</div></details>';
+
   var html = '' +
     '<!DOCTYPE html><html lang="hi"><head><meta charset="utf-8">' +
     '<title>Liksha sheet panel · ' + esc_(report.version) + '</title>' +
     '<style>' +
     'body{font:14px/1.6 -apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#faf8f5;color:#241d18;margin:0;padding:24px}' +
-    '.card{max-width:560px;margin:0 auto;background:#fff;border:1px solid #e9dfd4;border-radius:12px;padding:20px 22px}' +
+    '.card{max-width:760px;margin:0 auto;background:#fff;border:1px solid #e9dfd4;border-radius:12px;padding:20px 22px}' +
     'h1{font-size:18px;margin:0 0 2px}.sub{color:#8a8078;font-size:12px;margin:0 0 14px}' +
     '.row{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-top:1px solid #f4efe9}' +
     '.dot{width:10px;height:10px;border-radius:50%;margin-top:6px;flex:none}' +
@@ -2381,6 +3107,20 @@ function controlPanel_() {
     '.setform label{display:block;font-size:12px;font-weight:600;margin:8px 0 3px}' +
     '.setform input{width:100%;box-sizing:border-box;padding:8px;border:1px solid #d8cbbc;border-radius:6px;font:13px sans-serif}' +
     '.setform button{margin-top:10px;background:#862222;color:#fff;border:0;padding:9px 16px;border-radius:8px;font-weight:600;cursor:pointer}' +
+    '.setform select,.setform textarea{width:100%;box-sizing:border-box;padding:8px;border:1px solid #d8cbbc;border-radius:6px;font:13px sans-serif}' +
+    'details.sec{margin-top:14px;border:1px solid #e9dfd4;border-radius:10px;background:#fff}' +
+    'details.sec summary{cursor:pointer;font-weight:700;font-size:13.5px;padding:11px 14px;color:#862222}' +
+    'details.sec .inner{padding:0 14px 14px}' +
+    '.ovx{overflow-x:auto}' +
+    'table.list{width:100%;border-collapse:collapse;font-size:12px}' +
+    'table.list th,table.list td{border-top:1px solid #f1ebe5;padding:6px;text-align:left;vertical-align:top}' +
+    '.thumb{width:46px;height:58px;object-fit:cover;border-radius:6px;border:1px solid #eee6de;margin:0 4px 4px 0}' +
+    '.rv{border:1px solid #f1ebe5;border-radius:10px;padding:10px;margin-top:10px;background:#fdfcfb}' +
+    '.tiny{font-size:11px;color:#8a8078}' +
+    '.btnsm{display:inline-block;border:1px solid #862222;color:#862222;background:#fff;font-size:11px;font-weight:600;padding:5px 10px;border-radius:7px;cursor:pointer;text-decoration:none;margin:2px 4px 2px 0}' +
+    '.btnsm.solid{background:#862222;color:#fff}' +
+    '.btnsm.gray{border-color:#b7aca0;color:#6b6259}' +
+    '.badge{display:inline-block;font-size:10.5px;font-weight:700;border-radius:99px;padding:2px 9px;background:#fdf1e7;color:#862222;margin-left:6px}' +
     '</style></head><body><div class="card">' +
     '<h1>Liksha Clothing — sheet control panel</h1>' +
     '<p class="sub">Apps Script ' + esc_(report.version) + ' · ' + esc_(report.time) + ' · timezone ' + esc_(report.timezone) + '</p>' +
@@ -2392,8 +3132,8 @@ function controlPanel_() {
     '<a class="btn solid" href="' + esc_(storeUrl) + '">Website kholo</a>' +
     (adminUrl ? '<a class="btn" href="' + esc_(adminUrl) + '">Admin panel</a>' : '') +
     '<a class="btn" href="' + esc_(storeUrl) + '/api/sheet-health">Site ka sheet-health</a>' +
-    '</div>' + dropdownForm +
-    '<div class="hint"><b>R40: orders isi sheet me save hote hain</b> (Orders tab ka <b>Order JSON</b> column = poora order; koi Supabase/DB nahi). Customer ko message dikhana ho to order ki row ka <b>Admin Note</b> column bhar dijiye — 2 second me order page par dikhega (khaali ho to default “Waiting for confirmation”). Status badalna ho to <b>Order status</b> column edit kariye. Sheet badalni ho to upar wala form dobara — code/paste kuch nahi badlega.<br><br><b>R42: dropdown</b> — “Dropdowns lagao” form se (ya setup/repair ke saath khud) status columns me dropdown lag jaate hain: payment <b>pending/processing</b> ho to site order page par “Complete payment” button dikhati hai, <b>paid</b> karte hi button hat jaata hai.</div>' +
+    '</div>' + dropdownForm + ordersSection + reviewsSection + messagesSection + productsSection + settingsSection +
+    '<div class="hint"><b>R44: sheet hi database hai</b> — orders isi sheet me save hote hain (Orders tab ka <b>Order JSON</b> column = poora order; koi Supabase/DB nahi). Products tab me row jodiye/badaliye/hataiye, site par 30 second me live (price, image, title, sizes, hidden). <b>Reviews</b>: customer site par review likhta hai → yahan "Reviews" section me pending aata hai → Approve karte hi product page par live (Image 1…8 columns me photos). Row delete = review/product site se gaya. <b>Orders</b>: status + comment upar ke form se (ya Orders tab me dropdown se) — Admin Note customer ko dikhta hai. <b>Messages</b>: naye message ka WhatsApp reply + "Replied ✓". <b>Delivery estimate</b> Settings section se badliye. <b>Test product</b>: Status=hidden rakhein — visitors ko kahin nahi dikhta, direct link se kholkar ₹0.10 payment test kar sakte hain (link Products section me).<br><br><b>R42: dropdown</b> — "Dropdowns lagao" form se sab status columns me dropdown lag jaate hain: payment <b>pending/processing</b> ho to site "Complete payment" button dikhati hai, <b>paid</b> karte hi hat jata hai; order <b>confirmed</b> karte hi payment verified.</div>' +
     '</div></body></html>';
   return HtmlService.createHtmlOutput(html)
     .setTitle('Liksha sheet panel')
@@ -2509,7 +3249,8 @@ function doGet(e) {
    * Public actions — website ko settings token set hone se pehle bhi padhni hai,
    * aur owner `?action=health` browser me khol kar khud diagnose kar sakta hai.
    */
-  var isPublic = action === 'settings' || action === 'version' || action === 'ping' || action === 'health';
+  // R44: 'reviews' public hai — bina token sirf `approved` milte hain (branch ke andar check)
+  var isPublic = action === 'settings' || action === 'version' || action === 'ping' || action === 'health' || action === 'reviews' || action === 'coupons';
   if (!isPublic && !authed) {
     return json_({ ok: false, version: CODE_VERSION, error: 'unauthorized — token match nahi hua', fix: tokenFix_() });
   }
@@ -2517,10 +3258,17 @@ function doGet(e) {
   try {
     if (action === 'settings') {
       var all = readSettings_();
+      // R45 (owner): "sheet se delete kiya to site se bhi turant jaana chahiye" —
+      // jo public key sheet me nahi mili (row delete ya value khali), use '' bhejo.
+      // Isse website ko pata chalta hai ki owner ne jaan-boojh kar khali kiya hai;
+      // purana/hardcoded fallback nahi dikhega.
+      PUBLIC_SETTING_KEYS.forEach(function (key) {
+        if (all[key] === undefined) all[key] = '';
+      });
       if (authed) return json_({ ok: true, version: CODE_VERSION, settings: all, time: now_() });
       var pub = {};
       PUBLIC_SETTING_KEYS.forEach(function (key) {
-        if (all[key] !== undefined) pub[key] = all[key];
+        pub[key] = all[key];
       });
       return json_({ ok: true, version: CODE_VERSION, settings: pub, public: true, time: now_() });
     }
@@ -2579,6 +3327,139 @@ function doGet(e) {
     }
 
     /**
+     * R43 (owner): "jitne bi product hai vo saare sheet me list kr do … price
+     * change krte hi site pr visible ho jaye" — Products tab = catalog ka DB.
+     * Site `?action=catalog` se saari rows padhti hai (30s cache + stale-while-
+     * revalidate) aur build-time catalog par overlay karti hai:
+     *   • row badli (price/image/title/status) → site par live
+     *   • nayi row (naya Id) → naya product site par
+     *   • row delete → product site se gaya
+     * Tab khaali mile to site apna catalog `products_seed` (POST) se bhar deti hai.
+     */
+    if (action === 'catalog' || action === 'products') {
+      var productRows = productRows_(2000);
+      return json_({ ok: true, version: CODE_VERSION, count: productRows.length, products: productRows, time: now_() });
+    }
+
+    /**
+     * R44 (owner): "new koi kre kisi product ka review vo bi dikhna chiye or us
+     * new review ko approv krte hi vo site pr product pr live ho jana chiye".
+     *   • bina token → sirf `approved` reviews (site ka public raasta)
+     *   • token ke saath → sab statuses (panel/admin moderation)
+     *   • `empty:true` = Reviews tab KHAALI → site apne purane reviews seed karti hai
+     */
+    if (action === 'reviews') {
+      var reviewsAuthed = tokenOk_(params.token);
+      var listing = reviewsList_({
+        status: reviewsAuthed ? String(params.status || '') : 'approved',
+        product: String(params.product || params.handle || ''),
+        limit: Number(params.limit || (reviewsAuthed ? 500 : 300)),
+      });
+      return json_({
+        ok: true,
+        version: CODE_VERSION,
+        count: listing.reviews.length,
+        empty: listing.empty,
+        approvedOnly: !reviewsAuthed,
+        reviews: listing.reviews,
+        time: now_(),
+      });
+    }
+
+    /* ── R46: coupons — checkout coupon sheet ke Coupons tab se validate karta hai ── */
+    if (action === 'coupons') {
+      var couponsAuthed = tokenOk_(params.token);
+      var couponRows = readCoupons_();
+      // bina token sirf active coupons (public checkout validation);
+      // owner/panel (token ke saath) ko sab — inactive/expired bhi
+      var couponList = couponsAuthed
+        ? couponRows
+        : couponRows.filter(function (coupon) {
+            return coupon.active && !coupon.expired && !coupon.exhausted;
+          });
+      return json_({ ok: true, version: CODE_VERSION, count: couponList.length, coupons: couponList, time: now_() });
+    }
+
+    /* ── R44: panel ke GET forms (token zaroori) — visual sheet control ── */
+    if (action === 'review_set' || action === 'review_update') {
+      if (!tokenOk_(params.token)) return json_({ ok: false, error: 'token chahiye' });
+      var setResult = updateReview_({
+        id: params.id,
+        status: params.status,
+        title: params.title,
+        review: params.review,
+        rating: params.rating,
+        images: params.images === undefined ? undefined : String(params.images).split('|'),
+        actor: 'panel',
+      });
+      if (setResult.ok) setResult.message = 'Review update ho gaya — site par 30 second me dikhega';
+      return json_(setResult);
+    }
+    if (action === 'review_delete') {
+      if (!tokenOk_(params.token)) return json_({ ok: false, error: 'token chahiye' });
+      var delReview = deleteReview_(params.id, 'panel');
+      if (delReview.ok) delReview.message = 'Review delete ho gaya — site se hat gaya';
+      return json_(delReview);
+    }
+    if (action === 'product_delete') {
+      if (!tokenOk_(params.token)) return json_({ ok: false, error: 'token chahiye' });
+      var delProduct = deleteProduct_(params.id || params.handle || '', 'panel');
+      if (delProduct.ok) delProduct.message = 'Product delete ho gaya — site se hat gaya';
+      return json_(delProduct);
+    }
+    if (action === 'message_replied') {
+      if (!tokenOk_(params.token)) return json_({ ok: false, error: 'token chahiye' });
+      var messageId = String(params.id || '').trim();
+      if (!messageId) return json_({ ok: false, error: 'Message ID chahiye' });
+      var messageUpdated = updateWhere_('Messages', 'Message ID', messageId, {
+        Status: 'replied', Replied: 'yes', 'Replied at': istNow_(),
+      });
+      noteAudit_('panel', 'message_replied', messageId, '');
+      return json_({
+        ok: messageUpdated > 0,
+        updated: messageUpdated,
+        message: messageUpdated ? 'Message replied mark ho gaya' : 'message nahi mila',
+      });
+    }
+    if (action === 'order_set') {
+      if (!tokenOk_(params.token)) return json_({ ok: false, error: 'token chahiye' });
+      var orderNumber = String(params.orderNumber || params.order || '').trim();
+      if (!orderNumber) return json_({ ok: false, error: 'Order number chahiye' });
+      var hasStatus = String(params.status || '').trim() !== '';
+      var hasPayment = String(params.paymentStatus || '').trim() !== '';
+      var hasNote = String(params.adminNote || '').trim() !== '';
+      var orderResult = orderUpdate_({
+        orderNumber: orderNumber,
+        // sheet-edit events — site inhe owner ke stage-change/comment ki tarah
+        // padhti hai. Sirf comment badla ho to order.admin_note (warna status
+        // row ka fallback "placed" timeline me galat entry bana deta).
+        event: hasStatus || hasPayment ? 'order.status_sheet' : (hasNote ? 'order.admin_note' : 'order.updated'),
+        status: String(params.status || ''),
+        paymentStatus: String(params.paymentStatus || ''),
+        adminNote: hasNote ? String(params.adminNote) : '',
+        actor: 'panel',
+      });
+      if (orderResult.ok) orderResult.message = 'Order update ho gaya — customer ko 2 second me dikhega';
+      return json_(orderResult);
+    }
+    if (action === 'settings_save') {
+      if (!tokenOk_(params.token)) return json_({ ok: false, error: 'token chahiye' });
+      // panel form ke fields — sirf known keys hi likhi jaati hain
+      var SETTINGS_FORM_KEYS = [
+        'delivery_estimate_days', 'delivery_estimate_text', 'announcement', 'upi_id',
+        'upi_name', 'support_phone', 'whatsapp', 'support_hours', 'return_window_days',
+        'free_shipping', 'prepaid_only', 'instagram', 'store_name',
+      ];
+      var formSettings = {};
+      SETTINGS_FORM_KEYS.forEach(function (key) {
+        if (params[key] !== undefined) formSettings[key] = String(params[key]);
+      });
+      var formWritten = writeSettings_(formSettings);
+      noteAudit_('panel', 'settings_save', 'Settings', formWritten + ' keys');
+      return json_({ ok: true, written: formWritten, message: 'Settings save ho gayi — site par turant laagu' });
+    }
+
+    /**
      * Tracking timeline — order number + registered mobile se.
      *   ?action=timeline&order=LK-XXXX&phone=98XXXXXXXX
      * (site ka tracking DB se chalta hai; ye sheet se hi jawab deta hai — owner
@@ -2631,7 +3512,10 @@ function doGet(e) {
  *   { token, action: "invoice_save", invoiceNumber, orderNumber, taxable, cgst, sgst, igst, total }
  *   { token, action: "stock_update", handle, size, stock, change, reason }
  *   { token, action: "coupon_save", code, type, value, minOrder, maxUses, active }
- *   { token, action: "review_add", product, handle, customer, rating, review, verified }
+ *   { token, action: "review_add", product, handle, customer, city, rating, title, review, images[], verified }
+ *   { token, action: "review_update", id, status, title, review, rating, images[] }   ← R44 moderation
+ *   { token, action: "review_delete", id }   { token, action: "reviews_seed", reviews: […] }
+ *   { token, action: "product_upsert", id, title, price, images[], … }   { token, action: "product_delete", id }
  *   { token, action: "subscribe", email }
  *   { token, action: "message_status", id, status: "replied" | "handled" }
  *   { token, action: "dashboard" }   { token, action: "setup" }   { token, action: "repair" }
@@ -2641,6 +3525,18 @@ function doPost(e) {
   try {
     body = JSON.parse((e && e.postData && e.postData.contents) || '{}');
   } catch (error) {
+    body = {};
+  }
+  /**
+   * R44: /exec panel ke HTML forms `application/x-www-form-urlencoded` POST
+   * karte hain (JSON nahi) — Apps Script unke fields `e.parameter` me deti hai.
+   * Website hamesha JSON bhejti hai; form sirf panel ka raasta hai.
+   */
+  if (!body.action && e && e.parameter && e.parameter.action) {
+    body = {};
+    Object.keys(e.parameter).forEach(function (key) { body[key] = e.parameter[key]; });
+  }
+  if (!body.action) {
     return json_({ ok: false, version: CODE_VERSION, error: 'invalid json' });
   }
   if (!tokenOk_(body.token)) {
@@ -2668,6 +3564,13 @@ function doPost(e) {
       return json_({ ok: true, written: count, settings: readSettings_() });
     }
 
+    /* ── R46: coupon wala order place hua → Coupons tab me Used +1 ── */
+    if (action === 'coupon_use') {
+      var couponUseResult = couponUse_(body.code || body.coupon || '');
+      if (couponUseResult.ok) noteSync_('website→sheet', 'coupon_use:' + couponUseResult.code, 1, 'ok', '');
+      return json_({ ok: couponUseResult.ok, version: CODE_VERSION, used: couponUseResult.used || 0, error: couponUseResult.error || undefined, time: now_() });
+    }
+
     if (action === 'order_update') {
       var result = orderUpdate_(body);
       if (result.ok) noteAudit_(body.actor || 'admin', 'order_update', body.orderNumber || '', body.event || '');
@@ -2690,10 +3593,41 @@ function doPost(e) {
       return json_(upsertCoupon_(body));
     }
 
+    // R43: site apna build-time catalog Products tab me seed karti hai (sirf
+    // jab tab khaali ho — owner ka data kabhi override nahi hota).
+    if (action === 'products_seed') {
+      var seedResult = seedProducts_(body.products);
+      if (seedResult.ok && seedResult.seeded) {
+        noteAudit_(body.actor || 'site', 'products_seed', 'Products', seedResult.seeded + ' rows');
+      }
+      return json_(seedResult);
+    }
+
     if (action === 'review_add') {
       var review = addReview_(body);
       if (review.ok) refreshDashboard_();
       return json_(review);
+    }
+
+    // R44: review moderation + product CRUD (panel/site admin — token zaroori)
+    if (action === 'review_update') {
+      return json_(updateReview_(body));
+    }
+    if (action === 'review_delete') {
+      return json_(deleteReview_(String(body.id || ''), body.actor || 'admin'));
+    }
+    if (action === 'reviews_seed') {
+      var reviewsSeed = seedReviews_(body.reviews);
+      if (reviewsSeed.ok && reviewsSeed.seeded) {
+        noteAudit_(body.actor || 'site', 'reviews_seed', 'Reviews', reviewsSeed.seeded + ' rows');
+      }
+      return json_(reviewsSeed);
+    }
+    if (action === 'product_upsert') {
+      return json_(upsertProduct_(body));
+    }
+    if (action === 'product_delete') {
+      return json_(deleteProduct_(String(body.id || body.handle || ''), body.actor || 'admin'));
     }
 
     if (action === 'subscribe') {

@@ -304,6 +304,6 @@ export async function createPaymentLink(
     upiId: upi?.vpa?.trim() || process.env.STORE_UPI_ID || "likshaclothing@upi",
     upiUri,
     message:
-      "UPI se pay kariye — payment backend verify hote hi order confirm ho jaayega. WhatsApp par bhi screenshot bhej sakte hain.",
+      "Pay via UPI — your order is confirmed as soon as the payment is verified. You can also send the screenshot on WhatsApp.",
   };
 }

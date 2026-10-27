@@ -6,6 +6,8 @@ import {
   type SheetHealth,
 } from "@/lib/google-sheets";
 import { sheetOrderStoreInfo } from "@/lib/orders-sheet";
+import { catalogSheetInfo } from "@/lib/catalog-sheet";
+import { reviewsSheetInfo } from "@/lib/reviews-sheet";
 import { getStoreSettings, storeSettingsInfo } from "@/lib/store-settings";
 
 export const dynamic = "force-dynamic";
@@ -39,12 +41,16 @@ export async function GET() {
   const configured = sheetsConfigured();
   const started = Date.now();
 
-  const [health, settings, info, orderStore] = await Promise.all([
+  const [health, settings, info, orderStore, catalog] = await Promise.all([
     configured ? scriptHealth() : Promise.resolve(null),
     getStoreSettings().catch(() => null),
     Promise.resolve(storeSettingsInfo()),
     sheetOrderStoreInfo().catch(() => null),
+    // R43: catalog Products tab se live hai ya baked fallback par — owner yahan dekh sake
+    Promise.resolve(catalogSheetInfo()),
   ]);
+  // R44: reviews bhi sheet se live hain — source/count yahan dikhta hai
+  const reviews = reviewsSheetInfo();
 
   const write = sheetWriteInfo();
   const help: string[] = [];
@@ -78,7 +84,7 @@ export async function GET() {
       // save/read hote hain. Full fidelity (Order JSON snapshot, order_state,
       // sheet_set/auto-heal, Admin Note column, R42 dropdowns) ke liye latest
       // script paste karein: scripts/google-apps-script/liksha-sheets.gs (r42-1).
-      warnings.push(`Script ka purana version chal raha hai (${health.version}) — orders sheet me save ho rahe hain (compat mode), par Order JSON snapshot/Admin Note/sheet_set auto-heal/dropdowns jaisi poori taakat ke liye latest script (r42-1) paste kariye: repo ki scripts/google-apps-script/liksha-sheets.gs → Apps Script → Deploy → New version.`);
+      warnings.push(`Script ka purana version chal raha hai (${health.version}) — orders/products sheet me save ho rahe hain (compat mode), par Order JSON snapshot/dropdowns/Products catalog jaisi poori taakat ke liye latest script (r46-1) paste kariye: repo ki scripts/google-apps-script/liksha-sheets.gs → Apps Script → Deploy → New version.`);
     }
     if (health.tokenSet === false) {
       help.push("Script ka TOKEN set nahi — browser me <webapp URL>?action=set_token&token=<Vercel GOOGLE_SHEETS_TOKEN> kholiye.");
@@ -123,6 +129,22 @@ export async function GET() {
       sheetOrders: orderStore
         ? { ready: orderStore.ready, mode: orderStore.mode, reason: orderStore.reason || null, version: orderStore.version }
         : null,
+      catalog: {
+        source: catalog.source,
+        products: catalog.count,
+        ageMs: catalog.ageMs,
+        stale: catalog.stale,
+        lastError: catalog.lastError,
+        ttlMs: catalog.ttlMs,
+      },
+      reviews: {
+        source: reviews.source,
+        approved: reviews.count,
+        ageMs: reviews.ageMs,
+        stale: reviews.stale,
+        lastError: reviews.lastError,
+        ttlMs: reviews.ttlMs,
+      },
       sheet: {
         configured,
         expectedSheetId: expectedSheetId() || null,

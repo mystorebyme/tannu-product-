@@ -4,12 +4,15 @@ import fs from "node:fs";
 import path from "node:path";
 
 /**
- * Checkout = **3 steps** (owner requirement, R36 me update):
- *   1. delivery details → 2. review → 3. payment — **isi page par** (alag page nahi).
+ * Checkout = **3 steps** (owner requirement, R46 me update):
+ *   1. delivery details → 2. review (+coupon) → 3. **order placed + WhatsApp
+ *   confirmation** — isi page par (alag page nahi).
  *
- * Address aur payment ek saath dikhte nahi: step 1/2 par UPI ka koi zikr nahi,
- * payment sirf step 3 par (`CheckoutPaymentStep`). `/orders/<number>/pay` deep
- * links (WhatsApp/email/QR) ke liye bacha hai aur wahi `UpiPayment` render karta hai.
+ * R46 (owner): online payment **hold** par hai — checkout me payment step nahi.
+ * Order place hote hi confirmation card khulta hai jo poori order detail WhatsApp
+ * par bhejta hai; team confirm karke payment arrange karti hai.
+ * `/orders/<number>/pay` deep links (WhatsApp/email/QR) ke liye bacha hai aur
+ * wahi `UpiPayment` render karta hai.
  */
 
 const root = process.cwd();
@@ -35,30 +38,31 @@ test("checkout has a 3-step indicator", () => {
   assert.match(checkout, /data-testid="checkout-steps"/);
   assert.match(checkout, /Delivery/);
   assert.match(checkout, /Review/);
-  assert.match(checkout, /Payment/);
+  assert.match(checkout, /label: "WhatsApp"/);
 });
 
 test("checkout step 1 continues to review, order is placed only from review", () => {
   assert.match(checkout, /data-testid="checkout-continue"/);
   assert.match(checkout, /data-testid="checkout-review"/);
   assert.match(checkout, /setStep\("review"\)/);
-  // submit button sirf review step me dikhta hai (R36: payment step alag shell me hai)
-  assert.match(checkout, /const showDetails = !isPayment && !resumed && step === "details"/);
+  // submit button sirf review step me dikhta hai (R46: placed step alag shell me hai)
+  assert.match(checkout, /const showDetails = !isPlaced && !resumed && step === "details"/);
   assert.match(checkout, /\)\s*:\s*showDetails \? \(\s*<button\s+type="button"/);
 });
 
-test("step 1/2 me UPI ID / QR / 'pay here' nahi — payment sirf step 3 par", () => {
-  // checkout form khud UPI render nahi karta — step 3 ka component karta hai
+test("step 1/2 me UPI ID / QR / 'pay here' nahi — R46: payment checkout se hata hi diya gaya", () => {
+  // checkout form khud UPI render nahi karta — payment step ab hai hi nahi
   assert.ok(!checkout.includes('data-testid="upi-payment"'), "checkout form me UPI block nahi");
   assert.ok(!/UpiApps|upi-apps/.test(checkout), "koi UPI app chip nahi");
   assert.ok(!/UpiQr/.test(checkout), "checkout form me UPI QR nahi");
   assert.ok(!/buildUpiUri/.test(checkout), "checkout form me upi:// link nahi");
   assert.ok(!/upi:\/\//.test(checkout), "checkout form me UPI scheme nahi");
-  assert.ok(!/UPI ID/i.test(checkoutCode), "step 1/2 par 'UPI ID' text nahi");
+  assert.ok(!/UPI ID/i.test(checkoutCode), "checkout par 'UPI ID' text nahi");
   assert.ok(!/dhakadgourav/.test(checkout), "UPI ID hard-code nahi");
-  // step 3 wahin khulta hai, sirf isPayment par
-  assert.match(checkout, /<CheckoutPaymentStep/);
-  assert.match(checkout, /\{isPayment \? \(/);
+  assert.ok(!/CheckoutPaymentStep/.test(checkoutCode), "payment step component checkout me nahi");
+  // step 3 = placed confirmation card, sirf isPlaced par
+  assert.match(checkout, /data-testid="checkout-placed-step"/);
+  assert.match(checkout, /\{isPlaced \? \(/);
   assert.match(payPage, /UpiPayment/);
 });
 
@@ -73,11 +77,30 @@ test("payment par ek hi 'Pay on UPI' button + auto status detection (koi app bra
   assert.match(payPage, /PaymentStatusWatcher/);
 });
 
-test("order place hote hi payment step 3 checkout ke andar khulta hai (alag page nahi)", () => {
-  assert.match(checkout, /goToPayment\(result\.data\.orderNumber\)/);
-  assert.match(checkout, /window\.history\.pushState\(\{\}, "", paymentUrl\(target\)\)/);
-  assert.doesNotMatch(checkout, /router\.push\(`\/orders\//, "payment page par redirect nahi");
+test("order place hote hi confirmation step 3 checkout ke andar khulta hai (alag page nahi)", () => {
+  assert.match(checkout, /goToPlaced\(result\.data\.orderNumber/);
+  assert.match(checkout, /window\.history\.pushState\(\{\}, "", placedUrl\(target\)\)/);
+  assert.doesNotMatch(checkout, /router\.push\(`\/orders\//, "order page par redirect nahi");
   assert.doesNotMatch(checkout, /\?pay=1/, "UPI auto-open wala flag hata diya gaya");
+});
+
+test("R46: confirmation step par WhatsApp CTA + order details ka raasta", () => {
+  assert.match(checkout, /data-testid="placed-whatsapp"/);
+  assert.match(checkout, /placedWhatsAppHref/);
+  assert.match(checkout, /Send order on WhatsApp/);
+  assert.match(checkout, /data-testid="payment-order-details"/);
+  // WhatsApp message me poori detail: items + links + total + address
+  assert.match(checkout, /productUrl\(/);
+});
+
+test("R46: coupon payment ki jagah — review step par coupon box", () => {
+  assert.match(checkout, /data-testid="coupon-box"/);
+  assert.match(checkout, /data-testid="coupon-input"/);
+  assert.match(checkout, /data-testid="coupon-apply"/);
+  assert.match(checkout, /data-testid="coupon-status"/);
+  assert.match(checkout, /\/api\/coupons\/check/);
+  // order POST me couponCode jaata hai
+  assert.match(checkout, /couponCode: coupon\?\.code \?\? null/);
 });
 
 test("checkout funnel events DB + sheet me jaate hain", () => {

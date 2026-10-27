@@ -8,6 +8,12 @@ const root = process.cwd(); // npm test root se chalta hai
 const file = path.join(root, "database/seeds/catalog.json");
 const catalog = JSON.parse(fs.readFileSync(file, "utf8")) as Catalog;
 const products: Product[] = catalog.products;
+/**
+ * R44: customer ko dikhne wale products — hidden (owner ka ₹0.10 payment-test
+ * product) display invariants se chhoot hai (na image, na sale price — wo
+ * listings me jaata hi nahi).
+ */
+const customerProducts: Product[] = products.filter((product) => !product.hidden);
 /** extra store (guest) products — live-store parity sirf liksha products par hoti hai */
 const likshaProducts = products.filter((product) => (product as Product & { source?: string }).source !== "extra");
 const liveDir = path.join(root, "database/seeds/live");
@@ -47,7 +53,7 @@ test("every product has a positive integer price in paise", () => {
 
 test("festive sale: every final price is ₹499 / ₹549 / ₹599 / ₹649 / ₹699", () => {
   const allowed = [49_900, 54_900, 59_900, 64_900, 69_900];
-  for (const product of products) {
+  for (const product of customerProducts) {
     assert.ok(
       allowed.includes(product.price),
       `${product.handle}: final price ${product.price} sale set me nahi hai`,
@@ -60,8 +66,16 @@ test("festive sale: every final price is ₹499 / ₹549 / ₹599 / ₹649 / ₹
 });
 
 test("festive sale: discount badge only shows 60% or 70%", () => {
-  for (const product of products) {
+  for (const product of customerProducts) {
     const percent = Math.round(((product.compareAtPrice! - product.price) / product.compareAtPrice!) * 100);
+    /* R47 (owner): "price vhi iska 65% discount kr dena" — jinka MRP owner ne
+     * khud lock kiya (saleLockedPrice), unka discount 60/70 slab se bandha nahi;
+     * badge ek sane locked percent dikhaye. Baaki sab par 60/70 hi rahe. */
+    const locked = (product as Product & { saleLockedPrice?: boolean }).saleLockedPrice === true;
+    if (locked) {
+      assert.ok(percent > 0 && percent < 90, `${product.handle}: locked ${percent}% sane nahi`);
+      continue;
+    }
     assert.ok([60, 70].includes(percent), `${product.handle}: ${percent}% discount`);
   }
 });
@@ -78,9 +92,11 @@ test("compare-at price is always above selling price when present", () => {
 });
 
 test("every product has at least one CDN image and one size", () => {
-  for (const product of products) {
+  for (const product of customerProducts) {
     assert.ok(product.images.length >= 1, `${product.handle} has no image`);
-    assert.match(product.images[0]!, /^https:\/\/cdn\.shopify\.com\//);
+    /* R47: owner ke promo products ki photos cdn.phototourl.com par host hain
+     * (owner ne khud link diye); live-store products Shopify CDN par. */
+    assert.match(product.images[0]!, /^https:\/\/(cdn\.shopify\.com|cdn\.phototourl\.com)\//);
     assert.ok(product.sizes.length >= 1, `${product.handle} has no sizes`);
   }
 });
@@ -125,9 +141,37 @@ test("collection counts match the live store snapshot", () => {
       counts[collection] = (counts[collection] ?? 0) + 1;
     }
   }
+  /**
+   * R49: owner ki curation (admin overrides — jaise Trending me best-score items)
+   * live snapshot se aage ja sakti hai. Expected counts = live membership
+   * ± overrides ke collections-patch ka delta.
+   */
+  const overrideProducts: Record<string, { collections?: string[] }> = JSON.parse(
+    fs.readFileSync(path.join(root, "database/seeds/admin/overrides.json"), "utf8"),
+  ).products ?? {};
+  const expected: Record<string, number> = {};
   for (const [handle, handles] of Object.entries(liveMembership)) {
     if (handle === "frontpage") continue; // home-page grouping, nav collection nahi
-    assert.equal(counts[handle] ?? 0, handles.length, `${handle} count drifted from the live store`);
+    expected[handle] = handles.length;
+  }
+  for (const [handle, patch] of Object.entries(overrideProducts)) {
+    if (!Array.isArray(patch?.collections)) continue;
+    const product = likshaProducts.find((candidate) => candidate.handle === handle);
+    if (!product) continue; // extra products parity me count hi nahi hote
+    const live = new Set(
+      Object.entries(liveMembership)
+        .filter(([collection, handles]) => collection !== "frontpage" && handles.includes(product.sourceHandle))
+        .map(([collection]) => collection),
+    );
+    for (const collection of new Set(patch.collections)) {
+      if (!live.has(collection)) expected[collection] = (expected[collection] ?? 0) + 1;
+    }
+    for (const collection of live) {
+      if (!patch.collections.includes(collection)) expected[collection] = (expected[collection] ?? 0) - 1;
+    }
+  }
+  for (const [handle, want] of Object.entries(expected)) {
+    assert.equal(counts[handle] ?? 0, want, `${handle} count drifted from the live store`);
   }
   assert.equal(counts["saree"], undefined); // store par bhi khaali
 });
@@ -164,7 +208,7 @@ test("every product carries the full live gallery", () => {
 });
 
 test("live descriptions are sanitized and rendered, not dropped", () => {
-  for (const product of products) {
+  for (const product of customerProducts) {
     assert.ok(product.descriptionHtml && product.descriptionHtml.length > 3, `${product.handle} has no descriptionHtml`);
     assert.doesNotMatch(product.descriptionHtml!, /<(script|iframe|img)\b/i, `${product.handle} has unsanitized html`);
   }

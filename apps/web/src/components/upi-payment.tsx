@@ -182,16 +182,16 @@ export function UpiPayment({
       const status = payload?.paymentStatus ?? "pending";
       setStatusNote(
         status === "paid"
-          ? "Payment confirmed — order confirm ho gaya."
+          ? "Payment confirmed — your order is confirmed."
           : status === "processing"
-            ? "Reference mil gaya — team verify kar rahi hai."
+            ? "Reference received — our team is verifying it."
             : status === "failed"
-              ? "Payment failed dikh rahi hai — dobara try kariye."
-              : "Abhi tak payment pending hai.",
+              ? "The payment is showing as failed — please try again."
+              : "The payment is still pending.",
       );
       router.refresh();
     } catch {
-      setStatusNote("Status check nahi ho paaya — thodi der baad try kariye.");
+      setStatusNote("We could not check the status — please try again in a little while.");
     }
   }
 
@@ -226,7 +226,7 @@ export function UpiPayment({
     );
     setBusy(false);
     if (!result.data?.ok) {
-      setError(result.data?.error ?? result.error ?? "Confirm nahi ho paaya — WhatsApp par screenshot bhej dijiye.");
+      setError(result.data?.error ?? result.error ?? "We could not confirm the payment — please send the screenshot to us on WhatsApp.");
       return;
     }
     setSubmitted(true);
@@ -236,7 +236,7 @@ export function UpiPayment({
   /** UPI app me payment fail hui — order par failed mark + owner ki sheet me row */
   async function reportFailed() {
     if (!/^\d{4}$/.test(last4)) {
-      setError("Payment fail hui? Neeche apne mobile number ke last 4 digit daaliye.");
+      setError("Did the payment fail? Please enter the last 4 digits of your mobile number below.");
       return;
     }
     setBusy(true);
@@ -248,7 +248,7 @@ export function UpiPayment({
     );
     setBusy(false);
     if (!result.data?.ok) {
-      setError(result.data?.error ?? result.error ?? "Report save nahi hua — WhatsApp par bata dijiye.");
+      setError(result.data?.error ?? result.error ?? "The report could not be saved — please let us know on WhatsApp.");
       return;
     }
     setFailed(true);
@@ -256,7 +256,7 @@ export function UpiPayment({
 
   const wa = helpWhatsapp.replace(/\D/g, "").slice(-10);
   const waText = encodeURIComponent(
-    `Hi Designer Clothing, I have paid ${formatPrice(amount)} for order ${orderNumber} via UPI (${payeeVpa}). Ye payment ka screenshot hai:`,
+    `Hi Designer Clothing, I have paid ${formatPrice(amount)} for order ${orderNumber} via UPI (${payeeVpa}). Here is the payment screenshot:`,
   );
   const paid = paymentStatus === "paid";
 
@@ -277,9 +277,9 @@ export function UpiPayment({
         </div>
         <div className="px-4 py-4 sm:px-5" data-testid="upi-unavailable">
           <p className="text-[12.5px] leading-relaxed text-[#4a423b]">
-            Payment settings abhi load nahi ho rahi (UPI ID store ki sheet se aati hai).
-            Page ek-do baar refresh kariye — phir bhi na chale to WhatsApp par order
-            number <strong>{orderNumber}</strong> bhej dijiye, team turant madad karegi.
+            Payment settings are not loading right now. Please refresh the page once or twice —
+            if it still does not work, send us order number <strong>{orderNumber}</strong>{" "}
+            on WhatsApp and our team will help you right away.
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <button
@@ -292,13 +292,13 @@ export function UpiPayment({
             </button>
             {wa ? (
               <a
-                href={`https://wa.me/91${wa}?text=${encodeURIComponent(`Hi Designer Clothing, payment settings load nahi ho rahi — order ${orderNumber} (${formatPrice(amount)}). Madad chahiye.`)}`}
+                href={`https://wa.me/91${wa}?text=${encodeURIComponent(`Hi Designer Clothing, payment settings are not loading — order ${orderNumber} (${formatPrice(amount)}). Please help.`)}`}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex h-8 items-center border border-[#e0cf9f] bg-white px-2.5 text-[10px] font-semibold tracking-[.08em] text-[#6b5214] uppercase"
                 data-testid="upi-help-whatsapp"
               >
-                WhatsApp par madad
+                Get help on WhatsApp
               </a>
             ) : null}
           </div>
@@ -399,7 +399,7 @@ export function UpiPayment({
                 Pay on UPI · {formatPrice(amount)}
               </a>
               <p className="mt-1.5 text-[10.5px] text-[#8a7a5f]">
-                Button dabate hi UPI app khulegi (amount bhara hua). Na khule to QR scan kariye.
+                Pressing the button opens your UPI app with the amount filled in. If it does not open, please scan the QR code.
               </p>
               {/*
                 R37 (owner screenshot): kisi UPI app par kabhi &ldquo;Payment Alert —
@@ -409,8 +409,8 @@ export function UpiPayment({
                 (Owner rule: kisi app ka naam nahi — sirf generic wording.)
               */}
               <p className="mt-1.5 text-[10.5px] leading-relaxed text-[#8a7a5f]" data-testid="upi-risk-hint">
-                UPI app par &ldquo;Payment Alert&rdquo; dikhe to ghabraiye mat — &ldquo;Pay via
-                Scanning QR&rdquo; chuniye ya upar diya QR scan kariye / UPI ID copy kariye.
+                If your UPI app shows a &ldquo;Payment Alert&rdquo;, do not worry — choose &ldquo;Pay via
+                Scanning QR&rdquo;, or scan the QR code above / copy the UPI ID.
               </p>
             </div>
 
@@ -422,29 +422,29 @@ export function UpiPayment({
 
             {autoChecked && paymentStatus !== "paid" ? (
               <p className="mt-2 border border-[#e6d3a8] bg-[#fbf3df] px-2.5 py-2 text-[11px] leading-relaxed text-[#7a5c14]">
-                App se confirmation nahi mila — agar paisa kat gaya hai to neeche last 4 digit daal kar confirm
-                kariye, ya screenshot WhatsApp par bhej dein.
+                We did not receive a confirmation from the app — if the amount has been debited, please confirm
+                below with the last 4 digits, or send us the screenshot on WhatsApp.
               </p>
             ) : null}
 
             {submitted ? (
               <div className="mt-3 border border-[#c9dcc9] bg-[#eef7ee] px-3 py-2.5" data-testid="upi-submitted">
                 <p className="text-[12px] leading-relaxed text-[#2f6b3f]">
-                  <strong>Payment confirm ho gaya.</strong> Aapka order ab verify hokar dispatch ke liye
-                  ready hai — update WhatsApp par milega.
+                  <strong>Your payment is confirmed.</strong> Your order is now verified and ready for
+                  dispatch — you will receive updates on WhatsApp.
                 </p>
               </div>
             ) : API_AVAILABLE ? (
               <form onSubmit={submit} className="mt-4 space-y-2.5" data-testid="upi-form">
                 <p className="text-[11.5px] leading-relaxed text-[#6b6259]">
-                  UPI se pay karne ke baad neeche apne <strong>mobile ke last 4 digit</strong> daaliye —
-                  order turant verify ho jayega.
+                  After paying via UPI, enter the <strong>last 4 digits of your mobile number</strong> below —
+                  your order will be verified right away.
                 </p>
                 <div className="flex flex-wrap items-center gap-2">
                   <input
                     value={last4}
                     onChange={(event) => setLast4(event.target.value.replace(/\D/g, "").slice(0, 4))}
-                    placeholder="Mobile ke last 4 digit"
+                    placeholder="Last 4 digits of mobile"
                     inputMode="numeric"
                     maxLength={4}
                     data-testid="upi-last4"
@@ -457,27 +457,30 @@ export function UpiPayment({
                     data-testid="upi-claim"
                     className="h-10 bg-[#5c1010] px-4 text-[10.5px] font-semibold tracking-[.12em] text-white uppercase disabled:opacity-40"
                   >
-                    {busy ? "Confirm ho raha hai…" : "Payment ho gaya — confirm kariye"}
+                    {busy ? "Confirming…" : "I have paid — confirm payment"}
                   </button>
                 </div>
                 {error ? <p className="text-[11px] text-[#b3261e]">{error}</p> : null}
                 <div className="flex flex-wrap items-center gap-3 pt-0.5">
-                  <a
-                    href={`https://wa.me/${whatsappNumber(wa)}?text=${waText}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    data-testid="upi-whatsapp-screenshot"
-                    className="text-[10.5px] font-semibold tracking-[.06em] text-[#1b7a3e] uppercase underline"
-                  >
-                    Screenshot WhatsApp par bhejein
-                  </a>
+                  {/* R45: WhatsApp number sirf sheet se — khali ho to link nahi */}
+                  {whatsappNumber(wa) ? (
+                    <a
+                      href={`https://wa.me/${whatsappNumber(wa)}?text=${waText}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      data-testid="upi-whatsapp-screenshot"
+                      className="text-[10.5px] font-semibold tracking-[.06em] text-[#1b7a3e] uppercase underline"
+                    >
+                      Send screenshot on WhatsApp
+                    </a>
+                  ) : null}
                   <button
                     type="button"
                     onClick={reportFailed}
                     disabled={busy}
                     className="text-[10.5px] tracking-[.06em] text-[#8a7a5f] uppercase underline"
                   >
-                    {failed ? "Fail report ho gaya" : "Payment fail hui? Batayein"}
+                    {failed ? "Failure reported" : "Payment failed? Let us know"}
                   </button>
                 </div>
               </form>
@@ -492,7 +495,7 @@ export function UpiPayment({
                   Send payment screenshot on WhatsApp
                 </a>
                 <p className="mt-1.5 text-[11px] leading-relaxed text-[#8a7a5f]">
-                  Screenshot bhej dijiye — team UPI statement se match karke order confirm kar degi.
+                  Please send the screenshot — our team will match it against the UPI statement and confirm your order.
                 </p>
               </div>
             )}

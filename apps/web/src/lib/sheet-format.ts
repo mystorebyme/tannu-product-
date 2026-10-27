@@ -15,12 +15,27 @@ export type SheetSettings = {
   gstin?: string;
   freeShipping?: boolean;
   adminUrl?: string;
+  /** R44 (owner): "estimated delivery date bi sheet se change honi chiye" */
+  deliveryEstimateDays?: number;
+  /** Bhara ho to order page par yahi exact line dikhti hai (days ignore) */
+  deliveryEstimateText?: string;
 };
 
 function text(value: unknown, max = 240): string | undefined {
   if (typeof value !== "string") return undefined;
   const clean = value.replace(/\s+/g, " ").trim();
-  return clean ? clean.slice(0, max) : undefined;
+  // R45 (owner): khaali string = owner ne sheet me value jaan-boojh kar clear/delete
+  // ki — ye "" site tak jaana chahiye, warna purana fallback dikhta rahega.
+  // undefined sirf tab jab key sheet response me thi hi nahi (purana script).
+  return clean.slice(0, max);
+}
+
+/** "6" / 6 → 6 (1…max); galat/khaali → undefined (default chalta rahe) */
+function positiveInt(value: unknown, max: number): number | undefined {
+  const parsed = Number(typeof value === "string" ? value.trim() : value);
+  if (!Number.isFinite(parsed)) return undefined;
+  const rounded = Math.round(parsed);
+  return rounded >= 1 && rounded <= max ? rounded : undefined;
 }
 
 function truthy(value: unknown): boolean | undefined {
@@ -53,6 +68,8 @@ export function normaliseSheetSettings(payload: unknown): SheetSettings | null {
     gstin: text(source.gstin ?? source.GSTIN, 20),
     freeShipping: truthy(source.freeShipping ?? source.free_shipping),
     adminUrl: text(source.adminUrl ?? source.admin_url ?? source.admin_panel, 200),
+    deliveryEstimateDays: positiveInt(source.deliveryEstimateDays ?? source.delivery_estimate_days, 30),
+    deliveryEstimateText: text(source.deliveryEstimateText ?? source.delivery_estimate_text, 120),
   };
 
   const hasValue = Object.values(settings).some((value) => value !== undefined);

@@ -2,7 +2,7 @@ import "server-only";
 
 import type { Product } from "@liksha/types";
 import { listOrders } from "@/lib/orders";
-import { products } from "@/lib/store";
+import { allProducts } from "@/lib/store";
 
 /**
  * "Best sellers" — **asli orders** se, fixed list se nahi.
@@ -45,6 +45,8 @@ function sellable(product: Product): boolean {
 }
 
 export async function bestSellers(limit = 8): Promise<BestSeller[]> {
+  // R43: live catalog (sheet) — best sellers bhi sheet ke products se hi banein
+  const products = await allProducts();
   const counts = await soldCounts();
   const byHandle = new Map(products.map((product) => [product.handle, product]));
   const picked: BestSeller[] = [];

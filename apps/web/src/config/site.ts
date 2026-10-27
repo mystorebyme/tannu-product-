@@ -83,8 +83,10 @@ export const siteConfig = {
   ogImage: `${ASSET_BASE}/images/og-image.jpg`,
   description:
     "Designer Anarkali suits, lehenga choli and printed suit sets by Designer Clothing — hand-finished for weddings and festivals.",
-  phone: "+91 8005900581",
-  whatsapp: "8005900581",
+  // R45 (owner): contact number sirf Google Sheet se — static config me koi
+  // hardcoded number nahi (sheet se delete = site se delete).
+  phone: "",
+  whatsapp: "",
   /** owner rule: site par support email kahin nahi — sirf WhatsApp/phone */
   email: "",
   address: "India",

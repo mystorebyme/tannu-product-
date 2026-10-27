@@ -31,12 +31,17 @@ export function SafeImage({
 }) {
   const [failed, setFailed] = useState(false);
 
+  /** R49 smoothing: lazy images soft fade se aati hain; eager (hero/LCP) par fade
+   *  nahi — speed priority. Fallback par fail hone par bhi turant dikhe (no fade). */
+  const finalClassName =
+    loading === "lazy" && !failed ? (className ? `${className} img-fade` : "img-fade") : className;
+
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
       src={failed || !src ? fallbackSrc : src}
       alt={alt}
-      className={className}
+      className={finalClassName}
       loading={loading}
       decoding="async"
       fetchPriority={fetchPriority}

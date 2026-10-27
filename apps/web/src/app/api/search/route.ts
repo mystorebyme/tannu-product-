@@ -13,18 +13,18 @@ export async function GET(request: Request) {
 
   if (!term.trim()) {
     return Response.json(
-      { query: term, results: [], suggestions: [], recommended: recommendedProducts(6) },
+      { query: term, results: [], suggestions: [], recommended: await recommendedProducts(6) },
       { headers: { "Cache-Control": "public, max-age=300, stale-while-revalidate=600" } },
     );
   }
 
-  const results = searchProducts(term, limit);
+  const results = await searchProducts(term, limit);
   return Response.json(
     {
       query: term,
       results,
-      suggestions: searchSuggestions(term, 5),
-      recommended: results.length === 0 ? recommendedProducts(4) : [],
+      suggestions: await searchSuggestions(term, 5),
+      recommended: results.length === 0 ? await recommendedProducts(4) : [],
     },
     { headers: { "Cache-Control": "public, max-age=300, stale-while-revalidate=600" } },
   );

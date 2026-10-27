@@ -265,11 +265,48 @@ function updateFromAudit(entry: AuditEntry): TrackingUpdate | null {
       status: "payment",
       label: "Payment claim",
       kind: "payment",
-      text: "Payment confirm request mili — team UPI statement se verify kar rahi hai.",
+      text: "Payment confirmation request received — our team is verifying it against the payment statement.",
     };
   }
   if (entry.action === "payment.verified" || entry.action === "payment.confirmed") {
-    return { at: entry.at, status: "payment", label: "Payment received", kind: "payment" };
+    // R43: owner ka sheet-payment-edit ka message bhi dikhe ("Sheet se payment update (owner)")
+    const textRaw = entry.meta?.text ?? entry.meta?.note;
+    const text = typeof textRaw === "string" ? textRaw.trim() : "";
+    return { at: entry.at, status: "payment", label: "Payment received", kind: "payment", text: text || undefined };
+  }
+  // R43: mergeSheetWins ab site ke apne sheet-rows (order.placed, payment.*)
+  // ko unke asli event ke saath rakhta hai — pehle har row order.status.<slug>
+  // ban jaati thi aur claim jaise messages galat stage-label ke neeche dikhte
+  // the (owner ka live screenshot). Har event ka apna honest label:
+  const metaNote = typeof (entry.meta?.note ?? entry.meta?.text) === "string"
+    ? String(entry.meta?.note ?? entry.meta?.text).trim()
+    : "";
+  if (entry.action === "order.placed" || entry.action === "order.created") {
+    return { at: entry.at, status: "placed", label: "Placed", kind: "status", text: metaNote || undefined };
+  }
+  if (entry.action === "payment.failed") {
+    return { at: entry.at, status: "payment", label: "Payment failed", kind: "payment", text: metaNote || undefined };
+  }
+  if (entry.action === "payment.reference_submitted") {
+    return {
+      at: entry.at,
+      status: "payment",
+      label: "Payment reference",
+      kind: "payment",
+      text: metaNote || "Payment details received — our team is verifying them.",
+    };
+  }
+  if (entry.action === "payment.paid" || entry.action === "payment.auto_confirmed") {
+    return {
+      at: entry.at,
+      status: "payment",
+      label: "Payment received",
+      kind: "payment",
+      text: metaNote || "Payment received — thank you!",
+    };
+  }
+  if (entry.action === "payment.reversed") {
+    return { at: entry.at, status: "payment", label: "Payment update", kind: "payment", text: metaNote || undefined };
   }
   return null;
 }
@@ -288,12 +325,23 @@ export function trackingTimeLabel(iso: string | null | undefined): string {
   });
 }
 
-/** Delivery ka andaaza — placed + 6 din (weekend adjust nahi, simple aur honest) */
-export function estimatedDelivery(createdAt: string): string {
+/**
+ * Delivery ka andaaza — placed + `days` din (default 6; weekend adjust nahi,
+ * simple aur honest). R44 (owner): "estimated delivery date bi sheet se change
+ * honi chiye" — sheet Settings se `days` override ya exact `text` (bhara ho to
+ * wahi line dikhti hai, calculate kuch nahi hota).
+ */
+export function estimatedDelivery(
+  createdAt: string,
+  options: { days?: number; text?: string } = {},
+): string {
+  const text = String(options.text ?? "").trim();
+  if (text) return text;
   const created = new Date(createdAt);
   if (Number.isNaN(created.getTime())) return "";
+  const days = Number.isInteger(options.days) && (options.days as number) >= 1 ? (options.days as number) : 6;
   // ms jod kar + IST me format — server ke UTC date arithmetic se 1-din ki
   // galti (raat 10:30 IST baad ke orders) nahi hoti.
-  const eta = new Date(created.getTime() + 6 * 86_400_000);
+  const eta = new Date(created.getTime() + days * 86_400_000);
   return eta.toLocaleDateString("en-IN", { day: "numeric", month: "long", timeZone: STORE_TIME_ZONE });
 }

@@ -47,7 +47,7 @@ async function handlePost(request: Request) {
         paymentStatus: updated.paymentStatus,
         status: "claim_submitted",
         message:
-          "Payment claim mil gaya. Team UPI statement se verify karke order confirm karegi (WhatsApp par update milega).",
+          "Your payment claim has been received. Our team will verify it against the payment statement and confirm your order (you will get an update on WhatsApp).",
       },
       { status: 202 },
     );
@@ -56,7 +56,7 @@ async function handlePost(request: Request) {
       return Response.json({ error: error.message, code: error.code }, { status: error.status });
     }
     console.error("payment claim failed", error);
-    return Response.json({ error: "Claim save nahi hua — WhatsApp par screenshot bhej dijiye." }, { status: 500 });
+    return Response.json({ error: "Your claim could not be saved — please send the payment screenshot to us on WhatsApp." }, { status: 500 });
   }
 }
 

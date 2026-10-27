@@ -32,17 +32,17 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { orderNumber } = await params;
   const order = await getOrder(orderNumber);
-  if (!order) return { title: "Order nahi mila", robots: { index: false } };
+  if (!order) return { title: "Order not found", robots: { index: false } };
   const title =
     order.paymentStatus === "paid"
       ? "Order confirmed"
       : order.paymentStatus === "processing"
-        ? "Payment verify ho raha hai"
+        ? "Payment verification in progress"
         : order.paymentStatus === "failed"
           ? "Payment failed"
           : order.paymentStatus === "refunded"
-            ? "Refund ho gaya"
-            : "Payment pending";
+            ? "Refund completed"
+            : "Order placed";
   return { title, robots: { index: false } };
 }
 
@@ -57,6 +57,8 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
   const host = headerList.get("x-forwarded-host") ?? headerList.get("host") ?? fallbackHost;
   const proto = headerList.get("x-forwarded-proto") ?? "https";
   const siteUrl = `${proto}://${host}`;
+  // R45: WhatsApp number sirf sheet se — khali ho to "Confirm on WhatsApp" CTA dikhta nahi
+  const waPhone = settings.whatsapp || settings.supportPhone;
   if (!dbOrder) notFound();
   /**
    * R37 (owner): sheet = order ka DB. `Orders` tab me `Order status` / courier /
@@ -70,7 +72,12 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
     : null;
   const order = dbOrder ? mergeSheetTracking(dbOrder, sheet) : dbOrder;
 
-  const etaLabel = estimatedDelivery(order.createdAt);
+  // R44: delivery estimate sheet se (Settings tab: delivery_estimate_days /
+  // delivery_estimate_text) — owner badle, site par turant laagu.
+  const etaLabel = estimatedDelivery(order.createdAt, {
+    days: settings.deliveryEstimateDays,
+    text: settings.deliveryEstimateText,
+  });
   /** 5 step + har step ki asli date + cancelled/returned handle (lib/tracking.ts) */
   const { steps, stopped } = trackingSteps(order);
   const updates = trackingUpdates(order);
@@ -102,13 +109,14 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
               : order.paymentStatus === "paid"
                 ? "Payment received — thank you! Your order is confirmed and being prepared for dispatch."
                 : order.paymentStatus === "processing"
-                  ? "Payment reference received — our team is verifying it. Order confirm hote hi aapko update milega."
+                  ? "Payment reference received — our team is verifying it. You will be updated as soon as your order is confirmed."
                   : order.paymentStatus === "failed"
-                    ? "Payment fail hui thi. Neeche se dobara payment kar sakte hain."
-                    : "Order reserved hai. Payment complete karte hi order confirm ho jayega."}
+                    ? "The payment could not be completed. Please contact us on WhatsApp and our team will help you."
+                    : "Your order has been received. Our team will confirm it on WhatsApp and share the payment details with you there."}
           </p>
+          {waPhone ? (
           <a
-            href={orderWhatsAppLink(order, siteUrl)}
+            href={orderWhatsAppLink(order, siteUrl, waPhone)}
             target="_blank"
             rel="noopener noreferrer"
             data-testid="confirm-whatsapp"
@@ -119,6 +127,7 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
             </svg>
             Confirm order on WhatsApp
           </a>
+          ) : null}
           <p className="mt-1.5 text-[11px] text-[#8a8078]">
             This button sends your order number, every item with size and quantity, and the total on WhatsApp.
           </p>
@@ -140,22 +149,30 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
           <div className="mt-4" data-testid="order-payment-block">
             <PaymentStatusWatcher orderNumber={order.orderNumber} initialStatus={order.paymentStatus} />
             {/*
-              R42 (owner): "Complete payment" tabhi jab paisa baaki ho —
-              pending/processing (aur failed par "Retry"). paid/refunded par
-              button **hata** rehta hai; cancelled/returned order par bhi nahi
-              dikhta (order hi khatam hai to payment kis cheez ki?).
+              R46 (owner): online payment **hold** par hai — "Complete payment" CTA
+              hata diya. Paisa baaki ho to English note dikhta hai; team WhatsApp
+              par confirm karke payment arrange karti hai.
             */}
             {order.paymentStatus !== "paid" && order.paymentStatus !== "refunded" && !stopped ? (
-              <div className="mt-3 flex flex-wrap items-center gap-3 border border-[#e9dfd4] bg-white px-4 py-3">
-                <Link
-                  href={`/orders/${order.orderNumber}/pay`}
-                  data-testid="complete-payment"
-                  className="bg-[#862222] px-5 py-2.5 text-[11px] font-semibold tracking-[.14em] text-white uppercase"
-                >
-                  {order.paymentStatus === "failed" ? "Retry payment" : "Complete payment"}
-                </Link>
-                <p className="text-[11.5px] text-[#6b6259]">
-                  {formatPrice(order.total)} · UPI ({settings.upiName}) — paisa milne par order confirm hoga.
+              <div className="mt-3 flex flex-wrap items-center gap-3 border border-[#e9dfd4] bg-white px-4 py-3" data-testid="payment-hold-note">
+                <p className="text-[11.5px] leading-relaxed text-[#6b6259]">
+                  Order total <strong>{formatPrice(order.total)}</strong>. Online payment is currently
+                  paused — our team will confirm your order on WhatsApp and share the payment
+                  details with you there.
+                  {waPhone ? (
+                    <>
+                      {" "}
+                      <a
+                        href={orderWhatsAppLink(order, siteUrl, waPhone)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        data-testid="hold-whatsapp"
+                        className="font-semibold text-[#862222] underline"
+                      >
+                        Send order on WhatsApp
+                      </a>
+                    </>
+                  ) : null}
                 </p>
               </div>
             ) : null}
@@ -176,8 +193,8 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
               data-testid="tracking-stopped"
             >
               {stopped === "cancelled"
-                ? "Ye order cancel ho gaya hai. Paise kat gaye hon to refund 5–7 working days me wapas aa jaata hai — koi sawaal ho to WhatsApp par likh dijiye."
-                : "Ye order return ho gaya hai. Replacement ke liye WhatsApp par likh dijiye — team aage badha degi."}
+                ? "This order has been cancelled. If any payment was made, the refund will reach your account within 5–7 working days — please write to us on WhatsApp if you have any questions."
+                : "This order has been returned. For a replacement, please write to us on WhatsApp — our team will take it forward."}
             </p>
           ) : (
             <ol className="mt-4 grid grid-cols-5 gap-1.5 text-center">
@@ -241,7 +258,7 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
                 </a>
               ) : (
                 <p className="mt-1.5 text-[11px] text-[#8a8078]">
-                  Is AWB se track karne ke liye courier ki website par number daal dijiye.
+                  To track with this AWB number, please enter it on the courier&apos;s website.
                 </p>
               )}
               {noteText ? (
@@ -364,14 +381,16 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
           >
             Continue shopping
           </Link>
-          <a
-            href={orderWhatsAppLink(order, siteUrl)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="border border-[#862222] px-7 py-3 text-[11px] font-semibold tracking-[.16em] text-[#862222] uppercase"
-          >
-            Send order on WhatsApp
-          </a>
+          {waPhone ? (
+            <a
+              href={orderWhatsAppLink(order, siteUrl, waPhone)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="border border-[#862222] px-7 py-3 text-[11px] font-semibold tracking-[.16em] text-[#862222] uppercase"
+            >
+              Send order on WhatsApp
+            </a>
+          ) : null}
         </div>
       </div>
     </div>

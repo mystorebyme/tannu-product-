@@ -3,18 +3,31 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ProductDetail } from "@/components/product-detail";
 import { ProductReviews, Stars } from "@/components/product-reviews";
-import { reviewsFor } from "@/lib/reviews";
+import { liveReviewBlock } from "@/lib/reviews-sheet";
 import { ProductGrid } from "@/components/product-card";
 import { colourOptionsFor, getProduct, getRelatedProducts, products } from "@/lib/store";
 import { categoryHref, categoryLabel } from "@/lib/categories";
 import { siteConfig } from "@/config/site";
 
-// har product build time par static HTML ban jaata hai -> instant page loads
+/**
+ * R43: product data **sheet se live** hai (store.ts → catalog-sheet.ts) — price/
+ * image/title badalte hi site par dikhta hai, isliye page request par render
+ * hota hai (static HTML purani price dikhata). generateStaticParams build-time
+ * catalog se aata hai: GitHub Pages ke static export me poora catalog banta hai,
+ * aur Vercel par ye handles + sheet ke naye handles (dynamicParams: true) dono
+ * khulte hain.
+ */
 export async function generateStaticParams() {
   return products.map((product) => ({ handle: product.handle }));
 }
 
-export const dynamicParams = false;
+/**
+ * R43: sheet me naya product add hote hi URL khul jaaye (build ka intezaar nahi)
+ * → `dynamicParams: true`. GitHub Pages ke static export me `false` zaroori hai
+ * (runtime hota hi nahi) — wo swap `scripts/pages/build-preview.mjs` build ke
+ * dauraan khud karta hai (static boolean hi Next ko chahiye, expression nahi).
+ */
+export const dynamicParams = true;
 
 export async function generateMetadata({
   params,
@@ -52,8 +65,13 @@ export default async function ProductPage({
   const { handle } = await params;
   const product = await getProduct(handle);
   if (!product) notFound();
-  const related = await getRelatedProducts(product, 4);
-  const reviewBlock = reviewsFor(product.handle);
+  // R44: reviews sheet ke Reviews tab se live (approve hote hi dikhte hain,
+  // row delete hote hi gayab) — sheet down ho to purane baked reviews.
+  const [related, colours, reviewBlock] = await Promise.all([
+    getRelatedProducts(product, 4),
+    colourOptionsFor(product),
+    liveReviewBlock(product.handle),
+  ]);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -125,7 +143,7 @@ export default async function ProductPage({
 
       <ProductDetail
         product={product}
-        colours={colourOptionsFor(product)}
+        colours={colours}
         rating={reviewBlock.rating}
         reviewCount={reviewBlock.count}
       />

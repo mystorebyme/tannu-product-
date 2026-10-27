@@ -27,6 +27,13 @@ export type StoreSettings = {
   whatsapp: string;
   /** Admin panel ka link (sirf admin/owner ke liye — public API me nahi jaata) */
   adminUrl: string;
+  /**
+   * R44 (owner): "estimated delivery date bi sheet se change honi chiye" —
+   * days = placed + itne din; text bhara ho to wahi exact line dikhti hai.
+   * Dono sheet (Settings tab) se aate hain; na mile to default 6 din.
+   */
+  deliveryEstimateDays: number;
+  deliveryEstimateText: string;
   updatedAt: string;
   updatedBy: string;
 };
@@ -37,10 +44,11 @@ export const DEFAULT_STORE_SETTINGS: StoreSettings = {
   /**
    * R38 (owner): purana hardcoded payee VPA code se **poora hata diya** — jo
    * sheet me hai wahi fetch honi chahiye. UPI ka ek hi source hai: Google Sheet
-   * (Settings tab, `upi_id`). Env `STORE_UPI_ID` sirf emergency fallback hai
-   * (sheet bilkul na chale; production me ye env bhi hata diya gaya). Dono
-   * khaali hon to payment page honestly bolta hai "settings load nahi ho rahi"
-   * — galat payee par paisa jaane se ye kahin behtar hai.
+   * (Settings tab, `upi_id`).
+   * R45: sheet read successful ho to sheet ki value **hamesha** jeetti hai —
+   * khaali/"delete" bhi ("" = payment paused UI). Env `STORE_UPI_ID` sirf tab
+   * chalta hai jab sheet tak pahunch hi na ho (dev/CI test-VPA); production me
+   * ye env bhi nahi rakha jaata — wahan sheet hi ek-sach hai.
    */
   upiId: process.env.STORE_UPI_ID ?? "",
   upiName: process.env.STORE_UPI_NAME ?? "Designer Clothing",
@@ -48,12 +56,19 @@ export const DEFAULT_STORE_SETTINGS: StoreSettings = {
   sellerName: process.env.SELLER_NAME ?? "Designer Clothing",
   sellerAddress: process.env.SELLER_ADDRESS ?? "",
   sellerState: process.env.SELLER_STATE ?? "Rajasthan",
-  supportPhone: "8005900581",
+  // R45 (owner): contact number **sirf sheet se** — koi hardcoded default nahi.
+  // Khaali hai to UI phone/WhatsApp link chhupa deta hai.
+  // R46: `STORE_WHATSAPP` sirf dev/CI preview ke liye env se chalta hai (jaise
+  // STORE_UPI_ID test-VPA ke liye) — production env me ye set nahi hota, wahan
+  // sheet hi ek-sach hai. Sheet read successful ho to sheet ki value jeetti hai.
+  supportPhone: process.env.STORE_WHATSAPP ?? "",
   // Owner rule: site/API par support email nahi. Internal record ke liye ab
   // sirf env (SELLER_EMAIL) — default khaali.
   supportEmail: process.env.SELLER_EMAIL ?? "",
-  whatsapp: "8005900581",
+  whatsapp: process.env.STORE_WHATSAPP ?? "",
   adminUrl: process.env.ADMIN_PANEL_URL ?? "",
+  deliveryEstimateDays: 6,
+  deliveryEstimateText: "",
   updatedAt: new Date(0).toISOString(),
   updatedBy: "system",
 };
@@ -72,19 +87,34 @@ export function normalizeStoreSettings(input: unknown): StoreSettings {
   const raw = input as Partial<StoreSettings>;
   const text = (value: unknown, fallback: string, max = 240) =>
     typeof value === "string" && value.trim() ? value.trim().slice(0, max) : fallback;
+  /**
+   * R45 (owner): sheet/DB me value clear ki to site se bhi turant jaani chahiye —
+   * isliye owner-editable keys me khaali string bhi **jaan-boojh kar** save hoti
+   * hai ("" = kuch nahi dikhana). Fallback sirf tab jab key bheji hi na gayi ho.
+   */
+  const textOrEmpty = (value: unknown, fallback: string, max = 240) =>
+    typeof value === "string" ? value.trim().slice(0, max) : fallback;
   return {
     announcement: typeof raw.announcement === "string" ? raw.announcement.trim().slice(0, 180) : base.announcement,
     freeShipping: raw.freeShipping !== false,
-    upiId: text(raw.upiId, base.upiId, 80),
-    upiName: text(raw.upiName, base.upiName, 80),
+    upiId: textOrEmpty(raw.upiId, base.upiId, 80),
+    upiName: textOrEmpty(raw.upiName, base.upiName, 80),
     gstin: typeof raw.gstin === "string" ? raw.gstin.trim().toUpperCase().slice(0, 20) : base.gstin,
     sellerName: text(raw.sellerName, base.sellerName, 120),
     sellerAddress: typeof raw.sellerAddress === "string" ? raw.sellerAddress.trim().slice(0, 400) : base.sellerAddress,
     sellerState: text(raw.sellerState, base.sellerState, 60),
-    supportPhone: text(raw.supportPhone, base.supportPhone, 16),
-    supportEmail: text(raw.supportEmail, base.supportEmail, 120),
-    whatsapp: text(raw.whatsapp, base.whatsapp, 16),
-    adminUrl: text(raw.adminUrl, base.adminUrl, 200),
+    supportPhone: textOrEmpty(raw.supportPhone, base.supportPhone, 16),
+    supportEmail: textOrEmpty(raw.supportEmail, base.supportEmail, 120),
+    whatsapp: textOrEmpty(raw.whatsapp, base.whatsapp, 16),
+    adminUrl: textOrEmpty(raw.adminUrl, base.adminUrl, 200),
+    deliveryEstimateDays:
+      Number.isInteger(raw.deliveryEstimateDays) &&
+      (raw.deliveryEstimateDays as number) >= 1 &&
+      (raw.deliveryEstimateDays as number) <= 30
+        ? (raw.deliveryEstimateDays as number)
+        : base.deliveryEstimateDays,
+    deliveryEstimateText:
+      typeof raw.deliveryEstimateText === "string" ? raw.deliveryEstimateText.trim().slice(0, 120) : base.deliveryEstimateText,
     updatedAt: typeof raw.updatedAt === "string" ? raw.updatedAt : base.updatedAt,
     updatedBy: typeof raw.updatedBy === "string" ? raw.updatedBy : base.updatedBy,
   };
@@ -165,21 +195,30 @@ async function merge(options: { fresh?: boolean }): Promise<StoreSettings> {
     console.warn(`[settings] sheet read failed: ${(error as Error).message}`);
   }
 
+  /**
+   * R45 (owner): "sheet se delete kiya to site se bhi instant jaana chahiye" —
+   * sheet read successful hai to owner-editable key **hamesha** sheet ki value
+   * lete hain, khaali string bhi ("" = owner ne clear kiya). `undefined` ka
+   * matlab key sheet response me thi hi nahi (purana script) — tab stored chalta hai.
+   */
   const value = sheet
     ? normalizeStoreSettings({
         ...stored,
-        ...(sheet.announcement ? { announcement: sheet.announcement } : {}),
-        ...(sheet.supportPhone ? { supportPhone: sheet.supportPhone } : {}),
-        ...(sheet.supportEmail ? { supportEmail: sheet.supportEmail } : {}),
-        ...(sheet.whatsapp ? { whatsapp: sheet.whatsapp } : {}),
-        ...(sheet.upiId ? { upiId: sheet.upiId } : {}),
-        ...(sheet.upiName ? { upiName: sheet.upiName } : {}),
-        ...(sheet.gstin ? { gstin: sheet.gstin } : {}),
+        ...(typeof sheet.announcement === "string" ? { announcement: sheet.announcement } : {}),
+        ...(typeof sheet.supportPhone === "string" ? { supportPhone: sheet.supportPhone } : {}),
+        ...(typeof sheet.supportEmail === "string" ? { supportEmail: sheet.supportEmail } : {}),
+        ...(typeof sheet.whatsapp === "string" ? { whatsapp: sheet.whatsapp } : {}),
+        ...(typeof sheet.upiId === "string" ? { upiId: sheet.upiId } : {}),
+        ...(typeof sheet.upiName === "string" ? { upiName: sheet.upiName } : {}),
+        ...(typeof sheet.gstin === "string" ? { gstin: sheet.gstin } : {}),
         ...(typeof sheet.freeShipping === "boolean" ? { freeShipping: sheet.freeShipping } : {}),
-        ...(sheet.adminUrl ? { adminUrl: sheet.adminUrl } : {}),
-        ...(sheet.announcement || sheet.upiId || sheet.supportPhone
-          ? { updatedAt: new Date().toISOString(), updatedBy: "google-sheet" }
-          : {}),
+        ...(typeof sheet.adminUrl === "string" ? { adminUrl: sheet.adminUrl } : {}),
+        // R44: delivery estimate sheet se (days ya exact text)
+        ...(typeof sheet.deliveryEstimateDays === "number" ? { deliveryEstimateDays: sheet.deliveryEstimateDays } : {}),
+        ...(typeof sheet.deliveryEstimateText === "string" ? { deliveryEstimateText: sheet.deliveryEstimateText } : {}),
+        // sheet successfully padhi gayi — source of truth wahi hai
+        updatedAt: new Date().toISOString(),
+        updatedBy: "google-sheet",
       })
     : stored;
 

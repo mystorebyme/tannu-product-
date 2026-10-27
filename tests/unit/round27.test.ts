@@ -86,7 +86,7 @@ test("payment page: UTR nahi maangta — sirf last 4 digit + ek confirm button",
   assert.ok(!/UTR nahi mila/.test(pay), "purana UTR wala button text nahi");
   assert.match(pay, /data-testid="upi-last4"/);
   assert.match(pay, /data-testid="upi-claim"/);
-  assert.match(pay, /Mobile ke last 4 digit/);
+  assert.match(pay, /last 4 digits of your mobile number/);
   // page par lambi text wall na ho (owner ne kam karne ko kaha)
   // R36: returnPath / defaultLast4 / onConfirmed props — R38: empty-UPI pause
   // state (sheet se UPI na aaye to honest message) — budget 530 line
@@ -95,8 +95,8 @@ test("payment page: UTR nahi maangta — sirf last 4 digit + ek confirm button",
 
 test("payment page par 'payment ho gaya' confirm ka saaf message", () => {
   const pay = read("apps/web/src/components/upi-payment.tsx");
-  assert.match(pay, /Payment confirm ho gaya/);
-  assert.match(pay, /Screenshot WhatsApp par bhejein/);
+  assert.match(pay, /Your payment is confirmed\./);
+  assert.match(pay, /Send screenshot on WhatsApp/);
 });
 
 test("Pages shell: /orders/<number> aur /pay path sahi parse hote hain (base path ke saath)", async () => {

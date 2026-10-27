@@ -132,8 +132,10 @@ check("order/tracking page 2s ke andar khulta hai", orderTimed.ms < 2000, `${ord
 
 // ── 3. step 3 — UTR / last-4 / claim / WhatsApp ─────────────────────────────
 check("pay page par claim button hai", payHtml.includes('data-testid="upi-claim"'));
-check("pay page par WhatsApp screenshot option hamesha hai", payHtml.includes('data-testid="upi-whatsapp-screenshot"'));
-check("pay page par owner ka WhatsApp number hai", payHtml.includes("8005900581"));
+// R45: WhatsApp number sirf sheet se — dev/CI me sheet configured nahi, isliye
+// screenshot link/number nahi dikhta (sheet bhari ho to option hamesha rehta hai).
+check("pay page par hardcoded WhatsApp number nahi (R45)", !payHtml.includes("8005900581"));
+check("bina sheet number ke pay page par purana wa.me link nahi (R45)", !payHtml.includes("wa.me/918005900581"));
 check("pay page par UTR / last-4 input hai", /data-testid="upi-utr"|data-testid="upi-last4"/.test(payHtml));
 
 const badLast4 = await fetch(`${BASE}/api/payments/claim`, {

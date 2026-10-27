@@ -1,8 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { TrackOrderForm } from "@/components/track-order-form";
-import { siteConfig } from "@/config/site";
-import { whatsappNumber } from "@/lib/phone";
+import { WhatsAppHelpLine } from "@/components/contact-details";
 
 export const metadata: Metadata = {
   title: "My account & order tracking",
@@ -36,15 +35,11 @@ export default function AccountPage() {
               Order status
             </h2>
             <p className="mt-2 text-[12.5px] leading-relaxed text-[#6b6259]">
-              Apna order number daal kar live status, items aur delivery address dekh lein.
+              Enter your order number to see the live status, items and delivery address.
             </p>
             <TrackOrderForm />
-            <p className="mt-3 text-[11px] text-[#8a8078]">
-              Order number nahi mila? WhatsApp{" "}
-              <a href={`https://wa.me/${whatsappNumber(siteConfig.whatsapp)}`} className="text-[#862222]">
-                {siteConfig.whatsapp}
-              </a>
-            </p>
+            {/* R45: number sirf sheet se — khali ho to line dikhti hi nahi */}
+            <WhatsAppHelpLine label="Can't find your order number? WhatsApp us" className="mt-3" />
           </div>
 
           <div className="border border-[#eee6de] p-5 sm:p-6">
@@ -61,10 +56,10 @@ export default function AccountPage() {
               ))}
             </ul>
             <div className="mt-4 border-t border-[#f0eae3] pt-3 text-[12px] text-[#6b6259]">
-              <p>Email: {siteConfig.email}</p>
-              <p className="mt-1">Phone: {siteConfig.phone}</p>
+              {/* R45: email site par nahi (owner rule); phone/WhatsApp sirf sheet se — khali to line gayab */}
+              <WhatsAppHelpLine label="WhatsApp:" />
               <p className="mt-1 text-[11px] text-[#8a8078]">
-                Account login (saved addresses, wishlist) Phase 2 me aa raha hai.
+                Account login (saved addresses, wishlist) is coming soon.
               </p>
             </div>
           </div>

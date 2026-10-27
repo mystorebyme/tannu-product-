@@ -63,7 +63,7 @@ export function ProductGridWithMore({
         return [...current, ...parsed.data!.data.filter((item) => !seen.has(item.handle))];
       });
     } catch {
-      setError("Aur products load nahi hue. Internet check kar ke dobara try kariye.");
+      setError("More products could not be loaded. Please check your internet connection and try again.");
     } finally {
       loadingRef.current = false;
       setLoading(false);

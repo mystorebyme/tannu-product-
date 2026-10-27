@@ -7,16 +7,17 @@ import { apiUrl } from "@/lib/api-base";
 import { useStoreSettings } from "@/components/store-settings-provider";
 import { whatsappNumber } from "@/lib/phone";
 
-const FALLBACK_WHATSAPP = "8005900581";
-
 /**
  * Server fail ho to bhi customer atke nahi — poori baat WhatsApp par (owner rule:
- * site par support email kahin nahi dikhta, sirf WhatsApp).
+ * site par support email kahin nahi dikhta, sirf WhatsApp). R45: number sirf
+ * sheet se — khaali hai to link/button dikhta hi nahi (koi hardcoded fallback nahi).
  */
 function whatsappFallbackHref(
   form: { name: string; email: string; phone: string; subject: string; message: string },
   supportWhatsapp: string,
 ) {
+  const wa = whatsappNumber(supportWhatsapp);
+  if (!wa) return "";
   const body = [
     `Subject: ${form.subject}`,
     `Name: ${form.name}`,
@@ -26,13 +27,13 @@ function whatsappFallbackHref(
   ]
     .filter(Boolean)
     .join("\n");
-  return `https://wa.me/${whatsappNumber(supportWhatsapp)}?text=${encodeURIComponent(body)}`;
+  return `https://wa.me/${wa}?text=${encodeURIComponent(body)}`;
 }
 
 export function ContactForm() {
   const router = useRouter();
   const { whatsapp } = useStoreSettings();
-  const SUPPORT_WHATSAPP = whatsapp || FALLBACK_WHATSAPP;
+  const SUPPORT_WHATSAPP = whatsapp;
   const [form, setForm] = useState({ name: "", email: "", phone: "", subject: "Order enquiry", message: "" });
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
@@ -64,17 +65,20 @@ export function ContactForm() {
       <div className="border border-[#d6e8d9] bg-[#f2f8f3] p-6 text-center" data-testid="contact-success">
         <p className="font-display text-[21px] text-[#2f7a3f]">Message received!</p>
         <p className="mt-1 text-[12.5px] text-[#5c534b]">
-          Our team will reply within 24 hours. For an instant reply, WhatsApp us on {SUPPORT_WHATSAPP}.
+          Our team will reply within 24 hours.
+          {whatsappNumber(SUPPORT_WHATSAPP) ? ` For an instant reply, WhatsApp us on ${SUPPORT_WHATSAPP}.` : ""}
         </p>
         <div className="mt-3 flex flex-wrap justify-center gap-2">
-          <a
-            href={`https://wa.me/${whatsappNumber(SUPPORT_WHATSAPP)}?text=${encodeURIComponent("Hi Designer Clothing, I sent a message from the website.")}`}
-            target="_blank"
-            rel="noreferrer"
-            className="bg-[#25d366] px-4 py-2 text-[11px] font-semibold tracking-[.12em] text-white uppercase"
-          >
-            WhatsApp us
-          </a>
+          {whatsappNumber(SUPPORT_WHATSAPP) ? (
+            <a
+              href={`https://wa.me/${whatsappNumber(SUPPORT_WHATSAPP)}?text=${encodeURIComponent("Hi Designer Clothing, I sent a message from the website.")}`}
+              target="_blank"
+              rel="noreferrer"
+              className="bg-[#25d366] px-4 py-2 text-[11px] font-semibold tracking-[.12em] text-white uppercase"
+            >
+              WhatsApp us
+            </a>
+          ) : null}
           <button
             type="button"
             onClick={() => setStatus("idle")}
@@ -134,21 +138,24 @@ export function ContactForm() {
       {error ? (
         <div className="mt-2 text-[11.5px] text-[#b3261e]" role="alert">
           <p>{error}</p>
-          {/* honest fallback — static preview / server down par message kho na jaye */}
-          <p className="mt-1 text-[#5c534b]">
-            Aap seedha WhatsApp par bhi bhej sakte hain:{" "}
-            <a
-              href={`https://wa.me/${whatsappNumber(SUPPORT_WHATSAPP)}?text=${encodeURIComponent(
-                `Hi Designer Clothing! ${form.subject}\nName: ${form.name}\n${form.message}`,
-              )}`}
-              target="_blank"
-              rel="noreferrer"
-              className="underline"
-            >
-              WhatsApp {SUPPORT_WHATSAPP}
-            </a>
-            .
-          </p>
+          {/* honest fallback — static preview / server down par message kho na jaye.
+              R45: WhatsApp number sheet se khali ho to ye line dikhti hi nahi. */}
+          {whatsappNumber(SUPPORT_WHATSAPP) ? (
+            <p className="mt-1 text-[#5c534b]">
+              You can also send it to us directly on WhatsApp:{" "}
+              <a
+                href={`https://wa.me/${whatsappNumber(SUPPORT_WHATSAPP)}?text=${encodeURIComponent(
+                  `Hi Designer Clothing! ${form.subject}\nName: ${form.name}\n${form.message}`,
+                )}`}
+                target="_blank"
+                rel="noreferrer"
+                className="underline"
+              >
+                WhatsApp {SUPPORT_WHATSAPP}
+              </a>
+              .
+            </p>
+          ) : null}
         </div>
       ) : null}
       <div className="mt-3 flex flex-wrap items-center gap-3">
@@ -160,15 +167,17 @@ export function ContactForm() {
         >
           {status === "loading" ? "Sending…" : "Send message"}
         </button>
-        <a
-          href={whatsappFallbackHref(form, SUPPORT_WHATSAPP)}
-          target="_blank"
-          rel="noreferrer"
-          data-testid="contact-whatsapp"
-          className="text-[11.5px] text-[#5c534b] underline decoration-[#c9b9a8] underline-offset-4 hover:text-[#862222]"
-        >
-          ya WhatsApp {SUPPORT_WHATSAPP} par bhejein
-        </a>
+        {whatsappNumber(SUPPORT_WHATSAPP) ? (
+          <a
+            href={whatsappFallbackHref(form, SUPPORT_WHATSAPP)}
+            target="_blank"
+            rel="noreferrer"
+            data-testid="contact-whatsapp"
+            className="text-[11.5px] text-[#5c534b] underline decoration-[#c9b9a8] underline-offset-4 hover:text-[#862222]"
+          >
+            or send it on WhatsApp {SUPPORT_WHATSAPP}
+          </a>
+        ) : null}
       </div>
     </form>
   );

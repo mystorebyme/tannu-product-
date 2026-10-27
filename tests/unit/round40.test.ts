@@ -91,7 +91,7 @@ test("R40: orders.ts — createOrder sheet par await save, fail = honest error (
   assert.match(lib, /const saved = await persistOrderEvent\(order, "order\.placed", \{ items: true \}\);/, "order.placed AWAIT hota hai");
   assert.match(lib, /sheet_store_not_ready/, "script purana/down = saaf 503");
   assert.match(lib, /sheet_write_failed/, "sheet write fail = order fail, jhootha success nahi");
-  assert.match(lib, /WhatsApp par order bhej dijiye/, "customer ke liye fallback raasta");
+  assert.match(lib, /send your order to us on WhatsApp/, "customer ke liye fallback raasta");
   // writeAll: sirf badla hua order sheet par jaata hai (diff by snapshot)
   assert.match(lib, /const previous = lastSnapshot\.get\(order\.orderNumber\);/, "writeAll diff karta hai");
   assert.match(lib, /order\.audit\[0\]\?\.action \?\? "order\.updated"/, "event naam audit se");
@@ -124,7 +124,7 @@ test("R40: google-sheets — scriptGet/scriptPost/version-check/auto-heal, expec
 
 test("R40: script — sheet id sirf Script Properties, sheet_set bootstrap, order_state/orders_state", () => {
   const gs = read("scripts/google-apps-script/liksha-sheets.gs");
-  assert.match(gs, /var CODE_VERSION = 'r42-1';/);
+  assert.match(gs, /var CODE_VERSION = 'r4[2-6]-1';/);
   assert.ok(!gs.includes(FINAL_SHEET_ID), "sheet id code me kahin nahi");
   assert.ok(!gs.includes("var SPREADSHEET_ID"), "SPREADSHEET_ID constant gaya");
   assert.ok(!gs.includes("SHEET_ID_FALLBACK ="), "fallback constant gaya");
@@ -142,7 +142,7 @@ test("R40: script — sheet id sirf Script Properties, sheet_set bootstrap, orde
   assert.match(gs, /action === 'orders_state'/);
   assert.match(gs, /delete object\['Order JSON'\]/, "row payload me JSON duplicate nahi jaata");
   assert.match(gs, /var MAX_CELL_CHARS = 20000;/, "Order JSON ke liye cell cap badha");
-  assert.match(gs, /GIDS = \{\n  Settings: null, Orders: null/, "gid bhi kisi ek sheet ke nahi — naam-based lookup");
+  assert.match(gs, /GIDS = \{\n  Settings: null, Products: null, Orders: null/, "gid bhi kisi ek sheet ke nahi — naam-based lookup");
   assert.match(gs, /expectedId/, "health ka idMatch site ke bheje expected se");
   assert.match(gs, /sheetConfigured: Boolean\(propsSheetId_\(\)\)/, "health sheetConfigured batata hai");
   // panel bootstrap form
@@ -253,8 +253,10 @@ test("R40: parseOrderState — JSON snapshot + owner ke live sheet edits ka over
   // tracking columns overlay
   assert.equal(parsed.tracking?.courier, "Deliveroo");
   assert.equal(parsed.tracking?.awb, "AWB9988", "AWB clean hota hai");
-  // paisa site ki sachhai — sheet ke Payment status column se override nahi
-  assert.equal(parsed.paymentStatus, "pending");
+  // R43 (owner rule): sheet par status shipped = owner ne verify kar diya ki
+  // paisa aa gaya — prepaid par payment store-verified ("paid") maana jaata hai
+  assert.equal(parsed.paymentStatus, "paid");
+  assert.equal(parsed.payment?.verifiedBy, "store");
   assert.equal(parsed.total, 499900);
   // audit rows se banta hai (snapshot me audit bhejte hi nahi)
   assert.ok(parsed.audit.length >= 2, "row-history se audit bani");

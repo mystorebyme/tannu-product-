@@ -147,7 +147,7 @@ export function CollectionBrowser({
         setItems(payload.data);
         setTotal(payload.total);
       } catch {
-        setError("Products load nahi hue. Internet check kar ke dobara try kariye.");
+        setError("Products could not be loaded. Please check your internet connection and try again.");
       } finally {
         setLoading(false);
       }
@@ -198,7 +198,7 @@ export function CollectionBrowser({
       // agle page ki request abhi se — scroll karte hi instantly dikhega
       void fetchPage(sort, price, items.length + payload.data.length).catch(() => undefined);
     } catch {
-      setError("Aur products load nahi hue. Dobara try kariye.");
+      setError("More products could not be loaded. Please try again.");
     } finally {
       setAppending(false);
     }
@@ -287,7 +287,7 @@ export function CollectionBrowser({
                 >
                   {appending ? "Loading…" : `Load more (${total - items.length} left)`}
                 </button>
-                <p className="mt-2 text-[10.5px] text-[#a49a90]">Scroll karte hi agle styles khud load ho jaate hain</p>
+                <p className="mt-2 text-[10.5px] text-[#a49a90]">More styles load automatically as you scroll</p>
               </div>
             ) : (
               <p className="mt-10 text-center text-[11px] tracking-[.14em] text-[#a49a90] uppercase">

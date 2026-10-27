@@ -14,11 +14,26 @@ import {
 import { orderItemSheetRows, orderSheetRow } from "./sheet-format";
 import {
   groupOrdersFromRecentRows,
-  orderFromSheetRows,
   parseOrderState,
   type OrderState,
   type SheetRow,
 } from "./sheet-merge";
+
+/**
+ * R43 bug-fix: `order_state` timeout ho jaaye (Apps Script slow/cold) to compat
+ * rows se reconstruct hota tha — items ki price Rs. 0, product link khaali,
+ * image placeholder (customer ko WhatsApp message tak "Rs. 0" jaata tha). Par
+ * compat rows me bhi aksar `Order JSON` snapshot maujood hota hai (site ne
+ * write kiya tha) — usse utha kar parseOrderState ko do: snapshot + owner edits
+ * overlay, dono mil jaate hain.
+ */
+function lastOrderJson(rows: SheetRow[]): string {
+  for (let i = rows.length - 1; i >= 0; i -= 1) {
+    const value = String(rows[i]?.["Order JSON"] ?? "").trim();
+    if (value) return value;
+  }
+  return "";
+}
 
 /**
  * R40 (owner): **"Supabase par nahi chahiye — sheet me hi chahiye, only sheet."**
@@ -94,7 +109,7 @@ export async function sheetOrdersReady(): Promise<{ ready: boolean; reason: stri
       next = {
         ready: true,
         mode: "compat",
-        reason: `script ${version.version} par compat mode — orders sheet me hi save hote hain; Order JSON snapshot + dropdowns ke liye latest script (r42-1) paste karein`,
+        reason: `script ${version.version} par compat mode — orders sheet me hi save hote hain; Order JSON snapshot + dropdowns + Products catalog ke liye latest script (r43-1) paste karein`,
       };
     }
   }
@@ -196,7 +211,9 @@ export async function readSheetOrder(orderNumber: string): Promise<Order | null>
       );
       if (compat.ok) {
         const rows = [...(compat.data.order?.rows?.Orders ?? [])].reverse();
-        value = rows.length ? orderFromSheetRows(wanted, rows) : null;
+        value = rows.length
+          ? parseOrderState({ orderNumber: wanted, rows, json: lastOrderJson(rows) })
+          : null;
       }
     }
   }
@@ -233,7 +250,9 @@ export async function readSheetOrders(limit = 200): Promise<Order[]> {
     );
     if (result.ok) {
       const orders = groupOrdersFromRecentRows(result.data.rows ?? [])
-        .map((group) => orderFromSheetRows(group.orderNumber, group.rows))
+        .map((group) =>
+          parseOrderState({ orderNumber: group.orderNumber, rows: group.rows, json: lastOrderJson(group.rows) }),
+        )
         .filter((order): order is Order => Boolean(order))
         .slice(0, Math.min(300, Math.max(1, limit)));
       listCache = { at: Date.now(), value: orders };

@@ -44,7 +44,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // Canonical (clean) handle use hota hai aur duplicate URL ek hi baar jaata hai.
     ...dedupe(
       collections
-        .filter((collection) => products.some((product) => product.collections.includes(collection.handle)))
+        .filter((collection) => products.some((product) => !product.hidden && product.collections.includes(collection.handle)))
         .map((collection) => ({
           url: `${base}/collections/${canonicalCollectionHandle(collection.handle)}`,
           lastModified: now,
@@ -52,7 +52,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
           priority: 0.8,
         })),
     ),
-    ...products.map((product) => ({
+    // R44: hidden (test) products sitemap me nahi — visitors/Google ko na dikhein
+    ...products.filter((product) => !product.hidden).map((product) => ({
       url: `${base}/products/${product.handle}`,
       lastModified: now,
       changeFrequency: "weekly" as const,

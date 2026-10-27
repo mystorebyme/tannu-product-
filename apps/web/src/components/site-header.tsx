@@ -53,7 +53,11 @@ export function SiteHeader() {
   const router = useRouter();
 
   // owner (admin ya Google Sheet) se announcement badalte hi header par wahi dikhta hai
-  const announcements = announcement ? [announcement, ...defaultAnnouncements] : defaultAnnouncements;
+  // R47: sheet ka announcement fallback copy se match kar sakta hai — duplicate hatao,
+  // warna do dots ko same React key milta hai ("two children with the same key" warning).
+  const announcements = announcement
+    ? [announcement, ...defaultAnnouncements.filter((item) => item !== announcement)]
+    : defaultAnnouncements;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -166,9 +170,11 @@ export function SiteHeader() {
     <>
       <div className="bg-[#7d1a1a] text-white">
         <div className="mx-auto flex min-h-9 max-w-[1400px] items-center justify-between gap-3 px-4 py-1.5">
-          {/* WhatsApp hi contact option hai — call nahi (owner request) */}
+          {/* WhatsApp hi contact option hai — call nahi (owner request).
+              R45: number sirf sheet se — khali ho to link dikhta nahi. */}
+          {whatsappNumber(supportPhone) ? (
           <a
-            href={`https://wa.me/${whatsappNumber(supportPhone.replace(/\D/g, "").slice(-10))}`}
+            href={`https://wa.me/${whatsappNumber(supportPhone)}`}
             target="_blank"
             rel="noreferrer"
             className="hidden shrink-0 items-center gap-1.5 text-[11px] tracking-[.06em] md:flex"
@@ -178,6 +184,7 @@ export function SiteHeader() {
             </svg>
             WhatsApp {supportPhone.replace(/\D/g, "").slice(-10)}
           </a>
+          ) : null}
 
           {/* rotating announcement — sab screens par (mobile par akela) */}
           <p
@@ -191,7 +198,7 @@ export function SiteHeader() {
             <span className="text-[11px] tracking-[.06em]">Premium Designer Collection ✦</span>
             {announcements.map((item, index) => (
               <button
-                key={item}
+                key={`${index}-${item}`}
                 type="button"
                 aria-label={`Announcement ${index + 1}`}
                 onClick={() => setBannerIndex(index)}
@@ -404,7 +411,7 @@ export function SiteHeader() {
 
               {query.trim().length >= 2 && results.length === 0 ? (
                 <p className="mt-3 text-[11.5px] text-[#8a8078]">
-                  &ldquo;{query.trim()}&rdquo; ke liye kuch nahi mila — inhe try kariye:
+                  Nothing found for &ldquo;{query.trim()}&rdquo; — try these instead:
                 </p>
               ) : null}
 

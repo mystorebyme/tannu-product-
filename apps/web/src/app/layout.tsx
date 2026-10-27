@@ -69,11 +69,16 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    /* R49: data-scroll-behavior — route transitions par Next smooth-scroll ko
+       khud handle karta hai (warning bhi hati hai, scroll jhatka nahi) */
+    <html lang="en" data-scroll-behavior="smooth">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://cdn.shopify.com" crossOrigin="anonymous" />
+        {/* R49 speed: owner-uploaded product photos (promo etc.) is CDN se aati hain */}
+        <link rel="preconnect" href="https://cdn.phototourl.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://cdn.phototourl.com" />
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Jost:wght@300;400;500;600&display=swap"

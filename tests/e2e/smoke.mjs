@@ -66,7 +66,8 @@ async function main() {
   check("home 200", home.status === 200, `status ${home.status}`);
   check("home lists products", /\/products\/[a-z0-9-]+/.test(home.text));
   check("home has brand name", /Designer Clothing/i.test(home.text));
-  check("home has support number", home.text.includes("8005900581"));
+  // R45: contact number sirf sheet se — sheet configured nahi to koi hardcoded number nahi
+  check("home par hardcoded support number nahi (R45)", !home.text.includes("8005900581"));
   check("home has the live announcement bar", /announcement-bar/.test(home.text));
   check(
     "home has no service-tile strip (removed on request)",
@@ -132,7 +133,9 @@ async function main() {
     );
     // koi generated "verified" sample review public page par nahi
     check("PDP shows no sample reviews", !/sample review|Verified buyer[\s\S]{0,40}sd-/.test(pdp.text));
-    check("PDP has WhatsApp order beside Buy now", pdp.text.includes('data-testid="pdp-whatsapp-order"'));
+    // R45: WhatsApp number sirf sheet se — dev/CI me sheet configured nahi, isliye
+    // PDP par WhatsApp-order button dikhta hi nahi (hardcoded number kabhi nahi).
+    check("PDP par hardcoded WhatsApp order button nahi (R45)", !pdp.text.includes('data-testid="pdp-whatsapp-order"'));
   }
 
   // ── phone OTP + GST invoice + tracking ──
@@ -369,9 +372,10 @@ async function main() {
   });
   const contactBody = await contact.json().catch(() => ({}));
   check("contact form accepts a message", contact.status === 201 && contactBody.ok === true, `status ${contact.status}`);
+  // R45: WhatsApp channel sheet se — sheet configured nahi to khaali; hardcoded number kabhi nahi
   check(
-    "contact response gives a WhatsApp channel (no email on the site)",
-    Boolean(contactBody.channels?.whatsapp) && !contactBody.channels?.mailto,
+    "contact response has no hardcoded WhatsApp/email channel (R45)",
+    contactBody.channels?.whatsapp !== "8005900581" && !contactBody.channels?.mailto,
     JSON.stringify(contactBody).slice(0, 120),
   );
 
@@ -450,9 +454,13 @@ async function main() {
     typeof settingsBody.data?.upiId === "string" && settingsBody.data.upiId.includes("@"),
     settingsBody.data?.upiId,
   );
+  // R45 (owner): WhatsApp/phone sirf sheet se — sheet khali to site/API bhi khaali,
+  // hardcoded 8005900581 kabhi nahi. Email owner rule se pehle se nahi.
   check(
-    "settings expose support WhatsApp only (owner rule: no email anywhere)",
-    Boolean(settingsBody.data?.whatsapp) && !("supportEmail" in (settingsBody.data ?? {})),
+    "settings expose no hardcoded WhatsApp (sheet-driven, no email anywhere)",
+    settingsBody.data?.whatsapp !== "8005900581" &&
+      settingsBody.data?.supportPhone !== "8005900581" &&
+      !("supportEmail" in (settingsBody.data ?? {})),
     JSON.stringify(settingsBody.data).slice(0, 160),
   );
 

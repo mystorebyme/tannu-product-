@@ -180,9 +180,9 @@ export function ProductDetail({
       title: "Shipping & Delivery",
       content: (
         <p className="text-[12.5px] leading-relaxed text-[#5c534b]">
-          Ready to dispatch in 1-2 days. Free shipping across India, prepaid orders only (UPI) —
-          4-7 business days delivery. Cash on Delivery available nahi hai, isliye order place karte hi
-          UPI se payment confirm kar lein.
+          Ready to dispatch in 1-2 days. Free shipping across India, prepaid orders only —
+          delivery in 4-7 business days. Cash on Delivery is not available; after you place the
+          order our team will confirm it on WhatsApp and share the payment details there.
         </p>
       ),
     },
@@ -337,10 +337,10 @@ export function ProductDetail({
           </div>
           <p className="mt-2 text-[11px] text-[#8a8078]">
             {bigSizeSurcharge
-              ? `Bade size (${size.split(" ")[0]}) me extra fabric lagta hai — price Rs. ${Math.round(
+              ? `Larger sizes (${size.split(" ")[0]}) use extra fabric — the price is Rs. ${Math.round(
                   (sizePricing!.price - active.price) / 100,
-                )} zyada.`
-              : "XL aur usse bade sizes par price thoda zyada hota hai."}
+                )} higher.`
+              : "XL and larger sizes are priced slightly higher."}
           </p>
           {sizeSoldOut ? (
             <p className="mt-1 text-[11.5px] text-[#b3261e]">
@@ -393,8 +393,10 @@ export function ProductDetail({
           >
             {sizeSoldOut || productSoldOut ? "Sold out" : "Buy it now"}
           </button>
+          {/* R45: WhatsApp number sirf sheet se — khali ho to button dikhta nahi */}
+          {whatsappNumber(whatsapp) ? (
           <a
-            href={`https://wa.me/${whatsappNumber(whatsapp.replace(/\D/g, "").slice(-10))}?text=${encodeURIComponent(
+            href={`https://wa.me/${whatsappNumber(whatsapp)}?text=${encodeURIComponent(
               [
                 `Hi Designer Clothing, I want to order:`,
                 `${product.title}`,
@@ -403,6 +405,8 @@ export function ProductDetail({
                 `Quantity: ${quantity}`,
                 `Price: ${formatPrice(price * quantity)}`,
                 productUrl(product.handle),
+                "",
+                "Please confirm my order and share the payment details.",
               ].join("\n"),
             )}`}
             target="_blank"
@@ -415,6 +419,7 @@ export function ProductDetail({
             </svg>
             Order on WhatsApp
           </a>
+          ) : null}
         </div>
 
         <p className="mt-3 text-[11px] tracking-[.06em] text-[#8a8078]">

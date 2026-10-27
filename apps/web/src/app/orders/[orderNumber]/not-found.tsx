@@ -1,7 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { siteConfig } from "@/config/site";
-import { whatsappNumber } from "@/lib/phone";
+import { SupportChannels } from "@/components/contact-details";
 
 /**
  * Order tracking ka apna "not found" — global 404 ki jagah customer ko saaf
@@ -11,10 +10,9 @@ import { whatsappNumber } from "@/lib/phone";
  * database reset ke baad ka number.
  */
 /** Browser tab / share preview me bhi "Order nahi mila" — default site title nahi. */
-export const metadata: Metadata = { title: "Order nahi mila", robots: { index: false, follow: false } };
+export const metadata: Metadata = { title: "Order not found", robots: { index: false, follow: false } };
 
 export default function OrderNotFound() {
-  const wa = siteConfig.whatsapp.replace(/\D/g, "").slice(-10);
   return (
     <div className="container-liksha py-14 lg:py-20" data-testid="order-not-found">
       <div className="mx-auto max-w-[620px] border border-[#eee6de] bg-[#faf8f5] p-6 text-center sm:p-9">
@@ -25,11 +23,11 @@ export default function OrderNotFound() {
             <path d="M12 17h.01" />
           </svg>
         </span>
-        <h1 className="mt-4 font-display text-[26px] font-medium sm:text-[32px]">Order nahi mila</h1>
+        <h1 className="mt-4 font-display text-[26px] font-medium sm:text-[32px]">Order not found</h1>
         <p className="mx-auto mt-2 max-w-[460px] text-[13px] leading-relaxed text-[#6b6259]">
-          Is number se koi order humare system me nahi hai. Ho sakta hai number galat type ho gaya ho,
-          ya order abhi sync na hua ho. Number <strong>LK-</strong> se shuru hota hai — dobara check kar
-          ke try kariye.
+          We could not find an order with this number. It may have been typed incorrectly, or the
+          order may not have synced yet. Order numbers start with <strong>LK-</strong> — please check
+          the number and try again.
         </p>
 
         <div className="mt-6 flex flex-wrap justify-center gap-3">
@@ -39,19 +37,13 @@ export default function OrderNotFound() {
           >
             Try another number
           </Link>
-          <a
-            href={`https://wa.me/${whatsappNumber(wa)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 border border-[#25D366] px-6 py-3 text-[11px] font-semibold tracking-[.14em] text-[#128c4b] uppercase"
-          >
-            WhatsApp support
-          </a>
+          {/* R45: WhatsApp number sirf sheet se — khali ho to button dikhta nahi */}
+          <SupportChannels />
         </div>
 
         <p className="mt-4 text-[11.5px] leading-relaxed text-[#8a8078]">
-          Order kiya tha aur number bilkul sahi hai? WhatsApp par order number bhejiye — team 24 ghante
-          me status bata degi. Support: <strong>{siteConfig.phone}</strong>
+          Placed an order and sure the number is correct? Send us the order number on WhatsApp — our team
+          will share the status within 24 hours.
         </p>
       </div>
     </div>

@@ -83,10 +83,11 @@ async function main() {
   const missingOrder = await get("/orders/LK-DOESNOTEXIST");
   check("unknown order returns 404", missingOrder.status === 404, `status ${missingOrder.status}`);
   check(
-    "unknown order explains 'Order nahi mila'",
-    /Order nahi mila/i.test(missingOrder.text) && /Try another number/i.test(missingOrder.text),
+    "unknown order explains 'Order not found'",
+    /Order not found/i.test(missingOrder.text) && /Try another number/i.test(missingOrder.text),
   );
-  check("not-found order offers WhatsApp support", /wa\.me\/918005900581/.test(missingOrder.text));
+  // R45: WhatsApp support sheet ke number se — sheet configured nahi to link nahi
+  check("not-found order par hardcoded WhatsApp number nahi (R45)", !/wa\.me\/918005900581/.test(missingOrder.text));
 
   /* ── 3. reviews: no fake sample data ────────────────────────────────── */
   const catalog = JSON.parse((await get("/api/products?limit=48&sort=price-low")).text);

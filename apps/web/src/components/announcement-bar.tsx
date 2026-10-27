@@ -21,13 +21,15 @@ export function AnnouncementBar() {
   const [visible, setVisible] = useState(true);
 
   // owner ki Google Sheet / admin se aaya announcement sabse pehle
-  const messages = useMemo(
-    () =>
-      announcement
-        ? [{ text: announcement, href: "/collections/sale" }, ...MESSAGES]
-        : MESSAGES,
-    [announcement],
-  );
+  // R47: sheet announcement default copy se match kare to duplicate hatao —
+  // same text do baar aane se React duplicate-key warning aati thi.
+  const messages = useMemo(() => {
+    if (!announcement) return MESSAGES;
+    return [
+      { text: announcement, href: "/collections/sale" },
+      ...MESSAGES.filter((message) => message.text !== announcement),
+    ];
+  }, [announcement]);
 
   useEffect(() => {
     if (messages.length < 2) return;

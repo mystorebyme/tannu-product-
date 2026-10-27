@@ -10,7 +10,8 @@ import { whatsappNumber } from "@/lib/phone";
 
 const money = (paise: number) => `Rs. ${(paise / 100).toLocaleString("en-IN")}`;
 
-export const WHATSAPP_NUMBER = "918005900581";
+// R45 (owner): hardcoded WhatsApp number **poora hata diya** — link banane wale
+// callers sheet/settings ka live number bhejte hain; number khali = link "" (UI chhupa deta hai).
 
 /**
  * Site ka apna live URL — WhatsApp message me **hamari** site ka link jaata hai,
@@ -28,9 +29,11 @@ export function productUrl(handle: string): string {
   return `${currentSiteUrl()}/products/${handle}`;
 }
 
-/** wa.me link — number me country code zaroori hai (dekho `phone.ts`) */
-export function whatsappLink(message: string, phone = WHATSAPP_NUMBER): string {
-  return `https://wa.me/${whatsappNumber(phone, WHATSAPP_NUMBER)}?text=${encodeURIComponent(message)}`;
+/** wa.me link — number me country code zaroori hai (dekho `phone.ts`). Khaali number = "" (R45). */
+export function whatsappLink(message: string, phone = ""): string {
+  const num = whatsappNumber(phone);
+  if (!num) return "";
+  return `https://wa.me/${num}?text=${encodeURIComponent(message)}`;
 }
 
 export function orderWhatsAppMessage(order: Order, origin = siteConfig.url): string {
@@ -56,7 +59,11 @@ export function orderWhatsAppMessage(order: Order, origin = siteConfig.url): str
   if (order.discount > 0) lines.push(`Discount: -${money(order.discount)}`);
   lines.push(`Shipping: ${order.shipping > 0 ? money(order.shipping) : "Free"}`);
   lines.push(`*Total: ${money(order.total)}*`);
-  lines.push(`Payment: Prepaid (${order.paymentStatus})`);
+  if (order.paymentStatus === "paid") {
+    lines.push("Payment: Paid");
+  } else {
+    lines.push("Payment: To be arranged after confirmation (online payment is paused)");
+  }
   lines.push("");
   lines.push("*Delivery address*");
   lines.push(`${order.address}, ${order.city}, ${order.state} - ${order.pincode}`);
@@ -65,12 +72,12 @@ export function orderWhatsAppMessage(order: Order, origin = siteConfig.url): str
     lines.push(`Note: ${order.notes}`);
   }
   lines.push("");
-  lines.push("Please confirm my order on WhatsApp.");
+  lines.push("Please confirm my order and share the payment details.");
   return lines.join("\n");
 }
 
-export function orderWhatsAppLink(order: Order, origin = siteConfig.url): string {
-  return whatsappLink(orderWhatsAppMessage(order, origin));
+export function orderWhatsAppLink(order: Order, origin = siteConfig.url, phone = ""): string {
+  return whatsappLink(orderWhatsAppMessage(order, origin), phone);
 }
 
 /** Cart se seedha WhatsApp par enquiry (order place karne se pehle bhi). */
@@ -88,6 +95,6 @@ export function cartWhatsAppMessage(
     );
   });
   const total = lines.reduce((sum, line) => sum + line.price * line.quantity, 0);
-  parts.push("", `*Total: ${money(total)}*`, "", "Please confirm availability and payment link.");
+  parts.push("", `*Total: ${money(total)}*`, "", "Please confirm availability and share the payment details.");
   return parts.join("\n");
 }

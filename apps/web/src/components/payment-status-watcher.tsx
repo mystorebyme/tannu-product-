@@ -10,22 +10,22 @@ export type PaymentState = "pending" | "processing" | "paid" | "failed" | string
 const COPY: Record<string, { label: string; note: string; tone: string }> = {
   pending: {
     label: "Payment pending",
-    note: "Payment abhi baaki hai — UPI se pay kariye, phir mobile ke last 4 digit se confirm kar dijiye.",
+    note: "Online payment is currently paused. Our team will confirm your order on WhatsApp and share the payment details with you there.",
     tone: "border-[#e6d3a8] bg-[#fdf9ee] text-[#8a6a1f]",
   },
   processing: {
     label: "Payment submitted",
-    note: "Aapki payment confirm request mil gayi hai. Team UPI statement se verify karke order confirm karegi (usually 10–30 min).",
+    note: "We have received your payment confirmation request. Our team is verifying it and your order will be confirmed shortly (usually 10–30 minutes).",
     tone: "border-[#c9d9ea] bg-[#f4f8fd] text-[#2f5d8a]",
   },
   paid: {
     label: "Payment confirmed",
-    note: "Paisa mil gaya — order confirm hai aur dispatch ke liye taiyaar hai.",
+    note: "Payment received — your order is confirmed and being prepared for dispatch.",
     tone: "border-[#cfe6d4] bg-[#f3faf4] text-[#2f7a3f]",
   },
   failed: {
     label: "Payment failed",
-    note: "Paisa cut nahi hua ya payment fail hui — dobara try kariye ya WhatsApp par batayein.",
+    note: "The payment could not be completed. Please write to us on WhatsApp and our team will help you.",
     tone: "border-[#f0c9c5] bg-[#fdf5f4] text-[#a3312a]",
   },
   /**
@@ -33,8 +33,8 @@ const COPY: Record<string, { label: string; note: string; tone: string }> = {
    * girta tha ("UPI se pay kariye") jo refund ke baad galat message hai.
    */
   refunded: {
-    label: "Refund ho gaya",
-    note: "Aapka paisa wapas kar diya gaya hai — 5–7 working days me account me dikh jayega.",
+    label: "Refund completed",
+    note: "Your refund has been issued — it will appear in your account within 5–7 working days.",
     tone: "border-[#cfe6d4] bg-[#f3faf4] text-[#2f7a3f]",
   },
 };

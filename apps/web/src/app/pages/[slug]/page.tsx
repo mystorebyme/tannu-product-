@@ -113,7 +113,7 @@ const pages: Record<string, PageContent> = {
         heading: "7 days replacement",
         body: [
           "If the product is damaged, has a manufacturing defect or was incorrectly shipped, request a replacement within 7 days of delivery.",
-          "The item must be unused, unwashed and have all original tags intact. Share an unboxing video or clear photographs on WhatsApp along with your order number (number neeche diya hai).",
+          "The item must be unused, unwashed and have all original tags intact. Share an unboxing video or clear photographs on WhatsApp along with your order number (the number is given below).",
         ],
       },
       {

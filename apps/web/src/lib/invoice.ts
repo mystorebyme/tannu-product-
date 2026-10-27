@@ -67,7 +67,8 @@ export function sellerFromSettings(settings?: {
     gstin: settings?.gstin?.trim() || process.env.SELLER_GSTIN?.trim() || "GSTIN pending",
     // owner rule: invoice par bhi support email nahi — sirf phone/WhatsApp
     email: "",
-    phone: settings?.supportPhone?.trim() || process.env.SELLER_PHONE?.trim() || "+91 8005900581",
+    // R45: koi hardcoded number nahi — settings/sheet khali to invoice par bhi khali
+    phone: settings?.supportPhone?.trim() || process.env.SELLER_PHONE?.trim() || "",
     state: settings?.sellerState?.trim() || process.env.SELLER_STATE?.trim() || SELLER_STATE,
   };
 }

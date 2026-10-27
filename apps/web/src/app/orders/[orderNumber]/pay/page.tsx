@@ -87,8 +87,8 @@ export default async function PaymentPage({ params }: { params: Promise<{ orderN
             Pay {formatPrice(order.total)}
           </h1>
           <p className="mt-1.5 text-[12.5px] leading-relaxed text-[#6b6259]">
-            Order place ho gaya hai. Neeche UPI se payment kariye — paisa milne par order khud confirm ho jayega
-            aur tracking shuru hogi.
+            Your order has been placed. Complete the payment with UPI below — your order is confirmed
+            automatically once the payment is received, and tracking begins.
           </p>
 
           <div className="mt-4 grid gap-3 border-y border-[#eee6de] py-4 sm:grid-cols-3">
@@ -137,7 +137,7 @@ export default async function PaymentPage({ params }: { params: Promise<{ orderN
           />
 
           <div className="mt-6 border-t border-[#eee6de] pt-4">
-            <h2 className="text-[11px] font-semibold tracking-[.14em] uppercase">Aapka order</h2>
+            <h2 className="text-[11px] font-semibold tracking-[.14em] uppercase">Your order</h2>
             <ul className="mt-3 space-y-2.5">
               {order.items.map((item) => (
                 <li key={`${item.handle}-${item.size}`} className="flex items-center gap-3">
@@ -179,19 +179,19 @@ export default async function PaymentPage({ params }: { params: Promise<{ orderN
           className="mt-5 border border-[#862222]/25 bg-[#fdf6f3] px-5 py-4 text-center"
         >
           <p className="text-[12px] font-semibold text-[#862222]">
-            Payment confirm hone ke baad hi order confirm hota hai.
+            Your order is confirmed once the payment is confirmed.
           </p>
           <Link
             href={`/orders/${order.orderNumber}`}
             data-testid="order-details-link"
             className="mt-3 inline-flex items-center gap-2 border border-[#862222] bg-[#862222] px-6 py-3 text-[11px] font-semibold tracking-[.14em] text-white uppercase transition-colors hover:bg-[#6d1b1b]"
           >
-            Order details dekhein
+            View order details
             <span aria-hidden="true">→</span>
           </Link>
           <p className="mt-2.5 text-[11px] leading-relaxed text-[#8a8078]">
-            Payment ke baad aage badhne ke liye <strong className="text-[#862222]">yahin click kariye</strong> —
-            tracking, order status aur delivery date isi page par milegi.
+            After payment, <strong className="text-[#862222]">click here</strong> to continue —
+            tracking, order status and the delivery date are all on that page.
           </p>
         </div>
       </div>

@@ -27,6 +27,8 @@ export function ProductGallery({
   const [index, setIndex] = useState(0);
   const [zoom, setZoom] = useState(false);
   const [origin, setOrigin] = useState("50% 50%");
+  /** R49: zoom layer ka src — mouse hatne par bhi rakha rehta hai taaki fade-out smooth ho */
+  const [zoomSrc, setZoomSrc] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState(false);
   const touchX = useRef<number | null>(null);
   const frameRef = useRef<HTMLDivElement | null>(null);
@@ -45,6 +47,22 @@ export function ProductGallery({
       img.src = imageUrl(src, 900);
     }
   }, [index, gallery]);
+
+  // R49: current image zoom-size (1400) me preload — pehli hover par zoom turant dikhe
+  useEffect(() => {
+    const src = gallery[index];
+    if (!src) return;
+    const img = new Image();
+    img.src = imageUrl(src, 1400);
+  }, [index, gallery]);
+
+  // R49: zoom layer ka src — zoom par current image; leave par purana src rehta hai
+  // (fade-out ke beech img khaali na ho — "vapis vaise ki vaise" smooth lage)
+  useEffect(() => {
+    if (!zoom) return;
+    const src = gallery[index];
+    if (src) setZoomSrc(imageUrl(src, 1400));
+  }, [zoom, index, gallery]);
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
@@ -68,13 +86,18 @@ export function ProductGallery({
     };
   }, [lightbox]);
 
-  function onMove(event: React.MouseEvent<HTMLDivElement>) {
+  const originFrom = useCallback((clientX: number, clientY: number) => {
     const node = frameRef.current;
     if (!node) return;
     const rect = node.getBoundingClientRect();
-    const x = ((event.clientX - rect.left) / rect.width) * 100;
-    const y = ((event.clientY - rect.top) / rect.height) * 100;
+    if (!rect.width || !rect.height) return;
+    const x = ((clientX - rect.left) / rect.width) * 100;
+    const y = ((clientY - rect.top) / rect.height) * 100;
     setOrigin(`${x}% ${y}%`);
+  }, []);
+
+  function onMove(event: React.MouseEvent<HTMLDivElement>) {
+    originFrom(event.clientX, event.clientY);
   }
 
   return (
@@ -105,10 +128,15 @@ export function ProductGallery({
           ref={frameRef}
           className="relative mx-auto aspect-[4/5] max-h-[calc(100svh-150px)] w-full touch-pan-y overflow-hidden bg-[#f6f1ec] sm:aspect-[3/4] lg:max-h-[calc(100svh-140px)]"
           data-testid="pdp-main-image-frame"
-          onMouseEnter={() => setZoom(true)}
+          onMouseEnter={(event) => {
+            // R49: enter par hi cursor point se zoom shuru — pehla frame sahi anchor par
+            originFrom(event.clientX, event.clientY);
+            setZoom(true);
+          }}
           onMouseLeave={() => {
+            // R49: origin yahan reset NAHI — fade-out usi point se smooth wapas ho,
+            // image apne aap scale(1) + opacity 0 par "vaise ki vaise" laut jaati hai
             setZoom(false);
-            setOrigin("50% 50%");
           }}
           onMouseMove={onMove}
           onDoubleClick={() => setLightbox(true)}
@@ -144,16 +172,32 @@ export function ProductGallery({
             </div>
           ))}
 
-          {/* hover zoom layer (sirf pointer devices par dikhta hai) */}
-          <div
-            className="pointer-events-none absolute inset-0 hidden bg-no-repeat transition-transform duration-300 ease-out sm:block"
-            style={{
-              backgroundImage: zoom ? `url("${imageUrl(gallery[index], 1400)}")` : "none",
-              backgroundSize: "190%",
-              backgroundPosition: origin,
-              opacity: zoom ? 1 : 0,
-            }}
-          />
+          {/* R49 hover-zoom layer (sirf pointer devices par).
+              Pehle: bina z-index ka background-image div — current slide (z-10) ke PEECHE
+              reh jaata tha, isliye zoom sirf image ke aas-paas ki khaali background par
+              ulta-seedha dikhta tha, aur cursor hatne par jhatke se hat-ta tha.
+              Ab: wahi object-contain image slide ke OOPAR (z-20), cursor ke point se
+              scale(1.9) — background se pixel-perfect match, aur mouse leave par
+              transform + opacity transition se smooth "vaise ki vaise" wapsi. */}
+          {zoomSrc ? (
+            <div
+              className="pointer-events-none absolute inset-0 z-20 hidden overflow-hidden sm:block"
+              aria-hidden="true"
+              style={{ opacity: zoom ? 1 : 0, transition: "opacity 240ms ease" }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={zoomSrc}
+                alt=""
+                className="h-full w-full object-contain"
+                style={{
+                  transform: zoom ? "scale(1.9)" : "scale(1)",
+                  transformOrigin: origin,
+                  transition: "transform 340ms cubic-bezier(0.22, 1, 0.36, 1)",
+                }}
+              />
+            </div>
+          ) : null}
 
           {badge ? (
             <span className="absolute left-3 top-3 z-20 bg-[#862222] px-2 py-1 text-[10px] font-semibold tracking-[.1em] text-white uppercase">
