@@ -2,12 +2,12 @@
  "meta": {
   "source": "trustoo",
   "shopId": "73883451696",
-  "syncedAt": "2026-10-24T16:20:21.393Z",
+  "syncedAt": "2026-10-27T00:09:26.727Z",
   "note": "scripts/reviews-sync/fetch-reviews.mjs (GitHub Actions daily) is file ko likhta hai — haath se edit na karein."
  },
  "shop": {
   "rating": 4.8,
-  "count": 1690
+  "count": 1686
  },
  "products": {
   "rang-e-royale-blooming-lehenga-suit-set-10511720087684": {
@@ -788,8 +788,17 @@
   },
   "rangshaa-heavy-embroidered-maxi-set": {
    "rating": 5,
-   "count": 2,
+   "count": 3,
    "reviews": [
+    {
+     "id": "26191425",
+     "author": "Bhavana A.",
+     "rating": 5,
+     "body": "It looks elegant and beautiful",
+     "date": "2026-10-26",
+     "verified": true,
+     "photos": []
+    },
     {
      "id": "26130073",
      "author": "Neha S.",
@@ -9661,57 +9670,6 @@
      "author": "parmi v.",
      "rating": 4,
      "body": "Fabric quality is awesome in this price and looks too Good 👍",
-     "date": "2025-04-10",
-     "verified": true,
-     "photos": []
-    }
-   ]
-  },
-  "shavis-peach-havy-zimmy-chu-royal-elegant-suit-set": {
-   "rating": 5,
-   "count": 5,
-   "reviews": [
-    {
-     "id": "25846932",
-     "author": "Rinku",
-     "rating": 5,
-     "body": "Amazing suit i loved it",
-     "date": "2026-01-28",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25829371",
-     "author": "Ranjana C.",
-     "rating": 5,
-     "body": "I’m really happy with this purchase. The Peach Heavy Zimmy Chu fabric feels premium and gives a very royal and elegant look. The stitching and finishing are neat, and the 2XL (44) size fits perfectly. The color is exactly as shown in the pictures. Highly recommended for festive and special occasions.\nThank you, Likshaclothing 😊👍",
-     "date": "2025-12-19",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25694682",
-     "author": "Mukesh P. S.",
-     "rating": 5,
-     "body": "Received my parcel. And i wear it. ❤️ Quality is very superb. And get very outstanding look 🥰😍 Thank you",
-     "date": "2025-08-12",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25691974",
-     "author": "Bhawana C.",
-     "rating": 5,
-     "body": "The quality of the cloth, stitching everything is so nice.the dress is really beautiful.the only thing is it's too long as my height is 5ft4inches and I ordered Small size.the fit was perfect everything good but just the length is long.",
-     "date": "2025-08-03",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25619236",
-     "author": "Shilpasunil",
-     "rating": 5,
-     "body": "A really gorgeous and beautiful piece in a affordable rate . Really comfortable. Perfect for indie functions",
      "date": "2025-04-10",
      "verified": true,
      "photos": []
