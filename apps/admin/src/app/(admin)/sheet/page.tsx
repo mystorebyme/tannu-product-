@@ -74,8 +74,8 @@ export default async function SheetPage() {
           </>
         ) : (
           <>
-            <strong>Sheet connected nahi hai.</strong> Site Postgres/JSON par chal rahi hai. Setup:{" "}
-            <span className="mono">docs/09-devops/google-sheets.md</span> — Apps Script deploy karke{" "}
+            <strong>Sheet connected nahi hai.</strong> Orders sheet me save nahi ho rahe. Setup: repo ki{" "}
+            <span className="mono">scripts/google-apps-script/liksha-sheets.gs</span> Apps Script me deploy karke{" "}
             <span className="mono">GOOGLE_SHEETS_WEBAPP_URL</span> +{" "}
             <span className="mono">GOOGLE_SHEETS_TOKEN</span> set kariye. {overview.hint}
           </>
@@ -116,7 +116,7 @@ export default async function SheetPage() {
                 Google <span className="mono">Publish to web</span> CSV ko ~5 minute cache karta hai — isliye sheet
                 me UPI badalne par site par turant nahi dikhta. Real-time chahiye to Apps Script wala{" "}
                 <span className="mono">/exec</span> URL <span className="mono">GOOGLE_SHEETS_WEBAPP_URL</span> me
-                daaliye (<span className="mono">docs/09-devops/google-sheets.md</span>).
+                daaliye.
               </div>
             </>
           ) : (

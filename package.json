@@ -40,18 +40,14 @@
     "test:smoke": "node tests/e2e/smoke.mjs",
     "test:responsive": "node tests/e2e/responsive.mjs && node tests/e2e/breakpoints.mjs",
     "assets:brand": "node scripts/brand/build-responsive-assets.mjs",
-    "assets:proof": "node scripts/brand/render-proof.mjs",
     "assets:invoice-logo": "node scripts/build-invoice-logo.mjs",
     "test:unit": "tsx --test tests/unit/*.test.ts",
-    "apps-script:export": "node scripts/export-apps-script.mjs",
     "sheets:check": "node scripts/sheets-selfcheck.mjs",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test:audit": "node tests/e2e/round16.mjs && node tests/e2e/payments.mjs && node tests/e2e/links.mjs",
     "test:links": "node tests/e2e/links.mjs",
     "test:payments": "node tests/e2e/payments.mjs",
-    "schema:embed": "node scripts/db/embed-schema.mjs",
-    "audit": "node scripts/repo-audit.mjs",
-    "audit:check": "node scripts/repo-audit.mjs --check"
+    "schema:embed": "node scripts/db/embed-schema.mjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.11",

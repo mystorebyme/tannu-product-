@@ -157,11 +157,10 @@ test("R35: GitHub Actions se Worker deploy (manual) — secrets repo me nahi", (
   assert.doesNotMatch(workflow, /npx wrangler deploy/, "root par wrangler deploy nahi (wahi purani galti)");
 });
 
-test("R35: docs me Workers Builds ki sahi settings likhi hain", () => {
-  const doc = read("docs/09-devops/cloudflare-workers.md");
-  assert.match(doc, /Could not detect a directory containing static files/, "error + wajah documented");
-  assert.match(doc, /npm run deploy:vinext --workspace @liksha\/web|scripts\/deploy-cloudflare\.sh/, "deploy command");
-  assert.match(doc, /bash scripts\/deploy-cloudflare\.sh/, "dashboard me yahi command");
-  assert.match(doc, /WORKER_NAME/, "existing worker (`designer`) par deploy karne ka tarika");
-  assert.match(doc, /NODE_VERSION/, "Node 22 build variable");
+test("R35: Workers deploy script me dashboard steps ki zaroori detail maujood hai", () => {
+  // docs gaye (R42 clean repo) — deploy knowledge ab script + workflow me hi rehti hai
+  const deploy = read("scripts/deploy-cloudflare.sh");
+  assert.match(deploy, /WORKER_NAME/, "existing worker (`designer`) par deploy");
+  assert.match(deploy, /wrangler deploy/, "deploy command");
+  assert.match(deploy, /durable:true/, "post-deploy verify hint");
 });

@@ -44,6 +44,10 @@ export default async function PaymentPage({ params }: { params: Promise<{ orderN
 
   // already paid → seedha order page (dobara pay karne ka koi matlab nahi)
   if (order.paymentStatus === "paid") redirect(`/orders/${order.orderNumber}`);
+  // R42: refunded/cancelled/returned order ka payment page khulna hi nahi chahiye
+  if (order.paymentStatus === "refunded" || order.status === "cancelled" || order.status === "returned") {
+    redirect(`/orders/${order.orderNumber}`);
+  }
 
   const fallbackHost = new URL(siteConfig.url).host;
   const host = headerList.get("x-forwarded-host") ?? headerList.get("host") ?? fallbackHost;

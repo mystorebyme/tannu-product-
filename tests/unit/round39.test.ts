@@ -152,7 +152,7 @@ test("R39: note-box order page par — sheet text warna default; purana static A
 
 test("R39: script r39-1 — Admin Note column, timeline adminNote, onEdit, /exec panel", () => {
   const gs = read("scripts/google-apps-script/liksha-sheets.gs");
-  assert.match(gs, /var CODE_VERSION = 'r40-\d+';/);
+  assert.match(gs, /var CODE_VERSION = 'r4\d-\d+';/); // r40+ (ab r42-1)
   assert.match(gs, /'Tracking URL', 'Notes', 'Admin Note', 'Source', 'Device',/, "Orders headers me Admin Note");
   assert.match(gs, /adminNote: adminNote,/, "timeline response me adminNote");
   assert.match(gs, /row\['Admin Note'\]/, "timeline Admin Note column padhta hai");

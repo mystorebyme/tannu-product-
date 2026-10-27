@@ -34,7 +34,7 @@ console.log("\n── Liksha Sheet self-check ───────────�
 
 if (!rawUrl || !token) {
   console.log("Usage: node scripts/sheets-selfcheck.mjs \"<Web app URL (/exec)>\" \"<TOKEN>\"\n");
-  console.log("URL/token kahan se: docs/00-overview/apps-script-code.md (Step 6 aur 3).");
+  console.log("URL/token kahan se: Apps Script → Deploy → Manage deployments (/exec URL); token = Vercel GOOGLE_SHEETS_TOKEN.");
   process.exit(1);
 }
 
@@ -171,5 +171,5 @@ if (failures === 0) {
   process.exit(0);
 }
 console.log(`❌ ${failures} problem mili — upar ke FAIL messages dekhiye.`);
-console.log("   Poora troubleshooting: docs/00-overview/sheet-setup-owner.md\n");
+console.log("   Troubleshooting: site ka /api/sheet-health kholein — sheet/script ka poora status wahan hai.\n");
 process.exit(1);

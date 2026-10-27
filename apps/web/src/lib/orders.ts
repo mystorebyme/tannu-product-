@@ -687,6 +687,15 @@ export async function claimPayment(
   if (order.paymentStatus === "paid") {
     throw new OrderError("This order is already paid.", 409, "already_paid");
   }
+  // R42: refunded/cancelled/returned order par dobara payment nahi — pehle claim
+  // refunded ko processing bana deta tha (double-payment ka chhed).
+  if (order.paymentStatus === "refunded" || order.status === "cancelled" || order.status === "returned") {
+    throw new OrderError(
+      "Ye order ab payment ke liye open nahi hai. WhatsApp par team se sampark kariye.",
+      409,
+      "payment_not_allowed",
+    );
+  }
   const now = new Date().toISOString();
   const note = (options.note ?? "").trim().slice(0, 180);
   const updated: Order = {
@@ -734,6 +743,14 @@ export async function submitPaymentReference(
   const order = all[index]!;
   if (order.paymentStatus === "paid") {
     throw new OrderError("This order is already paid.", 409, "already_paid");
+  }
+  // R42: refunded/cancelled/returned par reference submit bhi band (claim jaisa)
+  if (order.paymentStatus === "refunded" || order.status === "cancelled" || order.status === "returned") {
+    throw new OrderError(
+      "Ye order ab payment ke liye open nahi hai. WhatsApp par team se sampark kariye.",
+      409,
+      "payment_not_allowed",
+    );
   }
   // Ek UTR = ek payment. Dusre order par wahi reference = duplicate claim.
   // Pehle DB ka unique index isko 500 bana deta tha (customer ko laga save hi nahi hua).
@@ -844,6 +861,8 @@ export async function applyPaymentIntent(
   if (index === -1) return null;
   const order = orders[index]!;
   if (order.paymentStatus === "paid") return order; // dobara intent banane ki zaroorat nahi
+  // R42: refunded/cancelled/returned — intent apply hi nahi (order closed hai)
+  if (order.paymentStatus === "refunded" || order.status === "cancelled" || order.status === "returned") return order;
   orders[index] = {
     ...order,
     payment: {

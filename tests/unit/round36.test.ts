@@ -279,13 +279,9 @@ test("R36: eslint build output ko globally ignore karta hai (warna bundle lint h
   assert.doesNotMatch(rulesObject, /ignores:/, "rules wale object me ignores nahi");
 });
 
-test("R36: docs me naya flow + Vercel sheet config likha hai", () => {
-  const report = read("docs/00-overview/owner-report-round36.md");
-  assert.match(report, /step 3/i, "payment step 3");
-  assert.match(report, /Pay on UPI/, "auto redirect nahi");
-  assert.match(report, /liksha-clothing/, "Vercel project ka naam");
-  assert.match(report, /GOOGLE_SHEETS_WEBAPP_URL/);
-  const sheetsDoc = read("docs/09-devops/google-sheets.md");
-  assert.match(sheetsDoc, /liksha-clothing/, "Vercel project");
-  assert.match(sheetsDoc, /payment-context|step 3/i);
+test("R36: checkout flow — payment step 3 par, auto-launch nahi (code guard)", () => {
+  // docs gaye (R42 clean repo) — rule code me hi pin rehta hai
+  const form = read("apps/web/src/components/checkout-form.tsx");
+  assert.match(form, /payment-context/, "step 3 payment context se chalta hai");
+  assert.doesNotMatch(form, /window\.location\.href = upi/i, "UPI auto-launch nahi");
 });

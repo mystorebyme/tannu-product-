@@ -28,7 +28,7 @@ export type { SheetSettings };
  *              log hai, isliye owner ko poora history + latest status dono dikhte hain.
  *
  * Setup: Google Sheet → Extensions → Apps Script → `scripts/google-apps-script/liksha-sheets.gs`
- * deploy → Web app URL + token env me. Poora guide: docs/09-devops/google-sheets.md
+ * deploy → Web app URL + token env me.
  *
  * Sheets optional hai: configure nahi hai to site Postgres/JSON par chalti hai
  * (koi feature band nahi hota) — sirf owner edits sheet se nahi honge.
@@ -559,6 +559,23 @@ export async function healSheetConfig(): Promise<boolean> {
   }
 }
 
+/**
+ * R42 (owner): "dropdown data validation … jis column mai jrurat hai sabhi mai".
+ * Script r42+ par status-column dropdowns site **khud** lagwa deti hai — owner
+ * ko /exec panel ka button dabane ki zaroorat nahi. Idempotent (script same
+ * rule dobara set kar deta hai) + 10-min rate limit (healSheetConfig jaisa).
+ */
+let lastDropdownsAt = 0;
+export async function applySheetDropdowns(): Promise<boolean> {
+  if (!googleSheetsConfig()) return false;
+  const now = Date.now();
+  if (now - lastDropdownsAt < 10 * 60_000) return false;
+  lastDropdownsAt = now;
+  const result = await scriptPost<{ applied?: number }>("dropdowns", { actor: "site-auto" });
+  if (result.ok) console.info(`[sheets] dropdowns auto-apply ok (${result.data.applied ?? 0} columns)`);
+  return result.ok;
+}
+
 /** Script ka version (30s cache) — sheet-orders mode r40+ script maangta hai. */
 let versionCache: { at: number; version: string; major: number } | null = null;
 export async function readScriptVersion(): Promise<{ version: string; major: number } | null> {
@@ -757,6 +774,10 @@ export async function readSheetHealth(): Promise<SheetHealth | null> {
     const healMajor = Number(/^r(\d+)/.exec(String(payload.version ?? ""))?.[1] ?? 0);
     if (expected && payload.idMatch === false && healMajor >= 40) {
       void healSheetConfig().catch(() => {});
+    }
+    // R42: r42+ script mila to dropdowns ek baar khud lagwa do (fire-and-forget)
+    if (healMajor >= 42) {
+      void applySheetDropdowns().catch(() => {});
     }
     const rows: Record<string, number> = {};
     for (const entry of payload.sheets ?? []) {

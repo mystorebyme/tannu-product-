@@ -268,15 +268,58 @@ export function orderFromSheetRows(orderNumber: string, rows: SheetRow[]): Order
     ? (payRaw as Order["paymentStatus"])
     : "pending";
   const createdAt = toIso(first.Timestamp ?? latest.Timestamp);
+  /**
+   * R42 (owner): "har stage par owner/store ka comment dikhna chahiye".
+   *  • onEdit ke events (`order.status_sheet`, `order.admin_note`) timeline ki
+   *    bhasha me badlo — `STATUS_ACTION` sirf `order.status.<slug>` pakadta hai,
+   *    warna owner ke sheet edits stages me dikhte hi nahi.
+   *  • stage-comment = **Admin Note** (ya sheet-edit row ka Notes, jaise
+   *    "Sheet se status update (owner)") — customer ke order `Notes` nahi
+   *    (wo har row me repeat hote hain → timeline par spam lagta tha).
+   */
   const audit: AuditEntry[] = list
     .filter((row) => String(row?.Timestamp ?? "").trim())
-    .map((row) => ({
-      at: toIso(row.Timestamp),
-      actor: String(row.Source ?? "") === "sheet-edit" ? "sheet" : "system",
-      action: String(row.Event ?? "order.updated"),
-      meta: String(row.Notes ?? "") ? { note: String(row.Notes ?? "") } : undefined,
-    }))
+    .map((row) => {
+      const rawEvent = String(row.Event ?? "order.updated");
+      const sheetEdit = String(row.Source ?? "") === "sheet-edit";
+      let action = rawEvent;
+      if (rawEvent === "order.status_sheet") {
+        action = `order.status.${sheetStatusToOrderStatus(row["Order status"]) ?? "placed"}`;
+      } else if (rawEvent === "order.admin_note") {
+        action = "order.note_updated";
+      }
+      const comment =
+        String(row["Admin Note"] ?? "").trim() || (sheetEdit ? String(row.Notes ?? "").trim() : "");
+      const meta = comment ? { [rawEvent === "order.admin_note" ? "text" : "note"]: comment } : undefined;
+      return { at: toIso(row.Timestamp), actor: sheetEdit ? "sheet" : "system", action, meta };
+    })
     .reverse();
+  /** R42: Admin Note compat reconstruct me bhi statusNote banta hai (full mode
+   *  JSON snapshot se lata tha; purane-script rows se ye raha — owner ka comment
+   *  note-box + timeline me har mode me dikhe). */
+  let adminNoteAt = "";
+  for (let i = list.length - 1; i >= 0; i -= 1) {
+    if (String(list[i]?.["Admin Note"] ?? "").trim()) {
+      adminNoteAt = String(list[i]?.Timestamp ?? "");
+      break;
+    }
+  }
+  const adminNote = lastNonEmpty("Admin Note");
+  /**
+   * R42 bug-fix: customer ka order-note sirf **site ki rows** se lo — onEdit ki
+   * rows me `Notes` owner ka message hota hai ("Sheet se status update (owner)"
+   * ya admin note), customer ka delivery-note nahi. Last-non-empty Notes scan
+   * owner-edit ke baad customer note ko admin message se badal deta tha.
+   */
+  let customerNotes = "";
+  for (let i = list.length - 1; i >= 0; i -= 1) {
+    if (String(list[i]?.Source ?? "") === "sheet-edit") continue;
+    const value = String(list[i]?.Notes ?? "").trim();
+    if (value) {
+      customerNotes = value;
+      break;
+    }
+  }
   const courier = lastNonEmpty("Tracking courier") || null;
   const awb = lastNonEmpty("AWB") || null;
   const url = lastNonEmpty("Tracking URL") || null;
@@ -291,7 +334,7 @@ export function orderFromSheetRows(orderNumber: string, rows: SheetRow[]): Order
     city: lastNonEmpty("City"),
     state: lastNonEmpty("State"),
     pincode: lastNonEmpty("Pincode"),
-    notes: lastNonEmpty("Notes") || null,
+    notes: customerNotes || null,
     items,
     subtotal: rupeesToPaise(lastNonEmpty("Subtotal")),
     discount: rupeesToPaise(lastNonEmpty("Discount")),
@@ -311,6 +354,9 @@ export function orderFromSheetRows(orderNumber: string, rows: SheetRow[]): Order
       failureReason: null,
     },
     status,
+    statusNote: adminNote
+      ? { text: adminNote, at: toIso(adminNoteAt) || createdAt, by: "sheet", status }
+      : undefined,
     tracking:
       courier || awb || url
         ? { courier, awb, url, shippedAt: null, deliveredAt: null, updatedAt: createdAt, updatedBy: "sheet" }
@@ -353,7 +399,7 @@ export function parseOrderState(state: OrderState | null | undefined): Order | n
  * Owner ka live script r40 se purana ho (jaise r38-1) to `order_state`/`orders_state`
  * nahi hote — par `?action=order` (orderStory_: tab-wise rows) aur `?action=recent`
  * (newest-first rows) hamesha se hain. Site unhi se orders reconstruct karti hai:
- * orders sheet me **tab bhi** save/read hote hain (compat mode), r40-1 paste ke baad
+ * orders sheet me **tab bhi** save/read hote hain (compat mode), latest script paste ke baad
  * full fidelity (Order JSON snapshot) apne aap chalu.
  */
 

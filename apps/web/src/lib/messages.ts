@@ -150,7 +150,7 @@ export async function listMessages(limit = 100): Promise<ContactMessage[]> {
         .map((row) => ({
           // r40+ script: Message ID column hai. Purane script (r38-1) par column
           // hi nahi — Timestamp+Email se id banao taaki admin list chalti rahe
-          // (reply-mark purane script par limited hai; r40-1 paste se poora).
+          // (reply-mark purane script par limited hai; latest script paste se poora).
           id: String(row["Message ID"] ?? "") || `row:${String(row.Timestamp ?? "")}|${String(row.Email ?? "")}`,
           createdAt: String(row.Timestamp ?? ""),
           name: String(row.Name ?? ""),

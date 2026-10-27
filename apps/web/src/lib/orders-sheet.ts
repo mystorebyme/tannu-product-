@@ -94,7 +94,7 @@ export async function sheetOrdersReady(): Promise<{ ready: boolean; reason: stri
       next = {
         ready: true,
         mode: "compat",
-        reason: `script ${version.version} par compat mode — orders sheet me hi save hote hain; Order JSON snapshot ke liye r40+ paste karein`,
+        reason: `script ${version.version} par compat mode — orders sheet me hi save hote hain; Order JSON snapshot + dropdowns ke liye latest script (r42-1) paste karein`,
       };
     }
   }
