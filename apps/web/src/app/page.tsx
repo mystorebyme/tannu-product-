@@ -249,7 +249,7 @@ function PromoRail({ products }: { products: Awaited<ReturnType<typeof getProduc
           Trending Now
         </h2>
         <p className="mt-1 text-[11.5px] tracking-[.14em] text-[#9c8f82] uppercase">
-          Festive bestsellers — flat 65% off, ₹699
+          Handpicked for the festivities — flat 65% off
         </p>
       </Reveal>
       <Reveal className="mt-7" delay={80}>

@@ -5,14 +5,14 @@
   "cdn": "https://cdn.shopify.com/s/files/1/0738/8345/1696/",
   "currency": "INR",
   "moneyUnit": "paise",
-  "builtAt": "2026-10-27T18:37:25.957Z",
+  "builtAt": "2026-10-27T19:23:23.829Z",
   "snapshotAt": "2026-10-24T06:51:35.543Z",
-  "productCount": 453,
+  "productCount": 448,
   "liveProductCount": 287,
-  "extraProductCount": 166,
-  "listedProductCount": 393,
+  "extraProductCount": 161,
+  "listedProductCount": 388,
   "colourGroupCount": 43,
-  "imageCount": 2898
+  "imageCount": 2904
  },
  "collections": [
   {
@@ -21,7 +21,7 @@
    "subtitle": "Freshly dropped festive favourites",
    "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08096_JPG.jpg",
    "sortOrder": 1,
-   "productCount": 367
+   "productCount": 362
   },
   {
    "handle": "party-wear-gown",
@@ -29,7 +29,7 @@
    "subtitle": "Designer Anarkali Suits",
    "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_9512.webp",
    "sortOrder": 2,
-   "productCount": 246
+   "productCount": 241
   },
   {
    "handle": "likshas-choice",
@@ -37,7 +37,7 @@
    "subtitle": "Handpicked by our stylists",
    "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08059_JPG.jpg",
    "sortOrder": 3,
-   "productCount": 116
+   "productCount": 111
   },
   {
    "handle": "lehnga-choli",
@@ -61,7 +61,7 @@
    "subtitle": "Top view in this week",
    "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/WeddingSagabyIdahoClothing_Launchingourelegantpurpleembroideredmaxiset_beautifully_3__jpg.jpg",
    "sortOrder": 6,
-   "productCount": 10
+   "productCount": 5
   },
   {
    "handle": "weddin-collection",
@@ -45012,411 +45012,11 @@
    "compareAtPrice": 199900,
    "saleLockedPrice": true,
    "images": [
-    "https://cdn.phototourl.com/member/2026-10-27-90239d8a-0ed3-4635-bca9-1eddfd49648b.jpg"
-   ],
-   "collections": [
-    "new-arrivals",
-    "party-wear-gown",
-    "likshas-choice",
-    "trending"
-   ],
-   "category": "anarkali",
-   "productType": "Designer Suit Set",
-   "fabric": "Premium designer fabric",
-   "color": "As shown in picture",
-   "sizes": [
-    "XS [34]",
-    "S [36]",
-    "M [38]",
-    "L [40]",
-    "XL [42]",
-    "2XL [44]",
-    "3XL [46]"
-   ],
-   "sizePricing": {
-    "XS [34]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    },
-    "S [36]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    },
-    "M [38]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    },
-    "L [40]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    },
-    "XL [42]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    },
-    "2XL [44]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    },
-    "3XL [46]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    }
-   },
-   "details": [
-    "Elegant designer festive set, crafted for celebrations and special occasions.",
-    "Premium fabric with comfortable stitching and a flattering, true-to-size fit.",
-    "Available in sizes XS to 3XL — flat 65% off, final price ₹699.",
-    "Dry clean recommended. Colours may vary slightly due to screen lighting."
-   ],
-   "description": "Elegant designer festive set, crafted for celebrations and special occasions.\nPremium fabric with comfortable stitching and a flattering, true-to-size fit.\nAvailable in sizes XS to 3XL — flat 65% off, final price ₹699.\nDry clean recommended. Colours may vary slightly due to screen lighting.",
-   "descriptionHtml": "<p>Elegant designer festive set, crafted for celebrations and special occasions.\nPremium fabric with comfortable stitching and a flattering, true-to-size fit.\nAvailable in sizes XS to 3XL — flat 65% off, final price ₹699.\nDry clean recommended. Colours may vary slightly due to screen lighting.</p>",
-   "source": "extra",
-   "rating": 0,
-   "reviewCount": 0,
-   "inStock": true,
-   "featured": true,
-   "publishedAt": "2026-10-27T09:00:00.000Z"
-  },
-  {
-   "handle": "zarina-royale-designer-suit-set",
-   "sourceHandle": "zarina-royale-designer-suit-set",
-   "title": "Zarina Royale Designer Suit Set",
-   "price": 69900,
-   "compareAtPrice": 199900,
-   "saleLockedPrice": true,
-   "images": [
-    "https://cdn.phototourl.com/member/2026-10-27-62226e5e-8013-4dc1-bd9d-77773a1c8772.jpg"
-   ],
-   "collections": [
-    "new-arrivals",
-    "party-wear-gown",
-    "likshas-choice",
-    "trending"
-   ],
-   "category": "anarkali",
-   "productType": "Designer Suit Set",
-   "fabric": "Premium designer fabric",
-   "color": "As shown in picture",
-   "sizes": [
-    "XS [34]",
-    "S [36]",
-    "M [38]",
-    "L [40]",
-    "XL [42]",
-    "2XL [44]",
-    "3XL [46]"
-   ],
-   "sizePricing": {
-    "XS [34]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    },
-    "S [36]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    },
-    "M [38]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    },
-    "L [40]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    },
-    "XL [42]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    },
-    "2XL [44]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    },
-    "3XL [46]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    }
-   },
-   "details": [
-    "Elegant designer festive set, crafted for celebrations and special occasions.",
-    "Premium fabric with comfortable stitching and a flattering, true-to-size fit.",
-    "Available in sizes XS to 3XL — flat 65% off, final price ₹699.",
-    "Dry clean recommended. Colours may vary slightly due to screen lighting."
-   ],
-   "description": "Elegant designer festive set, crafted for celebrations and special occasions.\nPremium fabric with comfortable stitching and a flattering, true-to-size fit.\nAvailable in sizes XS to 3XL — flat 65% off, final price ₹699.\nDry clean recommended. Colours may vary slightly due to screen lighting.",
-   "descriptionHtml": "<p>Elegant designer festive set, crafted for celebrations and special occasions.\nPremium fabric with comfortable stitching and a flattering, true-to-size fit.\nAvailable in sizes XS to 3XL — flat 65% off, final price ₹699.\nDry clean recommended. Colours may vary slightly due to screen lighting.</p>",
-   "source": "extra",
-   "rating": 0,
-   "reviewCount": 0,
-   "inStock": true,
-   "featured": true,
-   "publishedAt": "2026-10-27T09:00:00.000Z"
-  },
-  {
-   "handle": "meher-grace-designer-suit-set",
-   "sourceHandle": "meher-grace-designer-suit-set",
-   "title": "Meher Grace Designer Suit Set",
-   "price": 69900,
-   "compareAtPrice": 199900,
-   "saleLockedPrice": true,
-   "images": [
-    "https://cdn.phototourl.com/member/2026-10-27-c9bbb502-ea37-47d0-8f13-6f3386617751.jpg"
-   ],
-   "collections": [
-    "new-arrivals",
-    "party-wear-gown",
-    "likshas-choice",
-    "trending"
-   ],
-   "category": "anarkali",
-   "productType": "Designer Suit Set",
-   "fabric": "Premium designer fabric",
-   "color": "As shown in picture",
-   "sizes": [
-    "XS [34]",
-    "S [36]",
-    "M [38]",
-    "L [40]",
-    "XL [42]",
-    "2XL [44]",
-    "3XL [46]"
-   ],
-   "sizePricing": {
-    "XS [34]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    },
-    "S [36]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    },
-    "M [38]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    },
-    "L [40]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    },
-    "XL [42]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    },
-    "2XL [44]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    },
-    "3XL [46]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    }
-   },
-   "details": [
-    "Elegant designer festive set, crafted for celebrations and special occasions.",
-    "Premium fabric with comfortable stitching and a flattering, true-to-size fit.",
-    "Available in sizes XS to 3XL — flat 65% off, final price ₹699.",
-    "Dry clean recommended. Colours may vary slightly due to screen lighting."
-   ],
-   "description": "Elegant designer festive set, crafted for celebrations and special occasions.\nPremium fabric with comfortable stitching and a flattering, true-to-size fit.\nAvailable in sizes XS to 3XL — flat 65% off, final price ₹699.\nDry clean recommended. Colours may vary slightly due to screen lighting.",
-   "descriptionHtml": "<p>Elegant designer festive set, crafted for celebrations and special occasions.\nPremium fabric with comfortable stitching and a flattering, true-to-size fit.\nAvailable in sizes XS to 3XL — flat 65% off, final price ₹699.\nDry clean recommended. Colours may vary slightly due to screen lighting.</p>",
-   "source": "extra",
-   "rating": 0,
-   "reviewCount": 0,
-   "inStock": true,
-   "featured": true,
-   "publishedAt": "2026-10-27T09:00:00.000Z"
-  },
-  {
-   "handle": "inaya-dream-designer-suit-set",
-   "sourceHandle": "inaya-dream-designer-suit-set",
-   "title": "Inaya Dream Designer Suit Set",
-   "price": 69900,
-   "compareAtPrice": 199900,
-   "saleLockedPrice": true,
-   "images": [
-    "https://cdn.phototourl.com/member/2026-10-27-6755c417-7159-40a7-a00d-54ebc0a84975.jpg"
-   ],
-   "collections": [
-    "new-arrivals",
-    "party-wear-gown",
-    "likshas-choice",
-    "trending"
-   ],
-   "category": "anarkali",
-   "productType": "Designer Suit Set",
-   "fabric": "Premium designer fabric",
-   "color": "As shown in picture",
-   "sizes": [
-    "XS [34]",
-    "S [36]",
-    "M [38]",
-    "L [40]",
-    "XL [42]",
-    "2XL [44]",
-    "3XL [46]"
-   ],
-   "sizePricing": {
-    "XS [34]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    },
-    "S [36]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    },
-    "M [38]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    },
-    "L [40]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    },
-    "XL [42]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    },
-    "2XL [44]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    },
-    "3XL [46]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    }
-   },
-   "details": [
-    "Elegant designer festive set, crafted for celebrations and special occasions.",
-    "Premium fabric with comfortable stitching and a flattering, true-to-size fit.",
-    "Available in sizes XS to 3XL — flat 65% off, final price ₹699.",
-    "Dry clean recommended. Colours may vary slightly due to screen lighting."
-   ],
-   "description": "Elegant designer festive set, crafted for celebrations and special occasions.\nPremium fabric with comfortable stitching and a flattering, true-to-size fit.\nAvailable in sizes XS to 3XL — flat 65% off, final price ₹699.\nDry clean recommended. Colours may vary slightly due to screen lighting.",
-   "descriptionHtml": "<p>Elegant designer festive set, crafted for celebrations and special occasions.\nPremium fabric with comfortable stitching and a flattering, true-to-size fit.\nAvailable in sizes XS to 3XL — flat 65% off, final price ₹699.\nDry clean recommended. Colours may vary slightly due to screen lighting.</p>",
-   "source": "extra",
-   "rating": 0,
-   "reviewCount": 0,
-   "inStock": true,
-   "featured": true,
-   "publishedAt": "2026-10-27T09:00:00.000Z"
-  },
-  {
-   "handle": "aiza-luxe-designer-suit-set",
-   "sourceHandle": "aiza-luxe-designer-suit-set",
-   "title": "Aiza Luxe Designer Suit Set",
-   "price": 69900,
-   "compareAtPrice": 199900,
-   "saleLockedPrice": true,
-   "images": [
-    "https://cdn.phototourl.com/member/2026-10-27-63df45ce-cae9-439e-94d9-3945b545ffa2.jpg"
-   ],
-   "collections": [
-    "new-arrivals",
-    "party-wear-gown",
-    "likshas-choice",
-    "trending"
-   ],
-   "category": "anarkali",
-   "productType": "Designer Suit Set",
-   "fabric": "Premium designer fabric",
-   "color": "As shown in picture",
-   "sizes": [
-    "XS [34]",
-    "S [36]",
-    "M [38]",
-    "L [40]",
-    "XL [42]",
-    "2XL [44]",
-    "3XL [46]"
-   ],
-   "sizePricing": {
-    "XS [34]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    },
-    "S [36]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    },
-    "M [38]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    },
-    "L [40]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    },
-    "XL [42]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    },
-    "2XL [44]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    },
-    "3XL [46]": {
-     "price": 69900,
-     "compareAtPrice": 199900,
-     "available": true
-    }
-   },
-   "details": [
-    "Elegant designer festive set, crafted for celebrations and special occasions.",
-    "Premium fabric with comfortable stitching and a flattering, true-to-size fit.",
-    "Available in sizes XS to 3XL — flat 65% off, final price ₹699.",
-    "Dry clean recommended. Colours may vary slightly due to screen lighting."
-   ],
-   "description": "Elegant designer festive set, crafted for celebrations and special occasions.\nPremium fabric with comfortable stitching and a flattering, true-to-size fit.\nAvailable in sizes XS to 3XL — flat 65% off, final price ₹699.\nDry clean recommended. Colours may vary slightly due to screen lighting.",
-   "descriptionHtml": "<p>Elegant designer festive set, crafted for celebrations and special occasions.\nPremium fabric with comfortable stitching and a flattering, true-to-size fit.\nAvailable in sizes XS to 3XL — flat 65% off, final price ₹699.\nDry clean recommended. Colours may vary slightly due to screen lighting.</p>",
-   "source": "extra",
-   "rating": 0,
-   "reviewCount": 0,
-   "inStock": true,
-   "featured": true,
-   "publishedAt": "2026-10-27T09:00:00.000Z"
-  },
-  {
-   "handle": "sana-signature-designer-suit-set",
-   "sourceHandle": "sana-signature-designer-suit-set",
-   "title": "Sana Signature Designer Suit Set",
-   "price": 69900,
-   "compareAtPrice": 199900,
-   "saleLockedPrice": true,
-   "images": [
+    "https://cdn.phototourl.com/member/2026-10-27-90239d8a-0ed3-4635-bca9-1eddfd49648b.jpg",
+    "https://cdn.phototourl.com/member/2026-10-27-62226e5e-8013-4dc1-bd9d-77773a1c8772.jpg",
+    "https://cdn.phototourl.com/member/2026-10-27-c9bbb502-ea37-47d0-8f13-6f3386617751.jpg",
+    "https://cdn.phototourl.com/member/2026-10-27-6755c417-7159-40a7-a00d-54ebc0a84975.jpg",
+    "https://cdn.phototourl.com/member/2026-10-27-63df45ce-cae9-439e-94d9-3945b545ffa2.jpg",
     "https://cdn.phototourl.com/member/2026-10-27-8c73809e-bd28-48a1-b759-38ddcfc0eeea.jpg"
    ],
    "collections": [
@@ -45520,7 +45120,7 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2026-10-27T18:37:25.941Z",
+   "publishedAt": "2026-10-27T19:23:23.813Z",
    "hidden": true
   }
  ]

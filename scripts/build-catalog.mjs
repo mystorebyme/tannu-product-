@@ -799,6 +799,7 @@ const readExtra = (name, key) => {
       featured: item.featured === true,
       publishedAt: item.createdAt ?? new Date().toISOString(),
     });
+    stats.images += images.length; // R47: meta.imageCount admin/promo photos bhi gine
     addedCount += 1;
   }
   if (addedCount) console.log(`admin products added: ${addedCount}`);
