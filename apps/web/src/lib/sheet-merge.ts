@@ -57,6 +57,23 @@ const STEP_INDEX: Record<string, number> = {
   delivered: 4,
 };
 
+/** Sheet ke onEdit watcher se aane wale events — baaki sab site ke apne hain. */
+const SHEET_EDIT_EVENTS = new Set([
+  "order.status_sheet",
+  "order.admin_note",
+  "order.owner_note",
+  "order.payment_sheet",
+]);
+
+/**
+ * R43: Admin Note ka UI default "Waiting for confirmation" hai — sheet me wahi
+ * default likha ho aur owner ne Notes column me apna comment diya ho, to default
+ * comment ko chhupa nahi sakta (owner: "jo mai likhu wo order page par show ho").
+ */
+function isDefaultAdminNote(note: string): boolean {
+  return note.trim().toLowerCase() === "waiting for confirmation";
+}
+
 /** Sheet ka koi bhi status text ("Shipped", "dispatch ho gaya") → OrderStatus. */
 export function sheetStatusToOrderStatus(status: unknown): OrderStatus | null {
   const value = String(status ?? "").trim().toLowerCase();
@@ -154,9 +171,21 @@ export function mergeSheetTracking(order: Order, sheet: SheetTracking | null): O
    * customer-note se alag latest Notes = owner ka comment → note-box + timeline.
    */
   const customerNote = String(order.notes ?? "").trim();
-  const rowNote = String(sheet.updates.find((update) => String(update.notes ?? "").trim())?.notes ?? "").trim();
+  const rowNote = String(
+    sheet.updates.find((update) => {
+      const text = String(update.notes ?? "").trim();
+      if (!text) return false;
+      // R43: sirf owner wale rows gino — onEdit watcher (`order.owner_note`) ya
+      // manual row (Event khaali). Site ke apne rows / status-edit rows ke Notes
+      // canned messages hote hain ("Sheet se status update"), owner ka comment nahi.
+      const event = String(update.event ?? "");
+      return !event || event === "order.owner_note";
+    })?.notes ?? "",
+  ).trim();
   const ownerNote = rowNote && rowNote !== customerNote ? rowNote : "";
-  const noteText = adminNote || ownerNote;
+  // R43: default "Waiting for confirmation" owner ke Notes-comment ko chhupa
+  // nahi sakta (owner complaint, LK-QDM2EXQMGO live screenshot).
+  const noteText = adminNote && !(isDefaultAdminNote(adminNote) && ownerNote) ? adminNote : ownerNote;
   if (!noteText) return merged;
   return {
     ...merged,
@@ -179,6 +208,10 @@ function mergeSheetWins(order: Order, sheet: SheetTracking): Order {
    *    aur comment stage ke canned text me dab jaata tha)
    *  • `order.payment_sheet` (owner ne Payment status badla) → paid par
    *    `payment.verified` ("Payment received")
+   *  • **site ke apne events** (order.placed, payment.claimed, …) apna event
+   *    hi rahete hain — pehle HAR row `order.status.<slug>` ban jaati thi, isliye
+   *    claim ka message "Delivered" jaise galat stage label ke neeche dikhta tha
+   *    (owner ka live screenshot, LK-QDM2EXQMGO).
    */
   const audit: AuditEntry[] = sheet.updates
     .filter((update) => update?.at)
@@ -198,6 +231,15 @@ function mergeSheetWins(order: Order, sheet: SheetTracking): Order {
           actor: "sheet" as const,
           action: "payment.verified",
           meta: { note: update.message || undefined, event, payment: update.payment },
+        };
+      }
+      if (event && !SHEET_EDIT_EVENTS.has(event)) {
+        // site ka apna event (order.placed / payment.claimed / payment.failed …)
+        return {
+          at: update.at,
+          actor: "system" as const,
+          action: event,
+          meta: { note: update.message || undefined, event },
         };
       }
       return {

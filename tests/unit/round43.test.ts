@@ -362,6 +362,84 @@ test("R43: owner ne sheet se Payment status=paid kiya → timeline 'Payment rece
   assert.equal(payment!.text, "Sheet se payment update (owner)");
 });
 
+test("R43: site ke apne sheet-rows apne event ke saath — claim 'Delivered' label ke neeche nahi (live LK-QDM2EXQMGO bug)", () => {
+  // owner ka live screenshot: order sheet me Delivered, par timeline me claim ka
+  // message "Delivered · Payment confirm request mili" dikh raha tha — kyunki
+  // mergeSheetWins HAR row ko order.status.<slug> bana deta tha.
+  const base = makeOrder();
+  const sheet = sheetTracking({
+    status: "delivered",
+    step: 4,
+    updates: [
+      { at: "2026-10-27T07:50:00.000Z", status: "delivered", event: "order.status_sheet", message: "Sheet se status update (owner)", notes: "" },
+      { at: "2026-10-27T07:41:00.000Z", status: "delivered", event: "payment.claimed", message: "Payment confirm request mili — team UPI statement se verify kar rahi hai.", notes: "" },
+      { at: "2026-10-27T07:40:00.000Z", status: "placed", event: "order.placed", message: "Order mil gaya — payment ka intezaar hai.", notes: "" },
+    ],
+  });
+  const merged = mergeSheetTracking(base, sheet);
+  assert.equal(merged.status, "delivered");
+  assert.equal(merged.paymentStatus, "paid", "owner-confirm rule: delivered → paid");
+
+  const updates = trackingUpdates(merged);
+  const claim = updates.find((update) => update.text?.includes("Payment confirm request"));
+  assert.ok(claim, "claim entry dikhti hai");
+  assert.equal(claim!.kind, "payment", "claim ab payment-kind entry hai");
+  assert.equal(claim!.label, "Payment claim");
+  const deliveredStatuses = updates.filter((update) => update.kind === "status" && update.status === "delivered");
+  assert.ok(
+    deliveredStatuses.every((entry) => !entry.text?.includes("Payment confirm")),
+    "claim ka message Delivered stage label ke neeche nahi",
+  );
+  // owner ke status-edit row se Delivered stage entry banti rahe
+  assert.ok(deliveredStatuses.length >= 1, "sheet status-edit ki Delivered entry");
+  // site ka order.placed row ab "Placed" dikhata hai (pehle status-mapping me dubara placed banta tha)
+  const placed = updates.find((update) => update.kind === "status" && update.status === "placed");
+  assert.ok(placed, "placed entry hai");
+  assert.equal(placed!.label, "Placed");
+  assert.equal(placed!.text, "Order mil gaya — payment ka intezaar hai.");
+});
+
+test("R43: default Admin Note 'Waiting for confirmation' owner ke Notes-comment ko chhupa nahi sakta", () => {
+  const base = makeOrder();
+  const sheet = sheetTracking({
+    adminNote: "Waiting for confirmation", // sheet me default hi likha reh gaya
+    updates: [
+      { at: "2026-10-27T07:50:00.000Z", status: "placed", event: "", message: "", notes: "Parcel nikal gaya hai — kal tak mil jayega" },
+    ],
+  });
+  const merged = mergeSheetTracking(base, sheet);
+  assert.equal(merged.statusNote?.text, "Parcel nikal gaya hai — kal tak mil jayega");
+});
+
+test("R43: site ke canned-message rows owner-comment na banein (rowNote sirf owner rows se)", () => {
+  const base = makeOrder();
+  const sheet = sheetTracking({
+    updates: [
+      { at: "2026-10-27T07:50:00.000Z", status: "delivered", event: "order.status_sheet", message: "Sheet se status update (owner)", notes: "Sheet se status update (owner)" },
+      { at: "2026-10-27T07:41:00.000Z", status: "placed", event: "payment.claimed", message: "Payment confirm request mili", notes: "Payment confirm request mili" },
+    ],
+  });
+  const merged = mergeSheetTracking(base, sheet);
+  assert.equal(merged.statusNote?.text ?? "", "", "note-box me canned message owner-comment bankar nahi dikhega");
+});
+
+test("R43: payment.failed / reference_submitted rows ke apne labels", () => {
+  const base = makeOrder();
+  const sheet = sheetTracking({
+    updates: [
+      { at: "2026-10-27T07:50:00.000Z", status: "placed", event: "payment.reference_submitted", message: "", notes: "" },
+      { at: "2026-10-27T07:45:00.000Z", status: "placed", event: "payment.failed", message: "Payment verify nahi ho paya", notes: "" },
+    ],
+  });
+  const merged = mergeSheetTracking(base, sheet);
+  const updates = trackingUpdates(merged);
+  const failed = updates.find((update) => update.label === "Payment failed");
+  assert.ok(failed, "failed entry dikhti hai");
+  assert.equal(failed!.text, "Payment verify nahi ho paya");
+  const ref = updates.find((update) => update.label === "Payment reference");
+  assert.ok(ref, "reference entry dikhti hai");
+});
+
 /* ───────────────────────── R43.4: Order JSON restore (items Rs. 0 bug) ───────────────────────── */
 
 test("R43: rows me Order JSON ho to compat path bhi snapshot se items/price lauta hai", () => {

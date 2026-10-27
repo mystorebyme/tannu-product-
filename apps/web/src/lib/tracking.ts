@@ -274,6 +274,40 @@ function updateFromAudit(entry: AuditEntry): TrackingUpdate | null {
     const text = typeof textRaw === "string" ? textRaw.trim() : "";
     return { at: entry.at, status: "payment", label: "Payment received", kind: "payment", text: text || undefined };
   }
+  // R43: mergeSheetWins ab site ke apne sheet-rows (order.placed, payment.*)
+  // ko unke asli event ke saath rakhta hai — pehle har row order.status.<slug>
+  // ban jaati thi aur claim jaise messages galat stage-label ke neeche dikhte
+  // the (owner ka live screenshot). Har event ka apna honest label:
+  const metaNote = typeof (entry.meta?.note ?? entry.meta?.text) === "string"
+    ? String(entry.meta?.note ?? entry.meta?.text).trim()
+    : "";
+  if (entry.action === "order.placed" || entry.action === "order.created") {
+    return { at: entry.at, status: "placed", label: "Placed", kind: "status", text: metaNote || undefined };
+  }
+  if (entry.action === "payment.failed") {
+    return { at: entry.at, status: "payment", label: "Payment failed", kind: "payment", text: metaNote || undefined };
+  }
+  if (entry.action === "payment.reference_submitted") {
+    return {
+      at: entry.at,
+      status: "payment",
+      label: "Payment reference",
+      kind: "payment",
+      text: metaNote || "Payment details mil gayi — team verify kar rahi hai.",
+    };
+  }
+  if (entry.action === "payment.paid" || entry.action === "payment.auto_confirmed") {
+    return {
+      at: entry.at,
+      status: "payment",
+      label: "Payment received",
+      kind: "payment",
+      text: metaNote || "Payment received — thank you!",
+    };
+  }
+  if (entry.action === "payment.reversed") {
+    return { at: entry.at, status: "payment", label: "Payment update", kind: "payment", text: metaNote || undefined };
+  }
   return null;
 }
 
