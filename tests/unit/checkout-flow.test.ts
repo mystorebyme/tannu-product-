@@ -38,7 +38,7 @@ test("checkout has a 3-step indicator", () => {
   assert.match(checkout, /data-testid="checkout-steps"/);
   assert.match(checkout, /Delivery/);
   assert.match(checkout, /Review/);
-  assert.match(checkout, /Confirm/);
+  assert.match(checkout, /label: "WhatsApp"/);
 });
 
 test("checkout step 1 continues to review, order is placed only from review", () => {

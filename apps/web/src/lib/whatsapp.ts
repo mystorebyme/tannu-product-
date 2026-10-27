@@ -95,6 +95,6 @@ export function cartWhatsAppMessage(
     );
   });
   const total = lines.reduce((sum, line) => sum + line.price * line.quantity, 0);
-  parts.push("", `*Total: ${money(total)}*`, "", "Please confirm availability and payment link.");
+  parts.push("", `*Total: ${money(total)}*`, "", "Please confirm availability and share the payment details.");
   return parts.join("\n");
 }

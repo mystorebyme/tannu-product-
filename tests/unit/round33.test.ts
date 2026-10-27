@@ -85,8 +85,8 @@ test("R33: checkout 3 step — delivery → review → confirmation (R46)", () =
   const form = read("apps/web/src/components/checkout-form.tsx");
   const delivery = form.indexOf('label: "Delivery"');
   const review = form.indexOf('label: "Review"');
-  const confirm = form.indexOf('label: "Confirm"');
-  assert.ok(delivery > 0 && review > delivery && confirm > review, "step order delivery → review → confirm");
+  const whatsapp = form.indexOf('label: "WhatsApp"');
+  assert.ok(delivery > 0 && review > delivery && whatsapp > review, "step order delivery → review → whatsapp");
   // R36: payment step 3 checkout ke **andar** hai — alag page par redirect nahi
   assert.match(form, /placedUrl\(target\)/);
   assert.match(form, /data-testid="checkout-placed-step"/);

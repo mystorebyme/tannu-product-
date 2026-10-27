@@ -405,6 +405,8 @@ export function ProductDetail({
                 `Quantity: ${quantity}`,
                 `Price: ${formatPrice(price * quantity)}`,
                 productUrl(product.handle),
+                "",
+                "Please confirm my order and share the payment details.",
               ].join("\n"),
             )}`}
             target="_blank"

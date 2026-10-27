@@ -226,6 +226,37 @@ test("R46: placed WhatsApp message me poori order detail (items + links + qty + 
   assert.match(session, /handle\?: string/);
 });
 
+test("R46.5: review ka CTA hi direct WhatsApp send hai — 'Place order' nahi", () => {
+  const form = read(FORM);
+  assert.match(form, /Send order on WhatsApp · \$\{formatPrice\(total\)\}/, "final CTA = WhatsApp send");
+  assert.ok(!/Place order ·/.test(form), "purana 'Place order' CTA gaya");
+  assert.match(form, /label: "WhatsApp"/, "step 3 indicator = WhatsApp");
+  // order phir bhi sheet me banta hai (tracking data safe) — WhatsApp ke saath-saath
+  assert.match(form, /data-testid="checkout-submit"/);
+});
+
+test("R46.5: product page + cart par 'Order on WhatsApp' (Buy it now ke side)", () => {
+  const pdp = read("apps/web/src/components/product-detail.tsx");
+  assert.match(pdp, /data-testid="buy-now"/);
+  assert.match(pdp, /data-testid="pdp-whatsapp-order"/, "Buy it now ke side WhatsApp order button");
+  assert.match(pdp, /Order on WhatsApp/);
+  // detailed message: title + colour + size + qty + price + link + confirm line
+  assert.match(pdp, /Colour: \$\{active\.name\}/);
+  assert.match(pdp, /Size: \$\{size\}/);
+  assert.match(pdp, /Quantity: \$\{quantity\}/);
+  assert.match(pdp, /Please confirm my order and share the payment details\./);
+  const cart = read("apps/web/src/app/cart/page.tsx");
+  assert.match(cart, /cartWhatsAppMessage/, "cart/bag se bhi direct WhatsApp order");
+});
+
+test("R46.5: WhatsApp number sheet se; dev/CI preview ke liye STORE_WHATSAPP env (production me nahi)", () => {
+  const settings = read("apps/web/src/lib/store-settings.ts");
+  assert.match(settings, /whatsapp: process\.env\.STORE_WHATSAPP \?\? ""/);
+  assert.match(settings, /supportPhone: process\.env\.STORE_WHATSAPP \?\? ""/);
+  // source me number hardcode nahi — sirf env (R45 guard allowlist tootta nahi)
+  assert.ok(!/8005900581/.test(settings), "koi hardcoded number nahi");
+});
+
 test("R46: coupon checkout me payment ki jagah — review step par", () => {
   const form = read(FORM);
   assert.match(form, /data-testid="coupon-box"/);

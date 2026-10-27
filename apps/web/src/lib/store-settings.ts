@@ -58,11 +58,14 @@ export const DEFAULT_STORE_SETTINGS: StoreSettings = {
   sellerState: process.env.SELLER_STATE ?? "Rajasthan",
   // R45 (owner): contact number **sirf sheet se** — koi hardcoded default nahi.
   // Khaali hai to UI phone/WhatsApp link chhupa deta hai.
-  supportPhone: "",
+  // R46: `STORE_WHATSAPP` sirf dev/CI preview ke liye env se chalta hai (jaise
+  // STORE_UPI_ID test-VPA ke liye) — production env me ye set nahi hota, wahan
+  // sheet hi ek-sach hai. Sheet read successful ho to sheet ki value jeetti hai.
+  supportPhone: process.env.STORE_WHATSAPP ?? "",
   // Owner rule: site/API par support email nahi. Internal record ke liye ab
   // sirf env (SELLER_EMAIL) — default khaali.
   supportEmail: process.env.SELLER_EMAIL ?? "",
-  whatsapp: "",
+  whatsapp: process.env.STORE_WHATSAPP ?? "",
   adminUrl: process.env.ADMIN_PANEL_URL ?? "",
   deliveryEstimateDays: 6,
   deliveryEstimateText: "",

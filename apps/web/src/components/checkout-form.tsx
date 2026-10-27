@@ -817,7 +817,7 @@ export function CheckoutForm() {
           {[
             { n: 1, label: "Delivery", active: showDetails },
             { n: 2, label: "Review", active: !showDetails && !isPlaced },
-            { n: 3, label: "Confirm", active: isPlaced },
+            { n: 3, label: "WhatsApp", active: isPlaced },
           ].map((item, index) => (
             <li key={item.n} className="flex items-center gap-2">
               {index > 0 ? <span className="text-[#c9bfb4]">→</span> : null}
@@ -848,8 +848,9 @@ export function CheckoutForm() {
             <p className="mt-2 text-[12.5px] leading-relaxed text-[#6b6259]" data-testid="placed-note">
               Thank you! Your order{" "}
               <strong className="text-[#862222]" data-testid="placed-order-number">{orderNumber}</strong>{" "}
-              has been received. Send it to us on WhatsApp so our team can confirm it right away —
-              they will also share the payment details with you there.
+              has been received. WhatsApp should have opened with your complete order details — if it
+              did not, press the button below. Our team will confirm your order there and share the
+              payment details with you on the same chat.
             </p>
             {whatsappNumber(whatsapp) ? (
               <a
@@ -1013,9 +1014,9 @@ export function CheckoutForm() {
               <path d="M9 12l2 2 4-4" />
             </svg>
             <p className="text-[12.5px] leading-relaxed text-[#4a423b]" data-testid="prepaid-note">
-              Online payment is currently paused. Just press <strong>Place order</strong> — our team
-              will confirm your order on WhatsApp and share the payment details with you there.
-              No advance payment is needed to place the order.
+              Online payment is currently paused. Just press <strong>Send order on WhatsApp</strong> at
+              the end — your complete order reaches our team there, they confirm it with you and share
+              the payment details. No advance payment is needed to send your order.
             </p>
           </div>
         </section>
@@ -1141,8 +1142,9 @@ export function CheckoutForm() {
               </div>
               {/* Payment hold note — chhota, English */}
               <p className="mt-3 text-[11.5px] leading-relaxed text-[#8a8078]" data-testid="prepaid-note">
-                Online payment is currently paused. After you press <strong>Place order</strong>, our
-                team will confirm your order on WhatsApp and share the payment details there.
+                Online payment is currently paused. When you press <strong>Send order on WhatsApp</strong>,
+                your complete order is sent to our team there — they confirm it with you and share the
+                payment details on the same chat.
               </p>
             </section>
           </>
@@ -1323,7 +1325,7 @@ export function CheckoutForm() {
               disabled={submitting}
               className="mt-4 w-full bg-[#862222] py-3 text-[11.5px] font-semibold tracking-[.16em] text-white uppercase disabled:opacity-60"
             >
-              {submitting ? "Placing order…" : `Place order · ${formatPrice(total)}`}
+              {submitting ? "Sending your order…" : `Send order on WhatsApp · ${formatPrice(total)}`}
             </button>
             <button
               type="button"

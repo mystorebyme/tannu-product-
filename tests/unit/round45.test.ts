@@ -88,8 +88,11 @@ test("R45: static config/provider defaults me contact number khaali hai", () => 
   assert.match(provider, /supportPhone: ""/, "client defaults me number nahi");
   assert.doesNotMatch(provider, /8005900581/);
   const settings = read("apps/web/src/lib/store-settings.ts");
-  assert.match(settings, /supportPhone: ""/, "server defaults me number nahi");
-  assert.match(settings, /whatsapp: ""/, "server defaults me whatsapp nahi");
+  // R46.5: defaults me koi number literal nahi — sirf dev/CI preview env (STORE_WHATSAPP),
+  // production me ye env set nahi hota isliye default "" hi rehta hai; sheet jeetti hai.
+  assert.match(settings, /supportPhone: process\.env\.STORE_WHATSAPP \?\? ""/, "server defaults me number nahi (sirf dev/CI env)");
+  assert.match(settings, /whatsapp: process\.env\.STORE_WHATSAPP \?\? ""/, "server defaults me whatsapp nahi (sirf dev/CI env)");
+  assert.doesNotMatch(settings, /8005900581/, "source me number hardcode nahi");
   assert.match(settings, /textOrEmpty/, "owner-editable keys me khaali string preserve hoti hai");
 });
 
