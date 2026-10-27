@@ -69,11 +69,11 @@ export function ProductReviews({
           {/* R45: number sheet se khali ho to WhatsApp line dikhti hi nahi */}
           {whatsappNumber(wa) ? (
             <p className="mt-3 text-[11.5px] leading-relaxed text-[#8a8078]">
-              Ya{" "}
+              Or{" "}
               <a href={whatsappReview} target="_blank" rel="noopener noreferrer" className="font-medium text-[#862222] underline">
-                WhatsApp par review bhejiye
+                send your review on WhatsApp
               </a>{" "}
-              — team publish kar degi.
+              — our team will publish it.
             </p>
           ) : null}
         </div>
@@ -83,7 +83,7 @@ export function ProductReviews({
         <div className="mt-5 border border-[#eee6de] px-5 py-10 text-center">
           <Stars value={0} size={18} />
           <p className="mt-2 text-[12.5px] text-[#6b6259]">
-            Is piece par abhi koi review nahi hai. Pehla review aapka ho sakta hai.
+            There are no reviews for this piece yet. Yours could be the first.
           </p>
         </div>
       ) : (
@@ -103,8 +103,8 @@ export function ProductReviews({
             <div className="space-y-1.5">
               {block.reviews.length === 0 ? (
                 <p className="text-[12px] leading-relaxed text-[#6b6259]">
-                  Is piece par {block.count} ratings hain. Customer-written reviews aate hi yahan dikhte hain —
-                  koi sample review publish nahi hota.
+                  This piece has {block.count} ratings. Written reviews appear here as customers
+                  share them — we never publish sample reviews.
                 </p>
               ) : null}
               {block.reviews.length === 0 ? null : breakdown.map((row) => (
@@ -206,14 +206,14 @@ function ReviewForm({ productHandle }: { productHandle: string }) {
       const data = (await response.json().catch(() => null)) as { ok?: boolean; message?: string; error?: string } | null;
       if (response.ok && data?.ok) {
         setState("done");
-        setMessage(data.message ?? "Shukriya! Review approve hote hi dikhne lagega.");
+        setMessage(data.message ?? "Thank you! Your review will appear here as soon as it is approved.");
       } else {
         setState("error");
-        setMessage(data?.error ?? "Review submit nahi ho paya — dobara try kijiye.");
+        setMessage(data?.error ?? "Your review could not be submitted — please try again.");
       }
     } catch {
       setState("error");
-      setMessage("Review submit nahi ho paya — dobara try kijiye.");
+      setMessage("Your review could not be submitted — please try again.");
     }
   }
 
@@ -230,8 +230,8 @@ function ReviewForm({ productHandle }: { productHandle: string }) {
   return (
     <form onSubmit={onSubmit} className="grid gap-3 sm:grid-cols-2" data-testid="review-form">
       <div>
-        <label className={label} htmlFor="review-name">Naam *</label>
-        <input id="review-name" data-testid="review-name" className={field} value={form.name} onChange={(event) => set({ name: event.target.value })} required minLength={2} maxLength={60} placeholder="Aapka naam" />
+        <label className={label} htmlFor="review-name">Name *</label>
+        <input id="review-name" data-testid="review-name" className={field} value={form.name} onChange={(event) => set({ name: event.target.value })} required minLength={2} maxLength={60} placeholder="Your name" />
       </div>
       <div>
         <label className={label} htmlFor="review-city">City</label>
@@ -247,14 +247,14 @@ function ReviewForm({ productHandle }: { productHandle: string }) {
       </div>
       <div>
         <label className={label} htmlFor="review-title">Title</label>
-        <input id="review-title" data-testid="review-title" className={field} value={form.title} onChange={(event) => set({ title: event.target.value })} maxLength={140} placeholder="Bahut accha product" />
+        <input id="review-title" data-testid="review-title" className={field} value={form.title} onChange={(event) => set({ title: event.target.value })} maxLength={140} placeholder="Loved this product" />
       </div>
       <div className="sm:col-span-2">
         <label className={label} htmlFor="review-body">Review *</label>
-        <textarea id="review-body" data-testid="review-body" className={field} rows={4} value={form.body} onChange={(event) => set({ body: event.target.value })} required minLength={10} maxLength={4000} placeholder="Product kaisa laga — fabric, fitting, colour…" />
+        <textarea id="review-body" data-testid="review-body" className={field} rows={4} value={form.body} onChange={(event) => set({ body: event.target.value })} required minLength={10} maxLength={4000} placeholder="How did you like the product — fabric, fitting, colour…" />
       </div>
       <div className="sm:col-span-2">
-        <span className={label}>Photos (image ka link paste karein — max 8)</span>
+        <span className={label}>Photos (paste image links — up to 8)</span>
         <div className="grid gap-2">
           {form.images.map((image, index) => (
             <div key={index} className="flex gap-2">
@@ -271,25 +271,25 @@ function ReviewForm({ productHandle }: { productHandle: string }) {
                 inputMode="url"
               />
               <button type="button" onClick={() => set({ images: form.images.filter((_, i) => i !== index) })} className="shrink-0 border border-[#e2d8cc] px-3 text-[11px] text-[#8a8078] hover:border-[#862222] hover:text-[#862222]">
-                Hatao
+                Remove
               </button>
             </div>
           ))}
           {form.images.length < 8 ? (
             <button type="button" data-testid="review-image-add" onClick={() => set({ images: [...form.images, ""] })} className="w-fit border border-dashed border-[#c9bcae] px-3 py-1.5 text-[11px] font-medium text-[#862222]">
-              + Image link add karein
+              + Add image link
             </button>
           ) : null}
         </div>
       </div>
       <div className="sm:col-span-2 flex flex-wrap items-center gap-3">
         <button type="submit" data-testid="review-submit" disabled={state === "sending"} className="bg-[#862222] px-6 py-2.5 text-[11px] font-semibold uppercase tracking-[.14em] text-white disabled:opacity-60">
-          {state === "sending" ? "Bhej rahe hain…" : "Review bhejein"}
+          {state === "sending" ? "Sending…" : "Submit review"}
         </button>
         {state === "error" && message ? (
           <p data-testid="review-form-error" className="text-[12px] text-[#a04a32]">{message}</p>
         ) : null}
-        <p className="text-[11px] text-[#9c8f82]">Approve hote hi aapka review product page par dikhega.</p>
+        <p className="text-[11px] text-[#9c8f82]">Your review will appear on the product page once approved.</p>
       </div>
     </form>
   );

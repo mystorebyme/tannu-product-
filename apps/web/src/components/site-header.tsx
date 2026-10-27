@@ -407,7 +407,7 @@ export function SiteHeader() {
 
               {query.trim().length >= 2 && results.length === 0 ? (
                 <p className="mt-3 text-[11.5px] text-[#8a8078]">
-                  &ldquo;{query.trim()}&rdquo; ke liye kuch nahi mila — inhe try kariye:
+                  Nothing found for &ldquo;{query.trim()}&rdquo; — try these instead:
                 </p>
               ) : null}
 

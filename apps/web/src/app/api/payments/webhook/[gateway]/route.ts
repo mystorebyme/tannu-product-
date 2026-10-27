@@ -43,7 +43,7 @@ export async function POST(request: Request, context: { params: Promise<{ gatewa
 
   // signature ke baad bhi gateway se server-to-server confirmation
   const verified = await fetchGatewayPayment(account.id, paymentId);
-  if (!verified) return Response.json({ error: "Gateway se verify nahi hua." }, { status: 502 });
+  if (!verified) return Response.json({ error: "Gateway verification failed." }, { status: 502 });
 
   const orderNumber = String(entity?.notes?.orderNumber ?? "");
   const order = orderNumber ? await getOrderForPayment(orderNumber) : null;

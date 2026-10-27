@@ -180,9 +180,9 @@ export function ProductDetail({
       title: "Shipping & Delivery",
       content: (
         <p className="text-[12.5px] leading-relaxed text-[#5c534b]">
-          Ready to dispatch in 1-2 days. Free shipping across India, prepaid orders only (UPI) —
-          4-7 business days delivery. Cash on Delivery available nahi hai, isliye order place karte hi
-          UPI se payment confirm kar lein.
+          Ready to dispatch in 1-2 days. Free shipping across India, prepaid orders only —
+          delivery in 4-7 business days. Cash on Delivery is not available; after you place the
+          order our team will confirm it on WhatsApp and share the payment details there.
         </p>
       ),
     },
@@ -337,10 +337,10 @@ export function ProductDetail({
           </div>
           <p className="mt-2 text-[11px] text-[#8a8078]">
             {bigSizeSurcharge
-              ? `Bade size (${size.split(" ")[0]}) me extra fabric lagta hai — price Rs. ${Math.round(
+              ? `Larger sizes (${size.split(" ")[0]}) use extra fabric — the price is Rs. ${Math.round(
                   (sizePricing!.price - active.price) / 100,
-                )} zyada.`
-              : "XL aur usse bade sizes par price thoda zyada hota hai."}
+                )} higher.`
+              : "XL and larger sizes are priced slightly higher."}
           </p>
           {sizeSoldOut ? (
             <p className="mt-1 text-[11.5px] text-[#b3261e]">

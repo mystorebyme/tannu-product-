@@ -206,7 +206,7 @@ export function SiteFooter() {
               ) : null}
               {status === "error" ? (
                 <p className="mt-1.5 text-[11.5px] text-[#ffd6cf]">
-                  Signup abhi save nahi hua.
+                  Your signup could not be saved right now.
                   {/* R45: number sheet se khali ho to WhatsApp link nahi */}
                   {whatsappNumber(whatsapp) ? (
                     <>
@@ -219,7 +219,7 @@ export function SiteFooter() {
                         rel="noreferrer"
                         className="underline"
                       >
-                        WhatsApp par email bhejein
+                        Send your email on WhatsApp
                       </a>
                       .
                     </>

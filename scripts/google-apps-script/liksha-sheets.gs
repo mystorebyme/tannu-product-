@@ -87,7 +87,7 @@ var TOKEN = 'CHANGE-ME-liksha-token';
 var TOKEN_PLACEHOLDER = 'CHANGE-ME-liksha-token';
 
 /** Code ka version — `?action=health` me dikhta hai. Code badle to isse badhaayein. */
-var CODE_VERSION = 'r45-1';
+var CODE_VERSION = 'r46-1';
 
 /**
  * R40 (owner rule): sheet ka id **code me kahin nahi** — sirf Script Properties
@@ -1978,6 +1978,83 @@ function upsertCoupon_(body) {
   return { ok: true, updated: false, written: appendRows_([{ sheet: 'Coupons', row: row }]) };
 }
 
+/**
+ * R46: Expires cell kai shape me ho sakta hai — sheet ki Date, '31-Dec-2026',
+ * '2026-12-31', '31/12/2026'. Jo parse na ho usse expired **nahi** maante
+ * (coupon galat band na ho). Expired = date ka din poora beet gaya.
+ */
+function couponExpired_(expiresRaw) {
+  if (expiresRaw === null || expiresRaw === undefined || expiresRaw === '') return false;
+  var when = null;
+  if (expiresRaw instanceof Date) {
+    when = expiresRaw;
+  } else {
+    var text = String(expiresRaw).trim();
+    var formats = ['dd-MMM-yyyy', 'yyyy-MM-dd', 'dd/MM/yyyy', 'dd-MMM-yy'];
+    for (var i = 0; i < formats.length; i += 1) {
+      try {
+        when = Utilities.parseDate(text, TIMEZONE, formats[i]);
+        break;
+      } catch (ignored) {}
+    }
+  }
+  if (!when || isNaN(when.getTime())) return false;
+  return when.getTime() + 86400000 < Date.now();
+}
+
+/** R46: Coupons tab → objects (website checkout isi se coupon validate karti hai). */
+function readCoupons_() {
+  var sheet = sheet_('Coupons');
+  var headers = headersOf_(sheet);
+  var last = sheet.getLastRow();
+  if (last < 2) return [];
+  var values = sheet.getRange(2, 1, last - 1, headers.length).getValues();
+  var out = [];
+  values.forEach(function (row) {
+    var get = function (name) {
+      var index = headers.indexOf(name);
+      return index < 0 ? '' : row[index];
+    };
+    var code = text_(get('Code')).toUpperCase();
+    if (!code) return;
+    var maxUses = num_(get('Max uses'));
+    var used = num_(get('Used'));
+    var expiresRaw = get('Expires');
+    var expires = '';
+    if (expiresRaw instanceof Date && !isNaN(expiresRaw.getTime())) {
+      expires = Utilities.formatDate(expiresRaw, TIMEZONE, 'yyyy-MM-dd');
+    } else {
+      expires = text_(expiresRaw);
+    }
+    out.push({
+      code: code,
+      type: String(text_(get('Type'))).toLowerCase() === 'flat' ? 'flat' : 'percent',
+      value: num_(get('Value')),
+      minOrder: num_(get('Min order')),
+      maxUses: maxUses,
+      used: used,
+      active: truthy_(get('Active')),
+      expires: expires,
+      expired: couponExpired_(expiresRaw),
+      exhausted: maxUses > 0 && used >= maxUses,
+    });
+  });
+  return out;
+}
+
+/** R46: coupon wala order place hua → Used +1 (sheet me use-count track). */
+function couponUse_(code) {
+  var clean = text_(code).toUpperCase();
+  if (!clean) return { ok: false, error: 'code chahiye' };
+  var current = null;
+  readCoupons_().forEach(function (coupon) {
+    if (coupon.code === clean) current = coupon;
+  });
+  if (!current) return { ok: false, error: 'coupon nahi mila: ' + clean };
+  var updated = updateWhere_('Coupons', 'Code', clean, { Used: current.used + 1 });
+  return { ok: updated > 0, code: clean, used: current.used + 1, updated: updated };
+}
+
 /** Order status / tracking change — timeline + shipments dono me */
 function orderUpdate_(body) {
   var number = String(body.orderNumber || '').trim();
@@ -3173,7 +3250,7 @@ function doGet(e) {
    * aur owner `?action=health` browser me khol kar khud diagnose kar sakta hai.
    */
   // R44: 'reviews' public hai — bina token sirf `approved` milte hain (branch ke andar check)
-  var isPublic = action === 'settings' || action === 'version' || action === 'ping' || action === 'health' || action === 'reviews';
+  var isPublic = action === 'settings' || action === 'version' || action === 'ping' || action === 'health' || action === 'reviews' || action === 'coupons';
   if (!isPublic && !authed) {
     return json_({ ok: false, version: CODE_VERSION, error: 'unauthorized — token match nahi hua', fix: tokenFix_() });
   }
@@ -3287,6 +3364,20 @@ function doGet(e) {
         reviews: listing.reviews,
         time: now_(),
       });
+    }
+
+    /* ── R46: coupons — checkout coupon sheet ke Coupons tab se validate karta hai ── */
+    if (action === 'coupons') {
+      var couponsAuthed = tokenOk_(params.token);
+      var couponRows = readCoupons_();
+      // bina token sirf active coupons (public checkout validation);
+      // owner/panel (token ke saath) ko sab — inactive/expired bhi
+      var couponList = couponsAuthed
+        ? couponRows
+        : couponRows.filter(function (coupon) {
+            return coupon.active && !coupon.expired && !coupon.exhausted;
+          });
+      return json_({ ok: true, version: CODE_VERSION, count: couponList.length, coupons: couponList, time: now_() });
     }
 
     /* ── R44: panel ke GET forms (token zaroori) — visual sheet control ── */
@@ -3471,6 +3562,13 @@ function doPost(e) {
       var count = writeSettings_(body.settings || {});
       noteAudit_(body.actor || 'admin', 'settings_save', 'Settings', String(count) + ' keys');
       return json_({ ok: true, written: count, settings: readSettings_() });
+    }
+
+    /* ── R46: coupon wala order place hua → Coupons tab me Used +1 ── */
+    if (action === 'coupon_use') {
+      var couponUseResult = couponUse_(body.code || body.coupon || '');
+      if (couponUseResult.ok) noteSync_('website→sheet', 'coupon_use:' + couponUseResult.code, 1, 'ok', '');
+      return json_({ ok: couponUseResult.ok, version: CODE_VERSION, used: couponUseResult.used || 0, error: couponUseResult.error || undefined, time: now_() });
     }
 
     if (action === 'order_update') {

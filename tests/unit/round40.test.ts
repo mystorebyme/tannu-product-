@@ -91,7 +91,7 @@ test("R40: orders.ts — createOrder sheet par await save, fail = honest error (
   assert.match(lib, /const saved = await persistOrderEvent\(order, "order\.placed", \{ items: true \}\);/, "order.placed AWAIT hota hai");
   assert.match(lib, /sheet_store_not_ready/, "script purana/down = saaf 503");
   assert.match(lib, /sheet_write_failed/, "sheet write fail = order fail, jhootha success nahi");
-  assert.match(lib, /WhatsApp par order bhej dijiye/, "customer ke liye fallback raasta");
+  assert.match(lib, /send your order to us on WhatsApp/, "customer ke liye fallback raasta");
   // writeAll: sirf badla hua order sheet par jaata hai (diff by snapshot)
   assert.match(lib, /const previous = lastSnapshot\.get\(order\.orderNumber\);/, "writeAll diff karta hai");
   assert.match(lib, /order\.audit\[0\]\?\.action \?\? "order\.updated"/, "event naam audit se");
@@ -124,7 +124,7 @@ test("R40: google-sheets — scriptGet/scriptPost/version-check/auto-heal, expec
 
 test("R40: script — sheet id sirf Script Properties, sheet_set bootstrap, order_state/orders_state", () => {
   const gs = read("scripts/google-apps-script/liksha-sheets.gs");
-  assert.match(gs, /var CODE_VERSION = 'r4[2345]-1';/);
+  assert.match(gs, /var CODE_VERSION = 'r4[2-6]-1';/);
   assert.ok(!gs.includes(FINAL_SHEET_ID), "sheet id code me kahin nahi");
   assert.ok(!gs.includes("var SPREADSHEET_ID"), "SPREADSHEET_ID constant gaya");
   assert.ok(!gs.includes("SHEET_ID_FALLBACK ="), "fallback constant gaya");

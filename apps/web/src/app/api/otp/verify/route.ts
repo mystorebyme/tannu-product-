@@ -26,17 +26,17 @@ export async function POST(request: Request) {
   if (body.idToken) {
     const verifiedPhone = await verifyFirebaseIdToken(body.idToken);
     if (!verifiedPhone) {
-      return Response.json({ error: "OTP verify nahi ho paya. Dobara try kariye." }, { status: 401 });
+      return Response.json({ error: "The OTP could not be verified. Please try again." }, { status: 401 });
     }
     if (verifiedPhone !== phone) {
-      return Response.json({ error: "Verified number requested number se match nahi karta." }, { status: 400 });
+      return Response.json({ error: "The verified number does not match the requested number." }, { status: 400 });
     }
     return Response.json({ phoneToken: issuePhoneToken(phone), phone, mode: "firebase" });
   }
 
   if (mode === "dev" && body.code) {
     if (!checkDevCode(phone, body.code)) {
-      return Response.json({ error: "OTP galat ya expire ho gaya." }, { status: 401 });
+      return Response.json({ error: "The OTP is incorrect or has expired." }, { status: 401 });
     }
     return Response.json({ phoneToken: issuePhoneToken(phone), phone, mode: "dev" });
   }

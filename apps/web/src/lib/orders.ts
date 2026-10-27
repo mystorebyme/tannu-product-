@@ -6,11 +6,11 @@ import type { AuditEntry, InvoiceMeta, Order, OrderStatus, PaymentMethod, Tracki
 import {
   IDEMPOTENCY_TTL_MS,
   canTransition,
-  computeDiscount,
   generateOrderNumber,
   invoiceNumber,
 } from "@liksha/validation";
 import { runInBackground } from "./background";
+import { checkCouponCode, reportCouponUse } from "./coupons-sheet";
 import { dataFile } from "./data-dir";
 import { dbEnabled } from "./db";
 import {
@@ -103,7 +103,7 @@ async function writeAll(orders: StoredOrder[]) {
       const result = await persistOrderEvent(order, event);
       if (!result.ok) {
         throw new OrderError(
-          `Order sheet me save nahi hua (${result.error ?? "unknown"}) — change apply nahi hua. Dobara try kariye.`,
+          `The order update could not be saved (${result.error ?? "unknown"}). Please try again.`,
           502,
           "sheet_write_failed",
         );
@@ -159,7 +159,7 @@ export class OrderError extends Error {
 
 /** price server par recompute hota hai — client ke bheje hue amount par bharosa nahi */
 export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
-  if (!payload.items.length) throw new OrderError("Cart khaali hai.", 400, "empty_cart");
+  if (!payload.items.length) throw new OrderError("Your cart is empty.", 400, "empty_cart");
 
   // delivery serviceability — sirf admin-approved states/pincodes par order
   // (India Post data me na ho, blocked ho ya state band ho to yahin ruk jaata hai)
@@ -176,7 +176,7 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
     const pinState = canonicalStateName(serviceability.state) ?? serviceability.state;
     if (pinState && !statesMatch(payload.state, pinState)) {
       throw new OrderError(
-        `Ye pincode ${pinState} ka hai — State me "${pinState}" daaliye (aapne "${payload.state}" bheja hai).`,
+        `This pincode belongs to ${pinState} — please select "${pinState}" as the State (you sent "${payload.state}").`,
         400,
         "state_mismatch",
       );
@@ -191,19 +191,19 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
   const products = await allProducts();
   const items = payload.items.map((line) => {
     const product = products.find((candidate) => candidate.handle === line.handle);
-    if (!product) throw new OrderError(`Product nahi mila: ${line.handle}`, 400, "product_not_found");
+    if (!product) throw new OrderError(`Product not found: ${line.handle}`, 400, "product_not_found");
     // product-level stock — colour group ke sab sizes khatam ho to kuch bhi na bike
     if (product.inStock === false) {
-      throw new OrderError(`${product.title} abhi sold out hai.`, 409, "product_unavailable");
+      throw new OrderError(`${product.title} is currently sold out.`, 409, "product_unavailable");
     }
     const quantity = Number(line.quantity);
     if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10) {
-      throw new OrderError(`Quantity 1 se 10 ke beech honi chahiye (${product.title}).`, 400, "invalid_item");
+      throw new OrderError(`Quantity must be between 1 and 10 (${product.title}).`, 400, "invalid_item");
     }
     // size silently badalna galat order deta hai — customer ko saaf error do
     if (!product.sizes.includes(line.size)) {
       throw new OrderError(
-        `${product.title} me size "${line.size}" available nahi hai. Options: ${product.sizes.join(", ")}`,
+        `Size "${line.size}" is not available for ${product.title}. Options: ${product.sizes.join(", ")}`,
         400,
         "invalid_item",
       );
@@ -212,7 +212,7 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
     // size ke hisaab se price (XL +100 … 5XL +500) — cart me jo dikhta hai wahi charge hota hai
     const sizePricing = product.sizePricing?.[size];
     if (sizePricing && sizePricing.available === false) {
-      throw new OrderError(`${product.title} ka size ${size} abhi sold out hai.`, 400, "size_unavailable");
+      throw new OrderError(`Size ${size} of ${product.title} is currently sold out.`, 400, "size_unavailable");
     }
     // koi bhi size stock me na ho to product hi unavailable hai
     const anySizeAvailable = product.sizes.some((option) => {
@@ -220,7 +220,7 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
       return pricing ? pricing.available !== false : true;
     });
     if (!anySizeAvailable) {
-      throw new OrderError(`${product.title} abhi sold out hai.`, 409, "product_unavailable");
+      throw new OrderError(`${product.title} is currently sold out.`, 409, "product_unavailable");
     }
     return {
       handle: product.handle,
@@ -233,7 +233,18 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
   });
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const discount = computeDiscount(subtotal, payload.couponCode);
+  /**
+   * R46 (owner): coupon **sheet ke Coupons tab se** — server par hi validate
+   * hota hai (checkout ka client-side check sirf turant feedback hai). Sheet
+   * pipeline available nahi (dev/CI ya sheet down) → order kabhi nahi rukta,
+   * coupon bina discount ke ignore ho jaata hai.
+   */
+  let discount = 0;
+  if (payload.couponCode) {
+    const couponCheck = await checkCouponCode(payload.couponCode, subtotal);
+    if (!couponCheck.ok) throw new OrderError(couponCheck.error, 400, "coupon_invalid");
+    discount = couponCheck.discountPaise;
+  }
 
   /**
    * Site **prepaid-only** hai (owner ka rule). Pehle API COD accept karta tha —
@@ -242,7 +253,7 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
    */
   if (payload.paymentMethod === "cod") {
     throw new OrderError(
-      "Cash on Delivery available nahi hai — sirf prepaid (UPI) orders accept hote hain.",
+      "Cash on Delivery is not available — only prepaid orders are accepted.",
       400,
       "cod_not_allowed",
     );
@@ -303,7 +314,7 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
       // R41: customer ko andar ki problem (sheet/store/script) mat dikhao —
       // friendly line + WhatsApp raasta. Technical reason sheet-health/logs me.
       throw new OrderError(
-        "Order abhi complete nahi hua. Thodi der me dobara try kariye, ya WhatsApp par order bhej dijiye — team turant confirm karegi.",
+        "Your order could not be completed right now. Please try again in a little while, or send your order to us on WhatsApp — our team will confirm it right away.",
         503,
         "sheet_store_not_ready",
       );
@@ -311,7 +322,7 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
     const saved = await persistOrderEvent(order, "order.placed", { items: true });
     if (!saved.ok) {
       throw new OrderError(
-        "Order abhi complete nahi hua. Dobara try kariye, ya WhatsApp par order bhej dijiye — team turant confirm karegi.",
+        "Your order could not be completed. Please try again, or send your order to us on WhatsApp — our team will confirm it right away.",
         502,
         "sheet_write_failed",
       );
@@ -341,6 +352,9 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
     runInBackground(() => sheetRow("order.placed"));
     runInBackground(() => sheetRow("payment.pending"));
   }
+  // R46: coupon laga hai to sheet me use-count badhao (Used +1) — background me,
+  // order response ka intezaar nahi karta
+  if (order.couponCode && order.discount > 0) reportCouponUse(order.couponCode);
   return order;
 }
 
@@ -374,7 +388,7 @@ export async function updateOrderStatus(
   const all = await readAll();
   const wanted = normalizeOrderNumber(orderNumberValue);
   const index = all.findIndex((order) => order.orderNumber === wanted);
-  if (index === -1) throw new OrderError("Order nahi mila", 404, "order_not_found");
+  if (index === -1) throw new OrderError("Order not found", 404, "order_not_found");
   const order = all[index]!;
   /**
    * Payment pehle, dispatch baad me (owner rule): paisa verify hone se pehle order
@@ -427,7 +441,7 @@ export async function setStatusNote(
   const all = await readAll();
   const wanted = normalizeOrderNumber(orderNumberValue);
   const index = all.findIndex((order) => order.orderNumber === wanted);
-  if (index === -1) throw new OrderError("Order nahi mila", 404, "order_not_found");
+  if (index === -1) throw new OrderError("Order not found", 404, "order_not_found");
   const order = all[index]!;
   const now = new Date().toISOString();
 
@@ -462,7 +476,7 @@ export async function setTracking(
   const all = await readAll();
   const wanted = normalizeOrderNumber(orderNumberValue);
   const index = all.findIndex((order) => order.orderNumber === wanted);
-  if (index === -1) throw new OrderError("Order nahi mila", 404, "order_not_found");
+  if (index === -1) throw new OrderError("Order not found", 404, "order_not_found");
   const order = all[index]!;
   const now = new Date().toISOString();
   const courier = input.courier?.trim() || null;
@@ -516,7 +530,7 @@ async function nextInvoiceSerial(): Promise<number> {
   if (ordersBackend() === "sheet") {
     const serial = await nextInvoiceSerialSheet();
     if (serial === null) {
-      throw new OrderError("Invoice serial sheet se padha nahi ja saka — dobara try kariye.", 502, "sheet_read_failed");
+      throw new OrderError("Invoice numbering is temporarily unavailable — please try again.", 502, "sheet_read_failed");
     }
     return serial;
   }
@@ -548,7 +562,7 @@ export async function ensureInvoice(orderNumberValue: string): Promise<{ order: 
   const all = await readAll();
   const wanted = normalizeOrderNumber(orderNumberValue);
   const index = all.findIndex((order) => order.orderNumber === wanted);
-  if (index === -1) throw new OrderError("Order nahi mila", 404, "order_not_found");
+  if (index === -1) throw new OrderError("Order not found", 404, "order_not_found");
   const order = all[index]!;
   if (order.invoice) return { order, invoice: order.invoice };
 
@@ -633,7 +647,7 @@ export async function updateOrderContact(
   const all = await readAll();
   const wanted = normalizeOrderNumber(orderNumberValue);
   const index = all.findIndex((order) => order.orderNumber === wanted);
-  if (index === -1) throw new OrderError("Order nahi mila", 404, "order_not_found");
+  if (index === -1) throw new OrderError("Order not found", 404, "order_not_found");
   const order = all[index]!;
 
   const text = (value: string | undefined, current: string, min = 1, max = 240) => {
@@ -697,7 +711,7 @@ export async function claimPayment(
   // refunded ko processing bana deta tha (double-payment ka chhed).
   if (order.paymentStatus === "refunded" || order.status === "cancelled" || order.status === "returned") {
     throw new OrderError(
-      "Ye order ab payment ke liye open nahi hai. WhatsApp par team se sampark kariye.",
+      "This order is no longer open for payment. Please contact our team on WhatsApp.",
       409,
       "payment_not_allowed",
     );
@@ -753,7 +767,7 @@ export async function submitPaymentReference(
   // R42: refunded/cancelled/returned par reference submit bhi band (claim jaisa)
   if (order.paymentStatus === "refunded" || order.status === "cancelled" || order.status === "returned") {
     throw new OrderError(
-      "Ye order ab payment ke liye open nahi hai. WhatsApp par team se sampark kariye.",
+      "This order is no longer open for payment. Please contact our team on WhatsApp.",
       409,
       "payment_not_allowed",
     );
@@ -765,7 +779,7 @@ export async function submitPaymentReference(
   );
   if (clash) {
     throw new OrderError(
-      "Ye UPI reference pehle se doosre order par use ho chuka hai. Payment app se sahi UTR daaliye, ya WhatsApp par sampark kariye.",
+      "This UPI reference has already been used for another order. Please enter the correct reference from your payment app, or contact us on WhatsApp.",
       409,
       "reference_in_use",
     );

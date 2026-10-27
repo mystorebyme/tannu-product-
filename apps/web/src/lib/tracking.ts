@@ -265,7 +265,7 @@ function updateFromAudit(entry: AuditEntry): TrackingUpdate | null {
       status: "payment",
       label: "Payment claim",
       kind: "payment",
-      text: "Payment confirm request mili — team UPI statement se verify kar rahi hai.",
+      text: "Payment confirmation request received — our team is verifying it against the payment statement.",
     };
   }
   if (entry.action === "payment.verified" || entry.action === "payment.confirmed") {
@@ -293,7 +293,7 @@ function updateFromAudit(entry: AuditEntry): TrackingUpdate | null {
       status: "payment",
       label: "Payment reference",
       kind: "payment",
-      text: metaNote || "Payment details mil gayi — team verify kar rahi hai.",
+      text: metaNote || "Payment details received — our team is verifying them.",
     };
   }
   if (entry.action === "payment.paid" || entry.action === "payment.auto_confirmed") {

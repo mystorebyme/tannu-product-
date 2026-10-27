@@ -33,10 +33,10 @@ test("R32: payment page par order-details callout highlight hai", () => {
   assert.match(payPage, /bg-\[#862222\]/);
 });
 
-test("R32: callout me saaf line hai - payment ke baad yahan click karein", () => {
-  assert.match(payPage, /Payment confirm hone ke baad hi order confirm hota hai\./);
-  assert.match(payPage, /yahin click kariye/);
-  assert.match(payPage, /Order details dekhein/);
+test("R32: callout me saaf line hai - payment ke baad yahan click karein (R46: English)", () => {
+  assert.match(payPage, /Your order is confirmed once the payment is confirmed\./);
+  assert.match(payPage, /click here<\/strong> to continue/);
+  assert.match(payPage, /View order details/);
 });
 
 test("R32: callout ka link order page hi kholta hai (bahar nahi)", () => {

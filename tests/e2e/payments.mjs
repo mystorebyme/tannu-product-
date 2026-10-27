@@ -106,8 +106,9 @@ check("payment page ka UPI env/sheet se aaya", payHtml.includes("likshastore@upi
 const callout = /<div[^>]*data-testid="order-details-callout"[^>]*>/.exec(payHtml)?.[0] ?? "";
 check("payment page highlights the order-details callout", callout.length > 0, callout.slice(0, 80));
 check(
-  "callout says payment ke baad aage badhne ke liye yahan click karein",
-  /yahin click kariye/i.test(payHtml) && /Payment confirm hone ke baad hi order confirm hota hai/i.test(payHtml),
+  "callout says to click here after payment (R46: English copy)",
+  /click here<\/strong> to continue/i.test(payHtml) &&
+    /Your order is confirmed once the payment is confirmed/i.test(payHtml),
 );
 const detailsLink = /<a[^>]*data-testid="order-details-link"[^>]*>/.exec(payHtml)?.[0] ?? "";
 check(
@@ -135,7 +136,7 @@ const missingOrder = await fetch(`${BASE}/orders/LK-NOTFOUND`);
 const missingOrderHtml = await missingOrder.text();
 check(
   "unknown order number shows a friendly not-found page",
-  missingOrder.status === 404 && /Order nahi mila/i.test(missingOrderHtml),
+  missingOrder.status === 404 && /Order not found/i.test(missingOrderHtml),
   String(missingOrder.status),
 );
 

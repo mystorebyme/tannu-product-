@@ -8,13 +8,13 @@
 export type JsonResult<T> = { data: T | null; error: string | null };
 
 function statusMessage(status: number): string {
-  if (status === 401 || status === 403) return "Session expire ho gaya — page refresh karke dobara try kariye.";
-  if (status === 404) return "Service nahi mili — thodi der baad try kariye.";
-  if (status === 429) return "Bohot zyada requests — ek minute baad try kariye.";
+  if (status === 401 || status === 403) return "Your session has expired — please refresh the page and try again.";
+  if (status === 404) return "This service is not available right now — please try again in a little while.";
+  if (status === 429) return "Too many requests — please try again in a minute.";
   // R41 (owner): customer ko "server problem" jaisi andar ki baat mat dikhao —
   // friendly line + WhatsApp raasta. Asli problem /api/sheet-health par owner dekhta hai.
-  if (status >= 500) return "Kaam abhi complete nahi hua — thodi der baad try kariye ya WhatsApp par order bhej dijiye, team turant confirm karegi.";
-  return "Request poori nahi hui — dobara try kariye.";
+  if (status >= 500) return "This could not be completed right now — please try again in a little while, or send your order to us on WhatsApp and our team will confirm it right away.";
+  return "The request could not be completed — please try again.";
 }
 
 export async function readJson<T>(response: Response): Promise<JsonResult<T>> {
@@ -22,7 +22,7 @@ export async function readJson<T>(response: Response): Promise<JsonResult<T>> {
   try {
     text = await response.text();
   } catch {
-    return { data: null, error: "Reply nahi padha ja saka. Internet check karke dobara try kariye." };
+    return { data: null, error: "We could not read the reply. Please check your internet connection and try again." };
   }
 
   const trimmed = text.trim();
@@ -33,7 +33,7 @@ export async function readJson<T>(response: Response): Promise<JsonResult<T>> {
     return {
       data: null,
       error: response.ok
-        ? "Reply sahi nahi tha — page refresh kariye ya WhatsApp par order bhej dijiye."
+        ? "The reply was not correct — please refresh the page or send your order to us on WhatsApp."
         : statusMessage(response.status),
     };
   }
@@ -41,7 +41,7 @@ export async function readJson<T>(response: Response): Promise<JsonResult<T>> {
   try {
     return { data: JSON.parse(trimmed) as T, error: null };
   } catch {
-    return { data: null, error: "Server ka reply samajh nahi aaya — dobara try kariye." };
+    return { data: null, error: "We could not understand the reply — please try again." };
   }
 }
 
@@ -67,8 +67,8 @@ export async function postJson<T>(
       status: 0,
       error:
         name === "TimeoutError" || name === "AbortError"
-          ? "Order abhi complete nahi hua (timeout). WhatsApp par order bhej dijiye — hum turant confirm karenge."
-          : "Network error — internet check kariye ya WhatsApp par order bhej dijiye.",
+          ? "Your order could not be completed right now (timeout). Please send your order to us on WhatsApp — we will confirm it right away."
+          : "Network error — please check your internet connection, or send your order to us on WhatsApp.",
     };
   }
 }

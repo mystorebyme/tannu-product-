@@ -35,11 +35,11 @@ export default function AccountPage() {
               Order status
             </h2>
             <p className="mt-2 text-[12.5px] leading-relaxed text-[#6b6259]">
-              Apna order number daal kar live status, items aur delivery address dekh lein.
+              Enter your order number to see the live status, items and delivery address.
             </p>
             <TrackOrderForm />
             {/* R45: number sirf sheet se — khali ho to line dikhti hi nahi */}
-            <WhatsAppHelpLine label="Order number nahi mila? WhatsApp" className="mt-3" />
+            <WhatsAppHelpLine label="Can't find your order number? WhatsApp us" className="mt-3" />
           </div>
 
           <div className="border border-[#eee6de] p-5 sm:p-6">
@@ -59,7 +59,7 @@ export default function AccountPage() {
               {/* R45: email site par nahi (owner rule); phone/WhatsApp sirf sheet se — khali to line gayab */}
               <WhatsAppHelpLine label="WhatsApp:" />
               <p className="mt-1 text-[11px] text-[#8a8078]">
-                Account login (saved addresses, wishlist) Phase 2 me aa raha hai.
+                Account login (saved addresses, wishlist) is coming soon.
               </p>
             </div>
           </div>

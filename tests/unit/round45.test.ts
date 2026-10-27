@@ -124,7 +124,7 @@ test("R45: order fail par ek hi message — fallback box khula ho to {error} dup
 
 test("R45: gs settings response — missing public keys '' se bharti hain (delete = site se gaya)", () => {
   const gs = read("scripts/google-apps-script/liksha-sheets.gs");
-  assert.match(gs, /var CODE_VERSION = 'r45-1';/);
+  assert.match(gs, /var CODE_VERSION = 'r4[56]-1';/);
   assert.match(gs, /if \(all\[key\] === undefined\) all\[key\] = '';/);
   // seed defaults me bhi contact number khali
   assert.match(gs, /\['support_phone', ''\]/);

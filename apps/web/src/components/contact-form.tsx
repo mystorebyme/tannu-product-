@@ -142,7 +142,7 @@ export function ContactForm() {
               R45: WhatsApp number sheet se khali ho to ye line dikhti hi nahi. */}
           {whatsappNumber(SUPPORT_WHATSAPP) ? (
             <p className="mt-1 text-[#5c534b]">
-              Aap seedha WhatsApp par bhi bhej sakte hain:{" "}
+              You can also send it to us directly on WhatsApp:{" "}
               <a
                 href={`https://wa.me/${whatsappNumber(SUPPORT_WHATSAPP)}?text=${encodeURIComponent(
                   `Hi Designer Clothing! ${form.subject}\nName: ${form.name}\n${form.message}`,
@@ -175,7 +175,7 @@ export function ContactForm() {
             data-testid="contact-whatsapp"
             className="text-[11.5px] text-[#5c534b] underline decoration-[#c9b9a8] underline-offset-4 hover:text-[#862222]"
           >
-            ya WhatsApp {SUPPORT_WHATSAPP} par bhejein
+            or send it on WhatsApp {SUPPORT_WHATSAPP}
           </a>
         ) : null}
       </div>

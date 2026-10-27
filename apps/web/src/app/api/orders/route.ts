@@ -38,7 +38,7 @@ async function handlePost(request: Request) {
   if (!parsed.success) {
     const first = parsed.error.issues[0];
     return Response.json(
-      { error: first?.message ?? "Kripya details check kariye.", fields: parsed.error.flatten().fieldErrors },
+      { error: first?.message ?? "Please check your details and try again.", fields: parsed.error.flatten().fieldErrors },
       { status: 400 },
     );
   }
@@ -61,7 +61,7 @@ async function handlePost(request: Request) {
       return Response.json({ error: error.message, code: error.code }, { status: error.status });
     }
     console.error("order create failed", error);
-    return Response.json({ error: "Order place nahi ho paya. Please try again." }, { status: 500 });
+    return Response.json({ error: "Your order could not be placed. Please try again." }, { status: 500 });
   }
 }
 

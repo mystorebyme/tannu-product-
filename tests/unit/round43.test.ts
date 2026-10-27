@@ -389,7 +389,7 @@ test("R43: site ke apne sheet-rows apne event ke saath — claim 'Delivered' lab
   assert.equal(merged.paymentStatus, "paid", "owner-confirm rule: delivered → paid");
 
   const updates = trackingUpdates(merged);
-  const claim = updates.find((update) => update.text?.includes("Payment confirm request"));
+  const claim = updates.find((update) => update.text?.includes("Payment confirmation request"));
   assert.ok(claim, "claim entry dikhti hai");
   assert.equal(claim!.kind, "payment", "claim ab payment-kind entry hai");
   assert.equal(claim!.label, "Payment claim");

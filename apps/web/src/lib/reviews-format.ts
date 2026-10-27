@@ -58,19 +58,19 @@ export type ReviewSubmission = {
 /** Pure validation — tests isi par chalte hain. Khaali array = sab sahi. */
 export function reviewSubmissionErrors(input: Partial<ReviewSubmission>): string[] {
   const errors: string[] = [];
-  if (!String(input.handle ?? "").trim()) errors.push("product chahiye");
+  if (!String(input.handle ?? "").trim()) errors.push("Please select a product");
   const name = String(input.name ?? "").trim();
-  if (name.length < 2) errors.push("naam kam se kam 2 akshar ka ho");
+  if (name.length < 2) errors.push("Name must be at least 2 characters");
   const rating = Number(input.rating);
-  if (!Number.isInteger(rating) || rating < 1 || rating > 5) errors.push("rating 1 se 5 ke beech ho");
+  if (!Number.isInteger(rating) || rating < 1 || rating > 5) errors.push("Rating must be between 1 and 5");
   const body = String(input.body ?? "").trim();
-  if (body.length < 10) errors.push("review kam se kam 10 akshar ka ho");
-  if (body.length > 4000) errors.push("review bahut lamba hai (4000 akshar tak)");
+  if (body.length < 10) errors.push("Review must be at least 10 characters");
+  if (body.length > 4000) errors.push("Review is too long (up to 4000 characters)");
   const images = Array.isArray(input.images) ? input.images : [];
-  if (images.length > 8) errors.push("8 se zyada image link nahi");
+  if (images.length > 8) errors.push("Up to 8 image links are allowed");
   for (const image of images) {
     if (!/^https?:\/\/\S+$/i.test(String(image ?? "").trim())) {
-      errors.push("image link https:// se shuru hona chahiye");
+      errors.push("Image links must start with https://");
       break;
     }
   }

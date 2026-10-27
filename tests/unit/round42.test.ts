@@ -118,7 +118,11 @@ test("R42: Complete payment CTA — paid/refunded/cancelled par hidden, pending/
     /order\.paymentStatus !== "paid" && order\.paymentStatus !== "refunded" && !stopped/,
     "CTA guard: paid + refunded + cancelled/returned par hidden",
   );
-  assert.match(page, /data-testid="complete-payment"/, "CTA wahi testid ke saath");
+  // R46 (owner): online payment hold par hai — "Complete payment" CTA hata,
+  // uski jagah English hold note + WhatsApp raasta (CTA dobara tabhi jab payment chalu ho)
+  assert.doesNotMatch(page, /data-testid="complete-payment"/, "payment hold: CTA hataya gaya");
+  assert.match(page, /data-testid="payment-hold-note"/, "hold note dikhta hai");
+  assert.match(page, /Online payment is currently/, "customer ko English me saaf bataya gaya");
   // cod par payment block hi nahi (existing rule barkarar)
   assert.match(page, /order\.paymentMethod !== "cod"/);
 });
@@ -126,7 +130,7 @@ test("R42: Complete payment CTA — paid/refunded/cancelled par hidden, pending/
 test("R42: watcher — refunded ki apni copy + polling paid/refunded par rukti hai", () => {
   const watcher = read("apps/web/src/components/payment-status-watcher.tsx");
   assert.match(watcher, /refunded:\s*{/, "refunded state ki copy hai");
-  assert.match(watcher, /Refund ho gaya/, "refunded label");
+  assert.match(watcher, /Refund completed/, "refunded label (R46: English)");
   assert.match(watcher, /status === "paid" \|\| status === "refunded"/, "paid/refunded par poll start hi nahi");
   assert.match(watcher, /next === "paid" \|\| next === "refunded"/, "poll me bhi refund par stop");
 });
@@ -135,7 +139,7 @@ test("R42: watcher — refunded ki apni copy + polling paid/refunded par rukti h
 
 test("R42: script r42-1 — VALIDATIONS map, dropdowns action (GET+POST), setup/repair me auto", () => {
   const gs = read("scripts/google-apps-script/liksha-sheets.gs");
-  assert.match(gs, /var CODE_VERSION = 'r4[2345]-1';/);
+  assert.match(gs, /var CODE_VERSION = 'r4[2-6]-1';/);
   assert.match(gs, /function applyValidations_\(/);
   assert.match(gs, /setAllowInvalid\(true\)/, "dropdown suvidha hai, taala nahi — automation nahi tootta");
   // "jis column mai jrurat hai sabhi mai"

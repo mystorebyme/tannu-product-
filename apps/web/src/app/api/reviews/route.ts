@@ -33,7 +33,7 @@ export async function POST(request: Request) {
   try {
     body = await request.json();
   } catch {
-    return Response.json({ ok: false, error: "Request samajh nahi aayi — dobara try kijiye." }, { status: 400 });
+    return Response.json({ ok: false, error: "We could not read the request — please try again." }, { status: 400 });
   }
   const input = (body ?? {}) as Partial<ReviewSubmission>;
   const handle = String(input.handle ?? "").trim().toLowerCase();
@@ -46,13 +46,13 @@ export async function POST(request: Request) {
   // product live catalog (sheet) me hona chahiye — galat handle par row na bane
   const product = await getProduct(handle);
   if (!product) {
-    return Response.json({ ok: false, error: "Ye product abhi available nahi hai." }, { status: 404 });
+    return Response.json({ ok: false, error: "This product is not available right now." }, { status: 404 });
   }
 
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
   if (throttled(`${ip}:${handle}`)) {
     return Response.json(
-      { ok: false, error: "Bahut saare review ek saath nahi bhej sakte — thodi der baad try kijiye." },
+      { ok: false, error: "Too many reviews submitted at once — please try again after a while." },
       { status: 429 },
     );
   }
@@ -70,7 +70,7 @@ export async function POST(request: Request) {
     if (!result.ok) {
       console.warn(`[reviews] submit failed for ${handle}: ${result.error}`);
       return Response.json(
-        { ok: false, error: "Review abhi submit nahi ho paya — thodi der me dobara try kijiye." },
+        { ok: false, error: "Your review could not be submitted right now — please try again in a little while." },
         { status: 502 },
       );
     }
@@ -79,15 +79,15 @@ export async function POST(request: Request) {
         ok: true,
         duplicate: Boolean(result.duplicate),
         message: result.duplicate
-          ? "Ye review pehle se mil chuka hai — shukriya!"
-          : "Shukriya! Aapka review mil gaya hai — team approve karte hi product page par dikhne lagega.",
+          ? "We have already received this review — thank you!"
+          : "Thank you! We have received your review — it will appear on the product page once our team approves it.",
       },
       { status: 201 },
     );
   } catch (error) {
     console.error("[reviews] submit error", error instanceof Error ? error.message : error);
     return Response.json(
-      { ok: false, error: "Review abhi submit nahi ho paya — thodi der me dobara try kijiye." },
+      { ok: false, error: "Your review could not be submitted right now — please try again in a little while." },
       { status: 502 },
     );
   }

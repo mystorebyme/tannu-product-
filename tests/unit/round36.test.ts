@@ -155,23 +155,25 @@ test("R36: checkout form saved details prefill karta hai + batata hai + clear ho
 
 /* ───────────── 2. payment step 3 — isi page par, alag page nahi ───────────── */
 
-test("R36: step 3 payment checkout ke andar render hota hai", () => {
+test("R36: step 3 checkout ke andar render hota hai (R46: payment → order placed + WhatsApp)", () => {
   const form = read(FORM);
-  assert.match(form, /data-testid="checkout-payment-step"/);
-  assert.match(form, /<CheckoutPaymentStep/);
-  assert.match(form, /const isPayment = step === "payment" && Boolean\(orderNumber\)/);
-  // nested form se bachne ke liye payment step par shell <div> hai
-  assert.match(form, /if \(isPayment\) \{\s*return \(\s*<div className="grid gap-8/);
-  assert.doesNotMatch(form, /router\.push\(`\/orders\//, "payment page par redirect nahi");
+  assert.match(form, /data-testid="checkout-placed-step"/);
+  assert.match(form, /data-testid="placed-whatsapp"/);
+  assert.match(form, /const isPlaced = step === "placed" && Boolean\(orderNumber\)/);
+  // nested form se bachne ke liye placed step par shell <div> hai
+  assert.match(form, /if \(isPlaced\) \{\s*return \(\s*<div className="grid gap-8/);
+  assert.doesNotMatch(form, /router\.push\(`\/orders\//, "order page par redirect nahi");
   assert.doesNotMatch(form, /\?pay=1/, "UPI auto-open flag hata");
+  // R46: checkout me payment component render hi nahi hota
+  assert.ok(!/CheckoutPaymentStep/.test(form.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/[^\n]*$/gm, "")), "checkout form me CheckoutPaymentStep nahi");
 });
 
 test("R36: history pushState se URL banta hai — back review par, refresh par step 3", () => {
   const form = read(FORM);
   assert.match(form, /window\.history\.replaceState\(\{\}, "", reviewUrl\(target\)\)/);
-  assert.match(form, /window\.history\.pushState\(\{\}, "", paymentUrl\(target\)\)/);
+  assert.match(form, /window\.history\.pushState\(\{\}, "", placedUrl\(target\)\)/);
   assert.match(form, /window\.addEventListener\("popstate", syncFromUrl\)/, "back/forward par step sync");
-  assert.match(form, /setStep\(wantsReview \? "review" : "payment"\)/, "URL se step");
+  assert.match(form, /setStep\(wantsReview \? "review" : "placed"\)/, "URL se step");
 });
 
 test("R36: wahi order dobara kholne par payment context API se chalta hai", () => {
@@ -199,7 +201,9 @@ test("R36: step 3 par live status + order details ka raasta", () => {
   assert.match(read(WATCHER), /onStatusChange\?: \(status: PaymentState\) => void/);
   const form = read(FORM);
   assert.match(form, /data-testid="payment-order-details"/);
-  assert.match(form, /onStatusChange=\{setPaymentStatus\}/);
+  // R46: checkout ke placed step par payment status nahi dikhta (payment hold) —
+  // live status order page ke watcher par hi rehta hai
+  assert.doesNotMatch(form, /onStatusChange=\{setPaymentStatus\}/);
 });
 
 /* ──────────── 3. UPI app apne aap nahi khulti — sirf "Pay on UPI" par ──────────── */
@@ -247,7 +251,8 @@ test("R36: last 4 digit pehle se bhare aate hain (confirm ek tap me)", () => {
   assert.match(upi, /defaultLast4\?: string/);
   assert.match(upi, /setLast4\(\(current\) => \(current \? current : hint\)\)/, "khud likha hua override nahi hota");
   assert.match(read(STEP3), /last4Hint/);
-  assert.match(read(FORM), /last4Hint=\{phoneLast4\(form\.phone \|\| savedPhone\)\}/);
+  // R46: checkout-form payment step render nahi karta — last-4 prefill pay page + step3 component par hi
+  assert.doesNotMatch(read(FORM), /last4Hint/);
   assert.ok(read(PAY_PAGE).includes('defaultLast4={order.phone.replace(/\\D/g, "").slice(-4)}'), "pay page par bhi last-4 prefill");
 });
 

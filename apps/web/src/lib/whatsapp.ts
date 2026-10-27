@@ -59,7 +59,11 @@ export function orderWhatsAppMessage(order: Order, origin = siteConfig.url): str
   if (order.discount > 0) lines.push(`Discount: -${money(order.discount)}`);
   lines.push(`Shipping: ${order.shipping > 0 ? money(order.shipping) : "Free"}`);
   lines.push(`*Total: ${money(order.total)}*`);
-  lines.push(`Payment: Prepaid (${order.paymentStatus})`);
+  if (order.paymentStatus === "paid") {
+    lines.push("Payment: Paid");
+  } else {
+    lines.push("Payment: To be arranged after confirmation (online payment is paused)");
+  }
   lines.push("");
   lines.push("*Delivery address*");
   lines.push(`${order.address}, ${order.city}, ${order.state} - ${order.pincode}`);
@@ -68,7 +72,7 @@ export function orderWhatsAppMessage(order: Order, origin = siteConfig.url): str
     lines.push(`Note: ${order.notes}`);
   }
   lines.push("");
-  lines.push("Please confirm my order on WhatsApp.");
+  lines.push("Please confirm my order and share the payment details.");
   return lines.join("\n");
 }
 

@@ -239,7 +239,7 @@ test("R44: khaali-status sheet edit row se galat 'Placed' stage entry nahi banti
 
 test("R44: script r44-1 — Reviews tab (Review ID + Image 1…8 + City), validations, actions, panel sections", () => {
   const gs = read("scripts/google-apps-script/liksha-sheets.gs");
-  assert.match(gs, /var CODE_VERSION = 'r4[45]-1';/);
+  assert.match(gs, /var CODE_VERSION = 'r4[4-6]-1';/);
   // Reviews headers
   assert.match(gs, /'Timestamp', 'Review ID', 'Product', 'Handle', 'Customer', 'City', 'Rating',/);
   assert.match(gs, /'Image 1', 'Image 2', 'Image 3', 'Image 4', 'Image 5', 'Image 6', 'Image 7', 'Image 8',/);
@@ -309,7 +309,7 @@ test("R44: site wiring — product page live reviews, /api/reviews, hidden filte
 
   const sheetHealth = read("apps/web/src/app/api/sheet-health/route.ts");
   assert.match(sheetHealth, /reviewsSheetInfo/, "sheet-health me reviews source");
-  assert.match(sheetHealth, /r4[45]-1/, "warning latest script ki baat karta hai");
+  assert.match(sheetHealth, /r4[4-6]-1/, "warning latest script ki baat karta hai");
 
   const storeSettings = read("apps/web/src/lib/store-settings.ts");
   assert.match(storeSettings, /deliveryEstimateDays: 6/, "default 6 din");

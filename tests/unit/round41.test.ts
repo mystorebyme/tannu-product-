@@ -122,8 +122,8 @@ test("R41: orders-sheet — full/compat/none mode, purana script orders block na
 test("R41: orders.ts — gate sirf mode 'none' par, customer message friendly", () => {
   const lib = read("apps/web/src/lib/orders.ts");
   assert.match(lib, /if \(!ready\.ready\)/, "gate wahi ek jagah");
-  assert.match(lib, /Order abhi complete nahi hua\. Thodi der me dobara try kariye, ya WhatsApp par order bhej dijiye — team turant confirm karegi\./);
-  assert.match(lib, /Order abhi complete nahi hua\. Dobara try kariye, ya WhatsApp par order bhej dijiye — team turant confirm karegi\./);
+  assert.match(lib, /Your order could not be completed right now\. Please try again in a little while, or send your order to us on WhatsApp — our team will confirm it right away\./);
+  assert.match(lib, /Your order could not be completed\. Please try again, or send your order to us on WhatsApp — our team will confirm it right away\./);
   // owner rule: customer ko andar ki problem mat dikhao
   assert.ok(!lib.includes("sheet store ready nahi"), "technical jargon customer message se gaya");
   assert.ok(!lib.includes("Order sheet me save nahi hua — order nahi bana"), "purana technical message gaya");
@@ -134,13 +134,13 @@ test("R41: checkout/http-json — 'server problem' customer par expose nahi (sab
   const form = read("apps/web/src/components/checkout-form.tsx");
   assert.ok(!form.includes("Order server par save nahi hua"), "fallback banner friendly");
   assert.ok(!form.includes("Order server tak nahi pahuncha"), "catch message friendly");
-  assert.match(form, /Order abhi complete nahi hua\./);
+  assert.match(form, /Your order could not be completed\./);
   assert.match(form, /data-testid="checkout-fallback"/, "banner testid wahi (smoke pin)");
 
   const http = read("apps/web/src/lib/http-json.ts");
   assert.ok(!http.includes("Server par problem hai"), "500 message friendly");
   assert.ok(!http.includes("Server se reply nahi aaya"), "timeout/read messages friendly");
-  assert.match(http, /Kaam abhi complete nahi hua — thodi der baad try kariye ya WhatsApp par order bhej dijiye/);
+  assert.match(http, /This could not be completed right now — please try again in a little while, or send your order to us on WhatsApp/);
 });
 
 /* ── 3. Guards — sheet-health honest + wrong-sheet auto-heal ─────────────── */

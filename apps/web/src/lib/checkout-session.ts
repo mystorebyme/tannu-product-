@@ -14,6 +14,8 @@
 export type PlacedOrderItem = {
   title: string;
   image: string;
+  /** R46: WhatsApp order message me product link bhi jaata hai */
+  handle?: string;
   size?: string;
   colour?: string;
   quantity: number;
@@ -110,4 +112,13 @@ export function reviewUrl(orderNumber: string): string {
  */
 export function paymentUrl(orderNumber: string): string {
   return `/checkout?step=payment&order=${encodeURIComponent(orderNumber)}`;
+}
+
+/**
+ * R46 (owner): payment **hold** par hai — step 3 ab "order placed + WhatsApp
+ * par bhejo" confirmation hai. Purane `?step=payment` links bhi isi screen par
+ * aate hain (compat), isliye URL me `step=placed` push hota hai.
+ */
+export function placedUrl(orderNumber: string): string {
+  return `/checkout?step=placed&order=${encodeURIComponent(orderNumber)}`;
 }
