@@ -777,5 +777,11 @@ aur Apps Script aisa chahiye "jisko change krne ki jrurat na pde".
 - [x] Docs: `google-sheets.md` §4e, `apps-script-code.md` (auto-export r38-1),
       `owner-code-map.md`, `live-vercel-supabase.md`, `netlify-shift-guide.md`,
       **`owner-report-round38.md`**.
-- [ ] Gates + deploy: typecheck ✅; unit 270/270 ✅; test:all/lint/audit/builds; Next-prod
-      parity + workerd smoke; PR → merge → Vercel production.
+- [x] Gates: typecheck ✅ · unit **270/270** · test:all **329/329** · lint web 0/38 ·
+      audit sab A · next build + vinext ✅ · Next-prod parity: smoke **110/0**, responsive
+      44/0, breakpoints 48/0, round16 39/0, payments 61/0, links 40/0 · workerd **110/0**.
+- [x] Deploy: PR #9 squash-merged → `main` @ `4062a0a`; Vercel production
+      `dpl_H2hAd1kjKd9x66QrotXNJnMqLbPH` READY/PROMOTED (designerclothing.fashion +
+      www + liksha-clothing.vercel.app). Env: `STORE_UPI_ID` delete +
+      `GOOGLE_SHEETS_TOKEN` rotate (naya 48-char). Owner TODO: Apps Script r38-1 paste
+      → `setup` → New version deploy → `?action=set_token&token=…` → `upi_id` sheet me.

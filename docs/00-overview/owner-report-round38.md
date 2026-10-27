@@ -106,11 +106,20 @@ bound hai, UPI sheet me hai — sirf sheet par kaam chalao.
 | Next-prod parity (:3000) | ✅ smoke + payments + responsive + breakpoints + links |
 | workerd preview (:8787) | ✅ smoke |
 
-## 7. Deploy
+## 7. Deploy — ✅ LIVE
 
-PR → squash merge → `main` → Vercel `liksha-clothing` production deploy. Env changes
-(isi round me): `STORE_UPI_ID` **delete**, `GOOGLE_SHEETS_TOKEN` **rotate** (naya value
-sirf chat + Vercel me; script me `set_token` URL se jaayega). `liksha-admin` untouched.
+| Cheez | Result |
+| --- | --- |
+| PR #9 | ✅ **MERGED** (squash) → `main` @ `4062a0a` |
+| CI | ✅ typecheck·build·test + production-build smoke (Cloudflare `designer` check owner ke kehne par red chhoda) |
+| Vercel production | ✅ `dpl_H2hAd1kjKd9x66QrotXNJnMqLbPH` — **READY / PROMOTED** |
+| Live domains | `designerclothing.fashion` · `www.designerclothing.fashion` · `liksha-clothing.vercel.app` |
+| Env (isi deploy me) | `STORE_UPI_ID` **deleted** ✅ · `GOOGLE_SHEETS_TOKEN` **rotated** ✅ (build env me confirmed; `STORE_UPI_ID` build env me absent = sahi) |
+| `liksha-admin` | untouched |
+
+Naya token (script me `set_token` URL se jaana hai): chat me diya gaya hai —
+Vercel env me bhi wahi hai. Owner ke 4 kadam (§5) complete hote hi
+`/api/sheet-health` `"ok": true` dikha dega.
 
 Files: `scripts/google-apps-script/liksha-sheets.gs` (r38-1),
 `apps/web/src/lib/{google-sheets,store-settings,upi}.ts`,
