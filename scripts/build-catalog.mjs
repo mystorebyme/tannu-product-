@@ -473,7 +473,7 @@ const groupKeyOf = (base) => base.toLowerCase().replace(/[^a-z0-9]+/g, "-").repl
 const OVERRIDES_FILE = path.join(ROOT, "database/seeds/admin/overrides.json");
 
 function adminOverrides() {
-  if (!fs.existsSync(OVERRIDES_FILE)) return { products: {}, collections: {}, hidden: [], newProducts: [] };
+  if (!fs.existsSync(OVERRIDES_FILE)) return { products: {}, collections: {}, hidden: [], newProducts: [], mergeInto: {} };
   try {
     const parsed = JSON.parse(fs.readFileSync(OVERRIDES_FILE, "utf8"));
     return {
@@ -483,9 +483,11 @@ function adminOverrides() {
       // R47: ye pehle return hi nahi ho raha tha — admin panel se add kiye products
       // catalog me kabhi nahi jude. Ab newProducts build me merge hote hain.
       newProducts: parsed.newProducts ?? [],
+      // R50: owner-curated duplicate merges — { keepHandle: [duplicateHandles] }
+      mergeInto: parsed.mergeInto ?? {},
     };
   } catch {
-    return { products: {}, collections: {}, hidden: [], newProducts: [] };
+    return { products: {}, collections: {}, hidden: [], newProducts: [], mergeInto: {} };
   }
 }
 
@@ -1011,6 +1013,56 @@ const readExtra = (name, key) => {
 
   let mergedSameTitle = 0;
 
+  /* ---------- pass 0 (R50): owner-curated merges (overrides.mergeInto) ----------
+     Owner ne khud jin duplicates ko point kiya — same dress, bilkul alag naam
+     (Noor Festive Elegance == Aarushi Heavy Pure Cinon Silk Gown) — unka manual
+     merge. Keep-handle family ka representative banta hai aur `manual-` group
+     protected hai (baad ke passes rep override nahi karte). Products delete nahi
+     hote — images/prices/reviews apni jagah, live parity untouched. Family ka
+     best score card par carry hota hai (upward only). */
+  let curatedMerged = 0;
+  for (const [keepHandle, dupHandles] of Object.entries(overrides.mergeInto ?? {})) {
+    const keep = products.find((product) => product.handle === keepHandle);
+    if (!keep || keep.hidden || !Array.isArray(dupHandles)) continue;
+    let groupKey = keep.colourGroup && colourGroups[keep.colourGroup] ? keep.colourGroup : `manual-${keep.handle}`.slice(0, 64);
+    if (!colourGroups[groupKey]) {
+      const used = new Set();
+      const label = pickLabel(keep, used, 1);
+      keep.colourGroup = groupKey;
+      keep.colourName = label;
+      colourGroups[groupKey] = {
+        key: groupKey,
+        title: keep.title,
+        handle: keep.handle,
+        colours: [colourEntry(keep, label)],
+      };
+    }
+    const group = colourGroups[groupKey];
+    const usedLabels = new Set(
+      group.colours.map((colour) => String(colour.name ?? "").toLowerCase()).filter(Boolean),
+    );
+    let variant = group.colours.length + 1;
+    for (const dupHandle of dupHandles) {
+      const dup = products.find((product) => product.handle === dupHandle);
+      if (!dup || dup === keep || dup.hidden || dup.colourGroup === groupKey) continue;
+      if (dup.colourGroup && colourGroups[dup.colourGroup]) {
+        console.warn(`mergeInto: ${dupHandle} pehle se group ${dup.colourGroup} me hai — skip`);
+        continue;
+      }
+      const label = pickLabel(dup, usedLabels, variant);
+      variant = Math.max(variant + 1, group.colours.length + 2);
+      dup.colourGroup = groupKey;
+      dup.colourName = label;
+      group.colours.push(colourEntry(dup, label));
+      if (Number(dup.rating ?? 0) > Number(keep.rating ?? 0)) {
+        keep.rating = dup.rating;
+        keep.reviewCount = dup.reviewCount;
+      }
+      curatedMerged += 1;
+    }
+  }
+  if (curatedMerged) console.log(`curated merges (owner-pointed duplicates): ${curatedMerged}`);
+
   /* ---------- pass 1: exact same-title listings (purana behaviour as-is) ---------- */
   const titleBuckets = new Map();
   for (const product of products) {
@@ -1189,6 +1241,149 @@ const readExtra = (name, key) => {
   if (mergedSameTitle || nearDupFolded || joinedFamilies) {
     console.log(
       `same-design merge: ${mergedSameTitle} same-title + ${nearDupFolded} near-duplicate listings folded, ${joinedFamilies} existing groups me jude (${Object.keys(colourGroups).length} groups total)`,
+    );
+  }
+
+  /* ---------- pass 3 (R50): image-fingerprint families ----------
+     Owner: "aisi abhi or bi milenge unko bi fix kro … vapis se audit kr ke
+     duplicated to htado ya merge kr do". Jo dresses alag naam se list hain par
+     dono stores par SAME photo files chalti hain (ek hi photoshoot — img_3452.jpg
+     waghera), wo same design hain. Title/handle rules inhe nahi pakadte
+     (Maharani ↔ Pnihari, Noor ↔ Aarushi). Rule: do products/families me >=2
+     same photo files (basename) → ek family. Photo evidence title/category
+     gates se strong hai — same photo = same dress.
+     Winner: owner-curated `manual-` group protected; warna liksha pehle, phir
+     best score, phir sabse zyada photos, phir sabse purana publish. Do groups
+     milein to fuse ho jaate hain (ek card, poori family swatches me). */
+  const basenameOf = (image) => String(image).split("/").pop().split("?")[0].toLowerCase();
+  const unitOfPhoto = (product) => product.colourGroup ?? `single::${product.handle}`;
+  const photoCandidates = products.filter(
+    (product) => !product.hidden && !hiddenHandles.has(product.handle),
+  );
+  const unitPhotos = new Map(); // unit -> Set(basenames)
+  for (const product of photoCandidates) {
+    const unit = unitOfPhoto(product);
+    if (!unitPhotos.has(unit)) unitPhotos.set(unit, new Set());
+    const set = unitPhotos.get(unit);
+    for (const image of product.images ?? []) set.add(basenameOf(image));
+  }
+
+  const photoParent = new Map();
+  const photoFind = (unit) => {
+    if (!photoParent.has(unit)) photoParent.set(unit, unit);
+    let root = unit;
+    while (photoParent.get(root) !== root) root = photoParent.get(root);
+    let cursor = unit;
+    while (cursor !== root) {
+      const next = photoParent.get(cursor);
+      photoParent.set(cursor, root);
+      cursor = next;
+    }
+    return root;
+  };
+  const photoUnion = (a, b) => {
+    const rootA = photoFind(a);
+    const rootB = photoFind(b);
+    if (rootA !== rootB) photoParent.set(rootA, rootB);
+  };
+  const unitList = [...unitPhotos.keys()];
+  for (let i = 0; i < unitList.length; i += 1) {
+    for (let j = i + 1; j < unitList.length; j += 1) {
+      const photosA = unitPhotos.get(unitList[i]);
+      const photosB = unitPhotos.get(unitList[j]);
+      let shared = 0;
+      for (const base of photosB) {
+        if (photosA.has(base)) {
+          shared += 1;
+          if (shared >= 2) break;
+        }
+      }
+      if (shared >= 2) photoUnion(unitList[i], unitList[j]);
+    }
+  }
+
+  const photoFamilies = new Map(); // root -> [products]
+  for (const product of photoCandidates) {
+    const root = photoFind(unitOfPhoto(product));
+    if (!photoFamilies.has(root)) photoFamilies.set(root, []);
+    photoFamilies.get(root).push(product);
+  }
+
+  let photoCardsFolded = 0;
+  for (const members of photoFamilies.values()) {
+    const unitKeys = new Set(members.map(unitOfPhoto));
+    if (members.length < 2 || unitKeys.size < 2) continue; // already one family
+
+    const listedBefore = members.filter(
+      (member) => !member.colourGroup || colourGroups[member.colourGroup]?.handle === member.handle,
+    ).length;
+
+    // winner: manual (owner-curated) group protected; warna best member
+    const manualMember = members.find((member) => String(member.colourGroup ?? "").startsWith("manual-"));
+    const manualRep = manualMember
+      ? products.find((product) => product.handle === colourGroups[manualMember.colourGroup]?.handle)
+      : null;
+    const winner =
+      manualRep ??
+      [...members].sort((a, b) => {
+        const sourceRank = (product) => (product.source === "liksha" ? 0 : 1);
+        return (
+          sourceRank(a) - sourceRank(b) ||
+          Number(b.rating ?? 0) - Number(a.rating ?? 0) ||
+          Number(b.reviewCount ?? 0) - Number(a.reviewCount ?? 0) ||
+          b.images.length - a.images.length ||
+          String(a.publishedAt ?? "").localeCompare(String(b.publishedAt ?? ""))
+        );
+      })[0];
+
+    let groupKey =
+      winner.colourGroup && colourGroups[winner.colourGroup]
+        ? winner.colourGroup
+        : `same-${`${winner.title.toLowerCase()}::${winner.category}`
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-|-$/g, "")
+            .slice(0, 60)}`;
+    // key kisi DOOSRI family ki ho to suffix — collision par group corrupt na ho
+    let keyAttempt = groupKey;
+    let suffix = 2;
+    while (colourGroups[keyAttempt] && !members.some((member) => member.colourGroup === keyAttempt)) {
+      keyAttempt = `${groupKey}-${suffix}`;
+      suffix += 1;
+    }
+    groupKey = keyAttempt;
+
+    const ordered = [winner, ...members.filter((member) => member !== winner)];
+    const labels = labelAll(ordered); // purane colourName labels reuse hote hain
+    const dissolved = [...unitKeys].filter(
+      (key) => !key.startsWith("single::") && key !== groupKey && colourGroups[key],
+    );
+    for (const member of ordered) {
+      member.colourGroup = groupKey;
+      member.colourName = labels.get(member);
+    }
+    colourGroups[groupKey] = {
+      key: groupKey,
+      title: winner.title,
+      handle: winner.handle,
+      colours: ordered.map((member) => colourEntry(member, labels.get(member))),
+    };
+    for (const key of dissolved) delete colourGroups[key];
+
+    // family ka best score card par (upward only)
+    const best = [...members].sort(
+      (a, b) =>
+        Number(b.rating ?? 0) - Number(a.rating ?? 0) ||
+        Number(b.reviewCount ?? 0) - Number(a.reviewCount ?? 0),
+    )[0];
+    if (best !== winner && Number(best.rating ?? 0) > Number(winner.rating ?? 0)) {
+      winner.rating = best.rating;
+      winner.reviewCount = best.reviewCount;
+    }
+    photoCardsFolded += Math.max(listedBefore - 1, 0);
+  }
+  if (photoCardsFolded) {
+    console.log(
+      `photo-fingerprint merge (R50): ${photoCardsFolded} duplicate cards folded — same photos, alag naam (${Object.keys(colourGroups).length} groups total)`,
     );
   }
 

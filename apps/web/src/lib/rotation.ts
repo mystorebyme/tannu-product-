@@ -46,11 +46,14 @@ function random(seed: number): () => number {
 
 /** seed ke hisaab se shuffle karke pehle `count` items */
 export function rotatePick<T>(items: T[], seed: string, count: number): T[] {
-  if (items.length <= count) return [...items];
   const random_ = random(hash(seed));
   const copy = [...items];
-  // Fisher-Yates (partial — sirf jitne chahiye utne)
-  for (let index = 0; index < count; index += 1) {
+  // Fisher-Yates (partial — sirf jitne chahiye utne). R50: pool chhota ho
+  // (count jitna ya kam — jaise Trending collection ke 7 cards) to bhi order
+  // shuffle hota hai, taaki har 10-minute window me rail badla hua lage;
+  // membership poori rehti hai — collection ka har item har window me dikhta hai.
+  const passes = Math.min(count, copy.length);
+  for (let index = 0; index < passes; index += 1) {
     const swapWith = index + Math.floor(random_() * (copy.length - index));
     const temp = copy[index]!;
     copy[index] = copy[swapWith]!;

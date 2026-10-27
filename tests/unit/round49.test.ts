@@ -126,10 +126,11 @@ test("R49: listing par koi do products same normalized title ke nahi (duplicates
     assert.ok(!seen.has(key), `${seen.get(key)} aur ${product.handle} ek jaise naam se listed hain (${key})`);
     seen.set(key, product.handle);
   }
-  // merge ke baad listings 388 → 361; products/images parity untouched
+  // merge ke baad listings 388 → 361 (R49) → 345 (R50 photo-fingerprint + curated);
+  // products/images parity untouched
   assert.equal(products.length, 448, "koi product delete nahi hua — sab groups me fold hue");
-  assert.equal(listed.length, 361);
-  assert.equal(catalog.meta.listedProductCount, 361);
+  assert.equal(listed.length, 345);
+  assert.equal(catalog.meta.listedProductCount, 345);
   assert.equal(catalog.meta.liveProductCount, 287, "liksha parity untouched");
 });
 
