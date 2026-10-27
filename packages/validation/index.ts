@@ -10,10 +10,23 @@ export const pincodeSchema = z
   .trim()
   .regex(/^[1-9][0-9]{5}$/, "6 digit ka valid Indian pincode daaliye");
 
+/**
+ * R37 (owner): "mobile number me prefix 0 ya country code ya + aage accept karna
+ * chahiye … 91 / +91 / 0 automatic hat jana chahiye aur 10 digit number aa jana
+ * chahiye". Isliye transform me teeno prefix hat jaate hain — DB/sheet me hamesha
+ * saaf 10 digit phone save hota hai.
+ */
+export function normaliseIndianPhoneDigits(raw: unknown): string {
+  let digits = String(raw ?? "").replace(/\D/g, "");
+  if (digits.length === 12 && digits.startsWith("91")) digits = digits.slice(2);
+  else if (digits.length === 11 && digits.startsWith("0")) digits = digits.slice(1);
+  return digits;
+}
+
 export const phoneSchema = z
   .string()
   .trim()
-  .transform((value) => value.replace(/[\s-]/g, "").replace(/^(\+91|91)/, ""))
+  .transform((value) => normaliseIndianPhoneDigits(value))
   .refine((value) => /^[6-9][0-9]{9}$/.test(value), "10 digit ka valid mobile number daaliye");
 
 export const emailSchema = z.string().trim().toLowerCase().email("Valid email daaliye");

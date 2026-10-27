@@ -17,6 +17,12 @@ export default async function SheetPage() {
   const health = (overview as { health?: { ok?: boolean; spreadsheet?: string | null; spreadsheetId?: string | null; rows?: Record<string, number> } }).health;
   const expectedId = (overview as { expectedSheetId?: string }).expectedSheetId;
   const mismatch = Boolean((overview as { sheetMismatch?: boolean }).sheetMismatch);
+  /**
+   * Read path ka live status — "sheet me badla, site par nahi aaya" ki asli wajah
+   * yahan dikhti hai (source, latency, age, last error).
+   */
+  const liveRead = overview.liveRead;
+  const readAgeSec = liveRead?.ageMs == null ? null : Math.round(liveRead.ageMs / 1000);
   const orderRows = recent.orders.slice(0, 10);
   const columns = ["Timestamp", "Event", "Order number", "Order status", "Payment status", "Total", "Customer", "Phone"];
 
@@ -57,8 +63,8 @@ export default async function SheetPage() {
         {overview.configured ? (
           <>
             <strong>Connected</strong>
-            {" "}— settings sheet se live aati hain (15 s), aur har order / payment / message row sheet me
-            append hoti hai. Sheet ka link/token sirf server ke paas rehta hai, kabhi website par nahi dikhta.
+            {" "}— settings sheet se live aati hain (10 s TTL + background refresh), aur har order / payment /
+            message row sheet me append hoti hai. Sheet ka link/token sirf server ke paas rehta hai, kabhi website par nahi dikhta.
             {overview.reachable === false ? (
               <div style={{ marginTop: 6, color: "var(--danger)" }}>
                 Sheet URL configured hai par reply nahi aaya — Apps Script deployment (&quot;Anyone&quot;) aur token
@@ -75,6 +81,64 @@ export default async function SheetPage() {
           </>
         )}
       </div>
+
+      {overview.configured ? (
+        <div
+          className={`notice ${liveRead?.source ? "" : "warn"}`}
+          data-testid="sheet-live-read"
+          style={{ marginTop: 12 }}
+        >
+          {liveRead?.source === "apps-script" ? (
+            <>
+              <strong>Settings sheet se live padhi ja rahi hain ✅</strong>
+              <div style={{ marginTop: 6 }} className="small">
+                Source: <span className="mono">Apps Script</span> · last read{" "}
+                <span className="mono">{liveRead.lastReadMs} ms</span> · value{" "}
+                <span className="mono">{readAgeSec == null ? "—" : `${readAgeSec}s`}</span> purani · TTL{" "}
+                <span className="mono">{Math.round((liveRead.ttlMs ?? 0) / 1000)}s</span> · read timeout{" "}
+                <span className="mono">{Math.round((liveRead.readTimeoutMs ?? 0) / 1000)}s</span>
+                {liveRead.upiId ? (
+                  <>
+                    {" "}· site par UPI: <span className="mono">{liveRead.upiId}</span>
+                  </>
+                ) : null}
+              </div>
+              <div style={{ marginTop: 6 }} className="small muted">
+                Sheet me value badalne ke 10 second ke andar website par aa jaati hai (payment page par turant —
+                wo <span className="mono">?fresh=1</span> se padhta hai). Page reload karke yahan dobara check
+                kariye.
+              </div>
+            </>
+          ) : liveRead?.source === "csv" ? (
+            <>
+              <strong>⚠️ Settings published CSV se aa rahi hain (Apps Script nahi).</strong>
+              <div style={{ marginTop: 6 }} className="small">
+                Google <span className="mono">Publish to web</span> CSV ko ~5 minute cache karta hai — isliye sheet
+                me UPI badalne par site par turant nahi dikhta. Real-time chahiye to Apps Script wala{" "}
+                <span className="mono">/exec</span> URL <span className="mono">GOOGLE_SHEETS_WEBAPP_URL</span> me
+                daaliye (<span className="mono">docs/09-devops/google-sheets.md</span>).
+              </div>
+            </>
+          ) : (
+            <>
+              <strong>⚠️ Sheet configured hai, par settings padhi nahi ja saki.</strong>
+              <div style={{ marginTop: 6 }} className="small">
+                Is wajah se site apni <strong>default</strong> values (UPI ID samet) dikha rahi hai.
+                {liveRead?.lastError ? (
+                  <div style={{ marginTop: 6 }}>
+                    Last error: <span className="mono">{liveRead.lastError}</span>
+                  </div>
+                ) : null}
+              </div>
+              <div style={{ marginTop: 6 }} className="small muted">
+                Check: Apps Script deployment <span className="mono">Who has access: Anyone</span> hai? Token wahi
+                hai jo <span className="mono">GOOGLE_SHEETS_TOKEN</span> me hai? Script ka <strong>New version</strong>{" "}
+                deploy hua? (<span className="mono">/api/sheet-selftest?key=…</span> se poora detail milta hai.)
+              </div>
+            </>
+          )}
+        </div>
+      ) : null}
 
       <div className="panel">
         <div className="panel-head">
@@ -139,7 +203,7 @@ export default async function SheetPage() {
           </div>
           <p className="small muted" style={{ marginBottom: 0 }}>
             Settings page se save karte hi ye values sheet me bhi likh di jaati hain, aur sheet me seedha edit
-            karne par 15 second me website par aa jaati hain.
+            karne par 10 second ke andar website par aa jaati hain (payment page par turant).
           </p>
         </div>
       </div>

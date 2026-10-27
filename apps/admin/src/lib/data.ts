@@ -378,6 +378,18 @@ export type SheetOverview = {
   reachable?: boolean;
   settings?: Partial<StoreSettings>;
   live?: Partial<StoreSettings>;
+  /** settings read path ka sach — sheet se aayi ya defaults se, kitni purani, kya error */
+  liveRead?: {
+    configured?: boolean;
+    source?: "apps-script" | "csv" | null;
+    ageMs?: number | null;
+    stale?: boolean;
+    lastReadMs?: number;
+    lastError?: string | null;
+    ttlMs?: number;
+    readTimeoutMs?: number;
+    upiId?: string | null;
+  };
   sheet?: string | null;
   hint?: string;
   recent?: {

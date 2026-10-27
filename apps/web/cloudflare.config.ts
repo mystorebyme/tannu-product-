@@ -30,9 +30,20 @@ const SECRETS = [
   "RESEND_API_KEY",
 ] as const;
 
+/**
+ * Worker ka naam — default `liksha-storefront`, par **`WORKER_NAME` env se override**.
+ *
+ * Kyun: owner ka Cloudflare worker pehle se **`designer`** naam se bana hua hai (Git
+ * integration usi par hai, domain/routes usi par lage hain). Naam override na ho to
+ * `cf deploy` ek **naya** worker bana deta aur `designer` purana/stale reh jaata.
+ * Cloudflare dashboard → Worker → Settings → Build → **Build variables** me
+ * `WORKER_NAME=designer` daal dein (ya local par `WORKER_NAME=designer npm run deploy:worker`).
+ */
+const WORKER_NAME = process.env.WORKER_NAME?.trim() || "liksha-storefront";
+
 export default defineConfig({
   worker: defineWorker({
-    name: "liksha-storefront",
+    name: WORKER_NAME,
     entrypoint: "vinext/server/fetch-handler",
     compatibilityDate: "2026-10-26",
     compatibilityFlags: ["nodejs_compat"],
@@ -46,6 +57,22 @@ export default defineConfig({
       ...Object.fromEntries(SECRETS.map((name) => [name, bindings.secret()])),
       // public var — koi secret nahi, owner-facing domain
       NEXT_PUBLIC_SITE_URL: bindings.text("https://designerclothing.fashion"),
+      /**
+       * Sheet → site **real-time** knobs (R35).
+       *
+       * Workers par `process.env` sirf wahi padh sakta hai jo yahan declare ho,
+       * isliye ye do values config me hain. UPI ID khud **sheet se** aata hai
+       * (`GOOGLE_SHEETS_WEBAPP_URL`) — env sirf fallback hai, isliye yahan nahi.
+       *
+       *   SHEET_READ_TIMEOUT_MS  Apps Script `doGet` cold start par 1–4s leta hai;
+       *                          900ms par read hamesha timeout hota tha aur site
+       *                          default UPI dikha deti thi.
+       *   SHEET_SETTINGS_TTL_MS  owner ka sheet edit itni der me site par (payment
+       *                          page `?fresh=1` se turant padhta hai).
+       */
+      SHEET_READ_TIMEOUT_MS: bindings.text("4000"),
+      SHEET_SETTINGS_TTL_MS: bindings.text("2000"),
+      SHEET_TRACKING_TTL_MS: bindings.text("2000"),
     },
   }),
 });

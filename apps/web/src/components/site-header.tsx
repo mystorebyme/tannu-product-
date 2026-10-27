@@ -212,7 +212,7 @@ export function SiteHeader() {
           Logo hamesha **center** (owner ask) —
           mobile: [menu] [LOGO] [icons] · desktop: [nav] [LOGO] [icons]
         */}
-        <div className="mx-auto grid h-[66px] max-w-[1400px] grid-cols-[1fr_auto_1fr] items-center gap-2 px-3 sm:h-[74px] sm:px-4 lg:h-[80px] lg:gap-4 lg:px-6">
+        <div className="mx-auto grid h-[66px] max-w-[1400px] grid-cols-[1fr_auto_1fr] items-center gap-2 px-3 sm:h-[74px] sm:px-4 lg:h-[70px] lg:gap-4 lg:px-6">
           <button
             type="button"
             onClick={() => setMobileOpen(true)}
@@ -232,28 +232,6 @@ export function SiteHeader() {
           >
             <BrandLockup />
           </Link>
-
-          <nav className="hidden min-w-0 items-center justify-start gap-2 lg:col-start-1 lg:row-start-1 lg:flex xl:gap-5">
-            {quickLinks.map((link) => {
-              const active = pathname === link.href;
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`relative whitespace-nowrap py-2 text-[10px] font-medium tracking-[.06em] transition-colors hover:text-[#862222] xl:text-[11.5px] xl:tracking-[.1em] ${
-                    active ? "text-[#862222]" : "text-[#222]"
-                  }`}
-                >
-                  {link.label}
-                  {link.label === "SALE" ? (
-                    <span className="absolute -right-3 -top-0.5 rounded-sm bg-[#e02020] px-1 text-[8px] leading-[12px] font-bold text-white">
-                      HOT
-                    </span>
-                  ) : null}
-                </Link>
-              );
-            })}
-          </nav>
 
           <div className="col-start-3 row-start-1 flex items-center justify-end gap-0.5 sm:gap-1.5 lg:col-start-3">
             <button
@@ -315,6 +293,41 @@ export function SiteHeader() {
             </button>
           </div>
         </div>
+
+        {/*
+          R37 (owner: "header bar fix in desktop"): nav ab logo wali row ke **neeche**
+          apni alag centered row me hai. Pehle nav `grid-cols-[1fr_auto_1fr]` ke 1fr
+          column me thi — 1024–1440px par 8 links column se chaudi ho jaati thin aur
+          centered logo ke upar chadh jaati thin (overlap). Alag row me har width par
+          poora nav fit hota hai aur logo hamesha center rehta hai.
+        */}
+        <nav
+          data-testid="desktop-nav"
+          aria-label="Primary"
+          className="hidden border-t border-[#f1ebe5] lg:block"
+        >
+          <div className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-center gap-x-5 gap-y-0.5 px-4 py-1.5 xl:gap-x-8">
+            {quickLinks.map((link) => {
+              const active = pathname === link.href;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`relative whitespace-nowrap py-1 text-[10.5px] font-medium tracking-[.08em] transition-colors hover:text-[#862222] xl:text-[11.5px] xl:tracking-[.1em] ${
+                    active ? "text-[#862222]" : "text-[#222]"
+                  }`}
+                >
+                  {link.label}
+                  {link.label === "SALE" ? (
+                    <span className="absolute -right-3 -top-0.5 rounded-sm bg-[#e02020] px-1 text-[8px] leading-[12px] font-bold text-white">
+                      HOT
+                    </span>
+                  ) : null}
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
 
         {searchOpen ? (
           <div

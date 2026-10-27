@@ -1,5 +1,6 @@
 import { getOrder } from "@/lib/orders";
 import { createPaymentLink } from "@/lib/payments";
+import { getStoreSettingsFast } from "@/lib/store-settings";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +22,9 @@ export async function POST(request: Request) {
   if (order.paymentStatus === "paid") return Response.json({ paid: true });
 
   try {
-    const initiation = await createPaymentLink(order);
+    // UPI sheet/admin settings se live — env ka purana VPA QR me na chala jaaye
+    const settings = await getStoreSettingsFast();
+    const initiation = await createPaymentLink(order, { vpa: settings.upiId, name: settings.upiName });
     return Response.json(initiation);
   } catch (error) {
     console.error("payment initiation failed", error);

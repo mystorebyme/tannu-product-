@@ -8,10 +8,30 @@ import typescript from "eslint-config-next/typescript";
  * tha (matlab lint kabhi chalta hi nahi tha), isliye direct flat config.
  */
 const config = [
+  /**
+   * Build output lint se bahar: `.next` (Next), `.cloudflare`/`.vinext` (vinext ka
+   * worker bundle) aur `out` (GitHub Pages static export).
+   *
+   * ⚠️ Flat config me **global** ignore sirf tab hota hai jab object me `ignores`
+   * akela ho (rules ke saath likhne wo sirf us object ke liye exclude hota hai).
+   * Pehle `.next/**` rules wale object me tha, isliye minified bundle lint ho raha
+   * tha — `vite build` ke baad `npm run lint` 27 rules-of-hooks **error** deta tha
+   * jabki asli code saaf tha.
+   */
+  {
+    ignores: [
+      ".next/**",
+      ".cloudflare/**",
+      ".vinext/**",
+      "out/**",
+      "src/data/catalog.json",
+      "public/catalog-lite.json",
+      "next-env.d.ts",
+    ],
+  },
   ...coreWebVitals,
   ...typescript,
   {
-    ignores: [".next/**", "src/data/catalog.json", "next-env.d.ts"],
     rules: {
       /**
        * Cart/wishlist/compare/settings localStorage me rehte hain. Server par wo

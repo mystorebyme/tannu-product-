@@ -3,6 +3,7 @@ import { readPhoneToken } from "@/lib/otp";
 import { applyPaymentIntent, paymentStatusFor } from "@/lib/orders";
 import { createIntent, ensurePaymentsDir } from "@/lib/payments";
 import { getOrderForPayment } from "@/lib/payments-orders";
+import { getStoreSettingsFast } from "@/lib/store-settings";
 
 export const dynamic = "force-dynamic";
 
@@ -36,12 +37,15 @@ export async function POST(request: Request) {
   }
 
   ensurePaymentsDir();
+  const settings = await getStoreSettingsFast();
   const intent = await createIntent({
     orderNumber: order.orderNumber,
     amount: order.total,
     customerName: order.customerName,
     email: order.email,
     phone: order.phone,
+    // UPI sheet/admin settings se live (env fallback sirf sheet na ho to)
+    upi: { vpa: settings.upiId, name: settings.upiName },
   });
   await applyPaymentIntent(orderNumber, {
     gateway: intent.gateway,

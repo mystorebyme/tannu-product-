@@ -31,16 +31,21 @@ const COPY: Record<string, { label: string; note: string; tone: string }> = {
 };
 
 /**
- * Payment page ka live status. Har 8 second me `/api/orders/<num>/payment` poll
- * karta hai aur status badalte hi server component refresh kar deta hai, isliye
- * customer ko page reload nahi karna padta.
+ * Payment ka live status. Har 5-6 second me `/api/orders/<num>/payment` poll karta
+ * hai aur status badalte hi server component refresh kar deta hai, isliye customer
+ * ko page reload nahi karna padta.
+ *
+ * `onStatusChange` (R36): checkout ka step 3 client-side hai (server prop nahi),
+ * isliye wahan parent ko status chahiye — UPI card ko "paid" dikhane ke liye.
  */
 export function PaymentStatusWatcher({
   orderNumber,
   initialStatus,
+  onStatusChange,
 }: {
   orderNumber: string;
   initialStatus: PaymentState;
+  onStatusChange?: (status: PaymentState) => void;
 }) {
   const [status, setStatus] = useState<PaymentState>(initialStatus);
   const router = useRouter();
@@ -64,6 +69,7 @@ export function PaymentStatusWatcher({
         if (next !== statusRef.current) {
           statusRef.current = next;
           setStatus(next);
+          onStatusChange?.(next);
           router.refresh();
         }
         if (next === "paid") return;
@@ -87,6 +93,7 @@ export function PaymentStatusWatcher({
       document.removeEventListener("visibilitychange", onVisible);
       window.removeEventListener("focus", onVisible);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderNumber, router, status]);
 
   const copy = COPY[status] ?? COPY.pending!;

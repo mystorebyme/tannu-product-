@@ -33,6 +33,30 @@
 - `.data` path: web aur api dono same `DATA_DIR` use karein.
 - Order number case: uppercase.
 
+## Sheet me value badli, site par nahi aayi (UPI / phone / announcement)
+
+Owner ka sabse common complaint. Check order (2 minute):
+
+1. `curl -s https://<site>/api/settings` → `meta.sheetSource` kya hai?
+   - `"apps-script"` ✅ sheet se live aa raha hai (value TTL 10s, payment page `?fresh=1` se turant).
+   - `"csv"` ⚠️ published CSV fallback — Google ~5 minute cache karta hai, real-time nahi.
+     `GOOGLE_SHEETS_WEBAPP_URL` (/exec URL) set karo.
+   - `null` + `meta.sheetLastError` → request Apps Script tak nahi pahunchi
+     (deployment "Anyone" nahi / purana deployment URL / token mismatch / timeout).
+2. Sheet me key naam `upi_id` (lower-case + underscore) hona chahiye, value `name@bank` shape me.
+3. `/api/sheet-selftest?key=<SHEET_SELFTEST_KEY>` → poora detail (HTML reply ka hint bhi).
+4. Admin panel → **Google Sheet** screen → `sheet-live-read` notice (source, last read ms, age, error).
+
+**R35 se pehle ki teen asli wajah** (ab fix, `tests/sheets/settings-realtime.test.ts`):
+read timeout 900ms (Apps Script 1–4s leta hai) → hamesha timeout; fail par cache `null`
+→ last good UPI bhi gayab; payment page 350ms baad **hardcoded default** UPI dikha deta tha.
+
+## Cloudflare Worker deploy: "Could not detect a directory containing static files"
+
+`npx wrangler deploy` **repo root** par chala tha — root par wrangler config hai hi nahi
+(storefront vinext se `apps/web` me banta hai). Deploy command `bash scripts/deploy-cloudflare.sh`
+rakho; poori settings `docs/09-devops/cloudflare-workers.md` §7.1 me hain.
+
 ## Admin login loop
 
 - `ADMIN_SESSION_SECRET` change hua → dobara login.

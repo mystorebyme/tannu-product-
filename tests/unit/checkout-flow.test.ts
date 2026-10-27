@@ -4,11 +4,12 @@ import fs from "node:fs";
 import path from "node:path";
 
 /**
- * Checkout = **3 steps** (owner requirement):
- *   1. delivery details → 2. review → 3. payment page (alag URL).
+ * Checkout = **3 steps** (owner requirement, R36 me update):
+ *   1. delivery details → 2. review → 3. payment — **isi page par** (alag page nahi).
  *
- * Address aur payment kabhi ek hi screen par nahi aane chahiye — payment ki
- * poori detail sirf `/orders/<number>/pay` par hai.
+ * Address aur payment ek saath dikhte nahi: step 1/2 par UPI ka koi zikr nahi,
+ * payment sirf step 3 par (`CheckoutPaymentStep`). `/orders/<number>/pay` deep
+ * links (WhatsApp/email/QR) ke liye bacha hai aur wahi `UpiPayment` render karta hai.
  */
 
 const root = process.cwd();
@@ -41,36 +42,42 @@ test("checkout step 1 continues to review, order is placed only from review", ()
   assert.match(checkout, /data-testid="checkout-continue"/);
   assert.match(checkout, /data-testid="checkout-review"/);
   assert.match(checkout, /setStep\("review"\)/);
-  // submit button sirf review step me dikhta hai
-  // (R33: `showDetails` = !resumed && step === "details" — payment se back par review)
-  assert.match(checkout, /const showDetails = !resumed && step === "details"/);
+  // submit button sirf review step me dikhta hai (R36: payment step alag shell me hai)
+  assert.match(checkout, /const showDetails = !isPayment && !resumed && step === "details"/);
   assert.match(checkout, /\)\s*:\s*showDetails \? \(\s*<button\s+type="button"/);
 });
 
-test("checkout me UPI ID / QR / 'pay here' bilkul nahi — wo sirf payment page par", () => {
-  assert.ok(!checkout.includes('data-testid="upi-payment"'), "checkout par UPI block nahi hona chahiye");
+test("step 1/2 me UPI ID / QR / 'pay here' nahi — payment sirf step 3 par", () => {
+  // checkout form khud UPI render nahi karta — step 3 ka component karta hai
+  assert.ok(!checkout.includes('data-testid="upi-payment"'), "checkout form me UPI block nahi");
   assert.ok(!/UpiApps|upi-apps/.test(checkout), "koi UPI app chip nahi");
-  // UPI QR / upi:// link / "UPI ID" copy checkout par kabhi nahi
-  assert.ok(!/UpiQr/.test(checkout), "checkout par UPI QR nahi");
-  assert.ok(!/buildUpiUri/.test(checkout), "checkout par upi:// link nahi");
-  assert.ok(!/UPI ID/i.test(checkoutCode), "checkout par 'UPI ID' text nahi");
-  assert.ok(!/upiId|upiName/.test(checkoutCode), "checkout par UPI settings nahi");
+  assert.ok(!/UpiQr/.test(checkout), "checkout form me UPI QR nahi");
+  assert.ok(!/buildUpiUri/.test(checkout), "checkout form me upi:// link nahi");
+  assert.ok(!/upi:\/\//.test(checkout), "checkout form me UPI scheme nahi");
+  assert.ok(!/UPI ID/i.test(checkoutCode), "step 1/2 par 'UPI ID' text nahi");
   assert.ok(!/dhakadgourav/.test(checkout), "UPI ID hard-code nahi");
+  // step 3 wahin khulta hai, sirf isPayment par
+  assert.match(checkout, /<CheckoutPaymentStep/);
+  assert.match(checkout, /\{isPayment \? \(/);
   assert.match(payPage, /UpiPayment/);
 });
 
-test("payment page par ek hi 'Open UPI app' + auto status detection (koi app brand nahi)", () => {
+test("payment par ek hi 'Pay on UPI' button + auto status detection (koi app brand nahi)", () => {
   assert.match(upiLib, /export function buildUpiUri/);
   assert.match(upiPayment, /data-testid="upi-open"/);
   assert.match(upiPayment, /data-testid="upi-recheck"/);
+  assert.match(upiPayment, /Pay on UPI/);
   // owner rule: GPay/PhonePe/Paytm ke naam kahin nahi
   assert.ok(!/Google Pay|PhonePe|Paytm|BHIM/i.test(upiPayment), "payment page par app brand nahi");
   assert.ok(!/tez:\/\/|phonepe:\/\/|paytmmp:\/\//.test(upiPayment), "app-specific schemes nahi");
   assert.match(payPage, /PaymentStatusWatcher/);
 });
 
-test("order place hote hi payment page khulta hai (?pay=1 se UPI app chooser)", () => {
-  assert.match(checkout, /router\.push\(`\/orders\/\$\{[^}]+\}\/pay\?pay=1`\)/);
+test("order place hote hi payment step 3 checkout ke andar khulta hai (alag page nahi)", () => {
+  assert.match(checkout, /goToPayment\(result\.data\.orderNumber\)/);
+  assert.match(checkout, /window\.history\.pushState\(\{\}, "", paymentUrl\(target\)\)/);
+  assert.doesNotMatch(checkout, /router\.push\(`\/orders\//, "payment page par redirect nahi");
+  assert.doesNotMatch(checkout, /\?pay=1/, "UPI auto-open wala flag hata diya gaya");
 });
 
 test("checkout funnel events DB + sheet me jaate hain", () => {

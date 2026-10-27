@@ -72,16 +72,26 @@ export default async function HomePage() {
   const newArrivalsCollection = await getCollection("new-arrivals");
   const saleCollection = await getCollection("sale");
   const choiceCollection = await getCollection("likshas-choice");
+  const weddingCollection = await getCollection("wedding-collection");
+
+  /**
+   * R37 (owner): "wedding wale circle me image nahi dikh rhi" — pehle Wedding ka
+   * image hardcoded `undefined` tha, isliye circle khaali beige ring dikhta tha.
+   * Ab har circle ka image collection se aata hai, aur collection me image na ho
+   * to us collection ka **pehla product photo** fallback (circle kabhi khaali nahi).
+   */
+  const circleImage = (collection: { image?: string | null } | undefined, handle: string) =>
+    collection?.image ?? byCollection(handle)[0]?.images[0] ?? null;
 
   // "Shop by edit" circles — ek line me, live store ka style
   const circleItems = [
-    { href: "/collections/party-wear-gown", title: "Anarkali Suit", image: anarkaliCollection?.image, count: byCollection("party-wear-gown").length },
-    { href: "/collections/lehnga-choli", title: "Lehnga Choli", image: lehngaCollection?.image, count: byCollection("lehnga-choli").length },
-    { href: "/collections/printed-suit-set", title: "Printed Suit Set", image: printedCollection?.image, count: byCollection("printed-suit-set").length },
-    { href: "/collections/new-arrivals", title: "New Arrivals", image: newArrivalsCollection?.image, count: byCollection("new-arrivals").length },
-    { href: "/collections/likshas-choice", title: "Liksha's Choice", image: choiceCollection?.image, count: byCollection("likshas-choice").length },
-    { href: "/collections/sale", title: "Sale", image: saleCollection?.image, count: byCollection("sale").length },
-    { href: "/collections/wedding-collection", title: "Wedding", image: undefined, count: byCollection("weddin-collection").length },
+    { href: "/collections/party-wear-gown", title: "Anarkali Suit", image: circleImage(anarkaliCollection, "party-wear-gown"), count: byCollection("party-wear-gown").length },
+    { href: "/collections/lehnga-choli", title: "Lehnga Choli", image: circleImage(lehngaCollection, "lehnga-choli"), count: byCollection("lehnga-choli").length },
+    { href: "/collections/printed-suit-set", title: "Printed Suit Set", image: circleImage(printedCollection, "printed-suit-set"), count: byCollection("printed-suit-set").length },
+    { href: "/collections/new-arrivals", title: "New Arrivals", image: circleImage(newArrivalsCollection, "new-arrivals"), count: byCollection("new-arrivals").length },
+    { href: "/collections/likshas-choice", title: "Liksha's Choice", image: circleImage(choiceCollection, "likshas-choice"), count: byCollection("likshas-choice").length },
+    { href: "/collections/sale", title: "Sale", image: circleImage(saleCollection, "sale"), count: byCollection("sale").length },
+    { href: "/collections/wedding-collection", title: "Wedding", image: circleImage(weddingCollection, "weddin-collection"), count: byCollection("weddin-collection").length },
   ];
 
   const jsonLd = {

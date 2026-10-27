@@ -5,7 +5,7 @@ Google Sheet se hote hain:
 
 | Sheet | Kya hota hai | Website kya karti hai |
 | --- | --- | --- |
-| **Settings** | owner phone, WhatsApp, email, UPI ID, payee name, announcement, GSTIN, free shipping badalta hai | har **15 second** me padhti hai (`/api/settings`, `no-store`) — redeploy nahi |
+| **Settings** | owner phone, WhatsApp, email, UPI ID, payee name, announcement, GSTIN, free shipping badalta hai | har **10 second** me padhti hai (`/api/settings`, `no-store`); payment page **turant** (`?fresh=1`) — redeploy nahi |
 | **Orders** | har order + status change ki nayi row | order place / status change par append |
 | **Payments** | UTR submit + payment verified rows | payment reference submit aur verify par append |
 | **Messages** | contact form ke messages | message save hone par append |
@@ -111,12 +111,128 @@ curl -s -X POST "$SHEET_URL" \
 
 | File | Kaam |
 | --- | --- |
-| `apps/web/src/lib/google-sheets.ts` | settings read (15s cache) + rows append (6s timeout, best-effort) |
+| `apps/web/src/lib/google-sheets.ts` | settings read (4s timeout, 10s TTL + stale-while-revalidate, fail par **last good** value, Workers par edge cache) + rows append (6s timeout, best-effort) |
 | `apps/web/src/lib/sheet-format.ts` | pure row/format helpers (unit tested) |
-| `apps/web/src/lib/store-settings.ts` | DB/file settings + sheet merge (sheet jeetti hai) |
+| `apps/web/src/lib/store-settings.ts` | DB/file settings + sheet merge (sheet jeetti hai) + `getStoreSettingsFast()` — payment page: cache ho to turant, cold ho to 3s tak asli read, aur jab tak koi **last good** value hai tab tak hardcoded default kabhi nahi |
 | `apps/web/src/lib/orders.ts` | `order.placed`, `order.status.*`, `payment.paid`, `payment.reference_submitted`, `order.tracking_updated` par append |
 | `apps/web/src/lib/messages.ts` | contact message + newsletter subscriber append |
-| `apps/web/src/app/api/settings/route.ts` | public settings (UPI, phone, email, announcement) no-store |
+| `apps/web/src/app/api/settings/route.ts` | public settings (UPI, phone, email, announcement) no-store · `?fresh=1` = sheet se abhi padho · `meta` = read diagnostics |
+| `apps/web/src/components/store-settings-provider.tsx` | browser me har 15s + tab focus par refresh — sheet ka change bina page reload dikhta hai |
+| `apps/web/src/components/upi-payment.tsx` | payment page ka QR/UPI ID live sheet se (page pehle se khula ho to bhi naya UPI aa jaata hai) |
+
+## 4b. Real-time: sheet me badla, site par **kab** dikhta hai?
+
+| Jagah | Kab tak | Kaise |
+| --- | --- | --- |
+| Payment page (UPI ID + QR) | **turant** (page khulte hi) | client `/api/settings?fresh=1` call karta hai — sheet se abhi padh kar |
+| Announcement bar, WhatsApp number, footer, shipping line | ≤ 15 second | provider har 15s poll karta hai; tab par wapas aate hi turant |
+| Server-rendered pages (order page, invoice, contact) | ≤ 10 second | server TTL 10s + stale-while-revalidate (page kabhi sheet ka intezaar nahi karta) |
+| Naya Cloudflare Worker isolate / Vercel cold start | turant | last good value Cloudflare Cache API me rehti hai — defaults par nahi jaata |
+
+Page kabhi **block** nahi hota: sheet slow ya down ho to purani (par sahi) value turant
+jaati hai aur nayi background me aa jaati hai. Read fail hone par bhi site
+**default UPI par nahi girti** — last good value chalti rehti hai.
+
+Tuning (env): `SHEET_READ_TIMEOUT_MS` (default 4000), `SHEET_SETTINGS_TTL_MS` (default
+10000), `SHEET_SETTINGS_STALE_MS` (default 600000). Workers par ye do pehle
+`apps/web/cloudflare.config.ts` me declared hain.
+
+### "Sheet me UPI badla, site par nahi aaya" — 3 minute me check
+
+1. **Key naam sahi hai?** `Settings` tab me row `upi_id` (column A), value column B me.
+   Script lower-case + underscore padhta hai: `upi_id`, `upi_name`, `support_phone`,
+   `whatsapp`, `announcement`, `gstin`, `free_shipping`, `admin_url`.
+2. **Value valid UPI hai?** `name@bank` shape (jaise `owner@ybl`). Galat shape ho to site
+   use ignore karke purani (sahi) value rakhti hai.
+3. **Site se poochho** — `curl -s https://<site>/api/settings`:
+   - `data.upiId` = sheet wala UPI → sab theek (browser me hard refresh kariye).
+   - `meta.sheetSource: "apps-script"` → sheet se aa raha hai ✅
+   - `meta.sheetSource: "csv"` → ⚠️ published CSV fallback; Google ise ~5 minute cache
+     karta hai → Apps Script ka `/exec` URL set kariye (tabhi real-time milega).
+   - `meta.sheetSource: null` + `meta.sheetLastError` → request Apps Script tak nahi
+     pahunchi. Wajah usually: deployment **"Anyone"** nahi, purana/archived deployment
+     URL, ya token mismatch. `/api/sheet-selftest?key=…` poora detail deta hai.
+4. **Admin panel → Google Sheet** screen par wahi status insaani bhasha me dikhta hai
+   (`sheet-live-read` notice): source, last read ms, value kitni purani, last error.
+5. Sab sahi hai par browser me purana dikh raha → tab par wapas aate hi refresh hota hai,
+   ya 15 second rukhein. CDN/browser cache nahi hai (`cache-control: no-store`).
+
+> **R35 se pehle kya toota tha:** read timeout 900ms tha jabki Apps Script 1–4 second
+> leta hai → read hamesha timeout → site chup-chaap **default UPI** dikha deti thi.
+> Payment page to 350ms baad hi default par chala jaata tha. Teeno wajah ab fix hain
+> (`tests/sheets/settings-realtime.test.ts` inhe naapta hai).
+
+## 4c. Vercel par sheet config (`designerclothing.fashion`) — kya set hai, dobara kaise karein
+
+Storefront Vercel project **`liksha-clothing`** par chalta hai (root directory `apps/web`,
+build command `cd ../.. && npm run build --workspace @liksha/web`, domains
+`designerclothing.fashion` + `www.`). Admin panel alag project **`liksha-admin`** (root
+`apps/admin`) par hai. 27 Oct 2026 ko Vercel API se verify kiya — `liksha-clothing` me ye set hai:
+
+| Env variable | Status | Kaam |
+| --- | --- | --- |
+| `GOOGLE_SHEETS_WEBAPP_URL` | ✅ set (`script.google.com/macros/s/…/exec`) | Apps Script web app (settings + rows) |
+| `GOOGLE_SHEETS_TOKEN` | ✅ set (encrypted) | Apps Script ka `TOKEN` |
+| `SHEET_SELFTEST_KEY` | ✅ set (encrypted) | `/api/sheet-selftest?key=…` debugging |
+| `DATABASE_URL`, `ADMIN_API_TOKEN`, `OTP_TOKEN_SECRET`, `UPI_RETURN_SECRET` | ✅ set | order DB + payment confirm |
+| `STORE_UPI_ID` / `STORE_UPI_NAME` | ✅ `dhakadgourav@fam` / `Designer Clothing` | **sirf fallback** — sheet na chale tab |
+| `GOOGLE_SHEETS_SETTINGS_CSV_URL` | ❌ nahi | optional fallback (~5 min Google cache) — real-time ke liye zaroori nahi |
+| `SHEET_READ_TIMEOUT_MS` / `SHEET_SETTINGS_TTL_MS` | ❌ nahi (default 4000 / 10000) | tuning chahiye tabhi add karein |
+
+### Sheet "vapis configure" karni ho (script badla / naya deployment banaya)
+
+1. Apps Script editor → **Deploy → Manage deployments** → ✏️ Edit → Version: **New version** →
+   Execute as **Me** → Who has access **Anyone** → **Deploy**.
+   ⚠️ Script edit karke sirf *Save* karne se `/exec` URL **update nahi hota** — new version
+   deploy karna zaroori hai. **Naya** deployment banaya to URL hi badal jaata hai.
+2. Apps Script ka `TOKEN` aur Vercel ka `GOOGLE_SHEETS_TOKEN` same hona chahiye.
+3. Vercel → project **`liksha-clothing`** → Settings → Environment Variables →
+   `GOOGLE_SHEETS_WEBAPP_URL` (aur zaroorat ho to `GOOGLE_SHEETS_TOKEN`) → **Save**.
+4. **Redeploy** zaroori: Deployments → latest → ⋯ → **Redeploy** (env change existing
+   deployment par apply nahi hota).
+5. Verify:
+   ```bash
+   curl -s "https://designerclothing.fashion/api/settings?fresh=1"     # meta.sheetSource + data.upiId
+   curl -s "https://designerclothing.fashion/api/sheet-selftest?key=<SHEET_SELFTEST_KEY>"
+   ```
+
+> **Vercel-specific fix (R36):** background sheet refresh pehle `void promise` tha — Vercel par
+> response jaate hi function freeze ho sakta hai, isliye refresh adhoora reh jaata tha. Ab
+> `runInBackground()` (Next `after()`) chalta hai: response ke baad bhi platform task poora
+> karta hai. Cloudflare Workers par wahi fire-and-forget fallback chalta rehta hai.
+
+> **Pehle production par purana code tha:** R35 ka sheet fix merge/deploy na hone ki wajah se
+> live site 900ms-timeout wala reader chala rahi thi (sheet ka UPI ignore → default UPI).
+> Sheet ka asar dikhne ke liye **deploy zaroori** hai — `docs/00-overview/owner-report-round36.md` §5.
+
+### Checkout ka step 3 aur sheet
+
+Payment ab checkout ke **andar step 3** par hai (`/checkout?step=payment&order=LK-…`, R36 se).
+Wo UPI `/api/orders/<n>/payment-context` se leta hai, jo `getStoreSettingsFast()` se
+**sheet-first** UPI deta hai — sheet me UPI badalte hi naya order naye VPA par banta hai
+(deploy/restart ki zaroorat nahi).
+
+## 4d. Sheet = order ka DB (R37, trends-sheets.gs pattern)
+
+Owner ki dusri repo (`mystorebyme/manoj-Product` → `scripts/google-apps-script/trends-sheets.gs`)
+ka core idea: **ek sheet tab me hi placed / confirmed / shipped / delivered + replied / marked
+reply**. Hamari `liksha-sheets.gs` (version **r37-1**) me wahi aa gaya:
+
+1. **`onEdit(e)`** (simple trigger, install ki zaroorat nahi):
+   - `Orders` tab ka `Order status` cell badla → nayi timeline row append
+     (`Event = order.status_sheet`) ⇒ site ka timeline + status update.
+   - `Messages` tab ka `Status` me `replied` / `done` / `closed` ⇒ `Replied = YES` +
+     `Replied at` = abhi (marked-reply).
+2. **Store merge** — `lib/sheet-tracking.ts` (`?action=timeline&order=…&phone=…`, 2s TTL + SWR +
+   `?fresh=1`) + `lib/sheet-merge.ts` (pure): sheet ka status/courier/AWB/Tracking URL/note +
+   updates DB ke order par merge hote hain **jab sheet DB se aage ho** (cancel/return hamesha).
+   `paymentStatus` hamesha DB se — paisa sheet se override nahi hota.
+3. **Instant knobs** (Vercel env, store project): `SHEET_READ_TIMEOUT_MS=4000`,
+   `SHEET_SETTINGS_TTL_MS=2000`, `SHEET_TRACKING_TTL_MS=2000`; browser poll 3s.
+4. **Apps Script update zaroori**: sheet → Extensions → Apps Script → naya code
+   (`docs/00-overview/apps-script-code.md`) → Deploy → Manage deployments → Edit →
+   **New version** → Deploy. (Purane version par status merge chalta hai; `onEdit` wala
+   auto-timeline + marked-reply naye version se.)
 
 ## 5. Security
 

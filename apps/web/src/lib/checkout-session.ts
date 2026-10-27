@@ -1,7 +1,7 @@
 /**
  * Checkout session — "payment se back → review" (owner rule, R33).
  *
- * Flow: 1) delivery details → 2) review → 3) payment page (alag URL).
+ * Flow: 1) delivery details → 2) review → 3) payment (checkout ke andar hi).
  * Order place hote hi cart khali ho jaata hai, isliye payment page se wapas
  * aane par review dikhane ke liye order ka ek chhota snapshot `sessionStorage`
  * me rakhte hain. Isme **koi payment/UPI detail nahi** hoti — sirf wahi cheezein
@@ -92,7 +92,22 @@ export function readPlacedOrder(orderNumber?: string | null, now: number = Date.
   }
 }
 
-/** Review page ka URL — payment se "back" isi par jaata hai. */
+/** Review (step 2) ka URL — payment se "back" isi par jaata hai. */
 export function reviewUrl(orderNumber: string): string {
   return `/checkout?step=review&order=${encodeURIComponent(orderNumber)}`;
+}
+
+/**
+ * Payment (step 3) ka URL — **checkout ke andar hi**, alag page nahi (owner, R36).
+ *
+ * Iska do fayda:
+ *   1. Order place hote hi yahi URL history me push hota hai → step 3 khulta hai,
+ *      aur browser ka back review (step 2) par jaata hai.
+ *   2. Customer baad me wahi order kholta hai (link/refresh/doosra tab) to
+ *      `/checkout?step=payment&order=LK-…` se payment dobara chal jaata hai —
+ *      data `/api/orders/<n>/payment-context` se aata hai.
+ * UPI app ka callback bhi isi URL par aata hai (`&upi=return&t=…`).
+ */
+export function paymentUrl(orderNumber: string): string {
+  return `/checkout?step=payment&order=${encodeURIComponent(orderNumber)}`;
 }

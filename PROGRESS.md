@@ -586,3 +586,161 @@ likhega). Uske baad `/api/sheet-selftest` + connector se row confirm karna hai.
       → **88/0** (`dev:vinext`) aur `BASE_URL=…:8787 npm run test:smoke` → **88/0**
       (`vite preview` = production bundle; local values `apps/web/.env` se)
 - [ ] **Preview deploy nahi hua** — Cloudflare credentials nahi the; DNS/Vercel production jaisa hi hai
+
+### R35 — Sheet settings **real-time** (UPI fix) + Cloudflare Worker deploy steps
+
+Owner (26 Oct 2026): "sheet me UPI change kiya par real time me change nahi hui … jo cheez
+sheet se data dekh kar turant change hoti hai wo honi chahiye" + Cloudflare build
+`✘ Could not detect a directory containing static files`.
+
+**Teen asli wajah mili (guess-patch nahi):**
+1. `READ_TIMEOUT_MS = 900` jabki Apps Script `doGet` cold start par 1–4s leta hai →
+   read **hamesha** timeout → site defaults par.
+2. Read fail par cache `value: null` → **last good UPI bhi gayab**.
+3. Payment page `getStoreSettingsFast(350)` → 350ms baad **hardcoded default UPI**
+   (paisa purane VPA par jaane ka risk). Plus: cache garam ho to TTL check hi nahi tha
+   (stale-forever), aur UPI ID server-render par atka tha (client refresh ka asar nahi).
+
+- [x] `google-sheets.ts`: timeout **4s** (env `SHEET_READ_TIMEOUT_MS`), TTL **10s**
+      (`SHEET_SETTINGS_TTL_MS`), stale window 10 min (`SHEET_SETTINGS_STALE_MS`),
+      **stale-while-revalidate** + single-flight, fail par **last good** value,
+      cache-buster `_ts`, aur Workers ke liye **Cloudflare Cache API** (cold isolate
+      default par na jaaye; Node par no-op feature-detect)
+- [x] `store-settings.ts`: SWR merge, DB/fail-safe, `getStoreSettingsFast(3_000)` —
+      cache ho to turant (purani **sahi** value > default), cold ho to budget tak asli read;
+      naya `storeSettingsInfo()` diagnostics
+- [x] `/api/settings`: `?fresh=1` (sheet se abhi padho) + `meta` (sheetSource / ageMs /
+      stale / lastError / ttl / timeout) — koi secret nahi; `no-store` waisa hi
+- [x] Client: provider 30s → **15s** poll + `live` flag + `refresh({fresh})`;
+      **payment page ka UPI ID/QR/copy/WhatsApp text live sheet se** (page pehle se khula
+      ho tab bhi naya UPI aa jaata hai, hydration-safe)
+- [x] Legacy payment routes (`/api/payments`, `/api/payments/intent`) + `manualUpiUri()`
+      ab sheet ka live UPI use karte hain (pehle sirf env `STORE_UPI_ID`)
+- [x] Admin: `/api/admin/sheet` → `liveRead`; **Google Sheet screen** par naya notice
+      (Apps Script ✅ / CSV ⚠️ ~5min Google cache / fail ⚠️ + last error), purana "15s" copy hata
+- [x] Cloudflare: `scripts/deploy-cloudflare.sh` + `npm run deploy:worker`,
+      `.github/workflows/cloudflare-worker.yml` (manual), `cloudflare.config.ts` me
+      `SHEET_READ_TIMEOUT_MS` + `SHEET_SETTINGS_TTL_MS` declared (Workers par
+      `process.env` sirf declared vars padhta hai)
+- [x] Tests: naya suite **`tests/sheets/settings-realtime.test.ts` (10)** — asli code +
+      stub network (1.5s slow read chalta hai, fail par last good, TTL me 1 call, SWR,
+      CSV fallback, cold-start payment page default par nahi) + `npm run test:sheets`
+      (`--conditions=react-server`) `test:all` me juda; guards **`tests/unit/round35.test.ts` (12)**
+- [x] Verify: unit **229/0** (pehle 217), integration **40/0**, db **9/0**, typecheck ✓ (web+admin),
+      lint **0 errors / 33 warnings** (baseline same), `npm run audit -- --check` ✅ (A·A·A·A·A),
+      `vite build` (vinext) ✓, **workerd preview par smoke 88/0**, payment page ~25ms 200,
+      `/api/settings` → `sheetTtlMs 10000 · sheetReadTimeoutMs 4000`
+- [x] Docs: `docs/09-devops/google-sheets.md` §4b (real-time table + 3-minute troubleshooting),
+      `docs/09-devops/cloudflare-workers.md` §7.0–7.6 (error ki wajah + dashboard ki 3 settings +
+      token + secrets + verify), `agent-guides/troubleshoot-storefront.md` (2 naye section),
+      `.env.example`, **`docs/00-overview/owner-report-round35.md`** (owner ke liye poori guide)
+- [ ] **Deploy baaki** — Vercel (production) par ye code jaana zaroori hai, warna sheet wala
+      UPI live nahi hoga; Cloudflare Worker chahiye to §5.2 ki 3 settings + secrets
+
+### R36 — Address yaad (recommend) + payment **step 3 par yahin** + UPI auto-redirect band
+
+Owner (27 Oct 2026): "ek baar address card ki detail fill kare to sab cache me save kar lena,
+next time direct recommend ho jaaye"; "payment ka alag se page nahi khulna chahiye — wahi 3rd
+step me kaam kare, back jaane par bhi, aur wapis usi order me payment par jaane par bhi";
+"payment page par jaate hi UPI par redirect na kare, Pay on UPI kare tab jaakar UPI detect ho";
+"sheet ko vapis se configure karo — vaise abhi Vercel par deploy hai, fix karo".
+
+- [x] **Saved delivery details** — naya `lib/checkout-details.ts` (localStorage, 6 mahine,
+      pure `normaliseCheckoutDetails`: country-code/leading-0 → 10 digit, HTML/length clip,
+      adhoori details save nahi). Checkout mount par prefill + green notice
+      (`saved-address`) + "Naya address bharein" (`saved-address-clear`); save `goToReview`
+      aur order place par. Browser autofill ke liye `autocomplete` attrs
+      (name/tel/email/street-address/address-level2/address-level1/postal-code)
+- [x] **Payment step 3 = checkout ke andar** (alag page nahi): naya
+      `components/checkout-payment-step.tsx` + naya API
+      `GET /api/orders/[orderNumber]/payment-context` (amount, **sheet-first live UPI**,
+      status, reference, signed UPI-return token, items, name/city/state/pincode +
+      `phoneMasked` — poora address/email/phone **nahi**). URL `/checkout?step=payment&order=LK-…`
+- [x] History: order place par `replaceState(reviewUrl)` → `pushState(paymentUrl)` ⇒ browser
+      **back** = review; `popstate` listener se step URL-sync (refresh/share/doosra tab par bhi
+      step 3 chalta hai; snapshot na ho to context se review/summary ban jaati hai)
+- [x] Step 3 par outer `<form>` render nahi hota (UPI card ke andar apna form hai — nested form
+      invalid HTML + outer submit se doosra order ban jaata)
+- [x] **UPI auto-redirect hata**: `?pay=1` + `appOpened` + `window.location.href = upiUri`
+      effect delete; button ab **"Pay on UPI · ₹…"** (tap = asli gesture)
+- [x] **Auto-confirm bug fix**: UPI callback pehle `/orders/<n>` par jaata tha (jahan
+      `UpiPayment` render hi nahi hota) → `upi=return` koi nahi padhta tha. Ab `returnPath`
+      prop: step 3 → `/checkout?step=payment&order=<n>`, pay page → `/orders/<n>/pay`;
+      confirm hote hi `onConfirmed()` → status "paid"
+- [x] Last-4 prefill: `defaultLast4` (pay page: order ke phone se, step 3: form/saved phone se)
+      — "payment ho gaya" ek tap me
+- [x] `PaymentStatusWatcher` me `onStatusChange` (step 3 client-side hai, server prop nahi)
+- [x] **Vercel fix**: `google-sheets.ts` + `store-settings.ts` ka background refresh ab
+      `runInBackground()` (Next `after()`) se — pehle `void promise` tha aur Vercel par
+      response ke baad function freeze hone se sheet refresh adhoora reh jaata
+- [x] Vercel config verify (API se): project **`liksha-clothing`** (root `apps/web`,
+      domains designerclothing.fashion + www) me `GOOGLE_SHEETS_WEBAPP_URL`,
+      `GOOGLE_SHEETS_TOKEN`, `SHEET_SELFTEST_KEY`, `DATABASE_URL`, `UPI_RETURN_SECRET`,
+      `STORE_UPI_ID=dhakadgourav@fam` **set hain**; CSV URL nahi (optional). Production
+      deployment commit `9704b3b` ka tha ⇒ **R35/R36 ka code live nahi tha** (asli wajah)
+- [x] **Lint fix (bonus)**: `apps/web/eslint.config.mjs` me `ignores` rules wale object ke
+      andar tha — flat config me wo *global* ignore nahi hota, isliye `.next`/`.cloudflare`
+      ke minified bundle lint ho rahe the (`vite build` ke baad 27 rules-of-hooks **error**
+      + lint 4.5 minute leta tha). Ab `ignores` alag object me + `.cloudflare`/`.vinext`/`out`
+      add ⇒ **0 errors / 35 warnings, 9 second**
+- [x] **CI ka stale guard fix**: `tests/e2e/responsive.mjs` me purana check
+      "order page auto-opens the UPI app" `?pay=1` + `window.location.href = upiUri` ko
+      **zaroori** maanta tha — R36 me wahi code hataya, isliye CI ka `production-build smoke`
+      job fail hua. Ab guard ulta hai (auto-open code **nahi** hona chahiye + intent sirf
+      `upi-open` ke href se), aur `round36.test.ts` isi ko pin karta hai
+- [x] Tests: naya **`tests/unit/round36.test.ts` (17)**; `checkout-flow` + `round33` +
+      `round27` guards naye flow ke hisaab se; `tests/e2e/smoke.mjs` me payment-context
+      (200/404, live UPI, return token, privacy, `no-store`) + pay-page deep-link checks
+- [x] Verify: unit **245/0** (pehle 229), integration 40/0, sheets 10/10, db 9/0 ⇒
+      **304/0**; typecheck ✓ (web); `next build` ✓ (`/checkout` static hi raha,
+      `/api/orders/[orderNumber]/payment-context` ƒ); `vite build` (vinext) ✓;
+      workerd preview par **smoke 100/0** (pehle 88), `payments.mjs` 59/0, `round23.mjs` 23/0;
+      lint 0 errors
+- [x] **CI-parity verify** (Next production build + `next start` :3000, jaise CI karta hai):
+      smoke **100/0**, responsive **44/0**, breakpoints **48/0**, round16 **39/0**,
+      payments **59/0**, links **45 pages/0**
+- [x] Docs: **`docs/00-overview/owner-report-round36.md`**, `docs/09-devops/google-sheets.md`
+      **§4c (Vercel config + "vapis configure" ke 5 step + Vercel `after()` fix)**,
+      `docs/00-overview/owner-code-map.md`
+- [ ] **Deploy baaki** — Vercel `liksha-clothing` production par ye code jaana zaroori hai
+      ( warna na address recommend hoga, na step-3 payment, na sheet ka live UPI)
+
+### R37 — Sheet = order ka DB + phone prefix auto + header/circles fix + Vercel deploy
+
+Owner (27 Oct 2026, voice): Paytm "Payment Alert" screenshot ("direct phone se detect krta hai
+na UPI direct, fix kro"); "prkigothwal@gmail.com se DB connect + wahi se sheet ka Apps Script";
+"header bar fix in desktop"; "Vercel par sheet ke environment add kr dena"; "manoj-Product wali
+`trends-sheets.gs` dekho — ek box me placed/confirmed/shipped, replied/marked reply — DB ko sheet
+se manage karo"; "admin ko mat chhedo, only store + DB sheet"; "instant means instant (phone,
+UPI…)"; "har device comfortable"; "wedding circle me image nahi"; "phone me +91/91/0 auto hatao,
+10 digit"; "sab fix ke baad Vercel par latest deploy + push".
+
+- [x] **Paytm alert**: asli wajah production ka purana `?pay=1` auto-open (R36 me code hata tha,
+      live nahi tha). Ab UPI sirf tap par + naya `upi-risk-hint` (QR / UPI-ID copy raasta);
+      koi app brand nahi (owner rule guard se pin)
+- [x] **Phone prefix**: `lib/phone.ts` → `normaliseIndianPhone` + `autoFixPhoneInput` (type karte
+      hi `+91 / 91 / 0` hat jaate hain); `packages/validation` phoneSchema wahi (server par bhi
+      sirf 10 digit save); checkout payload me saaf number; contact form isi schema se
+- [x] **Wedding circle**: image hardcoded `undefined` thi → `circleImage()` (collection image,
+      fallback pehla product photo); smoke me "saare circles me img" guard
+- [x] **Desktop header**: nav 1fr column se logo par chadh jaati thi → alag centered row
+      (`desktop-nav`), logo hamesha center; mobile drawer unchanged
+- [x] **Sheet = DB** (trends-sheets.gs pattern): `liksha-sheets.gs` **r37-1** me `onEdit` —
+      `Orders!Order status` edit → timeline row (`order.status_sheet`), `Messages!Status` →
+      `Replied`/`Replied at` (marked-reply). Store side naya `lib/sheet-tracking.ts` (fetch +
+      2s TTL + SWR) + `lib/sheet-merge.ts` (pure merge: sheet status/courier/AWB/URL/note +
+      timeline updates; **paymentStatus hamesha DB**); order page + `/api/orders/<n>/public`
+      (`?fresh=1`) merge karte hain
+- [x] **Instant**: settings TTL 10s→**2s**, browser poll 15s→**3s**, tracking TTL **2s**;
+      worker bindings bhi (`cloudflare.config.ts`); payment-context pehle se `no-store`
+- [x] **Vercel env (store only)**: `liksha-clothing` par API se add — `SHEET_READ_TIMEOUT_MS=4000`,
+      `SHEET_SETTINGS_TTL_MS=2000`, `SHEET_TRACKING_TTL_MS=2000` (production+preview).
+      Admin project chheda nahi
+- [x] Tests: naya `tests/unit/round37.test.ts` (13); smoke me +4 checks (desktop-nav, wedding
+      circle img, `+91` phone se order 201, public `?fresh=1`); round35 guards naye knobs par
+- [x] Verify: unit **259/259**, integration 40, sheets 10, db 9 ⇒ **318/318**; lint 0 errors/38
+      warnings; audit sab A; `next build` + `vite build` ✅; Next-prod parity smoke **104/0**,
+      responsive 44/0, breakpoints 48/0, payments 59/0, links 45/0; workerd preview **104/0**
+- [x] Docs: **`docs/00-overview/owner-report-round37.md`**, `google-sheets.md` §4d,
+      `owner-code-map.md`, `apps-script-code.md` (auto-export r37-1)
+- [x] **Deploy**: owner ke kehne par PR #8 merge → `main` → Vercel `liksha-clothing` production
