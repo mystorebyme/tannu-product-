@@ -526,7 +526,7 @@ export function CheckoutForm() {
       goToPayment(result.data.orderNumber);
     } catch (error) {
       console.warn("order submit failed", error);
-      setError("Order server tak nahi pahuncha. Dobara try kariye, ya WhatsApp par order bhej dijiye — wahan hum turant confirm karte hain.");
+      setError("Order abhi complete nahi hua. Dobara try kariye, ya WhatsApp par order bhej dijiye — team turant confirm karegi.");
       setFallbackReason("failed");
       setFallbackHref(whatsappOrderLink());
       trackCheckout("order.failed", { reason: (error as Error)?.message ?? "network" });
@@ -981,7 +981,7 @@ export function CheckoutForm() {
               </p>
             ) : (
               <p className="text-[11.5px] leading-relaxed text-[#6b6259]">
-                Order server par save nahi hua. <strong>Dobara try</strong> kariye — ya WhatsApp par
+                Order abhi complete nahi hua. <strong>Dobara try</strong> kariye — ya WhatsApp par
                 order bhej dijiye, team turant confirm karegi.
               </p>
             )}

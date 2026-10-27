@@ -1195,3 +1195,42 @@ test("R40: message_status — 'handled' Replied state ko nahi chhuta", () => {
   assert.equal(rows.rows[0].Replied, "yes", "replied preserve (R40 fix)");
   assert.equal(rows.rows[0]["Replied at"], "2026-10-27T03:00:00.000Z");
 });
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * R41 — compat contract: site purane script (r38-1) par bhi orders sheet me
+ * save/read karti hai. Uske liye r40-1 me bhi purane actions zinda rehne
+ * chahiye: `?action=order` (orderStory_ = tab-wise rows) aur `?action=recent`
+ * (newest-first rows). Ye tests isi contract ko pin karte hain.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+test("R41: compat contract — action=order tab-wise rows deta hai (bina Order JSON ke bhi)", () => {
+  const { sandbox } = loadScript();
+  sandbox.setup();
+  sandbox.doPost({
+    postData: {
+      contents: JSON.stringify({
+        token: "test-token",
+        action: "append",
+        rows: [
+          { sheet: "Orders", row: { Timestamp: "2026-10-27T02:00:00.000Z", Event: "order.placed", "Order number": "LK-COMPAT1", "Order status": "placed", Total: 1499, "Item details": "Anarkali Set (M [38]) x2" } },
+          { sheet: "OrderItems", row: { Timestamp: "2026-10-27T02:00:00.000Z", "Order number": "LK-COMPAT1", Product: "Anarkali Set", Size: "M [38]", Qty: 2 } },
+          { sheet: "Orders", row: { Timestamp: "2026-10-27T03:00:00.000Z", Event: "order.status.confirmed", "Order number": "LK-COMPAT1", "Order status": "confirmed" } },
+        ],
+      }),
+    },
+  }).getJson();
+
+  const story = sandbox.doGet({ parameter: { action: "order", token: "test-token", order: "lk-compat1" } }).getJson();
+  assert.equal(story.ok, true);
+  assert.equal(story.order.orderNumber, "lk-compat1", "orderStory_ number wapas lauta ta hai");
+  assert.equal(story.order.rows.Orders.length, 2, "Orders ki poori history");
+  // findRows_ bottom-up scan karta hai → rows NEWEST-FIRST aati hain.
+  // Site (orders-sheet compat) inhe reverse karke chronological banati hai.
+  assert.equal(story.order.rows.Orders[0]["Order status"], "confirmed", "newest-first: nayi row pehle");
+  assert.equal(story.order.rows.Orders[1]["Order status"], "placed");
+  assert.equal(story.order.rows.OrderItems.length, 1, "OrderItems tab bhi story me hai");
+
+  const recent = sandbox.doGet({ parameter: { action: "recent", token: "test-token", sheet: "Orders", limit: 10 } }).getJson();
+  assert.equal(recent.ok, true);
+  assert.equal(recent.rows[0]["Order status"], "confirmed", "recent newest-first deta hai (site group karke reverse karti hai)");
+});

@@ -13,6 +13,8 @@ import {
 } from "./google-sheets";
 import { orderItemSheetRows, orderSheetRow } from "./sheet-format";
 import {
+  groupOrdersFromRecentRows,
+  orderFromSheetRows,
   parseOrderState,
   type OrderState,
   type SheetRow,
@@ -57,24 +59,43 @@ export function ordersBackend(): OrdersBackend {
   return "json";
 }
 
-/** Sheet-orders ready? (configured + script r40+). 30s cache — version call sasta hai. */
-let readyCache: { at: number; ready: boolean; reason: string } | null = null;
-export async function sheetOrdersReady(): Promise<{ ready: boolean; reason: string }> {
+/**
+ * R41 (owner: "abhi bi sheet mai nhai aa rha — fix kro"): script ka version
+ * orders ko **block nahi karta**. Teen mode:
+ *   • `full`    — script r40+: `order_state`/`orders_state` + `Order JSON` snapshot.
+ *   • `compat`  — purana script (jaise live r38-1): writes = wahi append (script
+ *                 unknown columns khud drop karta hai), reads = `?action=order`
+ *                 (orderStory_ rows) + `?action=recent` → `orderFromSheetRows`
+ *                 reconstruct. Orders sheet me TAB BHI save/read hote hain.
+ *   • `none`    — sheet env hi set nahi (dev/json fallback).
+ * Version padha hi na ja sake (script slow/cold) → optimistic `compat`:
+ * write fail hua to honest friendly error, pehle se 503 nahi.
+ */
+export type SheetOrdersMode = "full" | "compat" | "none";
+
+/** Sheet-orders ready? (configured + mode). 30s cache — version call sasta hai. */
+let readyCache: { at: number; ready: boolean; reason: string; mode: SheetOrdersMode } | null = null;
+export async function sheetOrdersReady(): Promise<{ ready: boolean; reason: string; mode: SheetOrdersMode }> {
   if (readyCache && Date.now() - readyCache.at < 30_000) return readyCache;
-  let next: { ready: boolean; reason: string };
+  let next: { ready: boolean; reason: string; mode: SheetOrdersMode };
   if (!sheetOrdersConfigured()) {
-    next = { ready: false, reason: "GOOGLE_SHEETS_WEBAPP_URL/TOKEN set nahi" };
+    next = { ready: false, mode: "none", reason: "GOOGLE_SHEETS_WEBAPP_URL/TOKEN set nahi" };
   } else {
     const version = await readScriptVersion();
     if (!version) {
-      next = { ready: false, reason: "script ka version padha nahi ja saka (script down?)" };
-    } else if (!version.major || version.major < SHEET_ORDERS_MIN_MAJOR) {
       next = {
-        ready: false,
-        reason: `script ka version ${version.version} purana hai — r40+ chahiye (Order JSON column isi me hai)`,
+        ready: true,
+        mode: "compat",
+        reason: "script ka version padha nahi ja saka — compat mode (write fail hua to saaf error dikhega)",
       };
+    } else if (version.major >= SHEET_ORDERS_MIN_MAJOR) {
+      next = { ready: true, mode: "full", reason: "" };
     } else {
-      next = { ready: true, reason: "" };
+      next = {
+        ready: true,
+        mode: "compat",
+        reason: `script ${version.version} par compat mode — orders sheet me hi save hote hain; Order JSON snapshot ke liye r40+ paste karein`,
+      };
     }
   }
   readyCache = { at: Date.now(), ...next };
@@ -86,12 +107,20 @@ export async function sheetOrderStoreInfo(): Promise<{
   backend: OrdersBackend;
   configured: boolean;
   ready: boolean;
+  mode: SheetOrdersMode;
   reason: string;
   version: string | null;
 }> {
   const version = sheetOrdersConfigured() ? await readScriptVersion() : null;
-  const { ready, reason } = await sheetOrdersReady();
-  return { backend: ordersBackend(), configured: sheetOrdersConfigured(), ready, reason, version: version?.version ?? null };
+  const { ready, reason, mode } = await sheetOrdersReady();
+  return {
+    backend: ordersBackend(),
+    configured: sheetOrdersConfigured(),
+    ready,
+    mode,
+    reason,
+    version: version?.version ?? null,
+  };
 }
 
 /* ────────────────────────────── write path ────────────────────────────── */
@@ -147,8 +176,30 @@ export async function readSheetOrder(orderNumber: string): Promise<Order | null>
   if (!wanted) return null;
   const hit = orderCache.get(wanted);
   if (hit && Date.now() - hit.at < TTL_MS) return hit.value;
-  const result = await scriptGet<{ order?: OrderState }>("order_state", { order: wanted }, { timeoutMs: SHEET_READ_TIMEOUT * 2 });
-  const value = result.ok ? parseOrderState(result.data.order) : null;
+  const { mode } = await sheetOrdersReady();
+  let value: Order | null = null;
+  if (mode !== "none") {
+    if (mode === "full") {
+      const result = await scriptGet<{ order?: OrderState }>("order_state", { order: wanted }, { timeoutMs: SHEET_READ_TIMEOUT * 2 });
+      if (result.ok) value = parseOrderState(result.data.order);
+    }
+    if (!value) {
+      // compat (r38-1 jaise purane script): ?action=order → tab-wise rows
+      // (orderStory_) → Orders rows se reconstruct. Full mode ka fallback bhi —
+      // owner ne script downgrade kiya to bhi order page chalta rahe.
+      // Dhyan rahe: findRows_ bottom-up scan karta hai → rows **newest-first**
+      // aati hain; orderFromSheetRows chronological (latest last) maanta hai.
+      const compat = await scriptGet<{ order?: { rows?: Record<string, SheetRow[]> } }>(
+        "order",
+        { order: wanted },
+        { timeoutMs: SHEET_READ_TIMEOUT * 2 },
+      );
+      if (compat.ok) {
+        const rows = [...(compat.data.order?.rows?.Orders ?? [])].reverse();
+        value = rows.length ? orderFromSheetRows(wanted, rows) : null;
+      }
+    }
+  }
   orderCache.set(wanted, { at: Date.now(), value });
   return value;
 }
@@ -156,18 +207,40 @@ export async function readSheetOrder(orderNumber: string): Promise<Order | null>
 /** Saare orders newest-first (admin list) — 2s TTL cache. */
 export async function readSheetOrders(limit = 200): Promise<Order[]> {
   if (listCache && Date.now() - listCache.at < TTL_MS) return listCache.value;
-  const result = await scriptGet<{ orders?: OrderState[] }>(
-    "orders_state",
-    { limit: Math.min(300, Math.max(1, limit)) },
-    { timeoutMs: SHEET_READ_TIMEOUT * 2 },
-  );
-  if (!result.ok) return listCache?.value ?? [];
-  const orders = (result.data.orders ?? [])
-    .map((state) => parseOrderState(state))
-    .filter((order): order is Order => Boolean(order))
-    .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
-  listCache = { at: Date.now(), value: orders };
-  return orders;
+  const { mode } = await sheetOrdersReady();
+  if (mode === "full") {
+    const result = await scriptGet<{ orders?: OrderState[] }>(
+      "orders_state",
+      { limit: Math.min(300, Math.max(1, limit)) },
+      { timeoutMs: SHEET_READ_TIMEOUT * 2 },
+    );
+    if (result.ok) {
+      const orders = (result.data.orders ?? [])
+        .map((state) => parseOrderState(state))
+        .filter((order): order is Order => Boolean(order))
+        .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+      listCache = { at: Date.now(), value: orders };
+      return orders;
+    }
+  }
+  if (mode !== "none") {
+    // compat: ?action=recent&sheet=Orders (newest-first rows, ≤200) → group
+    // by order number → chronological rows → reconstruct.
+    const result = await scriptGet<{ rows?: SheetRow[] }>(
+      "recent",
+      { sheet: "Orders", limit: 200 },
+      { timeoutMs: SHEET_READ_TIMEOUT * 2 },
+    );
+    if (result.ok) {
+      const orders = groupOrdersFromRecentRows(result.data.rows ?? [])
+        .map((group) => orderFromSheetRows(group.orderNumber, group.rows))
+        .filter((order): order is Order => Boolean(order))
+        .slice(0, Math.min(300, Math.max(1, limit)));
+      listCache = { at: Date.now(), value: orders };
+      return orders;
+    }
+  }
+  return listCache?.value ?? [];
 }
 
 /** GST invoice serial — Invoices tab ki rows se (DB sequence ki zaroorat nahi). */

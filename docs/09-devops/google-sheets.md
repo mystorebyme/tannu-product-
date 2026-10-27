@@ -331,6 +331,47 @@ admin ke kuch counters abhi JSON fallback par hain — ye ephemeral data hai, or
 > site read-time overlay se owner ka Admin Note/status/courier waise hi ~2s me dikha deti
 > hai (isi liye overlay last-non-empty scan karta hai).
 
+## 4h. R41 — compat mode: purane (r38-1) script par bhi site chalti hai + customer-friendly errors
+
+R40 ke baad owner r40-1 paste nahi kar paya — live script abhi bhi **r38-1** tha aur R40 ka
+version-gate orders ko imandari se mana kar raha tha (503). R41 ka rule: **site live script ke
+saath chale** — r40+ upgrade hai, majboori nahi.
+
+| Cheez | full (r40+) | compat (r38/r39 — live) |
+| --- | --- | --- |
+| Order write | append + `Order JSON` snapshot | wahi `append` — purana script `Order JSON` (unknown key) **drop** karta hai, baaki 27 columns likhe jaate hain |
+| Single order read | `order_state` (JSON + row history) | `?action=order&order=LK-…` → tab-wise rows. **`findRows_` bottom-up scan karta hai ⇒ rows newest-first** — site reverse karke chronological banati hai → columns se reconstruct |
+| Admin list | `orders_state` | `?action=recent&sheet=Orders&limit=200` (newest-first) → order-number wise group (`groupOrdersFromRecentRows`) → reconstruct |
+| Version padha hi na ja sake | — | **optimistic compat** — likhna sach me fail hua to saaf error, jhoothi success kabhi nahi |
+| Messages/newsletter/checkout mirrors | same | same — ye hamesha `append`/`subscribe` se likhte hain, ye actions r38 me bhi hain |
+
+**Reconstruct rule (R41 hardening):** `orderFromSheetRows` har human column (Customer/Phone/Total/
+Item details/…) **last-non-empty** scan se padhta hai — purane script par owner ka sheet-status-edit
+(`onEdit` ki sparse row: sirf status/number) latest row hoti hai, tab bhi customer/total/items
+gayab nahi hote. `Order status` free-text map ("Shipped" → shipped), `Payment status` sirf
+whitelist se (galat text = pending).
+
+**Customer-facing errors = friendly (R41):** "Server problem"/"sheet store ready nahi" jaisi
+technical copy customer ko **kahin nahi** dikhti — orders API, http-json (≥500, reply padha na
+gaya, HTML reply) aur checkout fallback banner sab me wahi baat: *"Order abhi complete nahi hua.
+Thodi der me dobara try kariye, ya WhatsApp par order bhej dijiye — team turant confirm karegi."*
+Technical detail sirf owner-side: `/api/sheet-health` (payload me naya **`sheetOrders.mode`** =
+full/compat/none + version + idMatch + script probe) aur server logs.
+
+**sheet-health ki nayi bhasha:** script major < 40 → ab `help` nahi, **`warnings`** ("compat mode
+me chal rahi hai — orders sheet me hi save hote hain; `Order JSON` snapshot ke liye r40+ paste
+karein"). Sheet hi configured nahi (`!ready`) → help me seedha env-fix (Vercel me
+`GOOGLE_SHEETS_WEBAPP_URL` + `GOOGLE_SHEETS_TOKEN` set karke redeploy).
+
+**Wrong-sheet auto-heal (r40+):** script r40+ hai aur `idMatch:false` (props me koi doosri sheet —
+jaise purane `adopt` se badal gayi) → health probe khud `SHEET_EXPECTED_ID` se `sheet_set`
+fire karta hai (healSheetConfig ka 10-min rate limit). r38-1 par `sheet_set` hota hi nahi — wahan
+sirf report; owner `<exec>?action=settings` se check kare ki script kaun si sheet padh raha hai.
+
+**Messages ids:** live `Messages` tab purana 7-column ho sakta hai (`Message ID` nahi) — admin
+list synthetic id banati hai (`row:<Timestamp>|<Email>`), list kabhi crash nahi hoti; replied-mark
+purane tab par gracefully degrade karta hai (script `updated:0` bhejta hai).
+
 ## 5. Security
 
 - Apps Script URL + token dono **server-side env** me hain, browser bundle me nahi.
