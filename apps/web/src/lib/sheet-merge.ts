@@ -25,13 +25,16 @@ export type SheetTracking = {
   awb: string;
   trackingUrl: string;
   note: string;
+  /**
+   * R39 (owner): Orders tab ke `Admin Note` column ka text — order ke liye
+   * owner ka apna message. Status merge jeete ya na jeete, ye note hamesha
+   * customer page ke note-box me dikhta hai (khaali ho to "Waiting for
+   * confirmation"). Purane script (r38-) isay nahi bhejte — isliye optional.
+   */
+  adminNote?: string;
   updates: SheetTrackingUpdate[];
   readAt: number;
 };
-
-const TTL_MS = Number(process.env.SHEET_TRACKING_TTL_MS ?? 5_000);
-const STALE_MAX_MS = 10 * 60_000;
-const READ_TIMEOUT_MS = Number(process.env.SHEET_READ_TIMEOUT_MS ?? 4_000);
 
 const ORDER_STATUSES: OrderStatus[] = [
   "placed",
@@ -91,9 +94,27 @@ export function sheetTrackingWins(order: Order, sheet: SheetTracking | null): bo
  * DB ke order par sheet ka tracking merge — **pure** (tests isi par chalte hain).
  * Sheet jeete to status / statusNote / courier-AWB-URL aur timeline ke updates
  * sheet se aate hain; paymentStatus hamesha DB ka (paisa = DB sacchai).
+ *
+ * R39: sheet ka `adminNote` (Orders → Admin Note column) **hamesha** jeetta hai
+ * — status merge ho ya na ho, owner ka message customer ke note-box me dikhega.
  */
 export function mergeSheetTracking(order: Order, sheet: SheetTracking | null): Order {
-  if (!sheetTrackingWins(order, sheet) || !sheet) return order;
+  if (!sheet) return order;
+  const merged = sheetTrackingWins(order, sheet) ? mergeSheetWins(order, sheet) : order;
+  const adminNote = String(sheet.adminNote ?? "").trim();
+  if (!adminNote) return merged;
+  return {
+    ...merged,
+    statusNote: {
+      text: adminNote,
+      at: sheet.updates[0]?.at ?? merged.createdAt,
+      by: "sheet",
+      status: merged.status,
+    },
+  };
+}
+
+function mergeSheetWins(order: Order, sheet: SheetTracking): Order {
   const status = sheetStatusToOrderStatus(sheet.status) ?? order.status;
 
   const audit: AuditEntry[] = sheet.updates

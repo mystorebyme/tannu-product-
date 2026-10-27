@@ -192,6 +192,19 @@ function loadScript(
         getJson: () => JSON.parse(text),
       }),
     },
+    /** R39: plain /exec browser request par HTML control panel banta hai. */
+    HtmlService: {
+      createHtmlOutput: (html: string) => {
+        const out: Record<string, unknown> = {
+          html,
+          getContent: () => html,
+          getTitle: () => "Liksha sheet panel",
+        };
+        out.setTitle = () => out;
+        out.addMetaTag = () => out;
+        return out;
+      },
+    },
     LockService: { getScriptLock: () => ({ waitLock: () => true, releaseLock: () => {} }) },
     PropertiesService: {
       /** R38: props key-aware hain — script ab TOKEN bhi Script Properties se padhti hai. */
@@ -992,4 +1005,58 @@ test("v3.2: clearDemoData sirf demo rows hataata hai (asli data safe)", () => {
   const messages = sheets.find((sheet) => sheet.getName() === "Messages")!.rows;
   assert.equal(messages.length, 2, "sirf header + asli row bachi");
   assert.equal(messages[1]![messages[0]!.indexOf("Name")], "Asli Customer");
+});
+
+test("R39: Admin Note — sheet ka per-order message timeline me + purani sheet me column apne aap", () => {
+  const { sandbox, sheets } = loadScript();
+  sandbox.setup();
+  const phone = "9876500011";
+  const base = { "Order number": "LK-NOTE01", Phone: phone, Customer: "Riya" };
+  sandbox.appendRows_([
+    { sheet: "Orders", row: { ...base, Timestamp: "2026-10-27T02:00:00.000Z", Event: "order.placed", "Order status": "placed" } },
+  ]);
+
+  // owner ne Orders tab me Admin Note likha (site wali append isi column ko bharti hai)
+  sandbox.appendRows_([
+    { sheet: "Orders", row: { ...base, Timestamp: "2026-10-27T02:30:00.000Z", Event: "order.admin_note", "Order status": "placed", "Admin Note": "Parcel kal subah aayega", Notes: "Parcel kal subah aayega" } },
+  ]);
+
+  const ok = sandbox.doGet({ parameter: { action: "timeline", token: "test-token", order: "LK-NOTE01", phone } }).getJson();
+  assert.equal(ok.ok, true);
+  assert.equal(ok.adminNote, "Parcel kal subah aayega", "Admin Note timeline jawab me aata hai");
+  assert.equal(ok.note, "Parcel kal subah aayega");
+
+  // purani sheet (owner ki sheet r38-1 se bani thi) me Admin Note column nahi tha —
+  // ensureHeaders_ usay apne aap jodta hai, warna owner ka text chup-chaap drop hota.
+  const orders = sheets.find((sheet) => sheet.getName() === "Orders");
+  assert.ok(orders, "Orders tab hai");
+  const header = orders.rows[0] as string[];
+  const idx = header.indexOf("Admin Note");
+  assert.ok(idx >= 0, "setup ne Admin Note column banaya");
+  header[idx] = ""; // simulate: column gayab (purani sheet)
+  sandbox.appendRows_([
+    { sheet: "Orders", row: { ...base, Timestamp: "2026-10-27T03:00:00.000Z", Event: "order.admin_note", "Admin Note": "Nikal gaya", Notes: "Nikal gaya" } },
+  ]);
+  const header2 = orders.rows[0] as string[];
+  assert.ok(header2.indexOf("Admin Note") >= 0, "missing column wapas jud gaya");
+  const again = sandbox.doGet({ parameter: { action: "timeline", token: "test-token", order: "LK-NOTE01", phone } }).getJson();
+  assert.equal(again.adminNote, "Nikal gaya", "latest Admin Note jeetta hai");
+});
+
+test("R39: browser se plain /exec → HTML control panel (JSON nahi)", () => {
+  const { sandbox } = loadScript();
+  sandbox.setup();
+  const out = sandbox.doGet({ parameter: {} }) as { getContent: () => string; getJson?: unknown };
+  assert.equal(typeof out.getContent, "function", "HtmlOutput mila");
+  const html = out.getContent();
+  assert.match(html, /sheet control panel/i);
+  assert.match(html, /r39-1/);
+  assert.match(html, /Admin Note/);
+  assert.match(html, /Waiting for confirmation/);
+  assert.match(html, /designerclothing\.fashion/);
+
+  // site ka contract nahi toota: action=settings abhi bhi JSON deta hai
+  const settings = sandbox.doGet({ parameter: { action: "settings" } }).getJson();
+  assert.equal(settings.ok, true);
+  assert.equal(settings.public, true);
 });

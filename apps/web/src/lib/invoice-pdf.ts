@@ -8,8 +8,9 @@ import type { InvoiceLine, InvoiceView } from "@/lib/invoice";
 const money = (paise: number) =>
   ((paise ?? 0) / 100).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+/** R39: invoice PDF ki date hamesha IST me (server UTC par render hota hai). */
 const dateLabel = (iso: string) =>
-  new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" });
+  new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric", timeZone: "Asia/Kolkata" });
 
 const MAROON = "#862222";
 const INK = "#2f2a25";

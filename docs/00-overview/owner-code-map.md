@@ -67,6 +67,10 @@ Repo me **do Next.js apps** hain (ek hi repo, do deploy):
 | **Sheet = order ka DB (R37)** — status/courier/AWB/note sheet se merge | `apps/web/src/lib/sheet-tracking.ts` + `apps/web/src/lib/sheet-merge.ts` (Apps Script: `scripts/google-apps-script/liksha-sheets.gs` → `onEdit` + `?action=timeline`) |
 | **Sheet pipeline report card (R38)** — owner browser me khud diagnose kare | `apps/web/src/app/api/sheet-health/route.ts` (public) + script ka `?action=health`; likhne ka hisaab `sheetWriteInfo()` (`lib/google-sheets.ts` retry ke saath) |
 | **Token paste-proof (R38)** — script ka token Script Properties me | `liksha-sheets.gs` → `effectiveToken_` + `?action=set_token` (ek baar) + `?action=adopt` (bound sheet apnao); UPI sirf sheet se — payment pause state `components/upi-payment.tsx` (`upi-unavailable`) |
+| **India timezone (R39)** — har date IST me | `apps/web/src/lib/format.ts` (`STORE_TIME_ZONE`) + `lib/tracking.ts` + `lib/invoice-pdf.ts` + `apps/admin/src/lib/format.ts` — sab `timeZone: "Asia/Kolkata"` pin |
+| **Sheet-driven per-order note (R39)** — Admin Note column | script r39-1: `HEADERS.Orders` + `timeline_().adminNote` + `onEdit` branch → site: `lib/sheet-merge.ts` (`adminNote` hamesha jeetta) → `orders/[orderNumber]/page.tsx` note-box (`order-note-box`, default "Waiting for confirmation") |
+| **/exec control panel (R39)** — browser se script ki sehat | `liksha-sheets.gs` → `controlPanel_()` (action ke bina GET = HTML panel; website ka JSON contract same) |
+| **Final sheet id (R39)** | `1b8DReh2RF5JeOSJeknWmH1KSE1RZgmBjatgkCDS9w_4` — `.gs` `SPREADSHEET_ID`, `lib/google-sheets.ts` `EXPECTED_SHEET_ID`, `scripts/sheets-selfcheck.mjs`, Vercel env `SHEET_EXPECTED_ID` |
 | Phone prefix auto-fix (`+91`/`91`/`0` → 10 digit) | `apps/web/src/lib/phone.ts` + `packages/validation/index.ts` (`phoneSchema`) |
 | Step 3 ka data API | `apps/web/src/app/api/orders/[orderNumber]/payment-context/route.ts` |
 | Order confirm / tracking `/orders/[orderNumber]` | `apps/web/src/app/orders/[orderNumber]/page.tsx` |
@@ -215,8 +219,8 @@ Wo text `components/upi-payment.tsx` me hai.
 | | |
 | --- | --- |
 | Sheet | **Designer Clothing — Store (Orders · Payments · Settings)** |
-| id | `1k8fsea04WpbrGjiyXuDrrS2Eewt9W7wx9X2lUQc5qMo` |
-| Link | https://docs.google.com/spreadsheets/d/1k8fsea04WpbrGjiyXuDrrS2Eewt9W7wx9X2lUQc5qMo/edit |
+| id | `1b8DReh2RF5JeOSJeknWmH1KSE1RZgmBjatgkCDS9w_4` |
+| Link | https://docs.google.com/spreadsheets/d/1b8DReh2RF5JeOSJeknWmH1KSE1RZgmBjatgkCDS9w_4/edit |
 
 ⚠️ Purane `pub?output=csv` link (`2PACX-1vTLs42cuo-…`, gids 1135948941/1261780310/…) **doosre account ki copy** ke hain — un gid ka koi tab is sheet me nahi. Code **naam** se tab dhoondhta hai, isliye tab ka **naam** badalna mat.
 

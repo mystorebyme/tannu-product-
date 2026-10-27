@@ -47,17 +47,32 @@ export async function GET() {
 
   const write = sheetWriteInfo();
   const help: string[] = [];
+  /**
+   * R39: probe ka timeout akela "sab fail" nahi hai — Apps Script cold start
+   * 8s+ le sakta hai. Settings sheet se aa rahi hain (URL zinda hai) + last
+   * write ok hai to timeout sirf warning hai, help (failure) nahi.
+   */
+  const warnings: string[] = [];
 
   if (!configured) {
     help.push("Vercel me GOOGLE_SHEETS_WEBAPP_URL set nahi — sheet pipeline band hai (docs/09-devops/google-sheets.md).");
   }
   if (health && !health.ok) {
-    help.push(
-      `Apps Script jawab nahi de raha (${health.error ?? "unknown"}) — URL purana/dead ho sakta hai. Deploy → Manage deployments → wala /exec URL Vercel me daaliye.`,
-    );
+    const probeTimedOut = /timeout|abort/i.test(String(health.error ?? ""));
+    const pipelineAlive = info.source === "apps-script" && (!write || write.ok);
+    if (probeTimedOut && pipelineAlive) {
+      warnings.push(
+        `Health probe timeout hua (${health.error}) par settings sheet se aa rahi hain aur last write ok hai — Apps Script cold start ki wajah se; dobara refresh kariye.`,
+      );
+    } else {
+      help.push(
+        `Apps Script jawab nahi de raha (${health.error ?? "unknown"}) — URL purana/dead ho sakta hai. Deploy → Manage deployments → wala /exec URL Vercel me daaliye.`,
+      );
+    }
   }
   if (health?.ok) {
-    if (health.version && !String(health.version).startsWith("r38")) {
+    const major = Number(/^r(\d+)/.exec(String(health.version ?? ""))?.[1] ?? 0);
+    if (major && major < 39) {
       help.push(`Script ka purana version chal raha hai (${health.version}) — naya code paste karke Deploy → Manage deployments → ✏️ → New version → Deploy kariye.`);
     }
     if (health.tokenSet === false) {
@@ -123,6 +138,7 @@ export async function GET() {
         lastWrite: write ? { at: new Date(write.at).toISOString(), ok: write.ok, sheets: write.sheets, error: write.error } : null,
       },
       help,
+      warnings,
       note: "Ye page sirf status batata hai — sheet ka URL/token kabhi expose nahi karta.",
     },
     { headers: { "cache-control": "no-store" } },

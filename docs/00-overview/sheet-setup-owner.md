@@ -21,8 +21,8 @@ Apps Script** banaya gaya hai — neeche ke 6 step follow kariye, bas ek baar ka
 **Ye sheet** (naya account `prakashgothwal370@gmail.com`) — yahi website se judni chahiye:
 
 - Naam: **Designer Clothing — Store (Orders · Payments · Settings)**
-- Sheet id: `1k8fsea04WpbrGjiyXuDrrS2Eewt9W7wx9X2lUQc5qMo`
-- Link: https://docs.google.com/spreadsheets/d/1k8fsea04WpbrGjiyXuDrrS2Eewt9W7wx9X2lUQc5qMo/edit
+- Sheet id: `1b8DReh2RF5JeOSJeknWmH1KSE1RZgmBjatgkCDS9w_4`
+- Link: https://docs.google.com/spreadsheets/d/1b8DReh2RF5JeOSJeknWmH1KSE1RZgmBjatgkCDS9w_4/edit
 
 **Tabs (aaj ready kar diye):** Settings · Orders · Payments · Messages · Newsletter ·
 **Checkout** (naya) · **Audit** (naya) — sab me header row + sahi column names.
@@ -39,7 +39,7 @@ Apps Script** banaya gaya hai — neeche ke 6 step follow kariye, bas ek baar ka
 >
 > * Script ne bataya: `Orders` = 1 row, `Payments` = 1 row, `Checkout` = 1 row
 >   (yaani live test order usme gaya)…
-> * …par aapki sheet (`1k8fsea04…`) me **0 rows**. Matlab script kisi **copy** ko pakde hue hai.
+> * …par aapki sheet (`1b8DReh2…`) me **0 rows**. Matlab script kisi **copy** ko pakde hue hai.
 >
 > **Wajah:** purane code me `book_()` sabse pehle `getActiveSpreadsheet()` dekhta tha — yaani
 > "jis sheet ke saath ye script bana hai". Aapka script `prkigothwal@gmail.com` se bana hai aur

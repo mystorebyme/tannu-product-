@@ -74,6 +74,13 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
   /** 5 step + har step ki asli date + cancelled/returned handle (lib/tracking.ts) */
   const { steps, stopped } = trackingSteps(order);
   const updates = trackingUpdates(order);
+  /**
+   * R39 (owner): note-box ka text **sheet se** — Orders tab ke `Admin Note`
+   * column me jo likha hai (2s me live), warna admin ka DB note, warna default
+   * "Waiting for confirmation". Static AWB waada hata diya: owner jo likhe wahi
+   * dikhega, har order ke liye alag.
+   */
+  const noteText = (order.statusNote?.text ?? "").trim();
   /** admin ne URL na diya ho to courier + AWB se link khud ban jaata hai */
   const courierUrl = orderTrackingUrl(order);
 
@@ -231,10 +238,15 @@ export default async function OrderPage({ params }: { params: Promise<{ orderNum
                   Is AWB se track karne ke liye courier ki website par number daal dijiye.
                 </p>
               )}
+              {noteText ? (
+                <p data-testid="order-note-box" className="mt-2 text-[11.5px] text-[#5c534b]">
+                  {noteText}
+                </p>
+              ) : null}
             </div>
           ) : (
-            <p className="mt-3 border-t border-[#f1ebe5] pt-3 text-[11.5px] text-[#8a8078]">
-              AWB number yahan aur WhatsApp par turant dikh jaayega jaise hi parcel courier ko jaayega.
+            <p data-testid="order-note-box" className="mt-3 border-t border-[#f1ebe5] pt-3 text-[11.5px] text-[#8a8078]">
+              {noteText || "Waiting for confirmation"}
             </p>
           )}
         </div>

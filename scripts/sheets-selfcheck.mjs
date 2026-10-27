@@ -74,7 +74,7 @@ try {
      * Sabse ahem check: script **aapki** sheet pakde hue hai ya kisi copy ko?
      * (25 Oct 2026 ko yahi bug tha — data ek copy me ja raha tha.)
      */
-    const wantedId = (process.argv[4] ?? process.env.EXPECTED_SHEET_ID ?? "1k8fsea04WpbrGjiyXuDrrS2Eewt9W7wx9X2lUQc5qMo").trim();
+    const wantedId = (process.argv[4] ?? process.env.EXPECTED_SHEET_ID ?? "1b8DReh2RF5JeOSJeknWmH1KSE1RZgmBjatgkCDS9w_4").trim();
     if (health.body.spreadsheetId) {
       const match = health.body.spreadsheetId === wantedId;
       expect("script sahi sheet pakde hue hai", match, `mila: ${health.body.spreadsheetId} · chahiye: ${wantedId}`);
