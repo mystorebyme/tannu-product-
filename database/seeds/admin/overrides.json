@@ -3,7 +3,14 @@
     "note": "Admin panel isi file ko likhta hai. scripts/build-catalog.mjs publish par isse catalogue me merge karta hai.",
     "lastPublishedAt": "2026-10-27T09:00:00.000Z"
   },
-  "products": {},
+  "products": {
+    "minisa-designer-embroidered-zari-sequins-work-gown": {
+      "collections": ["new-arrivals", "party-wear-gown", "trending"]
+    },
+    "rikva-premium-vichitra-royal-elegant-suit-set": {
+      "collections": ["new-arrivals", "party-wear-gown", "trending"]
+    }
+  },
   "collections": {},
   "hidden": [],
   "newProducts": [

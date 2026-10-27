@@ -141,9 +141,37 @@ test("collection counts match the live store snapshot", () => {
       counts[collection] = (counts[collection] ?? 0) + 1;
     }
   }
+  /**
+   * R49: owner ki curation (admin overrides — jaise Trending me best-score items)
+   * live snapshot se aage ja sakti hai. Expected counts = live membership
+   * ± overrides ke collections-patch ka delta.
+   */
+  const overrideProducts: Record<string, { collections?: string[] }> = JSON.parse(
+    fs.readFileSync(path.join(root, "database/seeds/admin/overrides.json"), "utf8"),
+  ).products ?? {};
+  const expected: Record<string, number> = {};
   for (const [handle, handles] of Object.entries(liveMembership)) {
     if (handle === "frontpage") continue; // home-page grouping, nav collection nahi
-    assert.equal(counts[handle] ?? 0, handles.length, `${handle} count drifted from the live store`);
+    expected[handle] = handles.length;
+  }
+  for (const [handle, patch] of Object.entries(overrideProducts)) {
+    if (!Array.isArray(patch?.collections)) continue;
+    const product = likshaProducts.find((candidate) => candidate.handle === handle);
+    if (!product) continue; // extra products parity me count hi nahi hote
+    const live = new Set(
+      Object.entries(liveMembership)
+        .filter(([collection, handles]) => collection !== "frontpage" && handles.includes(product.sourceHandle))
+        .map(([collection]) => collection),
+    );
+    for (const collection of new Set(patch.collections)) {
+      if (!live.has(collection)) expected[collection] = (expected[collection] ?? 0) + 1;
+    }
+    for (const collection of live) {
+      if (!patch.collections.includes(collection)) expected[collection] = (expected[collection] ?? 0) - 1;
+    }
+  }
+  for (const [handle, want] of Object.entries(expected)) {
+    assert.equal(counts[handle] ?? 0, want, `${handle} count drifted from the live store`);
   }
   assert.equal(counts["saree"], undefined); // store par bhi khaali
 });

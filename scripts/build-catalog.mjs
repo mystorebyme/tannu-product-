@@ -920,16 +920,98 @@ const readExtra = (name, key) => {
   };
 
   /**
-   * Same-title listings → ek product, multiple colours.
+   * Same-design listings → ek product, multiple colours/styles.
    *
-   * Source store par kai designs (same title, alag colour ya style code) alag
-   * listings hain — customer ko wahi design 4-5 cards me dikhta hai. Owner ka
-   * rule: "same product different colours = one product". Pehle wala colour
-   * grouping title ke andar colour word dhundhta hai; yahan baaki same-title
-   * listings ko group karte hain aur unique label (colour → style code →
-   * variant number) dete hain. Listing par sirf ek card, PDP par swatches.
+   * Source stores par kai designs alag listings hain — customer ko wahi design
+   * 4-5 cards me dikhta hai. Owner ka rule: "same product different colours =
+   * one product" + R49: "ek hi dress alag naam/alag images ke saath duplicate
+   * listed hai — merge kar dena".
+   *
+   * Pass 1 (purana rule, as-is): exact same-title listings → ek group.
+   * Pass 2 (R49 near-duplicate families): bacha-kucha duplicate dhundhne ke liye
+   *   union-find teen sanketon par — normalized title ("copy of", punctuation aur
+   *   SKU-number tokens hate: "… Maxi Set 6130" == "… Maxi Set"), handle base
+   *   (trailing numeric suffix hate: …-td-107 == …-td-107-7287175708804, isliye
+   *   ek shabd idhar-udhar ho — "Fux" vs "Fox" — tab bhi pakda jaata hai), aur
+   *   bani hui groups anchor banti hain (usi family ka bacha listing group me jud
+   *   jaata hai — do groups kabhi fuse nahi hote).
+   *
+   * Safety gates (galat merge se bachao):
+   *  - do ALAG groups ek family me milein → kuch nahi karte;
+   *  - categories alag hain → merge/join sirf jab extra-store ki duplicate ho
+   *    (same dress, do stores ne alag category di — purple gown ↔ anarkali);
+   *  - sirf handle-base match (titles alag) → merge sirf jab ek member extra ho
+   *    (do liksha designs sirf paas-paas ke handles se nahi jude — dharanis -12/-13);
+   *  - liksha product kabhi delete nahi hota — sab kuch colourGroups me fold hota
+   *    hai: images/prices/reviews products par rehte hain (live parity untouched),
+   *    listing par ek card, PDP par swatches se poori family.
    */
   const GENERIC_COLOUR = /^(as shown|multi|multicolour|multi colour|multi color|na|n\/a)$/i;
+
+  const normalizeTitle = (title) =>
+    String(title ?? "")
+      .toLowerCase()
+      .replace(/copy of/g, " ")
+      .replace(/[^a-z0-9]+/g, " ")
+      .split(/\s+/)
+      .filter((word) => word && !/^\d+$/.test(word))
+      .join(" ");
+
+  const handleBase = (handle) => String(handle).replace(/(-\d+)+$/, "");
+
+  const colourOf = (product) => {
+    const value = String(product.colourName || product.color || "").trim();
+    return value && !GENERIC_COLOUR.test(value) ? value : "";
+  };
+  const colourEntry = (member, label) => ({
+    name: label,
+    handle: member.handle,
+    title: member.title,
+    price: member.price,
+    compareAtPrice: member.compareAtPrice,
+    image: member.images[0] ?? "",
+    images: member.images,
+    sizes: member.sizes,
+    sizePricing: member.sizePricing,
+    inStock: member.inStock,
+    colourCode: member.color,
+  });
+  /** label: asli colour → style code → "Style N" (usedLabels se takraye nahi) */
+  const pickLabel = (product, usedLabels, startVariant) => {
+    const colour = colourOf(product);
+    if (colour && !usedLabels.has(colour.toLowerCase())) {
+      usedLabels.add(colour.toLowerCase());
+      return colour;
+    }
+    const code = styleCodeOf(product);
+    if (code && !usedLabels.has(code.toLowerCase())) {
+      usedLabels.add(code.toLowerCase());
+      return code;
+    }
+    let variant = startVariant;
+    let label = `Style ${variant}`;
+    while (usedLabels.has(label.toLowerCase())) {
+      variant += 1;
+      label = `Style ${variant}`;
+    }
+    usedLabels.add(label.toLowerCase());
+    return label;
+  };
+  /** labels: representative pehle — usi ka label "Style 1" / asli colour banta hai */
+  const labelAll = (ordered) => {
+    const usedLabels = new Set();
+    const labels = new Map();
+    let variant = 1;
+    for (const product of ordered) {
+      labels.set(product, pickLabel(product, usedLabels, variant));
+      variant = usedLabels.size + 1;
+    }
+    return labels;
+  };
+
+  let mergedSameTitle = 0;
+
+  /* ---------- pass 1: exact same-title listings (purana behaviour as-is) ---------- */
   const titleBuckets = new Map();
   for (const product of products) {
     if (product.colourGroup) continue; // pehle se grouped
@@ -937,8 +1019,6 @@ const readExtra = (name, key) => {
     if (!titleBuckets.has(key)) titleBuckets.set(key, []);
     titleBuckets.get(key).push(product);
   }
-
-  let mergedSameTitle = 0;
   for (const [bucketKey, members] of titleBuckets) {
     if (members.length < 2) continue;
 
@@ -948,38 +1028,8 @@ const readExtra = (name, key) => {
       if (images !== 0) return images;
       return String(a.publishedAt ?? "").localeCompare(String(b.publishedAt ?? ""));
     })[0];
-    // representative pehle — usi ka label "Style 1" / asli colour banta hai
     const ordered = [representative, ...members.filter((member) => member !== representative)];
-
-    // label: asli colour → style code → "Style N" (sab unique)
-    const labels = new Map();
-    const usedLabels = new Set();
-    const colourOf = (product) => {
-      const value = String(product.colourName || product.color || "").trim();
-      return value && !GENERIC_COLOUR.test(value) ? value : "";
-    };
-    for (const product of ordered) {
-      const colour = colourOf(product);
-      if (!colour || usedLabels.has(colour.toLowerCase())) continue;
-      usedLabels.add(colour.toLowerCase());
-      labels.set(product, colour);
-    }
-    let variant = 1;
-    for (const product of ordered) {
-      if (labels.has(product)) continue;
-      if (variant === 1) {
-        // pehla fallback label bhi "Style 1" — readable aur predictable
-      }
-      let label = "";
-      const code = styleCodeOf(product);
-      if (code && !usedLabels.has(code.toLowerCase())) label = code;
-      while (!label || usedLabels.has(label.toLowerCase())) {
-        label = `Style ${variant}`;
-        variant += 1;
-      }
-      usedLabels.add(label.toLowerCase());
-      labels.set(product, label);
-    }
+    const labels = labelAll(ordered);
 
     const groupKey = `same-${bucketKey.replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60)}`;
     if (colourGroups[groupKey]) continue;
@@ -988,30 +1038,157 @@ const readExtra = (name, key) => {
       member.colourGroup = groupKey;
       member.colourName = labels.get(member);
     }
-
     colourGroups[groupKey] = {
       key: groupKey,
       title: representative.title,
       handle: representative.handle,
-      colours: members.map((member) => ({
-        name: labels.get(member),
-        handle: member.handle,
-        title: member.title,
-        price: member.price,
-        compareAtPrice: member.compareAtPrice,
-        image: member.images[0] ?? "",
-        images: member.images,
-        sizes: member.sizes,
-        sizePricing: member.sizePricing,
-        inStock: member.inStock,
-        colourCode: member.color,
-      })),
+      colours: ordered.map((member) => colourEntry(member, labels.get(member))),
     };
+
+    /* R49: family ka best score card par — same dress ke reviews representative
+       par carry hote hain (sirf upward; apna score bada ho to wahi rehta hai) */
+    const bestScore = [...members].sort(
+      (a, b) =>
+        Number(b.rating ?? 0) - Number(a.rating ?? 0) ||
+        Number(b.reviewCount ?? 0) - Number(a.reviewCount ?? 0),
+    )[0];
+    if (bestScore !== representative && Number(bestScore.rating ?? 0) > Number(representative.rating ?? 0)) {
+      representative.rating = bestScore.rating;
+      representative.reviewCount = bestScore.reviewCount;
+    }
     mergedSameTitle += members.length - 1;
   }
-  if (mergedSameTitle) {
+
+  /* ---------- pass 2 (R49): near-duplicate families — units par union-find ---------- */
+  const unitOf = (product) => product.colourGroup ?? `single::${product.handle}`;
+  const familyParent = new Map();
+  const familyFind = (unit) => {
+    if (!familyParent.has(unit)) familyParent.set(unit, unit);
+    let root = unit;
+    while (familyParent.get(root) !== root) root = familyParent.get(root);
+    let cursor = unit;
+    while (cursor !== root) {
+      const next = familyParent.get(cursor);
+      familyParent.set(cursor, root);
+      cursor = next;
+    }
+    return root;
+  };
+  const familyUnion = (a, b) => {
+    const rootA = familyFind(a);
+    const rootB = familyFind(b);
+    if (rootA !== rootB) familyParent.set(rootA, rootB);
+  };
+
+  const familyCandidates = products.filter(
+    (product) => !product.hidden && !hiddenHandles.has(product.handle),
+  );
+  const keyFirst = new Map();
+  for (const product of familyCandidates) {
+    const unit = unitOf(product);
+    familyFind(unit);
+    for (const key of [`t::${normalizeTitle(product.title)}`, `h::${handleBase(product.handle)}`]) {
+      if (keyFirst.has(key)) familyUnion(unit, keyFirst.get(key));
+      else keyFirst.set(key, unit);
+    }
+  }
+  const familyUnits = new Map(); // root -> { groups: Set, singles: [products] }
+  for (const product of familyCandidates) {
+    const root = familyFind(unitOf(product));
+    if (!familyUnits.has(root)) familyUnits.set(root, { groups: new Set(), singles: [] });
+    const bucket = familyUnits.get(root);
+    if (product.colourGroup) bucket.groups.add(product.colourGroup);
+    else bucket.singles.push(product);
+  }
+
+  let nearDupFolded = 0;
+  let joinedFamilies = 0;
+  for (const { groups, singles } of familyUnits.values()) {
+    if (groups.size + singles.length < 2) continue;
+    if (groups.size >= 2) continue; // do bani-banai groups ko fuse nahi karte
+
+    /* case 1: bani hui group me bacha-kucha member jodo */
+    if (groups.size === 1) {
+      if (!singles.length) continue;
+      const groupKey = [...groups][0];
+      const group = colourGroups[groupKey];
+      if (!group) continue;
+      const groupRep = products.find((product) => product.handle === group.handle);
+      const usedLabels = new Set(
+        group.colours.map((colour) => String(colour.name ?? "").toLowerCase()).filter(Boolean),
+      );
+      let variant = group.colours.length + 1;
+      for (const member of singles) {
+        // cross-category join sirf extra-store duplicate par (same dress, alag category)
+        if (groupRep && member.category !== groupRep.category && member.source !== "extra") continue;
+        const label = pickLabel(member, usedLabels, variant);
+        variant = Math.max(variant + 1, group.colours.length + 2);
+        member.colourGroup = groupKey;
+        member.colourName = label;
+        group.colours.push(colourEntry(member, label));
+        joinedFamilies += 1;
+      }
+      continue;
+    }
+
+    /* case 2: nayi family (sab singles) — safety gates */
+    if (singles.length < 2) continue;
+    const hasExtra = singles.some((member) => member.source === "extra");
+    const sameNormTitle = new Set(singles.map((member) => normalizeTitle(member.title))).size === 1;
+    const sameBase = new Set(singles.map((member) => handleBase(member.handle))).size === 1;
+    const categories = new Set(singles.map((member) => member.category));
+    if (categories.size > 1 && !hasExtra) continue; // cross-category sirf extra-duplicate par
+    if (!sameNormTitle && !(sameBase && hasExtra)) continue; // warna titles/handles kaafi alag hain
+
+    // representative: liksha pehle (asli store, Trustoo reviews), phir best score,
+    // phir sabse zyada photos, phir sabse purana publish
+    const representative = [...singles].sort((a, b) => {
+      const sourceRank = (product) => (product.source === "liksha" ? 0 : 1);
+      return (
+        sourceRank(a) - sourceRank(b) ||
+        Number(b.rating ?? 0) - Number(a.rating ?? 0) ||
+        Number(b.reviewCount ?? 0) - Number(a.reviewCount ?? 0) ||
+        b.images.length - a.images.length ||
+        String(a.publishedAt ?? "").localeCompare(String(b.publishedAt ?? ""))
+      );
+    })[0];
+    const ordered = [representative, ...singles.filter((member) => member !== representative)];
+    const labels = labelAll(ordered);
+
+    const keySeed = sameNormTitle
+      ? `${representative.title.toLowerCase()}::${representative.category}`
+      : `${handleBase(representative.handle)}::${representative.category}`;
+    const groupKey = `same-${keySeed.replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60)}`;
+    if (colourGroups[groupKey]) continue; // same key ki group pehle se hai — safety
+
+    for (const member of ordered) {
+      member.colourGroup = groupKey;
+      member.colourName = labels.get(member);
+    }
+    colourGroups[groupKey] = {
+      key: groupKey,
+      title: representative.title,
+      handle: representative.handle,
+      colours: ordered.map((member) => colourEntry(member, labels.get(member))),
+    };
+
+    /* R49: family ka best score card par — same dress ke reviews representative
+       par carry hote hain (sirf upward; representative ka apna score bada ho to
+       wo hi rehta hai). */
+    const best = [...singles].sort(
+      (a, b) =>
+        Number(b.rating ?? 0) - Number(a.rating ?? 0) ||
+        Number(b.reviewCount ?? 0) - Number(a.reviewCount ?? 0),
+    )[0];
+    if (best !== representative && Number(best.rating ?? 0) > Number(representative.rating ?? 0)) {
+      representative.rating = best.rating;
+      representative.reviewCount = best.reviewCount;
+    }
+    nearDupFolded += ordered.length - 1;
+  }
+  if (mergedSameTitle || nearDupFolded || joinedFamilies) {
     console.log(
-      `same-title merge: ${mergedSameTitle} duplicate listings folded into colour groups (${Object.keys(colourGroups).length} groups total)`,
+      `same-design merge: ${mergedSameTitle} same-title + ${nearDupFolded} near-duplicate listings folded, ${joinedFamilies} existing groups me jude (${Object.keys(colourGroups).length} groups total)`,
     );
   }
 

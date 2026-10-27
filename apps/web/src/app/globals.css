@@ -148,12 +148,73 @@ body {
     transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* ---------- R49 smoothing: site-wide silky motion + colour polish ---------- */
+
+/* Tailwind transition classes — softer easing, thoda zyada duration (150ms → 220ms).
+   Buttons/links/swatches sab par ek jaisa premium feel. */
+.transition,
+.transition-all,
+.transition-colors,
+.transition-opacity,
+.transition-transform {
+  transition-duration: 220ms;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* lazy images soft fade-in se aati hain (eager/hero par nahi — LCP fast rehta hai).
+   Pure CSS animation — JS/hydration ka wait nahi. */
+.img-fade {
+  animation: softFade 0.45s ease both;
+}
+
+/* text selection brand maroon par */
+::selection {
+  background: #f0d9d5;
+  color: #431010;
+}
+
+/* keyboard focus saaf dikhe — brand ring (mouse click par outline nahi aata) */
+:focus-visible {
+  outline: 2px solid var(--maroon);
+  outline-offset: 2px;
+}
+
+/* desktop par patli, warm scrollbar — brand palette se match */
+@media (min-width: 1024px) and (hover: hover) {
+  ::-webkit-scrollbar {
+    width: 11px;
+    height: 11px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #faf6f1;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #d9c6b4;
+    border: 3px solid #faf6f1;
+    border-radius: 8px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #c4a88f;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-kenburns,
   .animate-marquee,
   .animate-soft-fade,
-  .animate-slide-in-right {
+  .animate-slide-in-right,
+  .img-fade {
     animation: none !important;
+  }
+  .transition,
+  .transition-all,
+  .transition-colors,
+  .transition-opacity,
+  .transition-transform {
+    transition-duration: 1ms !important;
   }
   .reveal-init {
     opacity: 1;
