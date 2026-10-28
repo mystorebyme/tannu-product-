@@ -4,7 +4,6 @@ import fs from "node:fs";
 import path from "node:path";
 
 import { applySalePricing, displayedPercent } from "../../scripts/lib/sale-pricing.mjs";
-import { PROMO_HANDLES } from "../../apps/web/src/lib/promo";
 
 /**
  * R47 (owner):
@@ -72,7 +71,6 @@ test("R47: saleLockedPrice wala product — final ₹699, MRP ₹1999, badge 65%
 /* ─────────────── ek promo product, 6 photos ki gallery ─────────────── */
 
 test("R47: saari 6 phototourl links EK hi product par — alag listings nahi", () => {
-  assert.deepEqual(PROMO_HANDLES, [PROMO_HANDLE], "promo rail me ek hi product");
   assert.ok(promo, "promo product catalog me hai");
   assert.deepEqual(promo.images, OWNER_IMAGE_URLS, "poori gallery owner ke order me");
 
@@ -146,13 +144,18 @@ test("R47: counts — 448 products (ek promo listing judi), live parity 287 unto
 
 /* ─────────────── home page wiring ─────────────── */
 
-test("R47: home par deterministic promo rail — rotating rails se pehle", () => {
+test("R51: home se duplicate Trending rail (promo) hataya — ek hi Trending Now", () => {
+  // Owner: "do do treanding aa rhe hai … jo first hai jisme 1 product hai usko
+  // home page se remove kr do" — purana promo section (hardcoded "Trending Now"
+  // heading + ek Noor card) gaya; asli Trending collection rail rehta hai.
   const page = fs.readFileSync(path.join(root, "apps/web/src/app/page.tsx"), "utf8");
-  assert.match(page, /PROMO_HANDLES/, "page promo handles use karta hai");
-  assert.match(page, /data-testid="promo-rail"/, "promo section testid ke saath");
-  const promoAt = page.indexOf("promoPicks.length > 0");
-  const trendyAt = page.indexOf('<ProductRail rail="trendy"');
-  assert.ok(promoAt > -1 && trendyAt > -1 && promoAt < trendyAt, "promo rail sabse pehle dikhta hai");
+  assert.ok(!page.includes("PromoRail"), "promo rail component home se gaya");
+  assert.ok(!page.includes("promo-rail"), "promo testid home se gaya");
+  assert.ok(!page.includes("PROMO_HANDLES"), "promo handles import home se gaya");
+  assert.ok(!page.includes("Handpicked for the festivities"), "duplicate subtitle gayi");
+  assert.ok(!page.includes("Trending Now"), "home me Trending Now heading hardcoded nahi — RAILS se aati hai");
+  assert.match(page, /<ProductRail rail="trendy"/, "asli Trending collection rail home par hai");
+  assert.ok(!fs.existsSync(path.join(root, "apps/web/src/lib/promo.ts")), "promo lib hi nahi bachi");
 });
 
 test("R47: duplicate-key error fix — announcements dedupe + index-based keys", () => {
