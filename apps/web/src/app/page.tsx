@@ -1,14 +1,12 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { RotatingRail } from "@/components/rotating-rail";
-import { ProductCarousel } from "@/components/product-carousel";
 import { CategoryCircles } from "@/components/category-circles";
 import { ReviewsStrip } from "@/components/reviews-strip";
 import { EditorialBand, OccasionStrip } from "@/components/occasion-strip";
 import { Reveal } from "@/components/reveal";
 import { getProducts, getCollection } from "@/lib/store";
 import { RAILS, type RailKey, railPool } from "@/lib/rails";
-import { PROMO_HANDLES } from "@/lib/promo";
 import { compactProduct, rotatePick, rotationBucket } from "@/lib/rotation";
 import { bestSellers } from "@/lib/best-sellers";
 import { BestSellersRail } from "@/components/best-sellers-rail";
@@ -65,12 +63,10 @@ export default async function HomePage() {
   const lehnga = rail("lehnga");
   const explore = rail("explore");
 
-  // R47 (owner): "ye home page pr dikhni chiye … isis se permotion aaya hai" —
-  // promo products hamesha home par sabse pehle dikhein (deterministic; 10-minute
-  // rotation ka wait nahi). PROMO_HANDLES se catalog me match karke nikaalte hain.
-  const promoPicks = PROMO_HANDLES.map((handle) => products.find((product) => product.handle === handle))
-    .filter((product): product is NonNullable<typeof product> => Boolean(product))
-    .map(compactProduct);
+  // R51 (owner): "do do treanding aa rhe hai … jo first hai jisme 1 product hai
+  // usko home page se remove kr do" — purana deterministic promo section (ek hi
+  // product, hardcoded duplicate heading) hata diya. Noor ab sirf asli
+  // trending-collection rail me dikhta hai (collection ka member hai).
 
   // best sellers — asli orders se ranked (orders empty ho to curated edit)
   const bestSellerPicks = (await bestSellers(8)).map(({ product }) => compactProduct(product));
@@ -179,8 +175,6 @@ export default async function HomePage() {
 
       <CategoryCircles items={circleItems} />
 
-      {promoPicks.length > 0 && <PromoRail products={promoPicks} />}
-
       <ProductRail rail="trendy" products={trendy.initial} pool={trendy.pool} />
 
       <BestSellersRail initial={bestSellerPicks} />
@@ -224,40 +218,6 @@ function ProductRail({
       <div className="mt-8 flex justify-center">
         <Link
           href={href}
-          className="border border-[#862222] px-9 py-3 text-[11px] font-semibold tracking-[.18em] text-[#862222] uppercase transition hover:bg-[#862222] hover:text-white"
-        >
-          View All
-        </Link>
-      </div>
-    </section>
-  );
-}
-
-/**
- * R47 (owner): promo products ka deterministic section — home par sabse pehle.
- * RotatingRail jaisa 10-minute rotation nahi; yahan owner ke chune hue products
- * hamesha dikhte hain (promotion inhi photos se aata hai). Products server par
- * `PROMO_HANDLES` se catalog me match hoke aate hain, isliye sheet/catalog se
- * handle hatne par section apne aap chhota ho jata hai (ya gayab, khaali ho to).
- */
-function PromoRail({ products }: { products: Awaited<ReturnType<typeof getProducts>> }) {
-  if (!products.length) return null;
-  return (
-    <section className="container-liksha py-10 lg:py-14" data-testid="promo-rail">
-      <Reveal className="flex flex-col items-center">
-        <h2 className="font-display text-[26px] leading-tight font-medium tracking-[.03em] text-[#2f2a25] sm:text-[32px]">
-          Trending Now
-        </h2>
-        <p className="mt-1 text-[11.5px] tracking-[.14em] text-[#9c8f82] uppercase">
-          Handpicked for the festivities — flat 65% off
-        </p>
-      </Reveal>
-      <Reveal className="mt-7" delay={80}>
-        <ProductCarousel products={products} perView={3} />
-      </Reveal>
-      <div className="mt-8 flex justify-center">
-        <Link
-          href="/collections/new-arrivals"
           className="border border-[#862222] px-9 py-3 text-[11px] font-semibold tracking-[.18em] text-[#862222] uppercase transition hover:bg-[#862222] hover:text-white"
         >
           View All
