@@ -10,7 +10,7 @@ import {
   invoiceNumber,
 } from "@liksha/validation";
 import { runInBackground } from "./background";
-import { checkCouponCode, reportCouponUse } from "./coupons-sheet";
+import { checkCouponCode, readCoupons, reportCouponUse } from "./coupons-sheet";
 import { dataFile } from "./data-dir";
 import { dbEnabled } from "./db";
 import {
@@ -161,10 +161,31 @@ export class OrderError extends Error {
 export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
   if (!payload.items.length) throw new OrderError("Your cart is empty.", 400, "empty_cart");
 
+  /**
+   * R53 (owner: "custumer ko sb kuch fast chiye instant chiye … wait hona hi
+   * nhia chie"): saare independent reads EK saath shuru — pincode rules, live
+   * catalog, sheet readiness aur coupon list. Pehle cold start par ye 3-4 sheet
+   * round-trip ek ke baad ek chalte the (order banne me 10-25 second lag jaate
+   * the); ab ek combined wait, aur order likhne ki sirf ek call. Checks isi
+   * purane order par hote hain (same points par await), isliye error priority
+   * nahi badli.
+   */
+  const pincodeRead = payload.skipPincodeCheck ? null : checkPincode(payload.pincode);
+  const productsRead = allProducts();
+  const readyRead = ordersBackend() === "sheet" ? sheetOrdersReady() : null;
+  // coupons ka warm-up: readCoupons ka in-flight dedupe + 30s TTL hai, isliye
+  // aage checkCouponCode ko yahi promise turant (warm) milta hai
+  if (payload.couponCode) void readCoupons().catch(() => null);
+  // prefetch safety-net: kisi pehle stage par throw ho to ye promises handled
+  // maane jaayein (unhandled rejection na bane); asli await ko error milta hi hai
+  pincodeRead?.catch(() => undefined);
+  productsRead.catch(() => undefined);
+  readyRead?.catch(() => undefined);
+
   // delivery serviceability — sirf admin-approved states/pincodes par order
   // (India Post data me na ho, blocked ho ya state band ho to yahin ruk jaata hai)
-  if (!payload.skipPincodeCheck) {
-    const serviceability = await checkPincode(payload.pincode);
+  if (pincodeRead) {
+    const serviceability = await pincodeRead;
     if (!serviceability.serviceable) {
       throw new OrderError(serviceability.message, 400, "pincode_not_serviceable");
     }
@@ -188,7 +209,7 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
    * price badle to checkout nayi price hi charge kare (build-time nahi), sheet se
    * delete product order na ho, naya sheet product order ho sake.
    */
-  const products = await allProducts();
+  const products = await productsRead;
   const items = payload.items.map((line) => {
     const product = products.find((candidate) => candidate.handle === line.handle);
     if (!product) throw new OrderError(`Product not found: ${line.handle}`, 400, "product_not_found");
@@ -309,7 +330,7 @@ export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
      * Save fail = order fail (customer ko saaf message + WhatsApp fallback);
      * aadha-adhura "order ban gaya par sheet me nahi" wala dhokha nahi.
      */
-    const ready = await sheetOrdersReady();
+    const ready = await (readyRead ?? sheetOrdersReady());
     if (!ready.ready) {
       // R41: customer ko andar ki problem (sheet/store/script) mat dikhao —
       // friendly line + WhatsApp raasta. Technical reason sheet-health/logs me.

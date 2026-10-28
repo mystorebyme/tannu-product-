@@ -6,7 +6,7 @@ We want you to keep the outfit, not the problem. This policy explains when a ret
 
 ## 1. Return window
 
-Raise a request within **7 days** of delivery on WhatsApp 8005900581 with your order number and photographs of the item.
+Raise a request within **7 days** of delivery on WhatsApp {{WHATSAPP}} with your order number and photographs of the item.
 
 ## 2. What qualifies for a return or exchange
 
