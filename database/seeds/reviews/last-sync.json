@@ -1,7 +1,7 @@
 {
  "steps": [
   "page: 410 bytes, shop 73883451696",
-  "catalog: 288 product ids, 892 titles, 2898 product images (new sync)",
+  "catalog: 288 product ids, 896 titles, 2904 product images (new sync)",
   "products-with-reviews: 344",
   "probed-endpoints: 18",
   "photo-reviews: 147",
@@ -18,7 +18,7 @@
   "/apps/trustoo/api/v1/reviews/add_review_via_shopify → 500 https://www.likshaclothing.com/apps/trustoo/ap",
   "/apps/trustoo/api/v1/reviews/collect_event → 500 https://www.likshaclothing.com/apps/trustoo/ap"
  ],
- "at": "2026-10-27T00:08:34.191Z",
+ "at": "2026-10-28T00:09:09.239Z",
  "endpointNames": [
   "collect",
   "get_product_list",
