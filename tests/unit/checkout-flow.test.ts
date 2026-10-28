@@ -86,7 +86,7 @@ test("order place hote hi confirmation step 3 checkout ke andar khulta hai (alag
 
 test("R46: confirmation step par WhatsApp CTA + order details ka raasta", () => {
   assert.match(checkout, /data-testid="placed-whatsapp"/);
-  assert.match(checkout, /placedWhatsAppHref/);
+  assert.match(checkout, /orderWhatsAppHref/);
   assert.match(checkout, /Send order on WhatsApp/);
   assert.match(checkout, /data-testid="payment-order-details"/);
   // WhatsApp message me poori detail: items + links + total + address

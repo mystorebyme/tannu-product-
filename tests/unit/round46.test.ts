@@ -213,7 +213,7 @@ test("R46: checkout me payment step nahi — step 3 = order placed + WhatsApp", 
 
 test("R46: placed WhatsApp message me poori order detail (items + links + qty + price + total + address)", () => {
   const form = read(FORM);
-  assert.match(form, /function placedWhatsAppHref\(target: string\): string/);
+  assert.match(form, /function orderWhatsAppHref\(target\?: string\): string/);
   assert.match(form, /productUrl\(/, "har item ka product link");
   assert.match(form, /whatsappLink\(/, "number sheet se — hardcode nahi");
   assert.match(form, /Please confirm my order/);
@@ -267,10 +267,10 @@ test("R46: coupon checkout me payment ki jagah — review step par", () => {
   assert.match(form, /Have a coupon\?/);
   assert.match(form, /\/api\/coupons\/check\?code=/);
   assert.match(form, /async function applyCoupon\(\): Promise<boolean>/, "submit stale-state se nahi phasta");
-  // R48: coupon fail par submit abort + reserved WhatsApp tab close
+  // R48/R52: coupon fail par submit abort — WhatsApp instant-open se PEHLE hi
   assert.match(
     form,
-    /const applied = await applyCoupon\(\);\s*\n\s*if \(!applied\) \{\s*\n\s*closeReservedWa\(\);\s*\n\s*return;/,
+    /const applied = await applyCoupon\(\);\s*\n\s*if \(!applied\) return;/,
   );
   assert.match(form, /couponCode: coupon\?\.code \?\? null/, "order POST me couponCode");
   assert.match(form, /data-testid="summary-discount"/, "aside me discount row");
