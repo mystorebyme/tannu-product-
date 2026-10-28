@@ -192,7 +192,7 @@ export function ProductDetail({
       content: (
         <p className="text-[12.5px] leading-relaxed text-[#5c534b]">
           Simply return it within 7 days for an exchange. The product must be unused with all tags
-          intact. Raise a request on WhatsApp {whatsapp} with your order number.
+          intact. Raise a request on WhatsApp{whatsapp ? ` ${whatsapp}` : ""} with your order number.
         </p>
       ),
     },
@@ -344,7 +344,7 @@ export function ProductDetail({
           </p>
           {sizeSoldOut ? (
             <p className="mt-1 text-[11.5px] text-[#b3261e]">
-              {size} is out of stock — WhatsApp {whatsapp} for the next drop.
+              {size} is out of stock — {whatsapp ? `WhatsApp ${whatsapp} for` : "message us on WhatsApp about"} the next drop.
             </p>
           ) : null}
         </div>

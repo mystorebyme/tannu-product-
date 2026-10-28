@@ -517,7 +517,9 @@ test("R43: site wiring — loader, seed trigger, store live data, dynamicParams"
 
   // checkout sheet ki price charge kare — build-time catalog ki nahi
   const orders = read("apps/web/src/lib/orders.ts");
-  assert.match(orders, /const products = await allProducts\(\);/, "createOrder live catalog se price recompute karta hai");
+  // R53: prefetch shape — read createOrder ke shuru me start, await wahi checkpoint par
+  assert.match(orders, /const productsRead = allProducts\(\);/, "createOrder live catalog se price recompute karta hai");
+  assert.match(orders, /const products = await productsRead;/, "live catalog hi await hota hai (baked nahi)");
   assert.ok(!orders.includes('import { products } from "./store"'), "sync baked catalog import gaya");
 
   const searchPage = read("apps/web/src/app/search/page.tsx");

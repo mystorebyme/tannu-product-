@@ -393,6 +393,23 @@ function sanitizeHtml(html) {
   out = out.replace(/\bNOTE\b\s*[:\-]?/gi, "");
   out = out.replace(/(<br\s*\/?>\s*){2,}/gi, "<br>");
   out = out.replace(/<p>\s*(<br\s*\/?>)?\s*<\/p>/gi, "");
+  /**
+   * R53 (owner: "product detail mai ye jo gispich hai isko fix kro detail
+   * quality … every product mai"): readable-HTML safaai —
+   *  • &nbsp;/\u00a0 junk → normal space,
+   *  • inline tags ke aas-paas missing spaces — "Neckline:</strong>Classic",
+   *    "Comfortable<em>Cotton</em>lining" → "Neckline:</strong> Classic",
+   *    "Comfortable <em>Cotton</em> lining" (site par chipka hua dikhta tha),
+   *  • khaali headings (<h3><br></h3>) gayab,
+   *  • double-escaped entities (&amp;amp;) ek baar khulte hain — meta/source me
+   *    raw "&amp;" jaisa gispich nahi.
+   */
+  out = out.replace(/&nbsp;/gi, " ").replace(/\u00a0/g, " ");
+  out = out.replace(/([A-Za-z0-9)"'])(<(?:strong|em|b|i|u|span)\b[^>]*>)/g, "$1 $2");
+  out = out.replace(/(<\/(?:strong|em|b|i|u|span)>)(?=[A-Za-z0-9("'])/g, "$1 ");
+  out = out.replace(/<(h[3-5])[^>]*>\s*(?:<br[^>]*>|\s)*<\/\1>/gi, "");
+  out = out.replace(/&amp;(amp|lt|gt|quot|#39);/gi, "&$1;");
+  out = out.replace(/ {2,}/g, " ");
   const allowed = new Set(["p", "br", "b", "strong", "i", "em", "u", "ul", "ol", "li", "span", "h3", "h4", "h5", "div", "table", "tbody", "tr", "td", "th"]);
   out = out.replace(/<\/?([a-zA-Z0-9-]+)([^>]*)>/g, (match, tag, attrs) => {
     const name = tag.toLowerCase();
@@ -422,6 +439,28 @@ function htmlToLines(html) {
     .split("\n")
     .map((line) => line.replace(/[ \t]+/g, " ").trim())
     .filter((line) => line.length > 1);
+}
+
+/**
+ * R53 (owner: detail/meta description "gispich" nahi): flat description ko
+ * word-boundary par kaato — purana `.slice(0, 400)` shabd ke BEECH me kaat
+ * deta tha ("XXL (4…"). Entities decoded rehte hain (htmlToLines decode kar
+ * chuka hota hai; yahan guard dobara), whitespace ek space par normalize.
+ */
+function tidyDescription(text, max = 400) {
+  const decoded = String(text ?? "")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (decoded.length <= max) return decoded;
+  const window = decoded.slice(0, max);
+  const lastSpace = window.lastIndexOf(" ");
+  const cut = lastSpace > 200 ? window.slice(0, lastSpace) : window;
+  return `${cut.replace(/[\s,;:·•()\-"']+$/, "")}…`;
 }
 
 /** primary image per size — variant.featured_image se (warna pehli image) */
@@ -683,7 +722,7 @@ const readExtra = (name, key) => {
       sizes,
       sizePricing,
       details,
-      description: stripEmoji(details.join(" ").trim() || cleanTitle).slice(0, 400),
+      description: tidyDescription(stripEmoji(details.join(" ").trim() || cleanTitle)),
       descriptionHtml,
       source: fromExtraStore ? "extra" : "liksha",
       rating: ratings.get(handle)?.rating ?? 0,
@@ -789,7 +828,7 @@ const readExtra = (name, key) => {
       sizes: finalSizes,
       sizePricing: Object.fromEntries(finalSizes.map((size) => [size, { price, compareAtPrice: lockedMrp, available: true }])),
       details: description.split(/\n+/).filter(Boolean).slice(0, 8),
-      description: description.slice(0, 400),
+      description: tidyDescription(description),
       descriptionHtml: `<p>${description.replace(/</g, "&lt;")}</p>`,
       /* R47: owner/admin se add products live liksha-store ke nahi hote — isliye
        * `extra` bucket (287 live-parity count aur snapshot check inhe chhod dete

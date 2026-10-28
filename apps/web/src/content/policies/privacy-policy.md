@@ -18,7 +18,7 @@ We use your data to accept and deliver orders, send order updates, handle return
 
 ## 3. Consent and notice
 
-We ask for your consent before collecting data for a new purpose. You can withdraw consent at any time by messaging us on WhatsApp 8005900581; withdrawal does not affect orders already placed or records we must keep by law.
+We ask for your consent before collecting data for a new purpose. You can withdraw consent at any time by messaging us on WhatsApp {{WHATSAPP}}; withdrawal does not affect orders already placed or records we must keep by law.
 
 ## 4. Sharing
 
@@ -37,7 +37,7 @@ Order and tax records are kept for 8 years as required by GST law. Support conve
 
 ## 6. Your rights
 
-You can ask us to access, correct, or erase your personal data, or to withdraw consent. Write to us on WhatsApp 8005900581 (with your order number); we respond within 30 days. You can also nominate someone to exercise these rights on your behalf. If you are unhappy with our response, you may complain to the Data Protection Board of India.
+You can ask us to access, correct, or erase your personal data, or to withdraw consent. Write to us on WhatsApp {{WHATSAPP}} (with your order number); we respond within 30 days. You can also nominate someone to exercise these rights on your behalf. If you are unhappy with our response, you may complain to the Data Protection Board of India.
 
 ## 7. Security
 
@@ -54,4 +54,4 @@ We use essential cookies for the cart and checkout, and optional analytics cooki
 ## 10. Contact
 
 Designer Clothing, Jaipur, Rajasthan, India.
-WhatsApp: 8005900581
+WhatsApp: {{WHATSAPP}}

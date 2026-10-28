@@ -164,7 +164,7 @@ test("R42: site r42+ script detect karte hi dropdowns khud lagwa deti hai (rate-
 
 /* ── 4. Guard: repo clean (owner rule — "no extra no .md") ────────────────── */
 
-test("R42: repo clean — koi .md nahi (sirf live policies content), docs/.claude/agent-guides gaye", () => {
+test("R42/R53: repo clean — sirf live policies content + owner sheet doc, baaki .md nahi", () => {
   const root = process.cwd();
   const skip = new Set(["node_modules", ".git", ".next", "dist", "coverage", ".turbo", ".venv", "out", "build"]);
   const offenders: string[] = [];
@@ -181,16 +181,21 @@ test("R42: repo clean — koi .md nahi (sirf live policies content), docs/.claud
         policyCount += 1; // live site ka legal content — build-policies.mjs isi se banata hai
         continue;
       }
+      // R53 (owner): "document jinki help leni ho ki kise sheet work krti hai ye sb
+      // to hona hi chiye" — sheet kaam kaise karti hai, iska doc allowed hai.
+      if (rel === path.join("docs", "google-sheets.md")) continue;
       offenders.push(rel);
     }
   };
   walk(root);
-  assert.deepEqual(offenders, [], "repo me sirf policies ke .md bachne chahiye");
+  assert.deepEqual(offenders, [], "repo me sirf policies ke .md + docs/google-sheets.md bachne chahiye");
   assert.equal(policyCount, 4, "privacy/terms/shipping/refund — chaaron policies intact");
 
-  for (const gone of ["docs", ".claude", "agent-guides", "scripts/export-apps-script.mjs", "scripts/repo-audit.mjs", "scripts/brand/render-proof.mjs", "PROGRESS.md", "README.md"]) {
+  for (const gone of [".claude", "agent-guides", "scripts/export-apps-script.mjs", "scripts/repo-audit.mjs", "scripts/brand/render-proof.mjs", "PROGRESS.md", "README.md"]) {
     assert.ok(!fs.existsSync(path.join(root, gone)), `${gone} rehna nahi chahiye`);
   }
+  // R53: owner-required sheet documentation zaroor present ho
+  assert.ok(fs.existsSync(path.join(root, "docs", "google-sheets.md")), "docs/google-sheets.md hona chahiye");
   const pkg = JSON.parse(read("package.json")) as { scripts: Record<string, string> };
   for (const script of ["apps-script:export", "audit", "audit:check", "assets:proof"]) {
     assert.equal(pkg.scripts[script], undefined, `package.json se "${script}" gaya`);

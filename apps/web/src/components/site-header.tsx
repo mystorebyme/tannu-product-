@@ -509,7 +509,10 @@ export function SiteHeader() {
               </div>
             </nav>
             <div className="border-t border-[#eee6de] px-5 py-4 text-[11.5px] text-[#5c534b]">
-              <p className="font-medium text-[#862222]">WhatsApp {whatsapp}</p>
+              {/* R45/R53: number sheet se khali ho to dikhta hi nahi — hardcode kabhi nahi */}
+              {whatsappNumber(whatsapp) ? (
+                <p className="font-medium text-[#862222]">WhatsApp {whatsapp}</p>
+              ) : null}
               <p className="mt-1">Support: Mon–Sat, 10 AM – 8 PM</p>
             </div>
           </div>

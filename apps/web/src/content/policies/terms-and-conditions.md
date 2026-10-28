@@ -6,7 +6,7 @@ These terms govern your use of designerclothing.fashion and any order you place 
 
 ## 1. Who we are
 
-Designer Clothing is a designer ethnic wear label operating from Jaipur, Rajasthan. You can reach us on WhatsApp 8005900581.
+Designer Clothing is a designer ethnic wear label operating from Jaipur, Rajasthan. You can reach us on WhatsApp {{WHATSAPP}}.
 
 ## 2. Products and descriptions
 
@@ -48,4 +48,4 @@ We are responsible for the products we sell and for delivering them safely. We a
 
 ## 11. Complaints and law
 
-WhatsApp 8005900581 par order number bhejiye; we acknowledge complaints within 48 hours and aim to resolve them within 15 days. These terms are governed by Indian law, and courts at Jaipur, Rajasthan have jurisdiction.
+Send your order number to us on WhatsApp {{WHATSAPP}}; we acknowledge complaints within 48 hours and aim to resolve them within 15 days. These terms are governed by Indian law, and courts at Jaipur, Rajasthan have jurisdiction.

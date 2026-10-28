@@ -278,7 +278,8 @@ test("R46: coupon checkout me payment ki jagah — review step par", () => {
 
 test("R46: order create me coupon SERVER-side validate hota hai (client par bharosa nahi)", () => {
   const lib = read("apps/web/src/lib/orders.ts");
-  assert.match(lib, /import \{ checkCouponCode, reportCouponUse \} from "\.\/coupons-sheet"/);
+  // R53: readCoupons prefetch import me juda (parallel warm-up) — validate server-side hi
+  assert.match(lib, /import \{ checkCouponCode, readCoupons, reportCouponUse \} from "\.\/coupons-sheet"/);
   assert.match(lib, /await checkCouponCode\(/);
   assert.match(lib, /coupon_invalid/, "invalid coupon = 400, order nahi banta");
   assert.match(lib, /reportCouponUse\(order\.couponCode\)/, "order banne ke baad sheet me Used +1");

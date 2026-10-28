@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { renderMarkdown } from "@/lib/markdown";
+import { PolicyBody } from "@/components/policy-body";
 import { SupportChannels } from "@/components/contact-details";
 import { policyMarkdown } from "@/content/policies.generated";
 
@@ -68,7 +68,8 @@ export default async function PolicyPage({ params }: { params: Promise<{ slug: s
             </Link>
           ))}
         </nav>
-        <article className="border border-[#eee6de] p-6 sm:p-9">{renderMarkdown(content)}</article>
+        {/* R53: number sheet se live — policy text me {{WHATSAPP}} placeholder hai */}
+        <PolicyBody markdown={content} />
         {/* number/email sheet se live — yahan hardcode nahi */}
         <div className="mt-6 flex flex-col items-center gap-2">
           <p className="text-[11.5px] text-[#8a8078]">Questions? Reach us on WhatsApp or email —</p>

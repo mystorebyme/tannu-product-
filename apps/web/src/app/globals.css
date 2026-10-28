@@ -20,7 +20,8 @@ html {
 body {
   font-family: var(--font-body);
   color: #2f2a25;
-  background: #fff;
+  /* R53: Diwali festive base — halka warm ivory (poori site par) */
+  background: #fffaf2;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -167,9 +168,9 @@ body {
   animation: softFade 0.45s ease both;
 }
 
-/* text selection brand maroon par */
+/* text selection — R53 festive gold tint */
 ::selection {
-  background: #f0d9d5;
+  background: #f5e3bd;
   color: #431010;
 }
 
@@ -391,4 +392,71 @@ table {
     object-fit: contain;
     background: #fbf1e2;
   }
+}
+
+/* ---------- R53: Diwali festive theme (owner: "according to dewali festaavil",
+   har page par) — pure CSS: na image, na JS, na layout shift. body background
+   canvas par propagate hota hai isliye ::before (z-index:-1) glow content ke
+   peeche rehta hai aur har page/route par dikhta hai. ---------- */
+
+/* Diya-glow bokeh: sone + maroon ki halki roshni page ke background me */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(900px 420px at 88% -6%, rgba(201, 152, 62, 0.14), transparent 62%),
+    radial-gradient(760px 380px at -8% 26%, rgba(134, 34, 34, 0.07), transparent 58%),
+    radial-gradient(720px 400px at 108% 68%, rgba(201, 152, 62, 0.1), transparent 60%),
+    radial-gradient(560px 300px at 20% 104%, rgba(201, 152, 62, 0.08), transparent 60%);
+}
+
+/* Festive ribbon: maroon→gold hairline strip sabse upar (har page) */
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 60;
+  pointer-events: none;
+  background: linear-gradient(90deg, #862222, #c9983e 28%, #eed28a 50%, #c9983e 72%, #862222);
+}
+
+/* Section headings par chhote sone ke sparkles — ::before/::after content DOM
+   text me nahi hota (tests/SSR parity safe) */
+h2.font-display::before,
+h2.font-display::after {
+  content: "✦";
+  color: #c9983e;
+  font-size: 0.5em;
+  vertical-align: middle;
+  margin: 0 0.65em;
+  opacity: 0.9;
+}
+
+/* Footer (deep red) ke upar gold shimmer band */
+footer {
+  position: relative;
+}
+footer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, #e8c877 30%, #c9983e 50%, #e8c877 70%, transparent);
+}
+
+/* Primary CTA hover par festive gold ring + warm glow */
+a[class*="bg-[#862222]"]:hover,
+button[class*="bg-[#862222]"]:hover {
+  box-shadow:
+    0 6px 20px rgba(134, 34, 34, 0.28),
+    0 0 0 1.5px rgba(201, 152, 62, 0.55);
 }
