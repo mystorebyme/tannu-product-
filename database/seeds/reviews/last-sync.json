@@ -4,21 +4,29 @@
   "catalog: 288 product ids, 896 titles, 2904 product images (new sync)",
   "products-with-reviews: 344",
   "probed-endpoints: 18",
-  "photo-reviews: 147",
-  "aggregates: 150"
+  "photo-reviews: 127",
+  "aggregates: 137"
  ],
  "probes": [
-  "/apps/trustoo/api/v1/reviews/collect → {\"code\":-1,\"message\":\"ClientId:required,EventCategory:required\"}",
-  "/apps/trustoo/api/v1/reviews/get_product_list → {\"code\":0,\"message\":\"OK\",\"data\":{\"page\":{\"total_page\":18,\"cur_page\":1,\"limit\":20,\"count\":344},\"list\":[{\"id\":\"15347787137328\",\"image_src\":\"https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08059_JPG.jpg?v=17917272",
-  "/apps/trustoo/api/v1/reviews/add_review_via_shopify → 500 https://www.likshaclothing.com/apps/trustoo/ap",
-  "/apps/trustoo/api/v1/reviews/collect_event → 500 https://www.likshaclothing.com/apps/trustoo/ap",
-  "/apps/trustoo/api/v1/reviews/get_product_reviews → {\"code\":0,\"message\":\"OK\",\"data\":{\"page\":{\"total_page\":0,\"cur_page\":1,\"limit\":20,\"count\":0},\"total_rating\":{\"rating\":\"0.0\",\"total_reviews\":0,\"total_star1\":0,\"total_star2\":0,\"total_star3\":0,\"total_star4\":0,\"total_star5\":0,",
+  "/apps/trustoo/api/v1/reviews/collect → 503 https://www.likshaclothing.com/apps/trustoo/ap",
+  "/apps/trustoo/api/v1/reviews/get_product_list → 503 https://www.likshaclothing.com/apps/trustoo/ap",
+  "/apps/trustoo/api/v1/reviews/add_review_via_shopify → 503 https://www.likshaclothing.com/apps/trustoo/ap",
+  "/apps/trustoo/api/v1/reviews/collect_event → 503 https://www.likshaclothing.com/apps/trustoo/ap",
+  "/apps/trustoo/api/v1/reviews/get_product_reviews → 503 https://www.likshaclothing.com/apps/trustoo/ap",
+  "/apps/trustoo/api/v1/reviews/get_reviews → 503 https://www.likshaclothing.com/apps/trustoo/ap",
+  "/apps/trustoo/api/v1/reviews/product_reviews → 503 https://www.likshaclothing.com/apps/trustoo/ap",
+  "/apps/trustoo/api/v1/reviews/review_list → 503 https://www.likshaclothing.com/apps/trustoo/ap",
+  "/apps/trustoo/api/v1/reviews/get_review_list → 503 https://www.likshaclothing.com/apps/trustoo/ap",
+  "/apps/trustoo/api/v1/reviews/get_product_detail → 503 https://www.likshaclothing.com/apps/trustoo/ap",
+  "/apps/trustoo/api/v1/reviews/get_all_reviews → 503 https://www.likshaclothing.com/apps/trustoo/ap",
+  "/apps/trustoo/api/v1/reviews/get_store_reviews → 503 https://www.likshaclothing.com/apps/trustoo/ap",
+  "/apps/trustoo/api/v1/review/product_reviews → 503 https://www.likshaclothing.com/apps/trustoo/ap",
   "/apps/trustoo/api/v1/reviews/collect → {\"code\":-1,\"message\":\"ClientId:required,EventCategory:required\"}",
   "/apps/trustoo/api/v1/reviews/get_product_list → {\"code\":0,\"message\":\"OK\",\"data\":{\"page\":{\"total_page\":18,\"cur_page\":1,\"limit\":20,\"count\":344},\"list\":[{\"id\":\"15347787137328\",\"image_src\":\"https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08059_JPG.jpg?v=17917272",
   "/apps/trustoo/api/v1/reviews/add_review_via_shopify → 500 https://www.likshaclothing.com/apps/trustoo/ap",
   "/apps/trustoo/api/v1/reviews/collect_event → 500 https://www.likshaclothing.com/apps/trustoo/ap"
  ],
- "at": "2026-10-28T00:09:09.239Z",
+ "at": "2026-10-29T00:31:32.074Z",
  "endpointNames": [
   "collect",
   "get_product_list",
@@ -60,7 +68,7 @@
   "review_attribute",
   "instagram_media"
  ],
- "reviewedProducts": 150,
- "total": 1686,
- "aggregates": 150
+ "reviewedProducts": 137,
+ "total": 1491,
+ "aggregates": 137
 }
