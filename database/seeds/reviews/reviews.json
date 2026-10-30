@@ -2,12 +2,12 @@
  "meta": {
   "source": "trustoo",
   "shopId": "73883451696",
-  "syncedAt": "2026-10-29T00:33:01.556Z",
+  "syncedAt": "2026-10-30T00:31:06.329Z",
   "note": "scripts/reviews-sync/fetch-reviews.mjs (GitHub Actions daily) is file ko likhta hai — haath se edit na karein."
  },
  "shop": {
   "rating": 4.8,
-  "count": 1491
+  "count": 1687
  },
  "products": {
   "rang-e-royale-blooming-lehenga-suit-set-10511720087684": {
@@ -396,8 +396,19 @@
   },
   "ruby-royale-red-anarkali-suit-set": {
    "rating": 4.9,
-   "count": 7,
+   "count": 8,
    "reviews": [
+    {
+     "id": "26191805",
+     "author": "Anudita K.",
+     "rating": 5,
+     "body": "The fabric quality is just amazing! ❤️😍 everyone asking about my deess. 🤩 Totally loved it! ✨💯",
+     "date": "2026-10-29",
+     "verified": true,
+     "photos": [
+      "https://img.trustoo.io/pro/73883451696/2026/10/29/KNZWhxnh4D.jpeg?x-oss-process=style/trustoo_big"
+     ]
+    },
     {
      "id": "26167632",
      "author": "Priyali N.",
@@ -7063,6 +7074,284 @@
     }
    ]
   },
+  "minisa-designer-embroidered-zari-sequins-work-gown": {
+   "rating": 5,
+   "count": 30,
+   "reviews": [
+    {
+     "id": "25860531",
+     "author": "Rajashree",
+     "rating": 4,
+     "body": "Love this.",
+     "date": "2026-02-25",
+     "verified": true,
+     "photos": [
+      "https://img.trustoo.io/pro/73883451696/2026/2/25/FidhJrApTC.jpg?x-oss-process=style/trustoo_big"
+     ]
+    },
+    {
+     "id": "26117435",
+     "author": "priyanka b.",
+     "rating": 5,
+     "body": "I can't believe how stunning the gown is ... I mean fabric, color and fitting is too good... Flare is also good... Must buy product",
+     "date": "2026-07-31",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25693707",
+     "author": "Vishal B.",
+     "rating": 5,
+     "body": "Fabric is amazing fit is awesome this suit is very comfortable",
+     "date": "2025-08-06",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25693708",
+     "author": "Sirin N.",
+     "rating": 5,
+     "body": "The fabric is good, the flare is also very nice, but the pants are a bit short and lack length. Still, it's good.",
+     "date": "2025-08-06",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25693711",
+     "author": "Rashmi",
+     "rating": 5,
+     "body": "The quality n material of the cloth is super comfortable Good for plus sizes Fir is extremely perfect according toh the size chart",
+     "date": "2025-08-06",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25693712",
+     "author": "D R.",
+     "rating": 5,
+     "body": "Okay.. M not disappointed... It's a little bit long.. But it doesn't matter.. M satisfied... Don't hesitate.. Go fr it guys.. Same as shown in pic...",
+     "date": "2025-08-06",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25693713",
+     "author": "Shashwati",
+     "rating": 5,
+     "body": "Gifted my mom and she loves it ..so elegant and at such a great price 🫶go for it without any second thought",
+     "date": "2025-08-06",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25693714",
+     "author": "Khushnuma",
+     "rating": 5,
+     "body": "Beautiful... Colour, fabric, design everything is perfect...",
+     "date": "2025-08-06",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25693715",
+     "author": "Benisha",
+     "rating": 5,
+     "body": "Really Very Good Quality and worth for the money 💗 love the product so much 🤌 wonderful dress, comfortable and soft 🩷",
+     "date": "2025-08-06",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25693716",
+     "author": "Sandhya",
+     "rating": 5,
+     "body": "This dress exceeded my expectations...The fit is perfect and the quality of the material is outstanding...😊",
+     "date": "2025-08-06",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25693717",
+     "author": "Sumit K.",
+     "rating": 5,
+     "body": "Perfect fit and colour and fabric are also good. Thanku Liksha clothing . Must buy product",
+     "date": "2025-08-06",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25693718",
+     "author": "Rashmi M.",
+     "rating": 5,
+     "body": "I got more than I expected. This suit is so cute and fits perfectly . I want you to try it once too.",
+     "date": "2025-08-06",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25693720",
+     "author": "Bindiya D.",
+     "rating": 5,
+     "body": "I bought 3-4 suits from this brand. quality is very good, nice fit and beautiful designs.",
+     "date": "2025-08-06",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25693721",
+     "author": "Anu C.",
+     "rating": 5,
+     "body": "Very beautiful fabric so comfortable I bought it for me and again bought another one for my niece,🥰🥰🥰🥰🥰🥰go for any hesitation",
+     "date": "2025-08-06",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25769386",
+     "author": "Farhat F.",
+     "rating": 5,
+     "body": "The dress is of excellent quality, with neat and well-done embroidery. The color is exactly as shown, and the fit is just perfect.",
+     "date": "2025-11-03",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25769387",
+     "author": "Archana",
+     "rating": 5,
+     "body": "Just loveeeeed the set.. it looks so elegant and beautiful.. got many compliments.. love every outfit by royal export♥️",
+     "date": "2025-11-03",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25769388",
+     "author": "Artti S.",
+     "rating": 5,
+     "body": "Excellent dress.. very class and sober color .. Liked everything about it the fut, quality etc. I would say, go for it!!",
+     "date": "2025-11-03",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25769389",
+     "author": "Pooja",
+     "rating": 5,
+     "body": "Suit fabric, colour, design is as same as shown in picture. The product is value for money. material quality is good.",
+     "date": "2025-11-03",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25769390",
+     "author": "Kalyani",
+     "rating": 5,
+     "body": "The colour and material quality is good. It is same as shown in the picture.",
+     "date": "2025-11-03",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25769391",
+     "author": "Sonali D.",
+     "rating": 5,
+     "body": "The fitting is perfect and exact. Also the colour looks very royal and rich. Loved it. I bought the size Small.",
+     "date": "2025-11-03",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25769392",
+     "author": "Mukta K.",
+     "rating": 5,
+     "body": "Amazing suit, colour is super and super quality of fabric. Stitching is perfect",
+     "date": "2025-11-03",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25769393",
+     "author": "Anushka",
+     "rating": 5,
+     "body": "Dress fitting is awesome. Good fabric all good. Personal I like duppata.",
+     "date": "2025-11-03",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25769394",
+     "author": "Reena S.",
+     "rating": 5,
+     "body": "Today i I received my parcel Its so beautiful soon I uploaded a pic with lots of compliments 😍",
+     "date": "2025-11-03",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25769395",
+     "author": "Madhu",
+     "rating": 5,
+     "body": "Awesome👌👌.....Fabric is good and colour is exactly same as in picture.....must go with it",
+     "date": "2025-11-03",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25769396",
+     "author": "Sneha",
+     "rating": 5,
+     "body": "The dress is superb elegant and the material is rich loved the dress totally worth the money",
+     "date": "2025-11-03",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25769397",
+     "author": "Juhita",
+     "rating": 5,
+     "body": "Lovely suit! The colour is beautiful, and the quality of the product is impressive.",
+     "date": "2025-11-03",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25769398",
+     "author": "Yashvi",
+     "rating": 5,
+     "body": "Beautiful😍good colour good quality. Jaisa pic mein hai vaisa hi hai. Nise clothes.",
+     "date": "2025-11-03",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25769399",
+     "author": "Swati",
+     "rating": 5,
+     "body": "Very beautiful suit, looking so beautiful, colour fabrics is just fabulous",
+     "date": "2025-11-03",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25693709",
+     "author": "Shristi K.",
+     "rating": 5,
+     "body": "Unlike my previous order, I got the right product that I ordered. I was on the brink of rejecting the manufacturer for my future purchase due to my last time experience. But, now after receiving the latest product, feel it was a once a while slip from their side. The product was very good and it looked as same as advertised.",
+     "date": "2025-08-06",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25693710",
+     "author": "Ananya",
+     "rating": 5,
+     "body": "Amazing fit, very elegant looking, rich feels",
+     "date": "2025-08-06",
+     "verified": true,
+     "photos": []
+    }
+   ]
+  },
   "rimmy-red-coloured-anarkali-suit-set": {
    "rating": 4.9,
    "count": 14,
@@ -7191,6 +7480,387 @@
      "rating": 4,
      "body": "So beautiful ! fabric is also top notch !",
      "date": "2026-02-18",
+     "verified": true,
+     "photos": []
+    }
+   ]
+  },
+  "liksha-premium-anarkali-suit-set": {
+   "rating": 4.9,
+   "count": 15,
+   "reviews": [
+    {
+     "id": "25667576",
+     "author": "Shivani",
+     "rating": 5,
+     "body": "It is a wonderful product, fabric quality is great and even the color combination",
+     "date": "2025-06-19",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25694523",
+     "author": "Shreen M.",
+     "rating": 5,
+     "body": "Very nice suit colour and fabric are also very good thank you liksha clothing",
+     "date": "2025-08-11",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25712376",
+     "author": "Radha P.",
+     "rating": 5,
+     "body": "This dtess rocked the internet . I gave it to my daughter and trust me it was a major hit.Her friends loved it and we love liksha for this masterpiece.",
+     "date": "2025-09-05",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25712377",
+     "author": "Swayang P. G.",
+     "rating": 5,
+     "body": "It's so pretty! The product is the same as shown here . The quality of the material is very comfortable to wear and the colour is super bright.",
+     "date": "2025-09-05",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25712378",
+     "author": "Arisha",
+     "rating": 5,
+     "body": "Awesome dress colour and design exactly same as in the picture.",
+     "date": "2025-09-05",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25712379",
+     "author": "Priyanka M.",
+     "rating": 5,
+     "body": "Superb Kurta Set! The embroidery and the color combination, color of the kurta, the dupatta all together gives such a festive look to it!",
+     "date": "2025-09-05",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25712380",
+     "author": "Manisha",
+     "rating": 5,
+     "body": "Absolutely beautiful piece of clothing! Really loved the fabric, the fit and the overall look. It is perfect for any kind of celebration. Must buy!",
+     "date": "2025-09-05",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25712381",
+     "author": "Neelam K.",
+     "rating": 5,
+     "body": "Kurta set is nice awesome fabric is awesome i really liked it dupatta is gud everything is gud jst go for it without any second thought",
+     "date": "2025-09-05",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25712402",
+     "author": "Sanjana B.",
+     "rating": 5,
+     "body": "Product qualities so good a material is too soft. My baby just a one year + she didn't cry when i held and I must to recommended this product",
+     "date": "2025-09-05",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25712403",
+     "author": "Akshatha",
+     "rating": 5,
+     "body": "Just the best product with good quality fabric, beautiful colour and perfect fitting 🤩 Happy to receive the product… Just go for it",
+     "date": "2025-09-05",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25712404",
+     "author": "Neha G.",
+     "rating": 5,
+     "body": "I love the product as it is exactly as showing in pictures color pattern every detail is same. Worth purchasing 🥰👍🏻",
+     "date": "2025-09-05",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25712405",
+     "author": "Savitri",
+     "rating": 5,
+     "body": "Good quality product. Purchased it for my daughter. She liked it . Highly appreciated to buy. You can buy for party wear.",
+     "date": "2025-09-05",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25712406",
+     "author": "Deepika J.",
+     "rating": 5,
+     "body": "Beautiful same colour as shown overall like the quality but its little tight if you ordering order one size bigger than yours",
+     "date": "2025-09-05",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25712407",
+     "author": "Neha G.",
+     "rating": 5,
+     "body": "Incredible fabric with a perfect hue. The fit, the texture, the color, and the overall appearance are truly remarkable. A must-buy!",
+     "date": "2025-09-05",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25667577",
+     "author": "Anjali G.",
+     "rating": 4,
+     "body": "It's superb quality wise nd dupatta is very heavy nd finishing is osam.......",
+     "date": "2025-06-19",
+     "verified": true,
+     "photos": []
+    }
+   ]
+  },
+  "saakshi-s-cosmo-slit-anarkali-premium-suit-set": {
+   "rating": 4.8,
+   "count": 26,
+   "reviews": [
+    {
+     "id": "25804753",
+     "author": "Saloni S.",
+     "rating": 5,
+     "body": "Loved it, planning to buy more.",
+     "date": "2025-12-04",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25667568",
+     "author": "Mousami P.",
+     "rating": 5,
+     "body": "Excellent 👍👍 must buy this product 🤠 superb material, excellent fitting and same as shown in the picture",
+     "date": "2025-06-19",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25667570",
+     "author": "Princi A.",
+     "rating": 5,
+     "body": "Same as shown, quality is premium material is very soft I'm self satisfied with this brand color is really awesome",
+     "date": "2025-06-19",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25667571",
+     "author": "Pushpa R.",
+     "rating": 5,
+     "body": "The fabric is very beautiful and also good but colour parfect",
+     "date": "2025-06-19",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25691877",
+     "author": "Mansi K.",
+     "rating": 5,
+     "body": "Same as shown in the picture.\nFabric is also soft.",
+     "date": "2025-08-02",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25712366",
+     "author": "Vanshika",
+     "rating": 5,
+     "body": "Absolutely loved the quality of the fabric! The material feels soft on the skin and is perfect for everyday wear. The fit was true to size, and the stitching looks durable. Definitely worth the price",
+     "date": "2025-09-05",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25712367",
+     "author": "Pari J.",
+     "rating": 5,
+     "body": "Soo good just like the image I’ve got so many compliments in this ethnic wear🤌🏼❤️ I ordered xxl size and it fits me so well It’s material is also so nyc Just perfect 🤩",
+     "date": "2025-09-05",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25712368",
+     "author": "Ishita D.",
+     "rating": 5,
+     "body": "The kurta set is absolutely beautiful. The material is very comfortable to wear. The pants are comfortable. And the dupatta is the star, the size and the material is amazing….🤩",
+     "date": "2025-09-05",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25712370",
+     "author": "Pallabi G.",
+     "rating": 5,
+     "body": "I must say it exceeded my expectations! Embroidery is beautifully detailed,adding a touch of elegance. Fit is true to size . #Ethnicwear #indianfashion #desistyle # kurtaset",
+     "date": "2025-09-05",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25712371",
+     "author": "Lavisha A.",
+     "rating": 5,
+     "body": "Awesome product. But it could have been better if it had a lining in it.. otherwise nice embroidery. Beautiful colour.. chunni material is also soft.",
+     "date": "2025-09-05",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25712372",
+     "author": "Priyanka C.",
+     "rating": 5,
+     "body": "I have bought this suit for a wedding party. Loved the fabric and embroidery. And the color is just exactly shown in the picture. This brand provides good quality. I bought ‘S’ size.",
+     "date": "2025-09-05",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25712373",
+     "author": "Shambhawi S.",
+     "rating": 5,
+     "body": "Perfect outfit. Loved the color, material and embroidery. This is just wowww. Go for it",
+     "date": "2025-09-05",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25712374",
+     "author": "Soumya",
+     "rating": 5,
+     "body": "This suit is really very beautiful and comfortable also. Colour is so elegant. I love it 😍. Delivered within 4 days. Packaging also good. Just go for it ☺️",
+     "date": "2025-09-05",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25712375",
+     "author": "Amita S.",
+     "rating": 5,
+     "body": "Excellent Quality and Fit!\" I recently purchased this suit, and it exceeded my expectations. The fabric is of premium quality, offering both comfort and style.",
+     "date": "2025-09-05",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25742521",
+     "author": "pjtoy",
+     "rating": 5,
+     "body": "just felt the stitching could have been better ❣️Nonetheless dress is pretty",
+     "date": "2025-10-10",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25876699",
+     "author": "Shafiya Y.",
+     "rating": 5,
+     "body": "thank you so much ☺️.. pretty outfit.. comfortable also 😍\ni really loved the dress wore it on Eid,🌙really loved the quality.....",
+     "date": "2026-03-12",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25667569",
+     "author": "Shruti",
+     "rating": 5,
+     "body": "Product image was better than the product",
+     "date": "2025-06-19",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25667574",
+     "author": "Sandhya",
+     "rating": 5,
+     "body": "Just too much awesome fabric and fittings.",
+     "date": "2025-06-19",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25667575",
+     "author": "Vaishnavi",
+     "rating": 5,
+     "body": "Great dress... goes with every occasion",
+     "date": "2025-06-19",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25712364",
+     "author": "Aditi G.",
+     "rating": 5,
+     "body": "This outfit is a showstopper! The embroidery is rich and perfectly done. The material feels soft on the skin and fits really well. Ideal for weddings or festive gatherings. Loved the compliments I received😊♥️",
+     "date": "2025-09-05",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25712365",
+     "author": "Ashwini N.",
+     "rating": 5,
+     "body": "Got a lot of compliments for this dress..material is super soft and comfortable for long time wear, doesn’t crease easily, it has good shine.. very elegant design.. I love it.. found my new favourite festive wear",
+     "date": "2025-09-05",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25876712",
+     "author": "Shafiya Y.",
+     "rating": 5,
+     "body": "😍",
+     "date": "2026-03-13",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25667567",
+     "author": "Charu S.",
+     "rating": 4,
+     "body": "What an Amazing fit...!!! Just fab👌 Perfect for family lunch, dinners, ladies day out and what not",
+     "date": "2025-06-19",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25667573",
+     "author": "Zuber",
+     "rating": 4,
+     "body": "As per price worth it👍 Quality is also nice.. Love it😍",
+     "date": "2025-06-19",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25712369",
+     "author": "Kajal",
+     "rating": 4,
+     "body": "Buy it without any doubt😍😍😍😍😍😍😍😍😍 Same colour shown in picture Material quality is very good 👍 Delivered to fast 😁",
+     "date": "2025-09-05",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25740263",
+     "author": "pj",
+     "rating": 4,
+     "body": "nice suit",
+     "date": "2025-10-06",
      "verified": true,
      "photos": []
     }
@@ -7675,6 +8345,21 @@
     }
    ]
   },
+  "saumya-neon-sharara-suit-set-copy": {
+   "rating": 4,
+   "count": 1,
+   "reviews": [
+    {
+     "id": "26188473",
+     "author": "Zareen K.",
+     "rating": 4,
+     "body": "Nice quality and colour same as picture",
+     "date": "2026-10-12",
+     "verified": true,
+     "photos": []
+    }
+   ]
+  },
   "saumya-neon-sharara-suit-set-10498715058308": {
    "rating": 4.7,
    "count": 22,
@@ -7880,6 +8565,1124 @@
     }
    ]
   },
+  "sandhiya-black-premium-quality-anarkali-suit-set": {
+   "rating": 5,
+   "count": 5,
+   "reviews": [
+    {
+     "id": "25626461",
+     "author": "Manika",
+     "rating": 5,
+     "body": "Best purchase , mujhe same product mila hai thamk you liksha clothing for this beautiful dress 🤗🤩",
+     "date": "2025-04-21",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25626455",
+     "author": "hetvi r.",
+     "rating": 5,
+     "body": "Fitting is good",
+     "date": "2025-04-21",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25626469",
+     "author": "Stuti D.",
+     "rating": 5,
+     "body": "Beautiful, as shown in the picture. Worth it.",
+     "date": "2025-04-21",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25626485",
+     "author": "Divmehar",
+     "rating": 5,
+     "body": "I really love that ! Thank you so much 🌸🫶",
+     "date": "2025-04-21",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25626489",
+     "author": "Pragati T.",
+     "rating": 5,
+     "body": "Bought size xs in this, loved the fit and color.😍",
+     "date": "2025-04-21",
+     "verified": true,
+     "photos": []
+    }
+   ]
+  },
+  "monshika-premium-quality-maroon-anarkali-suit-set": {
+   "rating": 4.6,
+   "count": 23,
+   "reviews": [
+    {
+     "id": "25736928",
+     "author": "Aditi",
+     "rating": 5,
+     "body": "Beautiful color, great fitting dress and moreover the the girth is amazing.",
+     "date": "2025-10-04",
+     "verified": true,
+     "photos": [
+      "https://img.trustoo.io/pro/73883451696/2025/10/4/b2ZkFCZNFS.jpg?x-oss-process=style/trustoo_big"
+     ]
+    },
+    {
+     "id": "25831078",
+     "author": "Sanskruti L.",
+     "rating": 5,
+     "body": "It’s very pretty and perfect fitting I am wearing “S” size and in love with this dress.",
+     "date": "2025-12-29",
+     "verified": true,
+     "photos": [
+      "https://img.trustoo.io/pro/73883451696/2025/12/29/eZiPcW3nwa.jpeg?x-oss-process=style/trustoo_big"
+     ]
+    },
+    {
+     "id": "25766187",
+     "author": "Sonam T.",
+     "rating": 5,
+     "body": "Very beautiful dress .....I love it",
+     "date": "2025-10-28",
+     "verified": true,
+     "photos": [
+      "https://img.trustoo.io/pro/73883451696/2025/10/28/afBt4GFnse.jpg?x-oss-process=style/trustoo_big",
+      "https://img.trustoo.io/pro/73883451696/2025/10/28/nAXnMAa4jk.jpg?x-oss-process=style/trustoo_big",
+      "https://img.trustoo.io/pro/73883451696/2025/10/28/cCxX86r3Ry.jpg?x-oss-process=style/trustoo_big"
+     ]
+    },
+    {
+     "id": "25811634",
+     "author": "Kumkum D.",
+     "rating": 5,
+     "body": "Such a beautiful outfit , at first I felt that this site is shady I should have not purchased from here but when the parcel arrived oh my godddd had such a good packaing it is just so amazing \nFabric\nDesign \nFit  \nQuality \nEverything was on point",
+     "date": "2025-12-10",
+     "verified": true,
+     "photos": [
+      "https://img.trustoo.io/pro/73883451696/2025/12/10/sSSMcHCRRd.jpg?x-oss-process=style/trustoo_big",
+      "https://img.trustoo.io/pro/73883451696/2025/12/10/JR2dTMKzEX.jpg?x-oss-process=style/trustoo_big"
+     ]
+    },
+    {
+     "id": "25669922",
+     "author": "Swetha",
+     "rating": 3,
+     "body": "Hi , I recently purchased  this suit … suit is good",
+     "date": "2025-06-27",
+     "verified": true,
+     "photos": [
+      "https://img.trustoo.io/pro/73883451696/2025/6/27/MAKZ3NNPpw.jpeg?x-oss-process=style/trustoo_big"
+     ]
+    },
+    {
+     "id": "25626456",
+     "author": "Rupa M.",
+     "rating": 5,
+     "body": "Beautiful dress,so comfortable, material is very beautiful and smooth",
+     "date": "2025-04-21",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25626468",
+     "author": "Ishu",
+     "rating": 5,
+     "body": "It is just perfect and wow ...it's fit me properly...and the dupatta...😍😍",
+     "date": "2025-04-21",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25626487",
+     "author": "Moutoshi D. D.",
+     "rating": 5,
+     "body": "recently purchased this suit, and I must say, it exceeded my expectations in both style and comfort. The fabric feels premium and breathable, perfect for long hours at events",
+     "date": "2025-04-21",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25626497",
+     "author": "Jyotsna N.",
+     "rating": 5,
+     "body": "Fitting like made for me ...just love this suit sets from  liksha.......❤️",
+     "date": "2025-04-21",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25626499",
+     "author": "Angeltripti",
+     "rating": 5,
+     "body": "everyone must buy this , lovely dress , I got many compliments wearing this dress ...❤️❤️❤️",
+     "date": "2025-04-21",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25626500",
+     "author": "Manidipa",
+     "rating": 5,
+     "body": "Most trending with damm comfy material Loved the colour, fitting 😍😍 Just go for it..😍👍",
+     "date": "2025-04-21",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25626501",
+     "author": "Manu K.",
+     "rating": 5,
+     "body": "Amazing suit 😍 nice fabric 😍 must buy ❤️ I ordered L size",
+     "date": "2025-04-21",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25626482",
+     "author": "Raghavendra",
+     "rating": 5,
+     "body": "Great design and quality",
+     "date": "2025-04-21",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25626491",
+     "author": "Preshita M.",
+     "rating": 5,
+     "body": "Good quality 💯",
+     "date": "2025-04-21",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25626498",
+     "author": "maishvi",
+     "rating": 5,
+     "body": "Loved this dress!",
+     "date": "2025-04-21",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25626502",
+     "author": "Arsha J.",
+     "rating": 5,
+     "body": "Its a wow purchase…highly recommended 💗",
+     "date": "2025-04-21",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25626503",
+     "author": "Arsha J.",
+     "rating": 5,
+     "body": "It was of good quality and so pretty",
+     "date": "2025-04-21",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25626464",
+     "author": "Shaihta K.",
+     "rating": 5,
+     "body": "Good",
+     "date": "2025-04-21",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25626505",
+     "author": "Anjali M.",
+     "rating": 4,
+     "body": "Loved the quality Product is same as shown on the picture",
+     "date": "2025-04-21",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25871453",
+     "author": "Sapna G.",
+     "rating": 4,
+     "body": "Loved the dress and want to buy it...but why it's sleeveless??? Please say,it has sleeves!!🥹",
+     "date": "2026-03-04",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25626504",
+     "author": "Nishtha T.",
+     "rating": 4,
+     "body": "Nice fitting Value for money",
+     "date": "2025-04-21",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25871784",
+     "author": "Pavani",
+     "rating": 3,
+     "body": "The dress is good",
+     "date": "2026-03-07",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25714216",
+     "author": "Kavita",
+     "rating": 3,
+     "body": "good",
+     "date": "2025-09-09",
+     "verified": true,
+     "photos": []
+    }
+   ]
+  },
+  "nehas-premium-anarkali-suit-set": {
+   "rating": 4.7,
+   "count": 55,
+   "reviews": [
+    {
+     "id": "26190626",
+     "author": "Arundhati C.",
+     "rating": 4,
+     "body": "I purchased this anarkali suit for my Durga pooja special dance performance.. it's really so elegant n beautiful..I have only one lil complaint about the flayer..jitna flayer add me dikhaya gya hai utna nhi hai real me..plz work on it otherwise ye suit bahut beautiful hai..",
+     "date": "2026-10-21",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25793942",
+     "author": "Aastha A.",
+     "rating": 5,
+     "title": "Bahut khushi hui 🤩",
+     "body": "The dress is superb elegant and the material is rich loved the dress totally worth the money Delivery time se pehle hi mil gaya, packaging bhi safe thi. Bahut khushi hui 🤩💯",
+     "date": "2025-11-09",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25620063",
+     "author": "Anjali B.",
+     "rating": 5,
+     "body": "So beautiful 🤩 I loved this anarkali suit 🥰 Thank You Liksha Clothing 🥹",
+     "date": "2025-04-12",
+     "verified": true,
+     "photos": [
+      "https://img.trustoo.io/pro/73883451696/2025/4/12/KikfzkaMpk.jpg?x-oss-process=style/trustoo_big",
+      "https://img.trustoo.io/pro/73883451696/2025/4/12/TcEnwDajBA.jpg?x-oss-process=style/trustoo_big"
+     ]
+    },
+    {
+     "id": "25623165",
+     "author": "Vandana K.",
+     "rating": 5,
+     "body": "Ekdmmm perfect 🥹\nReally amazing stuff and proper finishing ❤️",
+     "date": "2025-04-16",
+     "verified": true,
+     "photos": [
+      "https://img.trustoo.io/pro/73883451696/2025/4/17/brbEr58kdn.jpg?x-oss-process=style/trustoo_big"
+     ]
+    },
+    {
+     "id": "25629276",
+     "author": "Priyanshi S.",
+     "rating": 5,
+     "body": "Loved it ❤️😍 \nQuality, Stuff and finishing \nAll over superb and outstanding ❤️\nThank You Liksha Clothing 🥹😊",
+     "date": "2025-04-27",
+     "verified": true,
+     "photos": [
+      "https://img.trustoo.io/pro/73883451696/2025/4/27/kffNDdepMX.jpg?x-oss-process=style/trustoo_big",
+      "https://img.trustoo.io/pro/73883451696/2025/4/27/x4fPJxJdT2.jpg?x-oss-process=style/trustoo_big",
+      "https://img.trustoo.io/pro/73883451696/2025/4/27/ikzzHbENMd.jpg?x-oss-process=style/trustoo_big",
+      "https://img.trustoo.io/pro/73883451696/2025/4/27/PzTWsENcZ2.jpg?x-oss-process=style/trustoo_big"
+     ]
+    },
+    {
+     "id": "25629277",
+     "author": "Neha",
+     "rating": 5,
+     "body": "I first time order from liksha clothing.  My size was small and easily i exchanged. And it's really pretty suit and service is very great ❤️🥰🥰",
+     "date": "2025-04-27",
+     "verified": true,
+     "photos": [
+      "https://img.trustoo.io/pro/73883451696/2025/4/27/aYb7t28DDJ.jpg?x-oss-process=style/trustoo_big"
+     ]
+    },
+    {
+     "id": "25629279",
+     "author": "Himanshi",
+     "rating": 5,
+     "body": "Beautiful Suit ❤️🤩 it's my second order. Thank you ❤️ will order more and more ☺️",
+     "date": "2025-04-27",
+     "verified": true,
+     "photos": [
+      "https://img.trustoo.io/pro/73883451696/2025/4/27/zhe2ASkymW.jpg?x-oss-process=style/trustoo_big",
+      "https://img.trustoo.io/pro/73883451696/2025/4/27/fka5Pj6Jk7.jpg?x-oss-process=style/trustoo_big",
+      "https://img.trustoo.io/pro/73883451696/2025/4/27/4DT5cSaYir.jpg?x-oss-process=style/trustoo_big"
+     ]
+    },
+    {
+     "id": "25638459",
+     "author": "Smarth T.",
+     "rating": 5,
+     "body": "Lovely and comfortable fabric, very classy. I loved the outfit, Looking forward to more purchases from Liksha clothing",
+     "date": "2025-05-19",
+     "verified": true,
+     "photos": [
+      "https://img.trustoo.io/pro/73883451696/2025/5/20/zwfFjQhEYf.jpg?x-oss-process=style/trustoo_big"
+     ]
+    },
+    {
+     "id": "25689666",
+     "author": "Mamta C.",
+     "rating": 5,
+     "body": "Very beautiful suits fiting quality all good",
+     "date": "2025-07-26",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25830651",
+     "author": "Nandita",
+     "rating": 5,
+     "body": "Very good at this price. Go for it",
+     "date": "2025-12-26",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25623166",
+     "author": "Angel G.",
+     "rating": 4,
+     "body": "Loved it ❤️ \nIn my family, everyone most liked my suit 🤩 I will recommend to everyone 🥰",
+     "date": "2025-04-16",
+     "verified": true,
+     "photos": [
+      "https://img.trustoo.io/pro/73883451696/2025/4/17/rDAQ8ZNcWJ.jpg?x-oss-process=style/trustoo_big"
+     ]
+    },
+    {
+     "id": "25618473",
+     "author": "Aradhya S.",
+     "rating": 5,
+     "body": "Beautiful kurta set. Perfect colour. Embroidery is good. Elegant. I love indo Liksha clothing",
+     "date": "2025-04-08",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25618474",
+     "author": "Shilpi G.",
+     "rating": 5,
+     "body": "Very awesome dress good quality embroidery is do pretty",
+     "date": "2025-04-08",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25618475",
+     "author": "Richie D. B.",
+     "rating": 5,
+     "body": "No doubt the suit is very pretty and definitely will have head turns once .. but the stuff is not up to the level of the price duptta is nice So giving 5⭐ to appearance 4⭐ to material quality",
+     "date": "2025-04-08",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25618478",
+     "author": "Mala S.",
+     "rating": 5,
+     "body": "Awesome fabric and design I like the suit it's as same as in the picture... affordable price",
+     "date": "2025-04-08",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25618479",
+     "author": "Aparna V.",
+     "rating": 5,
+     "body": "Beautiful suit. Thank you soo much myntra for the beautiful suit. Perfect size and fabric was really nice and comfortable .Nice packaging.",
+     "date": "2025-04-08",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25618481",
+     "author": "Mehnaaz S.",
+     "rating": 5,
+     "body": "Beautiful suit 👌👌👌👌cloth fitting design everything was perfect …. I bought medium size …",
+     "date": "2025-04-08",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25618483",
+     "author": "Anannya N.",
+     "rating": 5,
+     "body": "It's a very comfortable and beautiful suit for summer.",
+     "date": "2025-04-08",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25618484",
+     "author": "Lainui D.",
+     "rating": 5,
+     "body": "Delivery is very late but im so happy because suit is fit my perfect size quality is good You can wear black suit in summer because it is a cool clothing 😍🫶🏻",
+     "date": "2025-04-08",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25618486",
+     "author": "Sonia",
+     "rating": 5,
+     "body": "I’m really happy with the purchase! The fabric is comfortable, good , Definitely worth the purchase! Let me know if you’d like any changes!",
+     "date": "2025-04-08",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25618487",
+     "author": "Gayatri D.",
+     "rating": 5,
+     "body": "Best Kurta set. Loved it same as shown in the picture. Thank you so much Liksha😍❤️ loved the fabric",
+     "date": "2025-04-08",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25618488",
+     "author": "Anshi A.",
+     "rating": 5,
+     "body": "The look is so good.. worth spending the money. Cloth is too soft. Though i found it little too much light.. but anyways loving it",
+     "date": "2025-04-08",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25619229",
+     "author": "Amit21",
+     "rating": 5,
+     "body": "This anarkali suit is really good and amazing. and embroidery is really good and fitting is very proper and dupatta is amazing.",
+     "date": "2025-04-10",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25619836",
+     "author": "leo d.",
+     "rating": 5,
+     "body": "Just perfect... Made my day... Hope it will last longer after wash too",
+     "date": "2025-04-11",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25629034",
+     "author": "Parul S.",
+     "rating": 5,
+     "body": "I love the fabric and  design. This suit looks  beautiful  and elegance after wearing.",
+     "date": "2025-04-25",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25680193",
+     "author": "Priya",
+     "rating": 5,
+     "body": "Pretty 🎀 This was very good the fabric was nice I bought it for myself it fits me so well. Thank you Liksha💗",
+     "date": "2025-07-20",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25689703",
+     "author": "Sonu v.",
+     "rating": 5,
+     "body": "Bohot khubsurat he nice fabric quality superb 👌",
+     "date": "2025-07-27",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25712298",
+     "author": "Arushi",
+     "rating": 5,
+     "body": "Bohot acha dress hai delivery bi bht fast hogaye no dout go for it guys",
+     "date": "2025-09-04",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25716073",
+     "author": "Ankita",
+     "rating": 5,
+     "body": "This dress is very beautiful..same as shown in pictures .. must buy product ..",
+     "date": "2025-09-17",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25751713",
+     "author": "RP",
+     "rating": 5,
+     "body": "Best dress ever .. As shown in the pictures, I got the same . Worth the price and its worth to buy . Loved it ! Thanks Liksha clothing",
+     "date": "2025-10-23",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25848688",
+     "author": "Kasak R.",
+     "rating": 5,
+     "body": "Really awesome and beautiful... same as shown in picture",
+     "date": "2026-02-03",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25853794",
+     "author": "Monika",
+     "rating": 5,
+     "body": "Sizing is as per chart and packaging was really commendable and the dress is just wow i was not expecting dress to be so flawless fabric is soft skin friendly",
+     "date": "2026-02-11",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25618476",
+     "author": "Sagun R.",
+     "rating": 5,
+     "body": "I absolutely love this ethnic suit! The quality is amazing – the fabric feels premium and comfortable to wear. The color is stunning and exactly as shown in the pictures, making it perfect for any special occasion. The i detailing adds an elegant touch. Highly recommended!\"",
+     "date": "2025-04-08",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25618480",
+     "author": "Husna A.",
+     "rating": 5,
+     "body": "This is a perfect dress for any occasion that you plan to go on. The detailing is so perfect. Goes in for any family function or for an eid/festive look!!! the fabric is so soft and looks elegant. Go for it",
+     "date": "2025-04-08",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25618482",
+     "author": "Sarbari G.",
+     "rating": 5,
+     "body": "I am 5.6 ft weighing 63 kg. Bought the M size. Fits like a dream. Very comfortable material. Embroidery is neat, the golden threads not too shiny. The bottom pants are also comfortable and fits nicely.",
+     "date": "2025-04-08",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25619870",
+     "author": "Anchal S.",
+     "rating": 5,
+     "body": "just love it 😍",
+     "date": "2025-04-11",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25619876",
+     "author": "Prema S.",
+     "rating": 5,
+     "body": "This Product is fab !",
+     "date": "2025-04-11",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25629433",
+     "author": "Ashish C. T.",
+     "rating": 5,
+     "body": "No doubt... only Purchased.. awesome product 😍😍😍",
+     "date": "2025-04-28",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25716161",
+     "author": "Priyanka N.",
+     "rating": 5,
+     "body": "Same as shown",
+     "date": "2025-09-17",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25829240",
+     "author": "Adeeba k.",
+     "rating": 5,
+     "body": "Bery nice anarkali",
+     "date": "2025-12-18",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25842249",
+     "author": "Mihika",
+     "rating": 5,
+     "body": "Its too good ❤️",
+     "date": "2026-01-18",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25843268",
+     "author": "Ruby s.",
+     "rating": 5,
+     "body": "Waooo waoooo waoooo ❤️😍😍😍",
+     "date": "2026-01-20",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25854104",
+     "author": "Jagruti d.",
+     "rating": 5,
+     "body": "Amazing 😍 go for it",
+     "date": "2026-02-11",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25877029",
+     "author": "Susmitha",
+     "rating": 5,
+     "body": "A good dress",
+     "date": "2026-03-14",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25619854",
+     "author": "Alima S.",
+     "rating": 5,
+     "body": "Nyc",
+     "date": "2025-04-11",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25665915",
+     "author": "Sonia S.",
+     "rating": 5,
+     "body": "Very nice",
+     "date": "2025-06-14",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25618477",
+     "author": "Vaishali S.",
+     "rating": 4,
+     "body": "I loved it! 🤩 Same as shown in picture. Great work amazing fabric so comfortable.",
+     "date": "2025-04-08",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25618485",
+     "author": "Swati C.",
+     "rating": 4,
+     "body": "Very beautiful and pretty suit, fabric quality is too good...just go for it!!",
+     "date": "2025-04-08",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25619257",
+     "author": "khushali s.",
+     "rating": 4,
+     "body": "I like the fabric and colour of the kurta.Its feel very comfortable🤩🤩",
+     "date": "2025-04-10",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25713166",
+     "author": "Nisha T.",
+     "rating": 4,
+     "body": "Wowww 😍😍 amazing ❤️",
+     "date": "2025-09-06",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25876485",
+     "author": "Vaishnavi S.",
+     "rating": 4,
+     "body": "Great material, good customer service.",
+     "date": "2026-03-11",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25858839",
+     "author": "P",
+     "rating": 3,
+     "body": "Very Good but  same as shown in pictures.. but still it was good …",
+     "date": "2026-02-21",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25714149",
+     "author": "Simran K.",
+     "rating": 3,
+     "body": "Everything is good The dress is so pretty I'm expecting alot and liksha literally did stand on my expectation perfectly i loved the dress so much I'll continue shopping from Liksha clothing💗 thank you so much",
+     "date": "2025-09-08",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25855661",
+     "author": "Akanksha P.",
+     "rating": 3,
+     "body": "Dress is good  accepted I like it 💗",
+     "date": "2026-02-14",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25694989",
+     "author": "Krishna",
+     "rating": 3,
+     "body": "Good",
+     "date": "2025-08-14",
+     "verified": true,
+     "photos": []
+    }
+   ]
+  },
+  "aditi-premium-black-anarkali-suit-set": {
+   "rating": 4.7,
+   "count": 22,
+   "reviews": [
+    {
+     "id": "25668093",
+     "author": "Akansha S.",
+     "rating": 5,
+     "body": "very very satisifed with the suit that i ordered.\nIt was same as expected even the gher was quite big just as in the picture. only the fabric quality could have been better.\nBut lookwise it was fabulous.",
+     "date": "2025-06-22",
+     "verified": true,
+     "photos": [
+      "https://img.trustoo.io/pro/73883451696/2025/6/23/zSS8MPK3ck.jpg?x-oss-process=style/trustoo_big"
+     ]
+    },
+    {
+     "id": "25794135",
+     "author": "Rishika A.",
+     "rating": 4,
+     "body": "Really like the detailing and fabric price is lit bit high otherwise it was good ... packing is gud !",
+     "date": "2025-11-10",
+     "verified": true,
+     "photos": [
+      "https://img.trustoo.io/pro/73883451696/2025/11/10/bkkXGHWasY.jpeg?x-oss-process=style/trustoo_big",
+      "https://img.trustoo.io/pro/73883451696/2025/11/10/BisypdJ2XE.jpeg?x-oss-process=style/trustoo_big"
+     ]
+    },
+    {
+     "id": "25619249",
+     "author": "nena v.",
+     "rating": 5,
+     "body": "Amazing quality and best looking dress, comfortable and designer dress, beautiful looking and stylish, highly recommend......😘😘😘",
+     "date": "2025-04-10",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25619259",
+     "author": "ritika s.",
+     "rating": 5,
+     "body": "Same as shown in the picture. Embroidery detailing & color gives you a decent look and it is comfortable as well.",
+     "date": "2025-04-10",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25619276",
+     "author": "riddhi v.",
+     "rating": 5,
+     "body": "just go for it and the duptta omggh fabulous quality wise amazing so stylish and pretty it makes you feel more pretty❤❤❤❤❤❤❤❤❤❤❤❤❤❤❤❤❤❤",
+     "date": "2025-04-10",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25668384",
+     "author": "Renu S.",
+     "rating": 5,
+     "body": "Suit is very pretty and fabric is so nice and comfortable.. worth the price..my height is 5 and weight is 55 , I ordered M and had to get it altered a little bit.",
+     "date": "2025-06-24",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25668385",
+     "author": "Neha X.",
+     "rating": 5,
+     "body": "It's so comfortable and so pretty. I mean black itself is my favorite color and in addition to that the material is super soft. Loved this purchase ❤️",
+     "date": "2025-06-24",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25668386",
+     "author": "Achu",
+     "rating": 5,
+     "body": "I didn't expect that I would get such a nice fabric as showed in the picture but really Likaha Clothing always makes me happy to choose for the outfits without any doubt on it",
+     "date": "2025-06-24",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25668390",
+     "author": "Haseena S.",
+     "rating": 5,
+     "body": "I was very impressed by the color of this dress...its so cool..and one thing is there if the qualityof the material increases a bit high it would be amazing...",
+     "date": "2025-06-24",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25668391",
+     "author": "Pragya S.",
+     "rating": 5,
+     "body": "Great fitting , got this dress in exact colour shown in the photo , comfortable & great quality too but the length of the dhuppata is little bit small but adjustable But worth buying 🤩🤩",
+     "date": "2025-06-24",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25668392",
+     "author": "Khushi T.",
+     "rating": 5,
+     "body": "Good quality,fitting is good. Overall one of the best products from Liksha.",
+     "date": "2025-06-24",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25668393",
+     "author": "Harshita K.",
+     "rating": 5,
+     "body": "It's an amazing product. I was afraid of the colour after the wash but it is as it is. No shrinking, no decolouring. Everything is fine... Thank you Liksha Clothing ❣️",
+     "date": "2025-06-24",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25619837",
+     "author": "sweta",
+     "rating": 5,
+     "body": "Sober yet beautiful ❤️ looks as shown in picture",
+     "date": "2025-04-11",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25619863",
+     "author": "Meghna M.",
+     "rating": 5,
+     "body": "Very beautiful dress... 👌👌👌",
+     "date": "2025-04-11",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25668382",
+     "author": "Shayeree G.",
+     "rating": 5,
+     "body": "Love this kurta set🖤 … sooo beautiful…. Perfect for small events 😍😍😍 10/10 Colour is same as shown in the picture… Colour is soo beautiful….you can go for this Anarkali Suit  set 👍👍👍🖤🖤🖤🖤🖤🖤🖤🖤",
+     "date": "2025-06-24",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25668383",
+     "author": "Shalini P.",
+     "rating": 5,
+     "body": "This dress looks stunning and elegant! The deep Black color is rich and classy, perfect for festive or traditional occasions. The embroidery and detailing add charm, giving it a luxurious touch. The flowy dupatta enhances the overall look, and the fit seems comfortable yet stylish. It’s a graceful choice for anyone who loves vibrant ethnic wear.",
+     "date": "2025-06-24",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25668388",
+     "author": "Nisha S.",
+     "rating": 5,
+     "body": "The dress is very good and the quality is also very good. That dress is more beautiful in reality than the photo,dupatta is so soft and lengthy,I did not expect the dress to be so beautiful but it looks quite good. thank you Liksha",
+     "date": "2025-06-24",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25619872",
+     "author": "Urvi G.",
+     "rating": 5,
+     "body": "👍👍👍👍",
+     "date": "2025-04-11",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25619856",
+     "author": "Kiran M.",
+     "rating": 4,
+     "body": "had purchased for birthday present of my best friend. She likes it very much. Altimate satisfaction of purchasing right product",
+     "date": "2025-04-11",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25668387",
+     "author": "Roopali",
+     "rating": 4,
+     "body": "It’s really good quality, looks also gorgeous , and main thing is than when I ware this cloth , everyone ask me , where I bought this",
+     "date": "2025-06-24",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25668389",
+     "author": "Laasya H.",
+     "rating": 4,
+     "body": "It's a beautiful suit....I loved it.",
+     "date": "2025-06-24",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25736881",
+     "author": "Tamanna K.",
+     "rating": 3,
+     "body": "Delivery is very fast shown as picture everything was just perfect",
+     "date": "2025-10-04",
+     "verified": true,
+     "photos": []
+    }
+   ]
+  },
+  "madhvi-heavy-embroidered-maxi-set-10016283328644": {
+   "rating": 4.9,
+   "count": 10,
+   "reviews": [
+    {
+     "id": "26173615",
+     "author": "Parismita M.",
+     "rating": 5,
+     "body": "It's very good 👍",
+     "date": "2026-10-06",
+     "verified": true,
+     "photos": [
+      "https://img.trustoo.io/pro/73883451696/2026/10/6/xhpj8kck8F.jpg?x-oss-process=style/trustoo_big",
+      "https://img.trustoo.io/pro/73883451696/2026/10/6/WGExMGfnwz.jpg?x-oss-process=style/trustoo_big",
+      "https://img.trustoo.io/pro/73883451696/2026/10/6/fSWpxztFZm.jpg?x-oss-process=style/trustoo_big",
+      "https://img.trustoo.io/pro/73883451696/2026/10/6/27prWHSM7E.jpg?x-oss-process=style/trustoo_big",
+      "https://img.trustoo.io/pro/73883451696/2026/10/6/2p7ftxSCNr.jpg?x-oss-process=style/trustoo_big"
+     ]
+    },
+    {
+     "id": "26173616",
+     "author": "Parismita M.",
+     "rating": 5,
+     "body": "So good and comfortable",
+     "date": "2026-10-06",
+     "verified": true,
+     "photos": [
+      "https://img.trustoo.io/pro/73883451696/2026/10/6/7KtdQAheEs.jpg?x-oss-process=style/trustoo_big",
+      "https://img.trustoo.io/pro/73883451696/2026/10/6/4tEZ2B6sek.jpg?x-oss-process=style/trustoo_big",
+      "https://img.trustoo.io/pro/73883451696/2026/10/6/5WQirmssfe.jpg?x-oss-process=style/trustoo_big",
+      "https://img.trustoo.io/pro/73883451696/2026/10/6/r6FDf7Sck7.jpg?x-oss-process=style/trustoo_big",
+      "https://img.trustoo.io/pro/73883451696/2026/10/6/HXB5AehyKT.jpg?x-oss-process=style/trustoo_big"
+     ]
+    },
+    {
+     "id": "25645006",
+     "author": "Swathi B.",
+     "rating": 5,
+     "body": "Loved it.....best fit & good quality",
+     "date": "2025-05-29",
+     "verified": true,
+     "photos": [
+      "https://img.trustoo.io/pro/73883451696/2025/5/29/xZA8PeC5EB.jpg?x-oss-process=style/trustoo_big"
+     ]
+    },
+    {
+     "id": "25619281",
+     "author": "sara",
+     "rating": 5,
+     "body": "Amazing fit.. 🤷‍♂️comfy fabric Just loved the product❤🥰",
+     "date": "2025-04-10",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25619869",
+     "author": "Hetal R. S.",
+     "rating": 5,
+     "body": "Really love it Go for it Modest + stylish good for every function",
+     "date": "2025-04-11",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25619268",
+     "author": "priya a.",
+     "rating": 5,
+     "body": "product quality  bahut  achh hai ❤️❤️👌",
+     "date": "2025-04-10",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25619842",
+     "author": "tanisha",
+     "rating": 5,
+     "body": "Very beautiful ❤️",
+     "date": "2025-04-11",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25619853",
+     "author": "Rajeswari D. M.",
+     "rating": 5,
+     "body": "Worth buying ❤️it's really good",
+     "date": "2025-04-11",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25619875",
+     "author": "Savita K.",
+     "rating": 5,
+     "body": "This anarkali dress is so comfortable and relaxing after wearing this so lightweight and beautiful dress you will gonna get so many compliments just go for it and the duptta omggh fabulous quality wise amazing so stylish and pretty it makes you feel more pretty💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕💕",
+     "date": "2025-04-11",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25619252",
+     "author": "parmi v.",
+     "rating": 4,
+     "body": "Fabric quality is awesome in this price and looks too Good 👍",
+     "date": "2025-04-10",
+     "verified": true,
+     "photos": []
+    }
+   ]
+  },
   "ashleys-anarkali-suit-set": {
    "rating": 5,
    "count": 1,
@@ -7891,6 +9694,90 @@
      "title": "must buy it 🥰❤️",
      "body": "More then my expectations....flair was good .....colour was as shown as picture everything was just perfect",
      "date": "2025-09-19",
+     "verified": true,
+     "photos": []
+    }
+   ]
+  },
+  "ellies-party-wear-anarkali-suit-set": {
+   "rating": 5,
+   "count": 1,
+   "reviews": [
+    {
+     "id": "26169329",
+     "author": "Chandan G.",
+     "rating": 5,
+     "body": "Loved it ♥️",
+     "date": "2026-09-29",
+     "verified": true,
+     "photos": [
+      "https://img.trustoo.io/pro/73883451696/2026/9/29/FnHr6ywr4c.png?x-oss-process=style/trustoo_big",
+      "https://img.trustoo.io/pro/73883451696/2026/9/29/FFscyYtJ2B.jpeg?x-oss-process=style/trustoo_big"
+     ]
+    }
+   ]
+  },
+  "hazels-anarkali-partywear-suit-set-8228836245636": {
+   "rating": 4.6,
+   "count": 5,
+   "reviews": [
+    {
+     "id": "25619228",
+     "author": "Hetal K.",
+     "rating": 5,
+     "body": "Absolutely loved this dress! The fabric is comfortable, the fit is perfect, and the design is so elegant. Ideal for traditional occasions. Worth every penny!",
+     "date": "2025-04-10",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25620072",
+     "author": "riza d.",
+     "rating": 5,
+     "body": "The quality was too good 😊.",
+     "date": "2025-04-12",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25620076",
+     "author": "joya f.",
+     "rating": 5,
+     "body": "overall good for such price ...thanku Liksha ❣❣❣❣",
+     "date": "2025-04-12",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25620056",
+     "author": "kashii n.",
+     "rating": 4,
+     "body": "Good quality and very comfortable to wear.",
+     "date": "2025-04-11",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "25620078",
+     "author": "joya m.",
+     "rating": 4,
+     "body": "Best Product ever purchased thanks liksha  🤩🤩🤩",
+     "date": "2025-04-12",
+     "verified": true,
+     "photos": []
+    }
+   ]
+  },
+  "premium-quality-gown-anarkali-suit-set-copy": {
+   "rating": 5,
+   "count": 1,
+   "reviews": [
+    {
+     "id": "25587888",
+     "author": "Foram t.",
+     "rating": 5,
+     "body": "Same",
+     "date": "2025-02-24",
      "verified": true,
      "photos": []
     }
@@ -8240,6 +10127,21 @@
      "rating": 3,
      "body": "quality wroth price",
      "date": "2025-09-04",
+     "verified": true,
+     "photos": []
+    }
+   ]
+  },
+  "shwaryas-premium-quality-heavy-traditional-lehenga-choli": {
+   "rating": 5,
+   "count": 1,
+   "reviews": [
+    {
+     "id": "26140237",
+     "author": "Madhu",
+     "rating": 5,
+     "body": "Good product",
+     "date": "2026-08-17",
      "verified": true,
      "photos": []
     }
