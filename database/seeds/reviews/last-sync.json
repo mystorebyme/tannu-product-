@@ -2,23 +2,23 @@
  "steps": [
   "page: 410 bytes, shop 73883451696",
   "catalog: 288 product ids, 890 titles, 2882 product images (new sync)",
-  "products-with-reviews: 344",
+  "products-with-reviews: 345",
   "probed-endpoints: 18",
   "photo-reviews: 147",
   "aggregates: 150"
  ],
  "probes": [
   "/apps/trustoo/api/v1/reviews/collect → {\"code\":-1,\"message\":\"ClientId:required,EventCategory:required\"}",
-  "/apps/trustoo/api/v1/reviews/get_product_list → {\"code\":0,\"message\":\"OK\",\"data\":{\"page\":{\"total_page\":18,\"cur_page\":1,\"limit\":20,\"count\":344},\"list\":[{\"id\":\"15347787137328\",\"image_src\":\"https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08059_JPG.jpg?v=17917272",
+  "/apps/trustoo/api/v1/reviews/get_product_list → {\"code\":0,\"message\":\"OK\",\"data\":{\"page\":{\"total_page\":18,\"cur_page\":1,\"limit\":20,\"count\":345},\"list\":[{\"id\":\"15396395483440\",\"image_src\":\"https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6127286557812133620_y",
   "/apps/trustoo/api/v1/reviews/add_review_via_shopify → 500 https://www.likshaclothing.com/apps/trustoo/ap",
   "/apps/trustoo/api/v1/reviews/collect_event → 500 https://www.likshaclothing.com/apps/trustoo/ap",
   "/apps/trustoo/api/v1/reviews/get_product_reviews → {\"code\":0,\"message\":\"OK\",\"data\":{\"page\":{\"total_page\":0,\"cur_page\":1,\"limit\":20,\"count\":0},\"total_rating\":{\"rating\":\"0.0\",\"total_reviews\":0,\"total_star1\":0,\"total_star2\":0,\"total_star3\":0,\"total_star4\":0,\"total_star5\":0,",
   "/apps/trustoo/api/v1/reviews/collect → {\"code\":-1,\"message\":\"ClientId:required,EventCategory:required\"}",
-  "/apps/trustoo/api/v1/reviews/get_product_list → {\"code\":0,\"message\":\"OK\",\"data\":{\"page\":{\"total_page\":18,\"cur_page\":1,\"limit\":20,\"count\":344},\"list\":[{\"id\":\"15347787137328\",\"image_src\":\"https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08059_JPG.jpg?v=17917272",
+  "/apps/trustoo/api/v1/reviews/get_product_list → {\"code\":0,\"message\":\"OK\",\"data\":{\"page\":{\"total_page\":18,\"cur_page\":1,\"limit\":20,\"count\":345},\"list\":[{\"id\":\"15396395483440\",\"image_src\":\"https://cdn.shopify.com/s/files/1/0738/8345/1696/files/photo_6127286557812133620_y",
   "/apps/trustoo/api/v1/reviews/add_review_via_shopify → 500 https://www.likshaclothing.com/apps/trustoo/ap",
   "/apps/trustoo/api/v1/reviews/collect_event → 500 https://www.likshaclothing.com/apps/trustoo/ap"
  ],
- "at": "2026-10-30T00:30:07.501Z",
+ "at": "2026-10-31T00:14:58.170Z",
  "endpointNames": [
   "collect",
   "get_product_list",
