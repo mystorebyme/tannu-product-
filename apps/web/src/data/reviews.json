@@ -2,7 +2,7 @@
  "meta": {
   "source": "trustoo",
   "shopId": "73883451696",
-  "syncedAt": "2026-10-31T00:15:37.176Z",
+  "syncedAt": "2026-10-31T23:52:27.421Z",
   "note": "scripts/reviews-sync/fetch-reviews.mjs (GitHub Actions daily) is file ko likhta hai — haath se edit na karein."
  },
  "shop": {
@@ -1453,20 +1453,20 @@
      "photos": []
     },
     {
-     "id": "26190494",
-     "author": "poonam",
-     "rating": 3,
-     "body": "kya chiz banayi he  kya Product  he  Product kaise mast banai\" liksha clothing india",
-     "date": "2026-10-21",
-     "verified": true,
-     "photos": []
-    },
-    {
      "id": "26127102",
      "author": "Kestina B.",
      "rating": 5,
      "body": "The quality is super",
      "date": "2026-08-11",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "26190494",
+     "author": "poonam",
+     "rating": 3,
+     "body": "kya chiz banayi he  kya Product  he  Product kaise mast banai\" liksha clothing india",
+     "date": "2026-10-21",
      "verified": true,
      "photos": []
     },
@@ -7090,15 +7090,6 @@
      ]
     },
     {
-     "id": "26117435",
-     "author": "priyanka b.",
-     "rating": 5,
-     "body": "I can't believe how stunning the gown is ... I mean fabric, color and fitting is too good... Flare is also good... Must buy product",
-     "date": "2026-07-31",
-     "verified": true,
-     "photos": []
-    },
-    {
      "id": "25693707",
      "author": "Vishal B.",
      "rating": 5,
@@ -7329,6 +7320,15 @@
      "rating": 5,
      "body": "Very beautiful suit, looking so beautiful, colour fabrics is just fabulous",
      "date": "2025-11-03",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "26117435",
+     "author": "priyanka b.",
+     "rating": 5,
+     "body": "I can't believe how stunning the gown is ... I mean fabric, color and fitting is too good... Flare is also good... Must buy product",
+     "date": "2026-07-31",
      "verified": true,
      "photos": []
     },
