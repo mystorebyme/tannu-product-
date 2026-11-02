@@ -2,7 +2,7 @@
  "meta": {
   "source": "trustoo",
   "shopId": "73883451696",
-  "syncedAt": "2026-10-31T23:52:27.421Z",
+  "syncedAt": "2026-11-02T00:03:05.484Z",
   "note": "scripts/reviews-sync/fetch-reviews.mjs (GitHub Actions daily) is file ko likhta hai — haath se edit na karein."
  },
  "shop": {
@@ -252,6 +252,15 @@
    "count": 6,
    "reviews": [
     {
+     "id": "26157627",
+     "author": "riddhi",
+     "rating": 5,
+     "body": "It's very nice dress perfect for any occasion.... 🥰❤️❤️❤️",
+     "date": "2026-09-02",
+     "verified": true,
+     "photos": []
+    },
+    {
      "id": "26157954",
      "author": "aasha.m",
      "rating": 5,
@@ -270,10 +279,10 @@
      "photos": []
     },
     {
-     "id": "26157627",
-     "author": "riddhi",
+     "id": "26157628",
+     "author": "gouri",
      "rating": 5,
-     "body": "It's very nice dress perfect for any occasion.... 🥰❤️❤️❤️",
+     "body": "“Absolutely loved this product!",
      "date": "2026-09-02",
      "verified": true,
      "photos": []
@@ -284,15 +293,6 @@
      "rating": 5,
      "body": "Amazing suit i loved it 😍😍",
      "date": "2026-09-03",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "26157628",
-     "author": "gouri",
-     "rating": 5,
-     "body": "“Absolutely loved this product!",
-     "date": "2026-09-02",
      "verified": true,
      "photos": []
     },
