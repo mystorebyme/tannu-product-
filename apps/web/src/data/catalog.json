@@ -5,14 +5,14 @@
   "cdn": "https://cdn.shopify.com/s/files/1/0738/8345/1696/",
   "currency": "INR",
   "moneyUnit": "paise",
-  "builtAt": "2026-11-04T00:46:53.359Z",
+  "builtAt": "2026-11-05T00:58:52.918Z",
   "snapshotAt": "2026-10-24T06:51:35.543Z",
-  "productCount": 445,
+  "productCount": 444,
   "liveProductCount": 287,
-  "extraProductCount": 158,
-  "listedProductCount": 342,
+  "extraProductCount": 157,
+  "listedProductCount": 341,
   "colourGroupCount": 66,
-  "imageCount": 2882
+  "imageCount": 2878
  },
  "collections": [
   {
@@ -21,7 +21,7 @@
    "subtitle": "Freshly dropped festive favourites",
    "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/DSC08096_JPG.jpg",
    "sortOrder": 1,
-   "productCount": 320
+   "productCount": 319
   },
   {
    "handle": "party-wear-gown",
@@ -45,7 +45,7 @@
    "subtitle": "Our Range of Designer Lehenga Choli",
    "image": "https://cdn.shopify.com/s/files/1/0738/8345/1696/files/IMG_9782.jpg",
    "sortOrder": 4,
-   "productCount": 18
+   "productCount": 17
   },
   {
    "handle": "printed-suit-set",
@@ -101,7 +101,7 @@
    "subtitle": "",
    "image": "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/WhatsAppImage2026-09-01at12.42.21PM.jpg",
    "sortOrder": 101,
-   "productCount": 74
+   "productCount": 73
   }
  ],
  "colourGroups": {
@@ -40262,80 +40262,6 @@
    "colourName": "Cream"
   },
   {
-   "handle": "nithya-lehenga-sharara-suit-set",
-   "sourceHandle": "nithya-lehenga-sharara-suit-set",
-   "title": "Nithya Lehenga Sharara Suit Set",
-   "price": 59900,
-   "compareAtPrice": 199667,
-   "images": [
-    "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/6181664344177839116.jpg",
-    "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/6181664344177839115.jpg",
-    "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/6181664344177839113.jpg",
-    "https://cdn.shopify.com/s/files/1/0343/4558/2724/files/6181664344177839114.jpg"
-   ],
-   "collections": [
-    "lehnga-choli",
-    "new-arrivals",
-    "suit-set-gown"
-   ],
-   "category": "lehnga",
-   "productType": "LEHENGA CHOLI",
-   "fabric": "Cotton",
-   "color": "As Shown",
-   "sizes": [
-    "S [36]",
-    "M [38]",
-    "L [40]",
-    "XL [42]",
-    "2XL [44]"
-   ],
-   "sizePricing": {
-    "S [36]": {
-     "price": 59900,
-     "compareAtPrice": 199667,
-     "available": true
-    },
-    "M [38]": {
-     "price": 59900,
-     "compareAtPrice": 199667,
-     "available": true
-    },
-    "L [40]": {
-     "price": 59900,
-     "compareAtPrice": 199667,
-     "available": true
-    },
-    "XL [42]": {
-     "price": 59900,
-     "compareAtPrice": 199667,
-     "available": true
-    },
-    "2XL [44]": {
-     "price": 59900,
-     "compareAtPrice": 199667,
-     "available": true
-    }
-   },
-   "details": [
-    "GOWN:",
-    "FABRIC & WORK: Fandy with Embroidery Zari with Codding Sequins-work",
-    "LINING: Cotton (Full Inner Top To Bottom)",
-    "SLEEVE: 3/4",
-    "LENGHA: Fabric – Fandy with Embroidery Zari with Codding Sequins-work",
-    "DUPATTA:",
-    "FABRIC: Fandy Embroidered Zari with Codding Sequins-work",
-    "Length: 2.20MTR"
-   ],
-   "description": "GOWN: FABRIC & WORK: Fandy with Embroidery Zari with Codding Sequins-work LINING: Cotton (Full Inner Top To Bottom) SLEEVE: 3/4 LENGHA: Fabric – Fandy with Embroidery Zari with Codding Sequins-work DUPATTA: FABRIC: Fandy Embroidered Zari with Codding Sequins-work Length: 2.20MTR",
-   "descriptionHtml": "<p><span>GOWN: </span><br><span>FABRIC &amp; WORK: Fandy with Embroidery Zari with Codding Sequins-work</span><br><span>LINING: Cotton (Full Inner Top To Bottom)</span><br><span>SLEEVE: 3/4 </span><br><span>LENGHA: Fabric – Fandy with Embroidery Zari with Codding Sequins-work</span><br><span>DUPATTA: </span><br><span>FABRIC: Fandy Embroidered Zari with Codding Sequins-work</span><br><span>Length: 2.20MTR</span><br></p>",
-   "source": "extra",
-   "rating": 0,
-   "reviewCount": 0,
-   "inStock": true,
-   "featured": false,
-   "publishedAt": "2025-12-15T17:43:39+05:30"
-  },
-  {
    "handle": "catalinas-red-coloured-party-wear-lehenga-choli",
    "sourceHandle": "catalinas-red-coloured-party-wear-lehenga-choli",
    "title": "Catalina's Pink Coloured Party Wear Lehenga Choli",
@@ -49269,7 +49195,7 @@
    "reviewCount": 0,
    "inStock": true,
    "featured": false,
-   "publishedAt": "2026-11-04T00:46:53.318Z",
+   "publishedAt": "2026-11-05T00:58:52.859Z",
    "hidden": true
   }
  ]
