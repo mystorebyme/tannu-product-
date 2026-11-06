@@ -2,7 +2,7 @@
  "meta": {
   "source": "trustoo",
   "shopId": "73883451696",
-  "syncedAt": "2026-11-04T00:58:54.443Z",
+  "syncedAt": "2026-11-05T01:10:38.138Z",
   "note": "scripts/reviews-sync/fetch-reviews.mjs (GitHub Actions daily) is file ko likhta hai — haath se edit na karein."
  },
  "shop": {
@@ -252,15 +252,6 @@
    "count": 6,
    "reviews": [
     {
-     "id": "26157627",
-     "author": "riddhi",
-     "rating": 5,
-     "body": "It's very nice dress perfect for any occasion.... 🥰❤️❤️❤️",
-     "date": "2026-09-02",
-     "verified": true,
-     "photos": []
-    },
-    {
      "id": "26157954",
      "author": "aasha.m",
      "rating": 5,
@@ -279,10 +270,10 @@
      "photos": []
     },
     {
-     "id": "26157628",
-     "author": "gouri",
+     "id": "26157627",
+     "author": "riddhi",
      "rating": 5,
-     "body": "“Absolutely loved this product!",
+     "body": "It's very nice dress perfect for any occasion.... 🥰❤️❤️❤️",
      "date": "2026-09-02",
      "verified": true,
      "photos": []
@@ -293,6 +284,15 @@
      "rating": 5,
      "body": "Amazing suit i loved it 😍😍",
      "date": "2026-09-03",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "26157628",
+     "author": "gouri",
+     "rating": 5,
+     "body": "“Absolutely loved this product!",
+     "date": "2026-09-02",
      "verified": true,
      "photos": []
     },
@@ -6798,20 +6798,20 @@
    "count": 3,
    "reviews": [
     {
-     "id": "26121560",
-     "author": "Simran H.",
-     "rating": 5,
-     "body": "It's great ,the fabric and the florals are awesome Love It!! Thank you ❤️",
-     "date": "2026-08-03",
-     "verified": true,
-     "photos": []
-    },
-    {
      "id": "25798912",
      "author": "Akansha",
      "rating": 5,
      "body": "So beautiful suit i like it🌺 same aya hai excellent quality superb wedding ke perfect h❤️sab le sakte h",
      "date": "2025-11-12",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "26121560",
+     "author": "Simran H.",
+     "rating": 5,
+     "body": "It's great ,the fabric and the florals are awesome Love It!! Thank you ❤️",
+     "date": "2026-08-03",
      "verified": true,
      "photos": []
     },
@@ -8326,20 +8326,20 @@
      "photos": []
     },
     {
-     "id": "26122180",
-     "author": "Niha A.",
-     "rating": 3,
-     "body": "It's beautiful 😍",
-     "date": "2026-08-05",
-     "verified": true,
-     "photos": []
-    },
-    {
      "id": "25712152",
      "author": "Sudip N.",
      "rating": 3,
      "body": "I received Best product  Omgg it's just perfect soo pretty 😍",
      "date": "2025-09-03",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "26122180",
+     "author": "Niha A.",
+     "rating": 3,
+     "body": "It's beautiful 😍",
+     "date": "2026-08-05",
      "verified": true,
      "photos": []
     }
@@ -14802,15 +14802,6 @@
      ]
     },
     {
-     "id": "26121544",
-     "author": "Khushboo Y.",
-     "rating": 5,
-     "body": "I love it ❤️",
-     "date": "2026-08-02",
-     "verified": true,
-     "photos": []
-    },
-    {
      "id": "24763564",
      "author": "Rakhi t.",
      "rating": 5,
@@ -14969,6 +14960,15 @@
      "rating": 5,
      "body": "The red kurta set looks vibrant and graceful, with golden detailing on the dupatta adding a festive touch. The fabric appears to be soft offering comfort and a nice flow—perfect for traditional occasions.",
      "date": "2025-08-07",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "26121544",
+     "author": "Khushboo Y.",
+     "rating": 5,
+     "body": "I love it ❤️",
+     "date": "2026-08-02",
      "verified": true,
      "photos": []
     },
