@@ -2,7 +2,7 @@
  "meta": {
   "source": "trustoo",
   "shopId": "73883451696",
-  "syncedAt": "2026-11-06T01:17:54.352Z",
+  "syncedAt": "2026-11-07T00:31:52.493Z",
   "note": "scripts/reviews-sync/fetch-reviews.mjs (GitHub Actions daily) is file ko likhta hai — haath se edit na karein."
  },
  "shop": {
@@ -4943,15 +4943,6 @@
      "photos": []
     },
     {
-     "id": "26122574",
-     "author": "Madhuri V.",
-     "rating": 4,
-     "body": "The Anarkali is not heavy as I expected.. it’s just like a normal one",
-     "date": "2026-08-06",
-     "verified": true,
-     "photos": []
-    },
-    {
      "id": "25824563",
      "author": "Preeti",
      "rating": 5,
@@ -5065,6 +5056,15 @@
      "rating": 4,
      "body": "Mera parcel mil gaya hai or mera suit Sach me bahut hi badhiya 😘 hai thanks likshacloth..... Thank you so much 😊",
      "date": "2026-02-24",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "26122574",
+     "author": "Madhuri V.",
+     "rating": 4,
+     "body": "The Anarkali is not heavy as I expected.. it’s just like a normal one",
+     "date": "2026-08-06",
      "verified": true,
      "photos": []
     },
