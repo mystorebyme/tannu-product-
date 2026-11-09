@@ -18,7 +18,7 @@
   "/apps/trustoo/api/v1/reviews/add_review_via_shopify → 500 https://www.likshaclothing.com/apps/trustoo/ap",
   "/apps/trustoo/api/v1/reviews/collect_event → 500 https://www.likshaclothing.com/apps/trustoo/ap"
  ],
- "at": "2026-11-08T00:04:40.308Z",
+ "at": "2026-11-09T00:18:12.567Z",
  "endpointNames": [
   "collect",
   "get_product_list",
