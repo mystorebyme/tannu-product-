@@ -2,12 +2,12 @@
  "meta": {
   "source": "trustoo",
   "shopId": "73883451696",
-  "syncedAt": "2026-11-11T00:58:10.737Z",
+  "syncedAt": "2026-11-12T02:04:30.354Z",
   "note": "scripts/reviews-sync/fetch-reviews.mjs (GitHub Actions daily) is file ko likhta hai — haath se edit na karein."
  },
  "shop": {
   "rating": 4.8,
-  "count": 1687
+  "count": 1671
  },
  "products": {
   "rang-e-royale-blooming-lehenga-suit-set-10511720087684": {
@@ -2763,8 +2763,34 @@
   },
   "premium-bandhej-heavy-traditional-koti-anarkali-suit-set": {
    "rating": 5,
-   "count": 14,
+   "count": 16,
    "reviews": [
+    {
+     "id": "26193824",
+     "author": "Lavanya",
+     "rating": 5,
+     "body": "Amazing suit",
+     "date": "2026-11-06",
+     "verified": true,
+     "photos": [
+      "https://img.trustoo.io/pro/73883451696/2026/11/6/DJKmA4EdF2.jpeg?x-oss-process=style/trustoo_big"
+     ]
+    },
+    {
+     "id": "26193086",
+     "author": "Priyanka M.",
+     "rating": 5,
+     "body": "Just Love It!",
+     "date": "2026-11-05",
+     "verified": true,
+     "photos": [
+      "https://img.trustoo.io/pro/73883451696/2026/11/5/tZXeCSwy2j.jpg?x-oss-process=style/trustoo_big",
+      "https://img.trustoo.io/pro/73883451696/2026/11/5/Fdk4G7aKHN.png?x-oss-process=style/trustoo_big",
+      "https://img.trustoo.io/pro/73883451696/2026/11/5/c2dJK7NBdb.png?x-oss-process=style/trustoo_big",
+      "https://img.trustoo.io/pro/73883451696/2026/11/5/kmt4e7TR2e.png?x-oss-process=style/trustoo_big",
+      "https://img.trustoo.io/pro/73883451696/2026/11/5/pTSDZbEFdy.jpg?x-oss-process=style/trustoo_big"
+     ]
+    },
     {
      "id": "26158366",
      "author": "Shiva S.",
@@ -12315,144 +12341,6 @@
     }
    ]
   },
-  "copy-of-night-star-chocolate-colorembroidered-georgette-suit-set-td-120": {
-   "rating": 4.6,
-   "count": 14,
-   "reviews": [
-    {
-     "id": "25694443",
-     "author": "urvi p.",
-     "rating": 5,
-     "body": "Love the soft pastel color, super comfortable fit, and such a classy design.\nFeels light, looks gorgeous, and is so easy to carry all day. Totally in love! 🌸",
-     "date": "2025-08-10",
-     "verified": true,
-     "photos": [
-      "https://img.trustoo.io/pro/73883451696/2025/8/11/ZcSksQxmey.jpeg?x-oss-process=style/trustoo_big",
-      "https://img.trustoo.io/pro/73883451696/2025/8/11/s44iTcskDS.jpeg?x-oss-process=style/trustoo_big",
-      "https://img.trustoo.io/pro/73883451696/2025/8/11/mTWNnBwiPn.jpeg?x-oss-process=style/trustoo_big"
-     ]
-    },
-    {
-     "id": "25384557",
-     "author": "Kinjal",
-     "rating": 5,
-     "body": "Perfect to me 😍😍😍😍😍 i loved it",
-     "date": "2024-09-14",
-     "verified": true,
-     "photos": [
-      "https://img.trustoo.io/pro/73883451696/2024/9/15/TEPchQ66h8.jpg?x-oss-process=style/trustoo_big"
-     ]
-    },
-    {
-     "id": "25359799",
-     "author": "Bhawana R.",
-     "rating": 5,
-     "body": "Kurta is awesome same as shown as in the picture but it’s little bit loose. Need size xtra small.",
-     "date": "2024-08-22",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25359801",
-     "author": "Shweta S.",
-     "rating": 5,
-     "body": "Awesome cloth is not transparent , quality is fine..lenth is perfect fitting also good ... without any thought u can purchase this product ...",
-     "date": "2024-08-22",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25374476",
-     "author": "chaha g.",
-     "rating": 5,
-     "body": "very beutifull. and tottaly satisfide with quality.",
-     "date": "2024-08-28",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25387061",
-     "author": "minaa",
-     "rating": 5,
-     "body": "I liked the product too much.. it's really beautiful.... thank you",
-     "date": "2024-09-20",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25359800",
-     "author": "Nisha B.",
-     "rating": 5,
-     "body": "Fabric is good and comfortable to wear I love the colour and fabric too....... Nice product, i strongly recommend to go with this Good day Always Liksha clothing proves that with good quality and comfortable material that dresses are maden and it is body touching material Thank you",
-     "date": "2024-08-22",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25387054",
-     "author": "jankii",
-     "rating": 5,
-     "body": "I liked it",
-     "date": "2024-09-20",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25500107",
-     "author": "RANJITHA",
-     "rating": 4,
-     "body": "The quality and the fabric of dress is  too good the colour of the dress is shown as the picture it’s slightly  than that everything is good",
-     "date": "2024-12-10",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25374475",
-     "author": "leela",
-     "rating": 4,
-     "body": "good dress",
-     "date": "2024-08-28",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25387066",
-     "author": "jinaksi",
-     "rating": 4,
-     "body": "Nice and soft",
-     "date": "2024-09-20",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25387071",
-     "author": "killa p.",
-     "rating": 4,
-     "body": "The product was good 👍👍",
-     "date": "2024-09-20",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25387049",
-     "author": "pinku",
-     "rating": 4,
-     "body": "Achha hai",
-     "date": "2024-09-20",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "25387072",
-     "author": "mansi",
-     "rating": 4,
-     "body": "Good 👍👍",
-     "date": "2024-09-20",
-     "verified": true,
-     "photos": []
-    }
-   ]
-  },
   "anamika-premium-designer-readymade-gown-with-dupatta-set-kka-1082": {
    "rating": 4.8,
    "count": 21,
@@ -13753,48 +13641,6 @@
      "rating": 4,
      "body": "Pretty! The quality is also good.I like it but I am disappointed with dupatta.It didn't meet my expectations.Dupatta is not very wide as shown in picture.",
      "date": "2024-11-16",
-     "verified": true,
-     "photos": []
-    }
-   ]
-  },
-  "premium-quality-anarkali-suit-set": {
-   "rating": 5,
-   "count": 4,
-   "reviews": [
-    {
-     "id": "24760723",
-     "author": "Neha R.",
-     "rating": 5,
-     "body": "Omg sucha a pretty suit set ❤️❤️❤️ Perfect outfit 💜💜 & Dupptta is really awesome in organza ❤️❤️ Must buy 💜",
-     "date": "2024-03-12",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "24760724",
-     "author": "Subina K.",
-     "rating": 5,
-     "body": "The fabric is really nice and soft and can be worn in any party .Looks amazing ?",
-     "date": "2024-03-12",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "24760725",
-     "author": "Deepali V.",
-     "rating": 5,
-     "body": "Quality of the cloth is good , colour is pretty, looks good but it bleeds on wash and it’s the only problem otherwise everything is good",
-     "date": "2024-03-12",
-     "verified": true,
-     "photos": []
-    },
-    {
-     "id": "24760726",
-     "author": "Sonam",
-     "rating": 5,
-     "body": "he quality of the product was very nice and the colour was exactly as shown in the image No 1 product",
-     "date": "2024-03-12",
      "verified": true,
      "photos": []
     }
