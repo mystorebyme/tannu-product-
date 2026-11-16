@@ -2,7 +2,7 @@
  "meta": {
   "source": "trustoo",
   "shopId": "73883451696",
-  "syncedAt": "2026-11-14T01:08:50.267Z",
+  "syncedAt": "2026-11-15T00:32:11.604Z",
   "note": "scripts/reviews-sync/fetch-reviews.mjs (GitHub Actions daily) is file ko likhta hai — haath se edit na karein."
  },
  "shop": {
@@ -811,20 +811,20 @@
      "photos": []
     },
     {
-     "id": "26130073",
-     "author": "Neha S.",
-     "rating": 5,
-     "body": "Nice and beautiful",
-     "date": "2026-08-15",
-     "verified": true,
-     "photos": []
-    },
-    {
      "id": "26117001",
      "author": "Gouri",
      "rating": 5,
      "body": "Very nice",
      "date": "2026-07-27",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "26130073",
+     "author": "Neha S.",
+     "rating": 5,
+     "body": "Nice and beautiful",
+     "date": "2026-08-15",
      "verified": true,
      "photos": []
     }
@@ -2766,17 +2766,6 @@
    "count": 16,
    "reviews": [
     {
-     "id": "26193824",
-     "author": "Lavanya",
-     "rating": 5,
-     "body": "Amazing suit",
-     "date": "2026-11-06",
-     "verified": true,
-     "photos": [
-      "https://img.trustoo.io/pro/73883451696/2026/11/6/DJKmA4EdF2.jpeg?x-oss-process=style/trustoo_big"
-     ]
-    },
-    {
      "id": "26193086",
      "author": "Priyanka M.",
      "rating": 5,
@@ -2789,6 +2778,17 @@
       "https://img.trustoo.io/pro/73883451696/2026/11/5/c2dJK7NBdb.png?x-oss-process=style/trustoo_big",
       "https://img.trustoo.io/pro/73883451696/2026/11/5/kmt4e7TR2e.png?x-oss-process=style/trustoo_big",
       "https://img.trustoo.io/pro/73883451696/2026/11/5/pTSDZbEFdy.jpg?x-oss-process=style/trustoo_big"
+     ]
+    },
+    {
+     "id": "26193824",
+     "author": "Lavanya",
+     "rating": 5,
+     "body": "Amazing suit",
+     "date": "2026-11-06",
+     "verified": true,
+     "photos": [
+      "https://img.trustoo.io/pro/73883451696/2026/11/6/DJKmA4EdF2.jpeg?x-oss-process=style/trustoo_big"
      ]
     },
     {
@@ -3218,15 +3218,6 @@
    "count": 10,
    "reviews": [
     {
-     "id": "26143442",
-     "author": "Madeeha",
-     "rating": 5,
-     "body": "Perfect",
-     "date": "2026-08-22",
-     "verified": true,
-     "photos": []
-    },
-    {
      "id": "25856341",
      "author": "DHARMI L.",
      "rating": 5,
@@ -3259,6 +3250,15 @@
      "rating": 5,
      "body": "Quality Bahut Hi Acha Hai..Perfect Ocasion For Elegant Look.",
      "date": "2026-02-16",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "26143442",
+     "author": "Madeeha",
+     "rating": 5,
+     "body": "Perfect",
+     "date": "2026-08-22",
      "verified": true,
      "photos": []
     },
@@ -13211,15 +13211,6 @@
      ]
     },
     {
-     "id": "26196340",
-     "author": "Naina M.",
-     "rating": 5,
-     "body": "Superb",
-     "date": "2026-11-12",
-     "verified": true,
-     "photos": []
-    },
-    {
      "id": "24826789",
      "author": "Razi T.",
      "rating": 4,
@@ -13229,6 +13220,15 @@
      "photos": [
       "https://img.trustoo.io/pro/73883451696/2024/5/17/ZMb8Rs6F8h.jpg?x-oss-process=style/trustoo_big"
      ]
+    },
+    {
+     "id": "26196340",
+     "author": "Naina M.",
+     "rating": 5,
+     "body": "Superb",
+     "date": "2026-11-12",
+     "verified": true,
+     "photos": []
     },
     {
      "id": "24788440",
