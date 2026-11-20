@@ -2,7 +2,7 @@
  "meta": {
   "source": "trustoo",
   "shopId": "73883451696",
-  "syncedAt": "2026-11-18T02:40:23.916Z",
+  "syncedAt": "2026-11-19T02:08:54.109Z",
   "note": "scripts/reviews-sync/fetch-reviews.mjs (GitHub Actions daily) is file ko likhta hai — haath se edit na karein."
  },
  "shop": {
@@ -220,7 +220,7 @@
     },
     {
      "id": "26157445",
-     "author": "Niza n.",
+     "author": "Niza N.",
      "rating": 5,
      "body": "Amazing Anarkali Kuta Suit Set Haii..Price Bhi Normal Hai..And Quality Bhi Bahut Acha Aya Hua Haii",
      "date": "2026-09-01",
@@ -458,7 +458,7 @@
     },
     {
      "id": "26157448",
-     "author": "Astha h.",
+     "author": "Astha H.",
      "rating": 5,
      "body": "Very Beautiful Anarkali And Colour Osm..",
      "date": "2026-09-01",
@@ -788,7 +788,7 @@
    "reviews": [
     {
      "id": "26176013",
-     "author": "davinder s.",
+     "author": "davinder S.",
      "rating": 4,
      "body": "..",
      "date": "2026-10-08",
@@ -1022,7 +1022,7 @@
    "reviews": [
     {
      "id": "26112279",
-     "author": "Riddi m.",
+     "author": "Riddi M.",
      "rating": 5,
      "body": "Color is so fresh and fabric super comfy 💕 Loved the fit!”",
      "date": "2026-07-15",
@@ -1085,7 +1085,7 @@
     },
     {
      "id": "26112287",
-     "author": "Mital k.",
+     "author": "Mital K.",
      "rating": 5,
      "body": "The quality of the dress is just amazing I loved it so much I can't even tell in words whoever is seeing this buy it without thinking twice.I m very happy by this Thankyou so much Liksha Clothing.",
      "date": "2026-07-15",
@@ -1103,7 +1103,7 @@
     },
     {
      "id": "26112289",
-     "author": "Shruti k.",
+     "author": "Shruti K.",
      "rating": 5,
      "body": "The dress is soft and superrb🤩 I didn't expect this much quality . Completely the dress is awesome.Loved it Don't think too much just buy it😻",
      "date": "2026-07-15",
@@ -1130,7 +1130,7 @@
     },
     {
      "id": "26112285",
-     "author": "Srushti l.",
+     "author": "Srushti L.",
      "rating": 4,
      "body": "Bhut acha aaya hai",
      "date": "2026-07-15",
@@ -1145,7 +1145,7 @@
    "reviews": [
     {
      "id": "26112302",
-     "author": "Fatema n.",
+     "author": "Fatema N.",
      "rating": 5,
      "body": "I m in love with this kurta set. Pattern fitting color and value for money. ❤️colour as shown in picture.",
      "date": "2026-07-15",
@@ -1199,7 +1199,7 @@
     },
     {
      "id": "26112321",
-     "author": "T j.",
+     "author": "T J.",
      "rating": 5,
      "body": "Just Awesome product..fit is perfect 👌👌very comfortable. Packaging is also very impressive..",
      "date": "2026-07-15",
@@ -1244,7 +1244,7 @@
     },
     {
      "id": "26112329",
-     "author": "Harmika j.",
+     "author": "Harmika J.",
      "rating": 5,
      "body": "Beautiful kurta set, One of the best Duppata 🥰🥰",
      "date": "2026-07-15",
@@ -1262,7 +1262,7 @@
     },
     {
      "id": "26112314",
-     "author": "Guddi k.",
+     "author": "Guddi K.",
      "rating": 5,
      "body": "It's a very beautiful outfit ..",
      "date": "2026-07-15",
@@ -1313,7 +1313,7 @@
    "reviews": [
     {
      "id": "26107723",
-     "author": "Shahina k.",
+     "author": "Shahina K.",
      "rating": 5,
      "body": "Bahut Hi Acha Anarkali Suit Set Haii.Mujhe Bahut Hi Pasand Aaya and Quality Bhi Bahut Hi Achhi Haii",
      "date": "2026-07-04",
@@ -1367,7 +1367,7 @@
     },
     {
      "id": "26107731",
-     "author": "Shree m.",
+     "author": "Shree M.",
      "rating": 5,
      "body": "Just loved this dress, quality is awesome, looked beautiful on me. Just lile shown in the picture, thank you Liksha ❤️ fit is also perfect",
      "date": "2026-07-04",
@@ -1376,7 +1376,7 @@
     },
     {
      "id": "26107732",
-     "author": "Mansvi j.",
+     "author": "Mansvi J.",
      "rating": 5,
      "body": "Product is very good ,more than my expectation fitting also perfect, I personally like very much and suggest my another friend to buy it for her Special Day.",
      "date": "2026-07-04",
@@ -1385,7 +1385,7 @@
     },
     {
      "id": "26107734",
-     "author": "Sharmila m.",
+     "author": "Sharmila M.",
      "rating": 5,
      "body": "बहुत सुंदर है कपड़ा भी बहुत अच्छा हे। I am so happy",
      "date": "2026-07-04",
@@ -1394,7 +1394,7 @@
     },
     {
      "id": "26107724",
-     "author": "Riddhi s.",
+     "author": "Riddhi S.",
      "rating": 5,
      "body": "Good Product.Thank You For Liksha Clothing.",
      "date": "2026-07-04",
@@ -1444,15 +1444,6 @@
      "photos": []
     },
     {
-     "id": "26190494",
-     "author": "poonam",
-     "rating": 3,
-     "body": "kya chiz banayi he  kya Product  he  Product kaise mast banai\" liksha clothing india",
-     "date": "2026-10-21",
-     "verified": true,
-     "photos": []
-    },
-    {
      "id": "26056525",
      "author": "PRITI M.",
      "rating": 5,
@@ -1463,7 +1454,7 @@
     },
     {
      "id": "26056528",
-     "author": "sushmita s.",
+     "author": "sushmita S.",
      "rating": 5,
      "body": "Ufff... stunning Suit set.. fabric beautiful..super comfortable and stylish..",
      "date": "2026-06-29",
@@ -1499,7 +1490,7 @@
     },
     {
      "id": "26056535",
-     "author": "Priyanshi k.",
+     "author": "Priyanshi K.",
      "rating": 5,
      "body": "Same to same bahut hi pyara aaya he.this kurta set gifted by my husband. 🥰😃.",
      "date": "2026-06-29",
@@ -1512,6 +1503,15 @@
      "rating": 5,
      "body": "I'm really happy to receive this beautiful kurtha set. Fabric is very soft and skin friendly. Fitting is perfect and comfortable. Totally satisfied. Thank you Liksha Clothing....",
      "date": "2026-06-29",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "26190494",
+     "author": "poonam",
+     "rating": 3,
+     "body": "kya chiz banayi he  kya Product  he  Product kaise mast banai\" liksha clothing india",
+     "date": "2026-10-21",
      "verified": true,
      "photos": []
     },
@@ -1535,7 +1535,7 @@
     },
     {
      "id": "26056531",
-     "author": "Sidhi n.",
+     "author": "Sidhi N.",
      "rating": 5,
      "body": "\"Beautiful kurta set! The fabric is soft, comfortable, and feels premium. The fitting is perfect, and the color looks exactly as shown in the pictures. The stitching and overall quality are excellent. It's perfect for both casual wear and festive occasions. Definitely worth the price. Highly recommended!\"",
      "date": "2026-06-29",
@@ -1544,7 +1544,7 @@
     },
     {
      "id": "26056534",
-     "author": "Roshni j.",
+     "author": "Roshni J.",
      "rating": 5,
      "body": "The color is bright and beautiful, and the fabric feels comfortable to wear. The fitting is good and it looks very elegant for casual outings or small functions. The quality is nice and the product looks the same as shown in the picture.",
      "date": "2026-06-29",
@@ -1553,7 +1553,7 @@
     },
     {
      "id": "26056536",
-     "author": "Vensi v.",
+     "author": "Vensi V.",
      "rating": 5,
      "body": "Absolutely in love with this white dress! ❤️",
      "date": "2026-06-29",
@@ -1571,7 +1571,7 @@
     },
     {
      "id": "26140184",
-     "author": "shivani s.",
+     "author": "shivani S.",
      "rating": 5,
      "body": "Gorgious look after wearing the dress ♥️",
      "date": "2026-08-16",
@@ -1580,7 +1580,7 @@
     },
     {
      "id": "26056538",
-     "author": "Bhavna m.",
+     "author": "Bhavna M.",
      "rating": 4,
      "body": "Thank you bohut hi soft fabric hai 😍bohut hi pyara kurta set hai 🤗",
      "date": "2026-06-29",
@@ -1589,7 +1589,7 @@
     },
     {
      "id": "26056532",
-     "author": "Dr a. s.",
+     "author": "Dr A. S.",
      "rating": 4,
      "body": "Good quality dress. Loved it ❤️",
      "date": "2026-06-29",
@@ -1613,7 +1613,7 @@
     },
     {
      "id": "26056541",
-     "author": "Sangita s.",
+     "author": "Sangita S.",
      "rating": 5,
      "body": "Absolutely love Kaumya Neon Elegant Sharara Suit Set dress! The fabric is incredibly soft and breathable perfect for wedding season wear. The fit is exactly as expected.",
      "date": "2026-06-29",
@@ -1640,7 +1640,7 @@
     },
     {
      "id": "26107735",
-     "author": "Mansi j.",
+     "author": "Mansi J.",
      "rating": 5,
      "body": "Such a lovely dress. Stuff is really good, colors design looks just elegant and amazing Thanks 😊",
      "date": "2026-07-04",
@@ -1658,7 +1658,7 @@
     },
     {
      "id": "26056540",
-     "author": "Minaxi d.",
+     "author": "Minaxi D.",
      "rating": 5,
      "body": "Extremely soft and pure fabric, looks very nice",
      "date": "2026-06-29",
@@ -1685,7 +1685,7 @@
     },
     {
      "id": "26107736",
-     "author": "Kanika m.",
+     "author": "Kanika M.",
      "rating": 5,
      "body": "Product was nice & looking as shown☺️",
      "date": "2026-07-04",
@@ -1718,7 +1718,7 @@
     },
     {
      "id": "26107739",
-     "author": "Sakshi m.",
+     "author": "Sakshi M.",
      "rating": 5,
      "body": "Fabric is amazing with vibrant colour. Print is also good and. So is the fit.",
      "date": "2026-07-04",
@@ -1736,7 +1736,7 @@
     },
     {
      "id": "26107741",
-     "author": "ZIsha n.",
+     "author": "ZIsha N.",
      "rating": 5,
      "body": "Best for any function bahut light weighted h or Up comfortable bhi bhut jada h isko ap engagement ya family function me pehn skte h..",
      "date": "2026-07-04",
@@ -1745,7 +1745,7 @@
     },
     {
      "id": "26107743",
-     "author": "Niru n.",
+     "author": "Niru N.",
      "rating": 5,
      "body": "Good quality Thank you for making my best day and best memory @liksha_clothing ❤️",
      "date": "2026-07-04",
@@ -1763,7 +1763,7 @@
     },
     {
      "id": "26107746",
-     "author": "Tanu n.",
+     "author": "Tanu N.",
      "rating": 5,
      "body": "⭐⭐⭐⭐⭐ Amazing Quality and Beautiful Design! I absolutely loved this suit set. The fabric is soft, comfortable, and feels premium.",
      "date": "2026-07-04",
@@ -1772,7 +1772,7 @@
     },
     {
      "id": "26107745",
-     "author": "V k.",
+     "author": "V K.",
      "rating": 5,
      "body": "Worth the money. Good quality",
      "date": "2026-07-04",
@@ -1814,7 +1814,7 @@
    "reviews": [
     {
      "id": "26107749",
-     "author": "Harvi k.",
+     "author": "Harvi K.",
      "rating": 5,
      "body": "⭐⭐⭐⭐⭐ 5/5 This dress is just beautiful 💖 The material is soft, the color is gorgeous, and the fit is super flattering.",
      "date": "2026-07-04",
@@ -1832,7 +1832,7 @@
     },
     {
      "id": "26107755",
-     "author": "Janvi m.",
+     "author": "Janvi M.",
      "rating": 5,
      "body": "Pretty Sharara osm look color very nice fitting super comfortable fabric nice quality super party wear dress by now",
      "date": "2026-07-04",
@@ -1850,7 +1850,7 @@
     },
     {
      "id": "26107750",
-     "author": "Dixa d.",
+     "author": "Dixa D.",
      "rating": 5,
      "body": "Mene pheli bar online dress kharidi and kya he bolu yrr dress bohot acche hai like bohot acche and bohot he reasonable rate me hai....I loved the dress.... thanks Liksha Team for this beautiful dress ❤️💙",
      "date": "2026-07-04",
@@ -1859,7 +1859,7 @@
     },
     {
      "id": "26107752",
-     "author": "Siya d.",
+     "author": "Siya D.",
      "rating": 5,
      "body": "very elegant Raumya Neon Sharara Suit Set.",
      "date": "2026-07-04",
@@ -1868,7 +1868,7 @@
     },
     {
      "id": "26107753",
-     "author": "Apexa v.",
+     "author": "Apexa V.",
      "rating": 5,
      "body": "\"Absolutely loved this outfit! The fabric feels super soft, lightweight and very comfortable to wear for long hours. The subtle shine and elegant embroidery give it a classy premium look. Perfect for festive occasions, family gatherings and even casual parties.\"",
      "date": "2026-07-04",
@@ -1877,7 +1877,7 @@
     },
     {
      "id": "26107751",
-     "author": "Urvashi n.",
+     "author": "Urvashi N.",
      "rating": 4,
      "body": "Very nice product very comfortable to wear just go for it 😍",
      "date": "2026-07-04",
@@ -1892,7 +1892,7 @@
    "reviews": [
     {
      "id": "25914135",
-     "author": "nisha n.",
+     "author": "nisha N.",
      "rating": 5,
      "body": "Thank You Liksha Team....Bahut Hii Acha Anarkali Suit Haii.Mujhe Bahut Hi Psand Aya...",
      "date": "2026-04-30",
@@ -2033,7 +2033,7 @@
     },
     {
      "id": "26107762",
-     "author": "Rajvi p.",
+     "author": "Rajvi P.",
      "rating": 5,
      "body": "Love the quality i m so so so Happy 😍😍thank u so much Liksha Clothing To provide best best best collection",
      "date": "2026-07-04",
@@ -2042,7 +2042,7 @@
     },
     {
      "id": "26107763",
-     "author": "Maya h.",
+     "author": "Maya H.",
      "rating": 5,
      "body": "Beutiful I recieved it as shown in the picture 🥰",
      "date": "2026-07-04",
@@ -2084,7 +2084,7 @@
    "reviews": [
     {
      "id": "26107766",
-     "author": "Jyoti h.",
+     "author": "Jyoti H.",
      "rating": 5,
      "body": "Beautiful kurta set! The color is vibrant, the fabric is soft, and the fit is perfect. The dupatta completes the elegant look. Loved it",
      "date": "2026-07-04",
@@ -2093,7 +2093,7 @@
     },
     {
      "id": "26107765",
-     "author": "noor h.",
+     "author": "noor H.",
      "rating": 5,
      "body": "Colour is bright & looks fresh !!",
      "date": "2026-07-04",
@@ -2126,7 +2126,7 @@
     },
     {
      "id": "25914170",
-     "author": "Deepiika j.",
+     "author": "Deepiika J.",
      "rating": 5,
      "body": "Love this colour..🥰🥰🥰 go for it .... Worth it😍",
      "date": "2026-04-30",
@@ -2179,7 +2179,7 @@
     },
     {
      "id": "25895819",
-     "author": "priti r.",
+     "author": "priti R.",
      "rating": 5,
      "body": "The dress is so pretty and beautiful. Quality material and comfortable to wear. Excellent choice for functions.",
      "date": "2026-04-09",
@@ -2206,7 +2206,7 @@
     },
     {
      "id": "25895824",
-     "author": "shruti a.",
+     "author": "shruti A.",
      "rating": 5,
      "body": "Very soft and elegant product. Reasonable price. Very comfortable. Fitting is perfect. Go for it",
      "date": "2026-04-09",
@@ -2215,7 +2215,7 @@
     },
     {
      "id": "25895826",
-     "author": "heena k.",
+     "author": "heena K.",
      "rating": 5,
      "body": "😍😍too good and comfortable and colour is not fade after wash",
      "date": "2026-04-09",
@@ -2224,7 +2224,7 @@
     },
     {
      "id": "25895827",
-     "author": "Shruti m.",
+     "author": "Shruti M.",
      "rating": 5,
      "body": "The fit and quality of material is good and looks elegant for any office and festive.",
      "date": "2026-04-09",
@@ -2251,7 +2251,7 @@
     },
     {
      "id": "25895818",
-     "author": "sneha k.",
+     "author": "sneha K.",
      "rating": 5,
      "body": "it's very beautiful 😍",
      "date": "2026-04-09",
@@ -2341,7 +2341,7 @@
     },
     {
      "id": "25895832",
-     "author": "Sasi b.",
+     "author": "Sasi B.",
      "rating": 4,
      "body": "good",
      "date": "2026-04-09",
@@ -2356,7 +2356,7 @@
    "reviews": [
     {
      "id": "25914155",
-     "author": "Harsha n.",
+     "author": "Harsha N.",
      "rating": 5,
      "body": "Fabric is Premium Teby Organza . Light weight, cool and comfortable.",
      "date": "2026-04-30",
@@ -2365,7 +2365,7 @@
     },
     {
      "id": "25914157",
-     "author": "Hiru m.",
+     "author": "Hiru M.",
      "rating": 5,
      "body": "I love this suit. Its dupatta is so beautiful nd comfortable to wear. ❤️🥰 Thank you Liksha.",
      "date": "2026-04-30",
@@ -2383,7 +2383,7 @@
     },
     {
      "id": "25914159",
-     "author": "Ruchi s.",
+     "author": "Ruchi S.",
      "rating": 5,
      "body": "Color looks rich and elegant. Nice option for casual outings.",
      "date": "2026-04-30",
@@ -2392,7 +2392,7 @@
     },
     {
      "id": "25914161",
-     "author": "Shreya n.",
+     "author": "Shreya N.",
      "rating": 5,
      "body": "The best dress ever! The material, pattern everything is perfect! I wish I could buy them all",
      "date": "2026-04-30",
@@ -2401,7 +2401,7 @@
     },
     {
      "id": "25914162",
-     "author": "Rensi b.",
+     "author": "Rensi B.",
      "rating": 5,
      "body": "Awesome dress. Has a white color base. Very Comfortable and soft material. Loved it",
      "date": "2026-04-30",
@@ -2533,7 +2533,7 @@
     },
     {
      "id": "25892510",
-     "author": "sIYA s.",
+     "author": "sIYA S.",
      "rating": 5,
      "body": "Looks very gorgeous and best for festivals.",
      "date": "2026-04-01",
@@ -2575,7 +2575,7 @@
    "reviews": [
     {
      "id": "25892518",
-     "author": "Minaxi n.",
+     "author": "Minaxi N.",
      "rating": 5,
      "body": "Bahut Acha Dress Hai Or Uska Colour Bhi Bahut Acha haii..",
      "date": "2026-04-01",
@@ -2734,7 +2734,7 @@
     },
     {
      "id": "25892541",
-     "author": "tamanna b.",
+     "author": "tamanna B.",
      "rating": 5,
      "body": "Suit is very beautiful.... material is fine...I loved it",
      "date": "2026-04-01",
@@ -2752,7 +2752,7 @@
     },
     {
      "id": "25892544",
-     "author": "Khushi m.",
+     "author": "Khushi M.",
      "rating": 5,
      "body": "Great collection, design and quality are very good and as shown in the pictures above.. value for money product great..Thank You Liksha Team..",
      "date": "2026-04-01",
@@ -2801,17 +2801,8 @@
      "photos": []
     },
     {
-     "id": "26145112",
-     "author": "NITIKA K.",
-     "rating": 5,
-     "body": "I love it",
-     "date": "2026-08-25",
-     "verified": true,
-     "photos": []
-    },
-    {
      "id": "25892495",
-     "author": "krishna k.",
+     "author": "krishna K.",
      "rating": 5,
      "body": "Love the colour fabric and the material with accurate size and fit.",
      "date": "2026-04-01",
@@ -2820,7 +2811,7 @@
     },
     {
      "id": "25892496",
-     "author": "nishita d.",
+     "author": "nishita D.",
      "rating": 5,
      "body": "🌷The color is nice, and the fabric feels comfortable.\nSame as shown in the picture.thank u",
      "date": "2026-04-01",
@@ -2874,7 +2865,7 @@
     },
     {
      "id": "25892505",
-     "author": "Trusha m.",
+     "author": "Trusha M.",
      "rating": 5,
      "body": "Shooting colour and amazing fit Perfect for any occasion and fabric is very unique and fine flare and length is so perfect.its totally amazing fit 🤞",
      "date": "2026-04-01",
@@ -2882,8 +2873,17 @@
      "photos": []
     },
     {
+     "id": "26145112",
+     "author": "NITIKA K.",
+     "rating": 5,
+     "body": "I love it",
+     "date": "2026-08-25",
+     "verified": true,
+     "photos": []
+    },
+    {
      "id": "25892494",
-     "author": "nisha v.",
+     "author": "nisha V.",
      "rating": 5,
      "body": "I really liked this dress set! The material is Pure Faux Georgette with Multi-Needle & Embroidery Work and feels very premium, and it also has an inner lining which makes it comfortable to wear.thank you liksha team.",
      "date": "2026-04-01",
@@ -2970,7 +2970,7 @@
     },
     {
      "id": "25892554",
-     "author": "Grishma b.",
+     "author": "Grishma B.",
      "rating": 5,
      "body": "This kurti is awsome in all perspective. i bought this for mainly dance and it looks just wow... Material, fittings are perfect.. the inner cloth os also very comfortable.",
      "date": "2026-04-01",
@@ -3177,7 +3177,7 @@
     },
     {
      "id": "25876383",
-     "author": "Rinki g.",
+     "author": "Rinki G.",
      "rating": 5,
      "body": "Very good 😊 my eid suit ❤️",
      "date": "2026-03-10",
@@ -3273,7 +3273,7 @@
     },
     {
      "id": "25856347",
-     "author": "janvi v.",
+     "author": "janvi V.",
      "rating": 5,
      "body": "Colour was good and fitting also perfect.",
      "date": "2026-02-16",
@@ -3560,7 +3560,7 @@
     },
     {
      "id": "25856188",
-     "author": "jagruti k.",
+     "author": "jagruti K.",
      "rating": 5,
      "body": "This kurta set is elegant and comfortable with a classy design. Perfect festive wear at a great price. Loved this♥️♥️\nThank You For Liksha Team..",
      "date": "2026-02-16",
@@ -3569,7 +3569,7 @@
     },
     {
      "id": "25857621",
-     "author": "feni s.",
+     "author": "feni S.",
      "rating": 5,
      "body": "Bahut Hi Acha Anarkali Suit Hai..Or Uska Fabic Bhi Jyada Acha Hai..Thank You Liksha Team.",
      "date": "2026-02-18",
@@ -3656,7 +3656,7 @@
    "reviews": [
     {
      "id": "25857642",
-     "author": "payal m.",
+     "author": "payal M.",
      "rating": 5,
      "body": "Omg what an amazing Anarkali look at that..the fabric Is super soft and comfortable.I highly recommend ❤️ love it",
      "date": "2026-02-18",
@@ -3692,7 +3692,7 @@
     },
     {
      "id": "25857643",
-     "author": "manisha v.",
+     "author": "manisha V.",
      "rating": 5,
      "body": "got this kurta set from Liksha Cothing and it’s really pretty! The design is elegant and the fit feels comfortable. The fabric quality is nice and it looks even better in person. Perfect for both casual and festive wear. Totally worth it!” Color is same as shown in picture. Dupatta is so beautiful design",
      "date": "2026-02-18",
@@ -3770,7 +3770,7 @@
     },
     {
      "id": "25857022",
-     "author": "rija m.",
+     "author": "rija M.",
      "rating": 5,
      "body": "Suit bhut hi pyara hai Value of money You guys buy without any Doubt.",
      "date": "2026-02-17",
@@ -3779,7 +3779,7 @@
     },
     {
      "id": "25857023",
-     "author": "zihana m.",
+     "author": "zihana M.",
      "rating": 5,
      "body": "Best and bright colour. Very comfortable with great fit. Best Anarkali found on Liksha Clothing. Very Very happy with the purchase...",
      "date": "2026-02-17",
@@ -3788,7 +3788,7 @@
     },
     {
      "id": "25857021",
-     "author": "prapti k.",
+     "author": "prapti K.",
      "rating": 5,
      "body": "Nice wonderful Dress😊",
      "date": "2026-02-17",
@@ -3848,7 +3848,7 @@
     },
     {
      "id": "25857016",
-     "author": "mirali m.",
+     "author": "mirali M.",
      "rating": 5,
      "body": "Just looking like a waoo this anarkali set is so beautiful print is also beautiful 😍",
      "date": "2026-02-17",
@@ -4151,7 +4151,7 @@
     },
     {
      "id": "25856155",
-     "author": "parth r.",
+     "author": "parth R.",
      "rating": 5,
      "body": "Loving my kurti set from Liksha Team😍 The fabric is so comfy and breathable, perfect for daily wear. The design is super cute and the fit is just right 💁‍♀️.",
      "date": "2026-02-16",
@@ -4715,7 +4715,7 @@
     },
     {
      "id": "25845174",
-     "author": "Bikramjit s.",
+     "author": "Bikramjit S.",
      "rating": 5,
      "body": "Suit bhut hi pyara hai \nValue of money \nYou guys buy without any Doubt",
      "date": "2026-01-27",
@@ -4733,7 +4733,7 @@
     },
     {
      "id": "25857844",
-     "author": "nazia k.",
+     "author": "nazia K.",
      "rating": 5,
      "body": "Its fabric is very soft and its colour is very lovely.. it came exactly as I wanted, thank you so much Liksha Clothing",
      "date": "2026-02-19",
@@ -4965,7 +4965,7 @@
     },
     {
      "id": "25829345",
-     "author": "surya y.",
+     "author": "surya Y.",
      "rating": 5,
      "body": "mene ye suit apni girlfreind ke liye buy kiya tha after resive she is surperice tnx liksha clothing team",
      "date": "2025-12-19",
@@ -5010,7 +5010,7 @@
     },
     {
      "id": "25829348",
-     "author": "sakshi h.",
+     "author": "sakshi H.",
      "rating": 5,
      "body": "product is very amezing 🥰",
      "date": "2025-12-19",
@@ -5028,7 +5028,7 @@
     },
     {
      "id": "25829360",
-     "author": "Daksha r.",
+     "author": "Daksha R.",
      "rating": 5,
      "body": "Nice",
      "date": "2025-12-19",
@@ -5141,7 +5141,7 @@
     },
     {
      "id": "25857857",
-     "author": "khushi h.",
+     "author": "khushi H.",
      "rating": 5,
      "body": "Very nice product. Material quality is very good and design is just awesome..",
      "date": "2026-02-20",
@@ -5150,7 +5150,7 @@
     },
     {
      "id": "25857854",
-     "author": "Alisha n.",
+     "author": "Alisha N.",
      "rating": 5,
      "body": "Nice Colour And Good Material.",
      "date": "2026-02-20",
@@ -5189,7 +5189,7 @@
    "reviews": [
     {
      "id": "25848681",
-     "author": "Pooja j.",
+     "author": "Pooja J.",
      "rating": 5,
      "body": "Thank you liksha dress bahot achi h ☺️😘😘❤️❤️❤️ thank you so much mujhe bahut pyri lgi dress...❣️❣️❣️",
      "date": "2026-02-03",
@@ -5198,7 +5198,7 @@
     },
     {
      "id": "25856990",
-     "author": "lavya h.",
+     "author": "lavya H.",
      "rating": 5,
      "body": "I loved this dress. The material is very soft and comfortable. The fit is also perfect for me.",
      "date": "2026-02-17",
@@ -5234,7 +5234,7 @@
     },
     {
      "id": "25857787",
-     "author": "Saloni j.",
+     "author": "Saloni J.",
      "rating": 5,
      "body": "Bahut Hi Acha Black Colour Hai..Material Or Quality Bhi Bahut Pasand Aaya..Thank You For Liksha Team.",
      "date": "2026-02-19",
@@ -5306,7 +5306,7 @@
     },
     {
      "id": "25857788",
-     "author": "Kumkum n.",
+     "author": "Kumkum N.",
      "rating": 5,
      "body": "Awesome Anarkali Suitset.",
      "date": "2026-02-19",
@@ -5438,7 +5438,7 @@
     },
     {
      "id": "25989584",
-     "author": "Ragvender s. y.",
+     "author": "Ragvender S. Y.",
      "rating": 5,
      "body": "Good",
      "date": "2026-06-26",
@@ -5855,7 +5855,7 @@
     },
     {
      "id": "25857065",
-     "author": "nirali s.",
+     "author": "nirali S.",
      "rating": 5,
      "body": "Fit is perfect , colour is exact match, material quality is good but can be improved thank you liksha team..",
      "date": "2026-02-17",
@@ -5864,7 +5864,7 @@
     },
     {
      "id": "25857066",
-     "author": "rashmika m.",
+     "author": "rashmika M.",
      "rating": 5,
      "body": "Beautiful colour material i purchased 2 time this in two different colours very beautiful ❤️",
      "date": "2026-02-17",
@@ -5918,7 +5918,7 @@
     },
     {
      "id": "25857641",
-     "author": "saloni n.",
+     "author": "saloni N.",
      "rating": 5,
      "body": "Bahut Hi Pyara Dress Hai .. Just Looking A Wow..",
      "date": "2026-02-18",
@@ -6397,7 +6397,7 @@
    "reviews": [
     {
      "id": "26165456",
-     "author": "Priya b.",
+     "author": "Priya B.",
      "rating": 5,
      "body": "Soooo Beutiful Dress 🥹❤️☺️\nThank you sooo much liksha clothing.",
      "date": "2026-09-23",
@@ -6556,7 +6556,7 @@
     },
     {
      "id": "25736202",
-     "author": "Pratima p.",
+     "author": "Pratima P.",
      "rating": 3,
      "body": "original anarkali suitJ ust beautiful product. The fabric and work is really good at this price.",
      "date": "2025-10-03",
@@ -6574,7 +6574,7 @@
     },
     {
      "id": "25736027",
-     "author": "Pratima p.",
+     "author": "Pratima P.",
      "rating": 3,
      "body": "good..",
      "date": "2025-10-03",
@@ -6633,7 +6633,7 @@
     },
     {
      "id": "25803353",
-     "author": "Nikita g.",
+     "author": "Nikita G.",
      "rating": 5,
      "body": "Beautiful dress😍😍❤️",
      "date": "2025-11-28",
@@ -7141,7 +7141,7 @@
     },
     {
      "id": "26117435",
-     "author": "priyanka b.",
+     "author": "priyanka B.",
      "rating": 5,
      "body": "I can't believe how stunning the gown is ... I mean fabric, color and fitting is too good... Flare is also good... Must buy product",
      "date": "2026-07-31",
@@ -7228,7 +7228,7 @@
     },
     {
      "id": "25857631",
-     "author": "pari n. v.",
+     "author": "pari N. V.",
      "rating": 5,
      "body": "Best for any function bahut light weighted h or Up comfortable bhi bhut jada h isko ap engagement ya family function me pehn skte h..",
      "date": "2026-02-18",
@@ -7237,7 +7237,7 @@
     },
     {
      "id": "25857632",
-     "author": "pragya s.",
+     "author": "pragya S.",
      "rating": 5,
      "body": "The dress is tooo much pretty. Go for it without a single doubt. The fitting it has is just perfect ❤️❤️",
      "date": "2026-02-18",
@@ -8284,7 +8284,7 @@
     },
     {
      "id": "25694717",
-     "author": "Bhawana p.",
+     "author": "Bhawana P.",
      "rating": 5,
      "body": "Very nice pretty colour love it the material is best and the duppata is way amazing.\nLove the outfit",
      "date": "2025-08-13",
@@ -8381,7 +8381,7 @@
     },
     {
      "id": "25626455",
-     "author": "hetvi r.",
+     "author": "hetvi R.",
      "rating": 5,
      "body": "Fitting is good",
      "date": "2025-04-21",
@@ -8895,7 +8895,7 @@
     },
     {
      "id": "25619836",
-     "author": "leo d.",
+     "author": "leo D.",
      "rating": 5,
      "body": "Just perfect... Made my day... Hope it will last longer after wash too",
      "date": "2025-04-11",
@@ -8922,7 +8922,7 @@
     },
     {
      "id": "25689703",
-     "author": "Sonu v.",
+     "author": "Sonu V.",
      "rating": 5,
      "body": "Bohot khubsurat he nice fabric quality superb 👌",
      "date": "2025-07-27",
@@ -9039,7 +9039,7 @@
     },
     {
      "id": "25829240",
-     "author": "Adeeba k.",
+     "author": "Adeeba K.",
      "rating": 5,
      "body": "Bery nice anarkali",
      "date": "2025-12-18",
@@ -9057,7 +9057,7 @@
     },
     {
      "id": "25843268",
-     "author": "Ruby s.",
+     "author": "Ruby S.",
      "rating": 5,
      "body": "Waooo waoooo waoooo ❤️😍😍😍",
      "date": "2026-01-20",
@@ -9066,7 +9066,7 @@
     },
     {
      "id": "25854104",
-     "author": "Jagruti d.",
+     "author": "Jagruti D.",
      "rating": 5,
      "body": "Amazing 😍 go for it",
      "date": "2026-02-11",
@@ -9120,7 +9120,7 @@
     },
     {
      "id": "25619257",
-     "author": "khushali s.",
+     "author": "khushali S.",
      "rating": 4,
      "body": "I like the fabric and colour of the kurta.Its feel very comfortable🤩🤩",
      "date": "2025-04-10",
@@ -9212,7 +9212,7 @@
     },
     {
      "id": "25619249",
-     "author": "nena v.",
+     "author": "nena V.",
      "rating": 5,
      "body": "Amazing quality and best looking dress, comfortable and designer dress, beautiful looking and stylish, highly recommend......😘😘😘",
      "date": "2025-04-10",
@@ -9221,7 +9221,7 @@
     },
     {
      "id": "25619259",
-     "author": "ritika s.",
+     "author": "ritika S.",
      "rating": 5,
      "body": "Same as shown in the picture. Embroidery detailing & color gives you a decent look and it is comfortable as well.",
      "date": "2025-04-10",
@@ -9230,7 +9230,7 @@
     },
     {
      "id": "25619276",
-     "author": "riddhi v.",
+     "author": "riddhi V.",
      "rating": 5,
      "body": "just go for it and the duptta omggh fabulous quality wise amazing so stylish and pretty it makes you feel more pretty❤❤❤❤❤❤❤❤❤❤❤❤❤❤❤❤❤❤",
      "date": "2025-04-10",
@@ -9469,7 +9469,7 @@
     },
     {
      "id": "25619268",
-     "author": "priya a.",
+     "author": "priya A.",
      "rating": 5,
      "body": "product quality  bahut  achh hai ❤️❤️👌",
      "date": "2025-04-10",
@@ -9505,7 +9505,7 @@
     },
     {
      "id": "25619252",
-     "author": "parmi v.",
+     "author": "parmi V.",
      "rating": 4,
      "body": "Fabric quality is awesome in this price and looks too Good 👍",
      "date": "2025-04-10",
@@ -9563,7 +9563,7 @@
     },
     {
      "id": "25620072",
-     "author": "riza d.",
+     "author": "riza D.",
      "rating": 5,
      "body": "The quality was too good 😊.",
      "date": "2025-04-12",
@@ -9572,7 +9572,7 @@
     },
     {
      "id": "25620076",
-     "author": "joya f.",
+     "author": "joya F.",
      "rating": 5,
      "body": "overall good for such price ...thanku Liksha ❣❣❣❣",
      "date": "2025-04-12",
@@ -9581,7 +9581,7 @@
     },
     {
      "id": "25620056",
-     "author": "kashii n.",
+     "author": "kashii N.",
      "rating": 4,
      "body": "Good quality and very comfortable to wear.",
      "date": "2025-04-11",
@@ -9590,7 +9590,7 @@
     },
     {
      "id": "25620078",
-     "author": "joya m.",
+     "author": "joya M.",
      "rating": 4,
      "body": "Best Product ever purchased thanks liksha  🤩🤩🤩",
      "date": "2025-04-12",
@@ -9605,7 +9605,7 @@
    "reviews": [
     {
      "id": "25587888",
-     "author": "Foram t.",
+     "author": "Foram T.",
      "rating": 5,
      "body": "Same",
      "date": "2025-02-24",
@@ -9683,7 +9683,7 @@
     },
     {
      "id": "25621783",
-     "author": "Reena r. G.",
+     "author": "Reena R. G.",
      "rating": 5,
      "body": "Bhot Jada sunder hai aur aacha bhi hai jaise dekhya same waise ehi aaya hai thank u liksha",
      "date": "2025-04-14",
@@ -9701,7 +9701,7 @@
     },
     {
      "id": "25802032",
-     "author": "Foram t.",
+     "author": "Foram T.",
      "rating": 5,
      "body": "The cloth material is really good as per the quality soft as well as comfortable stitch is perfect as per the size selected ❤❤",
      "date": "2025-11-24",
@@ -9755,7 +9755,7 @@
     },
     {
      "id": "25619255",
-     "author": "twinkle k.",
+     "author": "twinkle K.",
      "rating": 5,
      "body": "the work was perfect and fitting also",
      "date": "2025-04-10",
@@ -9773,7 +9773,7 @@
     },
     {
      "id": "25619279",
-     "author": "erika s.",
+     "author": "erika S.",
      "rating": 5,
      "body": "Very nice anarkali gown👍",
      "date": "2025-04-10",
@@ -9828,7 +9828,7 @@
     },
     {
      "id": "25845292",
-     "author": "Sangeeta y.",
+     "author": "Sangeeta Y.",
      "rating": 5,
      "body": "Nice suit i love it",
      "date": "2026-01-27",
@@ -9855,7 +9855,7 @@
     },
     {
      "id": "25619280",
-     "author": "sweeta s.",
+     "author": "sweeta S.",
      "rating": 5,
      "body": "divine",
      "date": "2025-04-10",
@@ -9882,7 +9882,7 @@
     },
     {
      "id": "25672200",
-     "author": "Shagun s.",
+     "author": "Shagun S.",
      "rating": 4,
      "body": "More then my expectations....flair was good .....colour was as shown as picture everything was just perfect must buy it 🥰❤️",
      "date": "2025-07-08",
@@ -9954,7 +9954,7 @@
     },
     {
      "id": "25712253",
-     "author": "Mahima k.",
+     "author": "Mahima K.",
      "rating": 3,
      "body": "quality wroth price",
      "date": "2025-09-04",
@@ -9984,7 +9984,7 @@
    "reviews": [
     {
      "id": "25620047",
-     "author": "tina v.",
+     "author": "tina V.",
      "rating": 5,
      "body": "Love the fit and look 😍❤️",
      "date": "2025-04-11",
@@ -9993,7 +9993,7 @@
     },
     {
      "id": "25620043",
-     "author": "richa m.",
+     "author": "richa M.",
      "rating": 4,
      "body": "Black color woww>>>",
      "date": "2025-04-11",
@@ -10017,7 +10017,7 @@
    "reviews": [
     {
      "id": "25620046",
-     "author": "viru i.",
+     "author": "viru I.",
      "rating": 5,
      "body": "It's more prettier than my expectations.",
      "date": "2025-04-11",
@@ -10026,7 +10026,7 @@
     },
     {
      "id": "25620042",
-     "author": "trisha n.",
+     "author": "trisha N.",
      "rating": 4,
      "body": "i like this dress>>>>.thank you liksha 😘",
      "date": "2025-04-11",
@@ -10035,7 +10035,7 @@
     },
     {
      "id": "25620052",
-     "author": "rekha b.",
+     "author": "rekha B.",
      "rating": 4,
      "body": "Just loved the fit , look & fabric.",
      "date": "2025-04-11",
@@ -10116,7 +10116,7 @@
     },
     {
      "id": "25619883",
-     "author": "abhira v.",
+     "author": "abhira V.",
      "rating": 5,
      "body": "Bahut sundar hai fitting bhi bahut achhi hai thank you 😇",
      "date": "2025-04-11",
@@ -10143,7 +10143,7 @@
     },
     {
      "id": "25619250",
-     "author": "kritika k.",
+     "author": "kritika K.",
      "rating": 5,
      "body": "price ke hisab se product bahot achha hai",
      "date": "2025-04-10",
@@ -10206,7 +10206,7 @@
     },
     {
      "id": "25619844",
-     "author": "jiya n.",
+     "author": "jiya N.",
      "rating": 4,
      "body": "I like the fabric and colour ......❤❤❤💟💟💟",
      "date": "2025-04-11",
@@ -10230,7 +10230,7 @@
     },
     {
      "id": "25521660",
-     "author": "kajal k.",
+     "author": "kajal K.",
      "rating": 5,
      "body": "Awesome quality and good flair ❤",
      "date": "2025-01-03",
@@ -10266,7 +10266,7 @@
     },
     {
      "id": "25619283",
-     "author": "tashi t.",
+     "author": "tashi T.",
      "rating": 5,
      "body": "Nice clothes",
      "date": "2025-04-10",
@@ -10387,7 +10387,7 @@
     },
     {
      "id": "25619267",
-     "author": "purvi b.",
+     "author": "purvi B.",
      "rating": 5,
      "body": "Just loved the quality and fit of this suit it is very beautiful I just loved it",
      "date": "2025-04-10",
@@ -10526,7 +10526,7 @@
     },
     {
      "id": "25387050",
-     "author": "sikji p.",
+     "author": "sikji P.",
      "rating": 5,
      "body": "nice quality",
      "date": "2024-09-20",
@@ -10586,7 +10586,7 @@
    "reviews": [
     {
      "id": "25477755",
-     "author": "rakhi k.",
+     "author": "rakhi K.",
      "rating": 5,
      "body": "Most beautiful purchase from liksha clothing. The colour is so good, the design looks very rich and elegant. Perfect for any festival or party. Very comfortable to wear",
      "date": "2024-11-08",
@@ -10667,7 +10667,7 @@
     },
     {
      "id": "25445948",
-     "author": "Purvi p.",
+     "author": "Purvi P.",
      "rating": 5,
      "body": "Good material of dress nd good flare \nEverything is good \nNice out fit",
      "date": "2024-10-22",
@@ -10694,7 +10694,7 @@
     },
     {
      "id": "25619244",
-     "author": "kavita s.",
+     "author": "kavita S.",
      "rating": 5,
      "body": "The fabric is slightly sheer. It is comfortable to wear 👍🥰",
      "date": "2025-04-10",
@@ -10721,7 +10721,7 @@
     },
     {
      "id": "25619805",
-     "author": "tinu n.",
+     "author": "tinu N.",
      "rating": 5,
      "body": "Best purchase, sleeves are so cool, material is superb , go for it",
      "date": "2025-04-11",
@@ -10793,7 +10793,7 @@
     },
     {
      "id": "25619815",
-     "author": "jay m.",
+     "author": "jay M.",
      "rating": 5,
      "body": "wow fabric.....💥",
      "date": "2025-04-11",
@@ -10847,7 +10847,7 @@
     },
     {
      "id": "25521659",
-     "author": "jeena l.",
+     "author": "jeena L.",
      "rating": 4,
      "body": "nice dress and nice looking. thanks",
      "date": "2025-01-03",
@@ -10865,7 +10865,7 @@
     },
     {
      "id": "25613309",
-     "author": "garg l.",
+     "author": "garg L.",
      "rating": 4,
      "body": "good",
      "date": "2025-03-29",
@@ -10874,7 +10874,7 @@
     },
     {
      "id": "25619251",
-     "author": "shreya p.",
+     "author": "shreya P.",
      "rating": 4,
      "body": "worth it",
      "date": "2025-04-10",
@@ -10889,7 +10889,7 @@
    "reviews": [
     {
      "id": "25620080",
-     "author": "usha j.",
+     "author": "usha J.",
      "rating": 5,
      "body": "The Bandhani Anarkali suit is a stunning blend of tradition and elegance.❣❣❣❣❣❣❣❣❣",
      "date": "2025-04-12",
@@ -11014,7 +11014,7 @@
     },
     {
      "id": "25374469",
-     "author": "reshma b.",
+     "author": "reshma B.",
      "rating": 4,
      "body": "feeting is very nice. and best quality.",
      "date": "2024-08-28",
@@ -11071,7 +11071,7 @@
     },
     {
      "id": "25619892",
-     "author": "yashvi y.",
+     "author": "yashvi Y.",
      "rating": 5,
      "body": "Amazing very nice fabric looks fab❤️",
      "date": "2025-04-11",
@@ -11107,7 +11107,7 @@
     },
     {
      "id": "25619912",
-     "author": "rudri b.",
+     "author": "rudri B.",
      "rating": 4,
      "body": "this wrok is so beautiful..>>>>i love it!!!!!!!!!!!!👏👏",
      "date": "2025-04-11",
@@ -11191,7 +11191,7 @@
     },
     {
      "id": "25340033",
-     "author": "Payal h.",
+     "author": "Payal H.",
      "rating": 5,
      "body": "So beautiful 😍",
      "date": "2024-08-05",
@@ -11209,7 +11209,7 @@
     },
     {
      "id": "25619923",
-     "author": "kriva m.",
+     "author": "kriva M.",
      "rating": 5,
      "body": "mast ,,,,,,",
      "date": "2025-04-11",
@@ -11227,7 +11227,7 @@
     },
     {
      "id": "25619841",
-     "author": "usha n.",
+     "author": "usha N.",
      "rating": 4,
      "body": "Nice colour n fabric",
      "date": "2025-04-11",
@@ -11236,7 +11236,7 @@
     },
     {
      "id": "25619838",
-     "author": "varsha n.",
+     "author": "varsha N.",
      "rating": 3,
      "body": "Good item......",
      "date": "2025-04-11",
@@ -11308,7 +11308,7 @@
    "reviews": [
     {
      "id": "25128647",
-     "author": "gauri e.",
+     "author": "gauri E.",
      "rating": 5,
      "body": "feeting is very amazing. and front look bahut pasan aaya 😍😍😍 thank you liksha",
      "date": "2024-07-23",
@@ -11317,7 +11317,7 @@
     },
     {
      "id": "25128648",
-     "author": "mansi g.",
+     "author": "mansi G.",
      "rating": 5,
      "body": "good quality product in this rates. i recomend to everyone",
      "date": "2024-07-23",
@@ -11398,7 +11398,7 @@
     },
     {
      "id": "25128646",
-     "author": "hitiksha r.",
+     "author": "hitiksha R.",
      "rating": 4,
      "body": "Receved today.  😊 Best for regular wear",
      "date": "2024-07-23",
@@ -11491,7 +11491,7 @@
     },
     {
      "id": "25378996",
-     "author": "kruti h.",
+     "author": "kruti H.",
      "rating": 5,
      "body": "so pretty suit... ❤",
      "date": "2024-09-04",
@@ -11509,7 +11509,7 @@
     },
     {
      "id": "25620081",
-     "author": "asha d.",
+     "author": "asha D.",
      "rating": 4,
      "body": "nice printed suit >>>>>>👍",
      "date": "2025-04-12",
@@ -11560,7 +11560,7 @@
     },
     {
      "id": "25620045",
-     "author": "khushi c.",
+     "author": "khushi C.",
      "rating": 4,
      "body": "this woek is awesome.....💟❤❤❤❤❤❤",
      "date": "2025-04-11",
@@ -11575,7 +11575,7 @@
    "reviews": [
     {
      "id": "25378995",
-     "author": "avntika k.",
+     "author": "avntika K.",
      "rating": 5,
      "body": "i ordered for my brother engajment.  really quality is very fine and i loved it. even every one liked my suit 🤩🙌 \nthank ypu liksha clothing store",
      "date": "2024-09-04",
@@ -11584,7 +11584,7 @@
     },
     {
      "id": "25379045",
-     "author": "Saumya l.",
+     "author": "Saumya L.",
      "rating": 5,
      "body": "iska kpda bajut hi soft he schme aur price bhi achhi he qualit dekhe to. thank you",
      "date": "2024-09-04",
@@ -11602,7 +11602,7 @@
     },
     {
      "id": "25620054",
-     "author": "avani i.",
+     "author": "avani I.",
      "rating": 5,
      "body": "Just loved the fit , look & fabric.",
      "date": "2025-04-11",
@@ -11629,7 +11629,7 @@
     },
     {
      "id": "25620074",
-     "author": "zara v.",
+     "author": "zara V.",
      "rating": 4,
      "body": "its beautiful 😍 🤩 👌",
      "date": "2025-04-12",
@@ -11653,7 +11653,7 @@
     },
     {
      "id": "25379001",
-     "author": "damini s.",
+     "author": "damini S.",
      "rating": 5,
      "body": "very good",
      "date": "2024-09-04",
@@ -11680,7 +11680,7 @@
     },
     {
      "id": "25379009",
-     "author": "Zoya k.",
+     "author": "Zoya K.",
      "rating": 4,
      "body": "I am so so happy Jaise dikhaya tha vaise hi hai🥰",
      "date": "2024-09-04",
@@ -11689,7 +11689,7 @@
     },
     {
      "id": "25620055",
-     "author": "aarchi v.",
+     "author": "aarchi V.",
      "rating": 4,
      "body": "Absolutely loved it..",
      "date": "2025-04-11",
@@ -11730,7 +11730,7 @@
    "reviews": [
     {
      "id": "25379005",
-     "author": "kajal k.",
+     "author": "kajal K.",
      "rating": 5,
      "body": "ye anarkali suit bahut hi pyaara h \ni have ordered. feeting bhi ekdm perfect ❤🙌",
      "date": "2024-09-04",
@@ -11757,7 +11757,7 @@
     },
     {
      "id": "25620044",
-     "author": "krishna n.",
+     "author": "krishna N.",
      "rating": 5,
      "body": "muje ye bahut pasand aaya thank uh liksha for a lovely dress ........👍🎇",
      "date": "2025-04-11",
@@ -11801,7 +11801,7 @@
     },
     {
      "id": "25378993",
-     "author": "ganguly h.",
+     "author": "ganguly H.",
      "rating": 5,
      "body": "bahut hi achha he aur origianl yahi aaya. tahnk u",
      "date": "2024-09-04",
@@ -11828,7 +11828,7 @@
     },
     {
      "id": "25620082",
-     "author": "roza y.",
+     "author": "roza Y.",
      "rating": 5,
      "body": "nice sequence embroidery work this suit >>>>",
      "date": "2025-04-12",
@@ -11837,7 +11837,7 @@
     },
     {
      "id": "25378999",
-     "author": "indu k.",
+     "author": "indu K.",
      "rating": 5,
      "body": "i revently yesterday. feeting is so nice",
      "date": "2024-09-04",
@@ -11855,7 +11855,7 @@
     },
     {
      "id": "25379006",
-     "author": "jeena p.",
+     "author": "jeena P.",
      "rating": 3,
      "body": "acha hain",
      "date": "2024-09-04",
@@ -11897,7 +11897,7 @@
     },
     {
      "id": "25620053",
-     "author": "reshma b.",
+     "author": "reshma B.",
      "rating": 5,
      "body": "The outfit is very good. ❤❤❤❤❤",
      "date": "2025-04-11",
@@ -11906,7 +11906,7 @@
     },
     {
      "id": "25620075",
-     "author": "gulzar d.",
+     "author": "gulzar D.",
      "rating": 5,
      "body": "thank uh for amazing suit🎇🎇🎇🎇🎉🎉",
      "date": "2025-04-12",
@@ -11915,7 +11915,7 @@
     },
     {
      "id": "25620077",
-     "author": "riza c.",
+     "author": "riza C.",
      "rating": 5,
      "body": "Quality is too good 💯..",
      "date": "2025-04-12",
@@ -11924,7 +11924,7 @@
     },
     {
      "id": "25620079",
-     "author": "rizzan f.",
+     "author": "rizzan F.",
      "rating": 5,
      "body": "It is good 👍 go for it 😌",
      "date": "2025-04-12",
@@ -11984,7 +11984,7 @@
     },
     {
      "id": "25425401",
-     "author": "pallavi s.",
+     "author": "pallavi S.",
      "rating": 5,
      "body": "This suit is too good. Fabric is super soft. Flayer is also good.This suit is very comfortable. Cotton material with beautiful dupatta. Colour is vibrant. Affordable dress in this price.must buy product.",
      "date": "2024-10-13",
@@ -11993,7 +11993,7 @@
     },
     {
      "id": "25425402",
-     "author": "dipika y.",
+     "author": "dipika Y.",
      "rating": 5,
      "body": "I am absolutely impressed with the quality of this suit. The fabric is soft and breathable. Its comfortable to wear even in summer. Print is also really pretty. Ideal for both casual outings and festive occasion.",
      "date": "2024-10-13",
@@ -12026,7 +12026,7 @@
    "reviews": [
     {
      "id": "25668227",
-     "author": "Dr N. m. d.",
+     "author": "Dr N. M. D.",
      "rating": 5,
      "body": "Beautiful set, very elegant and comfortable, I got lot of compliments",
      "date": "2025-06-23",
@@ -12046,7 +12046,7 @@
    "reviews": [
     {
      "id": "24806742",
-     "author": "gauri h.",
+     "author": "gauri H.",
      "rating": 5,
      "body": "im satisfide with my dress. its really beutifull. 🥰🥰🥰\nthank u so much.",
      "date": "2024-04-19",
@@ -12057,7 +12057,7 @@
     },
     {
      "id": "24806743",
-     "author": "kajal o.",
+     "author": "kajal O.",
      "rating": 5,
      "body": "i have this suit 😍\njust looking like same and quality is amazing. just loved it. definetly buy more from your site. \nthanks ☺",
      "date": "2024-04-19",
@@ -12128,7 +12128,7 @@
     },
     {
      "id": "24806741",
-     "author": "ishani o.",
+     "author": "ishani O.",
      "rating": 4,
      "body": "desine and finishing very good. just i receved my suit. 😍",
      "date": "2024-04-19",
@@ -12137,7 +12137,7 @@
     },
     {
      "id": "24806745",
-     "author": "sachi p.",
+     "author": "sachi P.",
      "rating": 3,
      "body": "colour is really nice. but i need one size big.",
      "date": "2024-04-19",
@@ -12152,7 +12152,7 @@
    "reviews": [
     {
      "id": "25384556",
-     "author": "Anitha s.",
+     "author": "Anitha S.",
      "rating": 5,
      "body": "This suit quality is very awesome 😍 and feeting is very good and very comfortable to wear. ❤️ \nThank you liksha clothing ❤️",
      "date": "2024-09-14",
@@ -12163,7 +12163,7 @@
     },
     {
      "id": "25402392",
-     "author": "janki s.",
+     "author": "janki S.",
      "rating": 5,
      "body": "I Loved This Dress 😍 Quality Is Very Fine & Perfect Finishing. I am So Happy To buy From Liksha Clothing.\nThank You So Much ❤❤❤👍",
      "date": "2024-10-01",
@@ -12299,7 +12299,7 @@
     },
     {
      "id": "25402391",
-     "author": "Akansha s.",
+     "author": "Akansha S.",
      "rating": 5,
      "body": "Same as shown in pic",
      "date": "2024-10-01",
@@ -12372,7 +12372,7 @@
     },
     {
      "id": "25339342",
-     "author": "Ekta h.",
+     "author": "Ekta H.",
      "rating": 5,
      "body": "Feeting is perfect and very soft fabric. \nAll over dress is so much good. \nI recommend to my groups and family ❤️",
      "date": "2024-08-02",
@@ -12394,7 +12394,7 @@
     },
     {
      "id": "25384201",
-     "author": "Shrine t.",
+     "author": "Shrine T.",
      "rating": 5,
      "body": "I just really love this dress ❤️",
      "date": "2024-09-13",
@@ -12408,7 +12408,7 @@
     },
     {
      "id": "25339335",
-     "author": "Durga h.",
+     "author": "Durga H.",
      "rating": 4,
      "body": "I loved it 🥰 dress is so beautiful and quality is very much better 🥰\nThank you 😌",
      "date": "2024-08-02",
@@ -12635,7 +12635,7 @@
     },
     {
      "id": "25619812",
-     "author": "mayra y.",
+     "author": "mayra Y.",
      "rating": 5,
      "body": "Just a right pick ❤️for any occasion",
      "date": "2025-04-11",
@@ -12759,7 +12759,7 @@
     },
     {
      "id": "24822514",
-     "author": "Foram h.",
+     "author": "Foram H.",
      "rating": 4,
      "body": "Oh my god, it's so beautiful suit and cloth material is superb. Worth the money",
      "date": "2024-05-10",
@@ -12867,7 +12867,7 @@
     },
     {
      "id": "25334488",
-     "author": "Aish k.",
+     "author": "Aish K.",
      "rating": 4,
      "body": "Wow!... Its really so sooo beautiful suit ❤️ kpda achha he, feeting bhi ekdm perfect 🥰😍\nThank you liksha clothing store",
      "date": "2024-07-29",
@@ -13014,7 +13014,7 @@
     },
     {
      "id": "24760407",
-     "author": "Krisha k.",
+     "author": "Krisha K.",
      "rating": 5,
      "body": "According to price it's look like so pretty and fabric are also good ? I am so happy",
      "date": "2024-03-11",
@@ -13032,7 +13032,7 @@
     },
     {
      "id": "24788372",
-     "author": "Prerana p.",
+     "author": "Prerana P.",
      "rating": 5,
      "body": "Love the products. Maine m size order kiya tha or mujhe bilkul perfect aaya.",
      "date": "2024-03-26",
@@ -13155,7 +13155,7 @@
    "reviews": [
     {
      "id": "24788454",
-     "author": "Anjali p.",
+     "author": "Anjali P.",
      "rating": 5,
      "body": "Love with my dress. 😍 Superb quality. \nLooking same like photo 😊😍 im very satisfied. \nThank you team aayna clothing",
      "date": "2024-03-27",
@@ -13166,7 +13166,7 @@
     },
     {
      "id": "24788476",
-     "author": "Sarika v.",
+     "author": "Sarika V.",
      "rating": 5,
      "body": "Amazing dress 😍 very soft fabric and design is really awesome 😍❤️ \nThank you aayna clothing india ❤️",
      "date": "2024-03-27",
@@ -13177,7 +13177,7 @@
     },
     {
      "id": "24788519",
-     "author": "Archana l.",
+     "author": "Archana L.",
      "rating": 5,
      "body": "I am so happy... ordered before one week. perfect suit and work ❤️\nLooking Very Good ❤️",
      "date": "2024-03-27",
@@ -13340,7 +13340,7 @@
     },
     {
      "id": "24788475",
-     "author": "Shreya k.",
+     "author": "Shreya K.",
      "rating": 4,
      "body": "Feeting is very perfect ❤️ quality is to much perfect. Quality wroth price ❤️\nLoved it 😍",
      "date": "2024-03-27",
@@ -13367,7 +13367,7 @@
     },
     {
      "id": "25619806",
-     "author": "tinu n.",
+     "author": "tinu N.",
      "rating": 4,
      "body": "Good fabric. Colour of the clothe perfectly matches the image. Good stitching. Great fit.💕👌",
      "date": "2025-04-11",
@@ -13376,7 +13376,7 @@
     },
     {
      "id": "25619811",
-     "author": "vihan m.",
+     "author": "vihan M.",
      "rating": 4,
      "body": "The quality of this kurtha is awesome... thank uh liksha .....🤎🤎🤎🤎🤎🤎🤎🤎🤎🤎🤎🤎🤎🤎💥💥💥💥💥💥💥💥💥💥",
      "date": "2025-04-11",
@@ -13418,7 +13418,7 @@
    "reviews": [
     {
      "id": "24822512",
-     "author": "zoya s.",
+     "author": "zoya S.",
      "rating": 5,
      "body": "receved yesterday. stuff is  really nice :-)",
      "date": "2024-05-10",
@@ -13588,7 +13588,7 @@
     },
     {
      "id": "25500010",
-     "author": "Pooja t.",
+     "author": "Pooja T.",
      "rating": 5,
      "body": "I first time bought from liksha clothing. I am very satisfied and give five start 😍😍😍❤️\nVery nice quality and finishing. \nThank you!",
      "date": "2024-12-09",
@@ -13699,7 +13699,7 @@
     },
     {
      "id": "25619254",
-     "author": "vihan b.",
+     "author": "vihan B.",
      "rating": 3,
      "body": "looks too Good....❤",
      "date": "2025-04-10",
@@ -13714,7 +13714,7 @@
    "reviews": [
     {
      "id": "24793105",
-     "author": "Kriti p.",
+     "author": "Kriti P.",
      "rating": 5,
      "body": "I love this suit. Its dupatta is so beautiful  nd comfortable to wear. ❤️🥰\nThank you aayna",
      "date": "2024-04-01",
@@ -13725,7 +13725,7 @@
     },
     {
      "id": "24793110",
-     "author": "Sharddha h.",
+     "author": "Sharddha H.",
      "rating": 5,
      "body": "Received last week ❤️\nThis outfit is really really beautiful. 🥺❤️ Quality is awesome. Price is best ❤️\nThank you. I will more order 😍🥰",
      "date": "2024-04-01",
@@ -13736,7 +13736,7 @@
     },
     {
      "id": "24793114",
-     "author": "Srishti d.",
+     "author": "Srishti D.",
      "rating": 5,
      "body": "Such a pretty suit 😍. Its exactly same as shown in the pic....  Feels good 😍 \nLoved it!!!! 😍",
      "date": "2024-04-01",
@@ -13747,7 +13747,7 @@
     },
     {
      "id": "24799000",
-     "author": "krina g.",
+     "author": "krina G.",
      "rating": 5,
      "body": "product is really good. 💞 mujhe bahut pasand aaya ye suit. and feeting bhi bahut achha he. thank you",
      "date": "2024-04-10",
@@ -13818,7 +13818,7 @@
     },
     {
      "id": "24793103",
-     "author": "Kanak m.",
+     "author": "Kanak M.",
      "rating": 5,
      "body": "Beutiful outfit 🥰  loved it ❤️",
      "date": "2024-04-01",
@@ -13989,7 +13989,7 @@
     },
     {
      "id": "25619779",
-     "author": "maha l.",
+     "author": "maha L.",
      "rating": 5,
      "body": "Worth it",
      "date": "2025-04-10",
@@ -14022,7 +14022,7 @@
     },
     {
      "id": "24760404",
-     "author": "Shweta p.",
+     "author": "Shweta P.",
      "rating": 5,
      "body": "I have received my suit. 😍 And i like it ❤️ first time im very happy in online shopping 🤗",
      "date": "2024-03-11",
@@ -14058,7 +14058,7 @@
     },
     {
      "id": "24763449",
-     "author": "Meera s. K. K.",
+     "author": "Meera S. K. K.",
      "rating": 5,
      "body": "Quality is ok, value for money, comfort level👍 but not that much bright as shown in picture.",
      "date": "2024-03-13",
@@ -14076,7 +14076,7 @@
     },
     {
      "id": "24763454",
-     "author": "Nischay m.",
+     "author": "Nischay M.",
      "rating": 5,
      "body": "Awesome dress. Has a cream color base. Very Comfortable and soft material. Loved it",
      "date": "2024-03-13",
@@ -14175,7 +14175,7 @@
     },
     {
      "id": "25619239",
-     "author": "Saba a.",
+     "author": "Saba A.",
      "rating": 5,
      "body": "The cloth material is really good as per the quality soft as well as comfortable stitch is perfect as per the size selected ❤❤",
      "date": "2025-04-10",
@@ -14184,7 +14184,7 @@
     },
     {
      "id": "25619338",
-     "author": "shagun r.",
+     "author": "shagun R.",
      "rating": 5,
      "body": "thank uh so much>>>Liksha cloth such a beautiful dress...i love this👌💕💕💕",
      "date": "2025-04-10",
@@ -14348,7 +14348,7 @@
     },
     {
      "id": "24763563",
-     "author": "Archna p.",
+     "author": "Archna P.",
      "rating": 4,
      "body": "Bahut hi sundar he 🤩 my sister also ordered one another suit today ❤️☺️🥰",
      "date": "2024-03-13",
@@ -14366,7 +14366,7 @@
     },
     {
      "id": "25623737",
-     "author": "Ainu s.",
+     "author": "Ainu S.",
      "rating": 4,
      "body": "I'm really happy with this dress! The material is great quality and it fits perfectly, accentuating my shape really well. Highly recommend!",
      "date": "2025-04-16",
@@ -14411,7 +14411,7 @@
     },
     {
      "id": "25616915",
-     "author": "gayatri k.",
+     "author": "gayatri K.",
      "rating": 3,
      "body": "ok not bad",
      "date": "2025-04-05",
@@ -14426,7 +14426,7 @@
    "reviews": [
     {
      "id": "24791354",
-     "author": "Sakshi k.",
+     "author": "Sakshi K.",
      "rating": 5,
      "body": "It’s similar to the picture. Fabric is too good. Also the fitting of the suit is perfect",
      "date": "2024-04-01",
@@ -14463,7 +14463,7 @@
     },
     {
      "id": "24763564",
-     "author": "Rakhi t.",
+     "author": "Rakhi T.",
      "rating": 5,
      "body": "Quality Is very nice. Very smoothy and comfortable ❤️🥰 thank you so much",
      "date": "2024-03-13",
@@ -14699,7 +14699,7 @@
     },
     {
      "id": "24789578",
-     "author": "Priya g.",
+     "author": "Priya G.",
      "rating": 5,
      "body": "Very beautiful dress 🥰 loved it.\nGood quality and feeting ❤️\nThank you team aayna clothing ❤️",
      "date": "2024-03-28",
@@ -14710,7 +14710,7 @@
     },
     {
      "id": "24793104",
-     "author": "Priti m.",
+     "author": "Priti M.",
      "rating": 5,
      "body": "Its looking really amazing and beautiful 😍 finishing is very awesome. \nThank you 🥰🥰",
      "date": "2024-04-01",
@@ -14721,7 +14721,7 @@
     },
     {
      "id": "24793112",
-     "author": "Pooja h.",
+     "author": "Pooja H.",
      "rating": 5,
      "body": "Quality and material is very good. ❤️\nGetting proper same look 😍 and its feet very well.  \nThank you 🥰🥰🥰",
      "date": "2024-04-01",
@@ -14743,7 +14743,7 @@
     },
     {
      "id": "25339340",
-     "author": "Vani k.",
+     "author": "Vani K.",
      "rating": 5,
      "body": "First time i am 100% satisfied for shopping from this store. ❤️\nI really soo happy 😍 quality is very superb. And ghr me sbhi ko bahut pasand aaya 😋😍😍",
      "date": "2024-08-02",
@@ -14754,7 +14754,7 @@
     },
     {
      "id": "25387484",
-     "author": "navita r.",
+     "author": "navita R.",
      "rating": 5,
      "body": "suit is very beutifull. i am tottaly satisfide with stuff and quality. liksha brand packing also amazing.\nbest service. thank you so much 🥰",
      "date": "2024-09-21",
@@ -14765,7 +14765,7 @@
     },
     {
      "id": "24826792",
-     "author": "Bunnu l.",
+     "author": "Bunnu L.",
      "rating": 5,
      "body": "Outstanding dress 🥰\nThank you",
      "date": "2024-05-16",
@@ -14959,7 +14959,7 @@
     },
     {
      "id": "25627863",
-     "author": "kavya s.",
+     "author": "kavya S.",
      "rating": 5,
      "body": "Eventhough I got the product after 2 weeks, I loved the dress. It is perfect. Please work on your delivery service 😉",
      "date": "2025-04-23",
@@ -15022,7 +15022,7 @@
     },
     {
      "id": "25716103",
-     "author": "Parul d.",
+     "author": "Parul D.",
      "rating": 5,
      "body": "Good quality product In this price",
      "date": "2025-09-17",
@@ -15064,7 +15064,7 @@
    "reviews": [
     {
      "id": "24760868",
-     "author": "ruchi s.",
+     "author": "ruchi S.",
      "rating": 5,
      "body": "SUPERB FABRIC.I ordered L(40) which is my regular size & it's firs perfectly. Good quality, worth the price. Delivered earlier than the expected date❤️ Thank you so much.",
      "date": "2024-03-12",
@@ -15073,7 +15073,7 @@
     },
     {
      "id": "24760869",
-     "author": "payal s.",
+     "author": "payal S.",
      "rating": 5,
      "body": "5 xl order kithi.price ke hisab se dress material quality thik he . dress se bhi jyada mujhe iska chunuri bahut pasand aya 👌👍",
      "date": "2024-03-12",
@@ -15126,7 +15126,7 @@
     },
     {
      "id": "24789594",
-     "author": "Tripda s.",
+     "author": "Tripda S.",
      "rating": 5,
      "body": "I recently order a suit from you. ❤️\nDress is really nice. And perfect feet to me. ❤️  Very satisfied 😌\nThank you so soo much ❣️",
      "date": "2024-03-28",
@@ -15137,7 +15137,7 @@
     },
     {
      "id": "25339336",
-     "author": "Anjali d.",
+     "author": "Anjali D.",
      "rating": 5,
      "body": "Everything is good in this suit 😍\nMy day was awesome bcz i have wear this beautiful anarkali suit 💞",
      "date": "2024-08-02",
@@ -15148,7 +15148,7 @@
     },
     {
      "id": "25373648",
-     "author": "Dalini m.",
+     "author": "Dalini M.",
      "rating": 5,
      "body": "Looking very pretty 😍 quality is really really nice 😍 i loved it. Thank you!\nLiksha clothing ❤️",
      "date": "2024-08-26",
@@ -15230,7 +15230,7 @@
     },
     {
      "id": "24763227",
-     "author": "kajal o.",
+     "author": "kajal O.",
      "rating": 5,
      "body": "I found this product very wonderful.....Truly it was one of my best purchases.....Very beautiful piece....Beautiful stitching beautiful hands everything is perfect abt the dress....Frm me its 10*****rating....Very very comfortable soft cloth",
      "date": "2024-03-12",
@@ -15278,7 +15278,7 @@
     },
     {
      "id": "25424919",
-     "author": "Salina m.",
+     "author": "Salina M.",
      "rating": 5,
      "body": "Bahut achha hr",
      "date": "2024-10-12",
@@ -15291,7 +15291,7 @@
     },
     {
      "id": "25439726",
-     "author": "Sonamoni s.",
+     "author": "Sonamoni S.",
      "rating": 5,
      "body": "Very beautiful and comfortable Anarkali",
      "date": "2024-10-15",
@@ -15315,7 +15315,7 @@
     },
     {
      "id": "24763226",
-     "author": "Neha r.",
+     "author": "Neha R.",
      "rating": 4,
      "body": "It is super pretty :) I m in love with this Bro everyone complimented me .... No need to think twice , just grab it !!...",
      "date": "2024-03-12",
@@ -15340,7 +15340,7 @@
     },
     {
      "id": "25353362",
-     "author": "M s. V.",
+     "author": "M S. V.",
      "rating": 4,
      "body": "Wowwww it's amazing 😍😍",
      "date": "2024-08-15",
@@ -15402,7 +15402,7 @@
     },
     {
      "id": "24760716",
-     "author": "sulochana y.",
+     "author": "sulochana Y.",
      "rating": 5,
      "body": "Omg!! Mujhe to believe nhi ho rha h itna acha products aayega wo v just 2700₹ me ?tq aayna clothing for sending this beautiful dress with best material ?love it ❤️‍?",
      "date": "2024-03-12",
@@ -15438,7 +15438,7 @@
     },
     {
      "id": "25619909",
-     "author": "priya v.",
+     "author": "priya V.",
      "rating": 5,
      "body": "Best suit for occasion love the material love the fit material is love",
      "date": "2025-04-11",
@@ -15456,7 +15456,7 @@
     },
     {
      "id": "25894929",
-     "author": "Tamanna j.",
+     "author": "Tamanna J.",
      "rating": 5,
      "body": "Same dress aaya h jesa dikhya jldi se jao or kharido..... I am very happy quality v bhut acha h❤️❤️❤️❤️❤️",
      "date": "2026-04-06",
@@ -15483,7 +15483,7 @@
     },
     {
      "id": "25424866",
-     "author": "Sonamoni s.",
+     "author": "Sonamoni S.",
      "rating": 5,
      "body": "Very Beautiful Anarkali",
      "date": "2024-10-11",
@@ -15510,7 +15510,7 @@
     },
     {
      "id": "25619253",
-     "author": "writiya p.",
+     "author": "writiya P.",
      "rating": 5,
      "body": "bahot he badhiya kapda aya hae",
      "date": "2025-04-10",
@@ -15627,7 +15627,7 @@
     },
     {
      "id": "24763176",
-     "author": "Mahima r.",
+     "author": "Mahima R.",
      "rating": 5,
      "body": "Very Comfortable Feeting and Finishing Is Really Good 👍❤️ i am so happy.",
      "date": "2024-03-12",
@@ -15638,7 +15638,7 @@
     },
     {
      "id": "24763181",
-     "author": "Mansi j.",
+     "author": "Mansi J.",
      "rating": 5,
      "body": "Wow 😍 its so beautiful outfit 🥰 quality is outstanding. \nJust looking like a wow... 🤗😍🥰",
      "date": "2024-03-12",
@@ -15649,7 +15649,7 @@
     },
     {
      "id": "24763182",
-     "author": "Vidhya p.",
+     "author": "Vidhya P.",
      "rating": 5,
      "body": "Very happy ❤️😊\nThank you for giving best stuff and look",
      "date": "2024-03-12",
@@ -15660,7 +15660,7 @@
     },
     {
      "id": "24763185",
-     "author": "Aayna d.",
+     "author": "Aayna D.",
      "rating": 5,
      "body": "I am aayna. And you also aayna. sending me best suit ever ❤️🥰\nYuzi sir also Praise for my outfit 😍",
      "date": "2024-03-12",
@@ -15671,7 +15671,7 @@
     },
     {
      "id": "24789595",
-     "author": "Tripada s.",
+     "author": "Tripada S.",
      "rating": 5,
      "body": "I recently order a suit from you. ❤️ Dress is really nice. And perfect feet to me. ❤️ Very satisfied 😌 Thank you so soo much ❣️",
      "date": "2024-03-28",
@@ -15728,7 +15728,7 @@
     },
     {
      "id": "24826795",
-     "author": "Veena h.",
+     "author": "Veena H.",
      "rating": 4,
      "body": "Beutiful suit ❤️",
      "date": "2024-05-16",
@@ -15838,7 +15838,7 @@
     },
     {
      "id": "24763177",
-     "author": "Dinesh k.",
+     "author": "Dinesh K.",
      "rating": 5,
      "body": "Nice suit he\nMeri biwi kafi like aaya",
      "date": "2024-03-12",
@@ -15928,7 +15928,7 @@
     },
     {
      "id": "24763179",
-     "author": "Rani l.",
+     "author": "Rani L.",
      "rating": 4,
      "body": "I got 2 days ago. I will wear and share feedback ☺️❤️  bahut achha ayaa hee kpra",
      "date": "2024-03-12",
@@ -15964,7 +15964,7 @@
     },
     {
      "id": "25494836",
-     "author": "Niharika a.",
+     "author": "Niharika A.",
      "rating": 4,
      "body": "Beautiful suit it was ;)",
      "date": "2024-11-29",
@@ -15982,7 +15982,7 @@
     },
     {
      "id": "24763178",
-     "author": "Vijya k.",
+     "author": "Vijya K.",
      "rating": 3,
      "body": "Size is little loose. But quality is very nice ❤️😍",
      "date": "2024-03-12",
@@ -16030,7 +16030,7 @@
     },
     {
      "id": "25617681",
-     "author": "Shiv S. t.",
+     "author": "Shiv S. T.",
      "rating": 2,
      "title": "outfit is very elegant",
      "body": "The outfit is very elegant, lightweight on the body, attractive, and comfy. Size is perfect, fittings are great and did not require any alterations, and the look is just as shown in the pictures. Beautiful print and good value for money. Overall, the product is superb.",
@@ -16057,7 +16057,7 @@
     },
     {
      "id": "25488272",
-     "author": "sanjana p.",
+     "author": "sanjana P.",
      "rating": 5,
      "body": "so nice lehenga choli aaj tak ka sab se accha kabra ha mera😆 😄 😅 😉",
      "date": "2024-11-20",
