@@ -2,7 +2,7 @@
  "meta": {
   "source": "trustoo",
   "shopId": "73883451696",
-  "syncedAt": "2026-11-20T01:57:19.884Z",
+  "syncedAt": "2026-11-21T01:53:39.348Z",
   "note": "scripts/reviews-sync/fetch-reviews.mjs (GitHub Actions daily) is file ko likhta hai — haath se edit na karein."
  },
  "shop": {
@@ -2766,17 +2766,6 @@
    "count": 16,
    "reviews": [
     {
-     "id": "26193824",
-     "author": "Lavanya",
-     "rating": 5,
-     "body": "Amazing suit",
-     "date": "2026-11-06",
-     "verified": true,
-     "photos": [
-      "https://img.trustoo.io/pro/73883451696/2026/11/6/DJKmA4EdF2.jpeg?x-oss-process=style/trustoo_big"
-     ]
-    },
-    {
      "id": "26193086",
      "author": "Priyanka M.",
      "rating": 5,
@@ -2789,6 +2778,17 @@
       "https://img.trustoo.io/pro/73883451696/2026/11/5/c2dJK7NBdb.png?x-oss-process=style/trustoo_big",
       "https://img.trustoo.io/pro/73883451696/2026/11/5/kmt4e7TR2e.png?x-oss-process=style/trustoo_big",
       "https://img.trustoo.io/pro/73883451696/2026/11/5/pTSDZbEFdy.jpg?x-oss-process=style/trustoo_big"
+     ]
+    },
+    {
+     "id": "26193824",
+     "author": "Lavanya",
+     "rating": 5,
+     "body": "Amazing suit",
+     "date": "2026-11-06",
+     "verified": true,
+     "photos": [
+      "https://img.trustoo.io/pro/73883451696/2026/11/6/DJKmA4EdF2.jpeg?x-oss-process=style/trustoo_big"
      ]
     },
     {
