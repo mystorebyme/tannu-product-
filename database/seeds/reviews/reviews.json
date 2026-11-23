@@ -2,7 +2,7 @@
  "meta": {
   "source": "trustoo",
   "shopId": "73883451696",
-  "syncedAt": "2026-11-22T00:48:23.506Z",
+  "syncedAt": "2026-11-23T01:15:09.090Z",
   "note": "scripts/reviews-sync/fetch-reviews.mjs (GitHub Actions daily) is file ko likhta hai — haath se edit na karein."
  },
  "shop": {
@@ -2766,17 +2766,6 @@
    "count": 16,
    "reviews": [
     {
-     "id": "26193824",
-     "author": "Lavanya",
-     "rating": 5,
-     "body": "Amazing suit",
-     "date": "2026-11-06",
-     "verified": true,
-     "photos": [
-      "https://img.trustoo.io/pro/73883451696/2026/11/6/DJKmA4EdF2.jpeg?x-oss-process=style/trustoo_big"
-     ]
-    },
-    {
      "id": "26193086",
      "author": "Priyanka M.",
      "rating": 5,
@@ -2789,6 +2778,17 @@
       "https://img.trustoo.io/pro/73883451696/2026/11/5/c2dJK7NBdb.png?x-oss-process=style/trustoo_big",
       "https://img.trustoo.io/pro/73883451696/2026/11/5/kmt4e7TR2e.png?x-oss-process=style/trustoo_big",
       "https://img.trustoo.io/pro/73883451696/2026/11/5/pTSDZbEFdy.jpg?x-oss-process=style/trustoo_big"
+     ]
+    },
+    {
+     "id": "26193824",
+     "author": "Lavanya",
+     "rating": 5,
+     "body": "Amazing suit",
+     "date": "2026-11-06",
+     "verified": true,
+     "photos": [
+      "https://img.trustoo.io/pro/73883451696/2026/11/6/DJKmA4EdF2.jpeg?x-oss-process=style/trustoo_big"
      ]
     },
     {
@@ -3254,15 +3254,6 @@
      "photos": []
     },
     {
-     "id": "26143442",
-     "author": "Madeeha",
-     "rating": 5,
-     "body": "Perfect",
-     "date": "2026-08-22",
-     "verified": true,
-     "photos": []
-    },
-    {
      "id": "25856346",
      "author": "ALISHA N.",
      "rating": 5,
@@ -3286,6 +3277,15 @@
      "rating": 5,
      "body": "Beautiful ❤️",
      "date": "2026-02-16",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "26143442",
+     "author": "Madeeha",
+     "rating": 5,
+     "body": "Perfect",
+     "date": "2026-08-22",
      "verified": true,
      "photos": []
     },
