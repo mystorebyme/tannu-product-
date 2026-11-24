@@ -2,7 +2,7 @@
  "meta": {
   "source": "trustoo",
   "shopId": "73883451696",
-  "syncedAt": "2026-11-23T01:15:09.090Z",
+  "syncedAt": "2026-11-24T05:04:31.570Z",
   "note": "scripts/reviews-sync/fetch-reviews.mjs (GitHub Actions daily) is file ko likhta hai — haath se edit na karein."
  },
  "shop": {
@@ -2873,15 +2873,6 @@
      "photos": []
     },
     {
-     "id": "26145112",
-     "author": "NITIKA K.",
-     "rating": 5,
-     "body": "I love it",
-     "date": "2026-08-25",
-     "verified": true,
-     "photos": []
-    },
-    {
      "id": "25892494",
      "author": "nisha V.",
      "rating": 5,
@@ -2914,6 +2905,15 @@
      "rating": 5,
      "body": "Fabulous suit love the material Look is awesome.",
      "date": "2026-04-01",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "26145112",
+     "author": "NITIKA K.",
+     "rating": 5,
+     "body": "I love it",
+     "date": "2026-08-25",
      "verified": true,
      "photos": []
     }
