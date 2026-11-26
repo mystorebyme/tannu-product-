@@ -2,7 +2,7 @@
  "meta": {
   "source": "trustoo",
   "shopId": "73883451696",
-  "syncedAt": "2026-11-25T03:52:42.349Z",
+  "syncedAt": "2026-11-26T03:18:04.641Z",
   "note": "scripts/reviews-sync/fetch-reviews.mjs (GitHub Actions daily) is file ko likhta hai — haath se edit na karein."
  },
  "shop": {
@@ -5338,15 +5338,6 @@
    "count": 15,
    "reviews": [
     {
-     "id": "26190493",
-     "author": "Gurpreet K.",
-     "rating": 4,
-     "body": "Good",
-     "date": "2026-10-21",
-     "verified": true,
-     "photos": []
-    },
-    {
      "id": "25829884",
      "author": "Ritika V.",
      "rating": 5,
@@ -5379,6 +5370,15 @@
      "rating": 5,
      "body": "Beautiful lehnga. Quality of lehnga n dupatta is very good. Looking elegant. Same as the picture shown... loved it . ❤️",
      "date": "2025-12-21",
+     "verified": true,
+     "photos": []
+    },
+    {
+     "id": "26190493",
+     "author": "Gurpreet K.",
+     "rating": 4,
+     "body": "Good",
+     "date": "2026-10-21",
      "verified": true,
      "photos": []
     },
